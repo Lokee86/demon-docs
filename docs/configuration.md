@@ -1,8 +1,8 @@
 # doc-ledger Configuration
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
-doc-ledger is configured with TOML. The config model lives in `tools/doc-ledger/doc_ledger/config.py` and is exercised by `tests/test_config.py`, `tests/test_public_config_end_to_end.py`, and `tests/test_cli.py`.
+doc-ledger is configured with TOML. The config model lives in `doc_ledger/config.py` and is exercised by `tests/test_config.py` and `tests/test_public_config_end_to_end.py`.
 
 ## What Configuration Controls
 
@@ -46,11 +46,11 @@ If no config file is found, doc-ledger uses the built-in defaults.
 
 ## Default Configuration
 
-The defaults preserve the current Space Rocks behavior:
+The defaults reflect the standalone repo behavior:
 
 ```toml
 root = "docs"
-index_file = "!README.md"
+index_file = "README.md"
 
 [markers]
 prefix = "doc-ledger"
@@ -111,9 +111,10 @@ include_notes = true
 
 `index_file` sets the folder index filename.
 
-- Default: `!README.md`
-- Example custom value: `README.md`
+- Default: `README.md`
+- Example custom value: `!README.md`
 - Folder README links and generated folder index paths follow this name
+- To keep the legacy filename, set `index_file = "!README.md"`.
 
 ## `[markers].prefix`
 
@@ -256,11 +257,11 @@ All four default to `true`.
 
 ## Custom Index Example
 
-This config uses `README.md` for folder indexes instead of `!README.md`:
+This config keeps the legacy `!README.md` folder index filename:
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "!README.md"
 
 [markers]
 prefix = "navmark"
@@ -308,7 +309,6 @@ In that setup:
 
 ## Related Files
 
-- `tools/doc-ledger/doc_ledger/config.py`
-- `tools/doc-ledger/tests/test_config.py`
-- `tools/doc-ledger/tests/test_public_config_end_to_end.py`
-- `tools/doc-ledger/tests/test_cli.py`
+- `doc_ledger/config.py`
+- `tests/test_config.py`
+- `tests/test_public_config_end_to_end.py`

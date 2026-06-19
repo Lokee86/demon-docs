@@ -5,6 +5,8 @@ from pathlib import Path
 
 from tomlkit import parse as parse_toml
 
+DEFAULT_INDEX_FILE = "README.md"
+
 
 @dataclass
 class MarkerConfig:
@@ -34,7 +36,7 @@ class DraftConfig:
 
 @dataclass
 class FileConfig:
-    index_file: str = "!README.md"
+    index_file: str = DEFAULT_INDEX_FILE
     include_patterns: list[str] = field(default_factory=lambda: ["**/*.md"])
     exclude_patterns: list[str] = field(default_factory=list)
     editable_parent_index_extensions: list[str] = field(default_factory=lambda: [".md"])
@@ -65,7 +67,7 @@ class ReadmeTemplateConfig:
 @dataclass
 class DocLedgerConfig:
     root: str = "docs"
-    index_file: str = "!README.md"
+    index_file: str = DEFAULT_INDEX_FILE
     markers: MarkerConfig = field(default_factory=MarkerConfig)
     parent_link: ParentLinkConfig = field(default_factory=ParentLinkConfig)
     sections: SectionConfig = field(default_factory=SectionConfig)

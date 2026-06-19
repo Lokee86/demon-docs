@@ -1,11 +1,13 @@
 # Watcher and Automation
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 doc-ledger has a watch mode for long-running docs maintenance, but it is still a convenience layer. Use `check` when you want a clean verification gate before commit or CI.
 
 ## Watch Commands
 
+- `python3 main.py fix --root docs`
+- `python3 main.py check --root docs`
 - `python3 main.py watch --root docs`
 - `python3 main.py watch --root docs --once`
 
@@ -47,13 +49,13 @@ log_file="$PWD/.cache/doc-ledger-watch.log"
 mkdir -p .cache
 
 start_doc_ledger_watch() {
-  nohup python3 tools/doc-ledger/main.py watch --root "$DOC_LEDGER_ROOT" > "$log_file" 2>&1 &
+  nohup python3 main.py watch --root "$DOC_LEDGER_ROOT" > "$log_file" 2>&1 &
   echo $! > "$pid_file"
 }
 
 if [ -s "$pid_file" ]; then
   pid="$(cat "$pid_file")"
-  if kill -0 "$pid" 2>/dev/null && ps -p "$pid" -o args= | grep -q "tools/doc-ledger/main.py watch"; then
+  if kill -0 "$pid" 2>/dev/null && ps -p "$pid" -o args= | grep -q "main.py watch"; then
     :
   else
     start_doc_ledger_watch
@@ -78,6 +80,6 @@ Those timestamps make it easier to understand the order of events when a fix pas
 
 ## Related Files
 
-- `tools/doc-ledger/doc_ledger/watch.py`
-- `tools/doc-ledger/doc_ledger/cli.py`
-- `tools/doc-ledger/docs/make-dummy-docs.sh`
+- `doc_ledger/watch.py`
+- `doc_ledger/cli.py`
+- `docs/make-dummy-docs.sh`

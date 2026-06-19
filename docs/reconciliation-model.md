@@ -1,6 +1,6 @@
 # Reconciliation Model
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 doc-ledger keeps the docs tree in a predictable shape by scanning folders, reading existing managed index blocks, and planning the smallest set of file updates needed to bring the tree back into sync.
 
@@ -26,6 +26,7 @@ doc-ledger treats README files as structured documents with managed sections.
 - The managed sections are Direct Files, Stub Files, and Direct Folders.
 - Human-authored content outside the managed markers is preserved.
 - Existing managed entries are parsed from those marker blocks before reconciliation rewrites them.
+- The default index filename is `README.md`, and `index_file = "!README.md"` keeps the legacy filename.
 
 If a README already has the expected managed sections, doc-ledger updates only the content inside those managed blocks.
 
@@ -75,8 +76,8 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 
 ## Related Files
 
-- `tools/doc-ledger/doc_ledger/scan.py`
-- `tools/doc-ledger/doc_ledger/readme_io.py`
-- `tools/doc-ledger/doc_ledger/parent_index.py`
-- `tools/doc-ledger/doc_ledger/reconcile.py`
-- `tools/doc-ledger/doc_ledger/model.py`
+- `doc_ledger/scan.py`
+- `doc_ledger/readme_io.py`
+- `doc_ledger/parent_index.py`
+- `doc_ledger/reconcile.py`
+- `doc_ledger/model.py`

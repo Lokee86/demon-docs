@@ -1,5 +1,7 @@
 # Docs
 
+Parent index: [Docs](./README.md)
+
 This index summarizes the docs docs.
 
 ## Ownership

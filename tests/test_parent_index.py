@@ -17,7 +17,7 @@ from doc_ledger.parent_index import update_parent_index_line
 def test_parent_index_for_root_readme_returns_none() -> None:
     root = Path("/tmp/docs")
 
-    assert parent_index_for_file(root / "!README.md", root, lambda _: "ignored") is None
+    assert parent_index_for_file(root / "README.md", root, lambda _: "ignored") is None
 
 
 def test_parent_index_for_configured_root_readme_returns_none() -> None:
@@ -37,7 +37,7 @@ def test_parent_index_for_normal_markdown_uses_same_folder_readme() -> None:
 
     result = parent_index_for_file(path, root, lambda folder: "Guide" if folder == root / "guide" else "Root")
 
-    assert result == "Parent index: [Guide](./!README.md)"
+    assert result == "Parent index: [Guide](./README.md)"
 
 
 def test_parent_index_for_normal_markdown_uses_configured_index_file() -> None:
@@ -64,12 +64,12 @@ def test_parent_index_for_stub_markdown_uses_parent_folder_title() -> None:
         lambda folder: "Guide" if folder == root / "guide" else "Root",
     )
 
-    assert result == "Parent index: [Guide](../!README.md)"
+    assert result == "Parent index: [Guide](../README.md)"
 
 
 def test_parent_index_for_child_folder_readme_uses_parent_folder_title() -> None:
     root = Path("/tmp/docs")
-    path = root / "guide" / "!README.md"
+    path = root / "guide" / "README.md"
 
     result = parent_index_for_file(
         path,
@@ -77,7 +77,7 @@ def test_parent_index_for_child_folder_readme_uses_parent_folder_title() -> None
         lambda folder: "Root" if folder == root else "Guide",
     )
 
-    assert result == "Parent index: [Root](../!README.md)"
+    assert result == "Parent index: [Root](../README.md)"
 
 
 def test_parent_index_for_child_folder_readme_uses_configured_index_file() -> None:
@@ -105,7 +105,7 @@ def test_parent_index_for_custom_label_uses_configured_label() -> None:
         DocLedgerConfig(parent_link=ParentLinkConfig(label="Parent directory")),
     )
 
-    assert result == "Parent directory: [Guide](./!README.md)"
+    assert result == "Parent directory: [Guide](./README.md)"
 
 
 def test_parent_index_for_configured_draft_folder_uses_parent_folder_title() -> None:
@@ -119,7 +119,7 @@ def test_parent_index_for_configured_draft_folder_uses_parent_folder_title() -> 
         DocLedgerConfig(draft=DraftConfig(folder="_drafts")),
     )
 
-    assert result == "Parent index: [Docs](../!README.md)"
+    assert result == "Parent index: [Docs](../README.md)"
 
 
 def test_update_parent_index_line_inserts_after_first_heading() -> None:
@@ -128,11 +128,11 @@ def test_update_parent_index_line_inserts_after_first_heading() -> None:
 Intro
 """
 
-    result = update_parent_index_line(text, "Parent index: [Docs](./!README.md)")
+    result = update_parent_index_line(text, "Parent index: [Docs](./README.md)")
 
     assert result == """# Title
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 Intro"""
 
@@ -143,11 +143,11 @@ def test_update_parent_index_line_inserts_after_double_hash_heading() -> None:
 Intro
 """
 
-    result = update_parent_index_line(text, "Parent index: [Docs](./!README.md)")
+    result = update_parent_index_line(text, "Parent index: [Docs](./README.md)")
 
     assert result == """## Title
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 Intro"""
 
@@ -155,16 +155,16 @@ Intro"""
 def test_update_parent_index_line_replaces_existing_line() -> None:
     text = """# Title
 
-Parent index: [Old](./!README.md)
+Parent index: [Old](./README.md)
 
 Intro
 """
 
-    result = update_parent_index_line(text, "Parent index: [New](./!README.md)")
+    result = update_parent_index_line(text, "Parent index: [New](./README.md)")
 
     assert result == """# Title
 
-Parent index: [New](./!README.md)
+Parent index: [New](./README.md)
 
 Intro
 """
@@ -173,7 +173,7 @@ Intro
 def test_update_parent_index_line_removes_existing_line() -> None:
     text = """# Title
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 Intro
 """
@@ -189,7 +189,7 @@ Intro
 def test_update_parent_index_line_removes_existing_line_with_custom_label() -> None:
     text = """# Title
 
-Parent directory: [Docs](./!README.md)
+Parent directory: [Docs](./README.md)
 
 Intro
 """
@@ -205,6 +205,6 @@ Intro
 def test_update_parent_index_line_inserts_at_top_without_heading() -> None:
     text = "Intro\n"
 
-    result = update_parent_index_line(text, "Parent index: [Docs](./!README.md)")
+    result = update_parent_index_line(text, "Parent index: [Docs](./README.md)")
 
-    assert result == "Parent index: [Docs](./!README.md)\n\nIntro\n"
+    assert result == "Parent index: [Docs](./README.md)\n\nIntro\n"

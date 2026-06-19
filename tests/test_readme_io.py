@@ -73,7 +73,7 @@ def test_replace_managed_block_uses_doc_ledger_markers() -> None:
 
 
 def test_parse_managed_entries_uses_configured_marker_prefix() -> None:
-    readme_path = Path("/tmp/docs/!README.md")
+    readme_path = Path("/tmp/docs/README.md")
     text = """# Title
 
 ## Direct Files
@@ -216,7 +216,7 @@ Keep this rulebook.
 
 ## Top-Level Folders
 <!-- doc-ledger:folders:start -->
-- [Guide](guide/!README.md) - Guide description.
+- [Guide](guide/README.md) - Guide description.
 <!-- doc-ledger:folders:end -->
 
 ## Related Docs
@@ -236,7 +236,7 @@ More notes.
     assert "## Direct Folders" in result
     assert result.count("## Direct Folders") == 1
     assert "- [alpha.md](alpha.md) - Alpha description." in result
-    assert "- [Guide](guide/!README.md) - Guide description." in result
+    assert "- [Guide](guide/README.md) - Guide description." in result
     assert "## Rulebook" in result
     assert "## Related Docs" in result
     assert "## Notes" in result
@@ -261,7 +261,7 @@ def test_ensure_managed_sections_uses_configured_headings_and_aliases() -> None:
 
 ## Subdirectories
 <!-- doc-ledger:folders:start -->
-- [guide](guide/!README.md) - Guide description.
+- [guide](guide/README.md) - Guide description.
 <!-- doc-ledger:folders:end -->
 """
 
@@ -276,7 +276,7 @@ def test_ensure_managed_sections_uses_configured_headings_and_aliases() -> None:
     assert "## Pages" not in result
     assert "## Subdirectories" not in result
     assert "- [alpha.md](alpha.md) - Alpha description." in result
-    assert "- [guide](guide/!README.md) - Guide description." in result
+    assert "- [guide](guide/README.md) - Guide description." in result
 
 
 def test_managed_root_title_prefers_consistent_child_titles() -> None:

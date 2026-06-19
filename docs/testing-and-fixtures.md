@@ -1,12 +1,12 @@
 # Testing and Fixtures
 
-Parent index: [Docs](./!README.md)
+Parent index: [Docs](./README.md)
 
 doc-ledger is covered by focused pytest tests plus a few end-to-end flows that exercise real docs trees.
 
 ## Test Command
 
-From `tools/doc-ledger`, run:
+From the repo root, run:
 
 ```bash
 python3 -m pytest tests
@@ -26,16 +26,16 @@ The doc-ledger tests are split across small, focused areas:
 - end-to-end flows
 - public config examples
 
-Those tests keep the implementation honest without depending on the full Space Rocks game runtime.
+Those tests keep the implementation honest without depending on a larger application runtime.
 
 ## Dummy Docs Fixture Generator
 
-`tools/doc-ledger/docs/make-dummy-docs.sh` is a manual stress and fixture generator. It builds a nested docs tree with randomly shaped folders and files so you can exercise reconciliation against a larger input.
+`docs/make-dummy-docs.sh` is a manual stress and fixture generator. It builds a nested docs tree with randomly shaped folders and files so you can exercise reconciliation against a larger input.
 
 Run it with:
 
 ```bash
-./tools/doc-ledger/docs/make-dummy-docs.sh
+./docs/make-dummy-docs.sh
 ```
 
 Useful knobs exposed by the script:
@@ -80,7 +80,7 @@ After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` aga
 
 ## Related Files
 
-- `tools/doc-ledger/docs/make-dummy-docs.sh`
-- `tools/doc-ledger/tests/test_end_to_end.py`
-- `tools/doc-ledger/tests/test_public_config_end_to_end.py`
-- `tools/doc-ledger/tests/test_watch.py`
+- `docs/make-dummy-docs.sh`
+- `tests/test_end_to_end.py`
+- `tests/test_public_config_end_to_end.py`
+- `tests/test_watch.py`

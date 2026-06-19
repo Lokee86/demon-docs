@@ -49,6 +49,50 @@ label = "Parent"
     assert cli.main(["check"]) == 0
 
 
+def test_public_config_end_to_end_legacy_index_file_still_works_via_config_discovery(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    project = tmp_path / "project"
+    notes = project / "docs"
+    stubs = notes / "stubs"
+    guide = notes / "guide"
+    stubs.mkdir(parents=True)
+    guide.mkdir(parents=True)
+    (project / ".doc-ledger.toml").write_text(
+        """
+root = "docs"
+index_file = "!README.md"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (notes / "page.md").write_text("# Page\n", encoding="utf-8")
+    (stubs / "draft.md").write_text("# Draft\n", encoding="utf-8")
+    (guide / "topic.md").write_text("# Topic\n", encoding="utf-8")
+    monkeypatch.chdir(project)
+
+    assert cli.main(["fix"]) == 0
+
+    root_readme = notes / "!README.md"
+    guide_readme = guide / "!README.md"
+    assert root_readme.exists()
+    assert guide_readme.exists()
+
+    root_readme_text = root_readme.read_text(encoding="utf-8")
+    page_text = (notes / "page.md").read_text(encoding="utf-8")
+    draft_text = (stubs / "draft.md").read_text(encoding="utf-8")
+    topic_text = (guide / "topic.md").read_text(encoding="utf-8")
+
+    assert "- [page.md](page.md) - Page documentation." in root_readme_text
+    assert "- [guide](guide/!README.md) - Guide documentation." in root_readme_text
+    assert "Parent index: [Docs](./!README.md)" in page_text
+    assert "Parent index: [Docs](../!README.md)" in draft_text
+    assert "Parent index: [Guide](./!README.md)" in topic_text
+
+    assert cli.main(["check"]) == 0
+
+
 def test_public_config_end_to_end_custom_draft_folder_and_section_headings(
     tmp_path: Path,
     monkeypatch,

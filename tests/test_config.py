@@ -18,7 +18,8 @@ def test_default_config_preserves_current_behavior() -> None:
     config = default_config()
 
     assert config.root == "docs"
-    assert config.index_file == "!README.md"
+    assert config.index_file == "README.md"
+    assert config.file.index_file == "README.md"
     assert config.markers.prefix == "doc-ledger"
     assert config.parent_link.label == "Parent index"
     assert config.parent_link.enabled is True
