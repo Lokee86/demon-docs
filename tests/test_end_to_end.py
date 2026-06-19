@@ -29,7 +29,7 @@ def test_new_normal_doc_updates_direct_files_and_parent_index(tmp_path: Path) ->
     guide_text = (docs_root / "guide.md").read_text(encoding="utf-8")
 
     assert "- [guide.md](guide.md) - Guide documentation." in root_readme
-    assert "Parent index: [Docs](./README.md)" in guide_text
+    assert "Parent index:" not in guide_text
 
 
 def test_new_stub_doc_updates_stub_files_and_parent_index(tmp_path: Path) -> None:
@@ -44,7 +44,7 @@ def test_new_stub_doc_updates_stub_files_and_parent_index(tmp_path: Path) -> Non
     stub_text = (stubs_dir / "guide.md").read_text(encoding="utf-8")
 
     assert "- [guide.md](stubs/guide.md) - Stub: Guide documentation." in root_readme
-    assert "Parent index: [Docs](../README.md)" in stub_text
+    assert "Parent index:" not in stub_text
 
 
 def test_stub_doc_graduation_preserves_description(tmp_path: Path) -> None:
@@ -75,7 +75,7 @@ def test_stub_doc_graduation_preserves_description(tmp_path: Path) -> None:
     moved_text = moved_path.read_text(encoding="utf-8")
 
     assert "- [archive.md](archive.md) - Legacy migration notes." in root_readme
-    assert "Parent index: [Docs](./README.md)" in moved_text
+    assert "Parent index:" not in moved_text
 
 
 def test_canonical_doc_moving_into_stubs_preserves_description(tmp_path: Path) -> None:
@@ -106,7 +106,7 @@ def test_canonical_doc_moving_into_stubs_preserves_description(tmp_path: Path) -
     moved_text = moved_path.read_text(encoding="utf-8")
 
     assert "- [guide.md](stubs/guide.md) - Stub: Migration guide for operators." in root_readme
-    assert "Parent index: [Docs](../README.md)" in moved_text
+    assert "Parent index:" not in moved_text
 
 
 def test_cross_folder_move_preserves_unique_description(tmp_path: Path) -> None:
@@ -139,7 +139,7 @@ def test_cross_folder_move_preserves_unique_description(tmp_path: Path) -> None:
     moved_text = moved_path.read_text(encoding="utf-8")
 
     assert "- [notes.md](notes.md) - Alpha notes for migration." in beta_text
-    assert "Parent index: [Beta](./README.md)" in moved_text
+    assert "Parent index:" not in moved_text
 
 
 def test_deleting_doc_removes_index_entry(tmp_path: Path) -> None:
@@ -212,8 +212,8 @@ def test_default_config_preserves_space_rocks_doc_conventions(tmp_path: Path) ->
     assert "- [page.md](page.md) - Page documentation." in root_readme
     assert "- [example.md](stubs/example.md) - Stub: Example documentation." in root_readme
     assert "- [Guide](guide/README.md) - Guide documentation." in root_readme
-    assert "Parent index: [Docs](./README.md)" in page_text
-    assert "Parent index: [Docs](../README.md)" in example_text
+    assert "Parent index:" not in page_text
+    assert "Parent index:" not in example_text
     assert "Parent index: [Docs](../README.md)" in guide_text
 
 
@@ -232,7 +232,7 @@ def test_default_config_indexes_markdown_only_and_leaves_png_untouched(tmp_path:
 
     assert "- [page.md](page.md) - Page documentation." in root_readme
     assert "diagram.png" not in root_readme
-    assert "Parent index: [Docs](./README.md)" in page_text
+    assert "Parent index:" not in page_text
     assert diagram_bytes == original_png
 
 
@@ -243,7 +243,16 @@ def test_fix_with_configured_index_file_uses_readme_md(tmp_path: Path) -> None:
     (docs_root / "guide").mkdir()
 
     config_path = tmp_path / "doc-ledger.toml"
-    config_path.write_text('index_file = "README.md"\n', encoding="utf-8")
+    config_path.write_text(
+        """
+index_file = "README.md"
+
+[parent_link]
+indexed_files = true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
 
     assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
 
@@ -256,6 +265,67 @@ def test_fix_with_configured_index_file_uses_readme_md(tmp_path: Path) -> None:
     assert "README.md" not in root_readme.split("## Direct Files", 1)[1].split("## Stub Files", 1)[0]
     assert "Parent index: [Docs](./README.md)" in guide_text
     assert "Parent index: [Docs](../README.md)" in guide_readme
+
+
+def test_fix_with_configured_legacy_index_file_uses_bang_readme_md(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "guide.md").write_text("# Guide\n", encoding="utf-8")
+    (docs_root / "guide").mkdir()
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text(
+        """
+index_file = "!README.md"
+
+[parent_link]
+indexed_files = true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "!README.md").read_text(encoding="utf-8")
+    guide_text = (docs_root / "guide.md").read_text(encoding="utf-8")
+    guide_readme = (docs_root / "guide" / "!README.md").read_text(encoding="utf-8")
+
+    assert (docs_root / "!README.md").exists()
+    assert (docs_root / "guide" / "!README.md").exists()
+    assert "- [guide.md](guide.md) - Guide documentation." in root_readme
+    assert "Parent index: [Docs](./!README.md)" in guide_text
+    assert "Parent index: [Docs](../!README.md)" in guide_readme
+
+
+def test_fix_with_folder_indexes_disabled_suppresses_child_folder_parent_links(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "guide.md").write_text("# Guide\n", encoding="utf-8")
+    (docs_root / "guide").mkdir()
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text(
+        """
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = false
+indexed_files = true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "README.md").read_text(encoding="utf-8")
+    guide_text = (docs_root / "guide.md").read_text(encoding="utf-8")
+    guide_readme = (docs_root / "guide" / "README.md").read_text(encoding="utf-8")
+
+    assert "Parent index: [Docs](./README.md)" in guide_text
+    assert "Parent index:" not in guide_readme
+    assert "- [guide.md](guide.md) - Guide documentation." in root_readme
 
 
 def test_fix_with_configured_marker_prefix_uses_nav_ledgers(tmp_path: Path) -> None:
@@ -290,7 +360,7 @@ def test_fix_with_configured_draft_folder_uses_drafts_section(tmp_path: Path) ->
     example_text = (drafts_dir / "example.md").read_text(encoding="utf-8")
 
     assert "- [example.md](_drafts/example.md) - Stub: Example documentation." in root_readme
-    assert "Parent index: [Docs](../README.md)" in example_text
+    assert "Parent index:" not in example_text
     assert not (drafts_dir / "README.md").exists()
     assert "_drafts" not in root_readme.split("## Direct Folders", 1)[1].split("## Related Docs", 1)[0]
 

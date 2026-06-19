@@ -16,7 +16,31 @@ class MarkerConfig:
 @dataclass
 class ParentLinkConfig:
     label: str = "Parent index"
-    enabled: bool = True
+    folder_indexes: bool = True
+    indexed_files: bool = False
+
+    def __init__(
+        self,
+        label: str = "Parent index",
+        folder_indexes: bool = True,
+        indexed_files: bool = False,
+        enabled: bool | None = None,
+    ) -> None:
+        self.label = label
+        self.folder_indexes = folder_indexes
+        self.indexed_files = indexed_files
+        if enabled is not None:
+            self.enabled = enabled
+
+    @property
+    def enabled(self) -> bool:
+        return self.folder_indexes or self.indexed_files
+
+    @enabled.setter
+    def enabled(self, value: bool) -> None:
+        enabled = bool(value)
+        self.folder_indexes = enabled
+        self.indexed_files = enabled
 
 
 @dataclass
@@ -82,6 +106,26 @@ def default_config() -> DocLedgerConfig:
     return DocLedgerConfig()
 
 
+def starter_config_text() -> str:
+    return (
+        'root = "docs"\n'
+        'index_file = "README.md"\n'
+        "\n"
+        "[parent_link]\n"
+        "folder_indexes = true\n"
+        "indexed_files = false\n"
+        "\n"
+        "[drafts]\n"
+        'folder = "stubs"\n'
+        'description_prefix = "Stub: "\n'
+        "\n"
+        "[watch]\n"
+        "debounce_seconds = 0.75\n"
+        'ignored_dirs = [".git", ".cache", "__pycache__"]\n'
+        'ignored_suffixes = ["~", ".swp", ".tmp", ".bak"]\n'
+    )
+
+
 def discover_config(start: Path) -> Path | None:
     current = start.resolve(strict=False)
     if current.is_file():
@@ -99,6 +143,51 @@ def discover_config(start: Path) -> Path | None:
         if current == current.parent:
             return None
         current = current.parent
+
+
+def local_config_path(cwd: Path) -> Path | None:
+    dot_config = cwd / ".doc-ledger.toml"
+    if dot_config.exists():
+        return dot_config
+
+    plain_config = cwd / "doc-ledger.toml"
+    if plain_config.exists():
+        return plain_config
+
+    return None
+
+
+def global_config_path(env: dict[str, str] | None = None, home: Path | None = None) -> Path:
+    env = env or {}
+    if "XDG_CONFIG_HOME" in env:
+        return Path(env["XDG_CONFIG_HOME"]) / "doc-ledger" / "config.toml"
+
+    home = home or Path.home()
+    return home / ".config" / "doc-ledger" / "config.toml"
+
+
+def selected_config_path(
+    cwd: Path,
+    explicit_config: Path | None,
+    no_local: bool,
+    no_global: bool,
+    env: dict[str, str] | None = None,
+    home: Path | None = None,
+) -> Path | None:
+    if explicit_config is not None:
+        return explicit_config
+
+    if not no_local:
+        local_config = local_config_path(cwd)
+        if local_config is not None:
+            return local_config
+
+    if not no_global:
+        global_config = global_config_path(env=env, home=home)
+        if global_config.exists():
+            return global_config
+
+    return None
 
 
 def load_config(config_path: Path | None = None) -> DocLedgerConfig:
@@ -171,8 +260,21 @@ def _apply_marker_config(config: MarkerConfig, data: dict) -> None:
 def _apply_parent_link_config(config: ParentLinkConfig, data: dict) -> None:
     if "label" in data:
         config.label = str(data["label"])
+
+    has_folder_indexes = "folder_indexes" in data
+    has_indexed_files = "indexed_files" in data
+
     if "enabled" in data:
-        config.enabled = bool(data["enabled"])
+        enabled = bool(data["enabled"])
+        if not has_folder_indexes:
+            config.folder_indexes = enabled
+        if not has_indexed_files:
+            config.indexed_files = enabled
+
+    if has_folder_indexes:
+        config.folder_indexes = bool(data["folder_indexes"])
+    if has_indexed_files:
+        config.indexed_files = bool(data["indexed_files"])
 
 
 def _apply_section_config(config: SectionConfig, data: dict) -> None:

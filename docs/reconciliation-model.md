@@ -1,7 +1,5 @@
 # Reconciliation Model
 
-Parent index: [Docs](./README.md)
-
 doc-ledger keeps the docs tree in a predictable shape by scanning folders, reading existing managed index blocks, and planning the smallest set of file updates needed to bring the tree back into sync.
 
 ## Scan Model
@@ -27,6 +25,8 @@ doc-ledger treats README files as structured documents with managed sections.
 - Human-authored content outside the managed markers is preserved.
 - Existing managed entries are parsed from those marker blocks before reconciliation rewrites them.
 - The default index filename is `README.md`, and `index_file = "!README.md"` keeps the legacy filename.
+- Folder index files get `Parent index` links by default.
+- Indexed files do not get `Parent index` links unless `indexed_files = true` is set.
 
 If a README already has the expected managed sections, doc-ledger updates only the content inside those managed blocks.
 
@@ -42,12 +42,14 @@ The generated README template includes the managed sections so reconciliation ca
 
 ## Parent Index Behavior
 
-doc-ledger maintains a single parent index line in editable files.
+doc-ledger maintains parent index lines according to the configured parent-link toggles.
 
 - The root index file has no parent index line.
 - Child folder index files point to the parent folder using `../<index file>`.
-- Normal docs point to their folder index using `./<index file>`.
-- Stub docs point to the owning parent folder index using `../<index file>`.
+- Normal docs point to their folder index using `./<index file>` when `indexed_files = true`.
+- Stub docs point to the owning parent folder index using `../<index file>` when `indexed_files = true`.
+- `folder_indexes = false` disables parent links in child folder indexes.
+- `indexed_files = false` disables parent links in indexed files.
 
 The parent index line is only written for file types that are configured as editable for parent links.
 

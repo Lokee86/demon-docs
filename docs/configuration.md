@@ -1,8 +1,15 @@
 # doc-ledger Configuration
 
-Parent index: [Docs](./README.md)
-
 doc-ledger is configured with TOML. The config model lives in `doc_ledger/config.py` and is exercised by `tests/test_config.py` and `tests/test_public_config_end_to_end.py`.
+
+CLI help is available with `doc-ledger --help`, and each subcommand also supports `--help`.
+Top-level version output is available with `doc-ledger -v` or `doc-ledger --version`.
+The `config` subcommand provides:
+
+- `doc-ledger config paths`
+- `doc-ledger config show`
+- `doc-ledger config init --local`
+- `doc-ledger config init --global`
 
 ## What Configuration Controls
 
@@ -12,7 +19,9 @@ The supported keys are:
 - `index_file`
 - `[markers].prefix`
 - `[parent_link].label`
-- `[parent_link].enabled`
+- `[parent_link].folder_indexes`
+- `[parent_link].indexed_files`
+- `[parent_link].enabled` for compatibility with older configs
 - `[sections.files].heading`
 - `[sections.stubs].heading`
 - `[sections.folders].heading`
@@ -33,16 +42,41 @@ The supported keys are:
 - `[template].include_related_docs`
 - `[template].include_notes`
 
-## Discovery
+## Selection
 
-doc-ledger discovers configuration by walking upward from the current working directory.
+doc-ledger selects one base config before applying command-specific CLI overrides.
 
-- `.doc-ledger.toml` is preferred over `doc-ledger.toml` in the same directory.
-- A nearer config wins over a farther config.
-- `--config` overrides discovery and uses the explicit file.
-- `--root` overrides the configured `root` value.
+Selection order:
 
-If no config file is found, doc-ledger uses the built-in defaults.
+1. `--config PATH`
+2. current-directory `.doc-ledger.toml`
+3. current-directory `doc-ledger.toml`
+4. global user config
+5. built-in defaults
+
+There is no upward search and no merge between local and global config files.
+
+`--root` still overrides the selected base config root.
+
+`doc-ledger config show` prints the selected base config.
+`doc-ledger config paths` prints the current-directory and global config candidates.
+`doc-ledger config init --local` writes `.doc-ledger.toml` in the current directory.
+`doc-ledger config init --global` writes the global config file and creates parent directories as needed.
+
+CLI flags override the selected base config. Examples include:
+
+```bash
+doc-ledger fix --root docs --index-file "!README.md"
+doc-ledger fix --root docs --draft-folder "_drafts"
+doc-ledger fix --root docs --include "**/*.png"
+doc-ledger fix --root docs --exclude "**/*.tmp"
+doc-ledger fix --root docs --marker-prefix "nav-ledger"
+doc-ledger fix --root docs --parent-label "Back to Index"
+doc-ledger fix --root docs --parent-link-folder-indexes
+doc-ledger fix --root docs --no-parent-link-folder-indexes
+doc-ledger fix --root docs --parent-link-indexed-files
+doc-ledger fix --root docs --no-parent-link-indexed-files
+```
 
 ## Default Configuration
 
@@ -57,7 +91,8 @@ prefix = "doc-ledger"
 
 [parent_link]
 label = "Parent index"
-enabled = true
+folder_indexes = true
+indexed_files = false
 
 [sections.files]
 heading = "Direct Files"
@@ -105,7 +140,7 @@ include_notes = true
 
 - Default: `docs`
 - Used when `--root` is omitted and no config override is provided
-- If `--root` is omitted and a config file exists, the configured `root` is resolved relative to that config file
+- `--root` always overrides the selected config root
 
 ## `index_file`
 
@@ -116,6 +151,8 @@ include_notes = true
 - Folder README links and generated folder index paths follow this name
 - To keep the legacy filename, set `index_file = "!README.md"`.
 
+Projects that want `!README.md` should set `index_file = "!README.md"` in config.
+
 ## `[markers].prefix`
 
 `[markers].prefix` sets the HTML comment prefix for managed sections.
@@ -123,17 +160,43 @@ include_notes = true
 - Default: `doc-ledger`
 - The managed blocks use `files`, `stubs`, and `folders` section ids
 
-## `[parent_link].label` and `[parent_link].enabled`
+## `[parent_link].label` and `[parent_link].folder_indexes` / `[parent_link].indexed_files`
 
 `[parent_link].label` sets the text used for parent index lines.
 
 - Default: `Parent index`
 - Example: `Parent`
 
-`[parent_link].enabled` toggles parent index line management.
+`[parent_link].folder_indexes` controls parent links in folder index files.
 
 - Default: `true`
-- When `false`, doc-ledger removes existing parent index lines and does not insert new ones
+- When `false`, doc-ledger does not insert or update parent links in child folder index files
+
+`[parent_link].indexed_files` controls parent links in indexed files such as `page.md` and `topic.md`.
+
+- Default: `false`
+- When `true`, doc-ledger inserts or updates parent links in editable indexed files
+
+`[parent_link].enabled` is a compatibility alias for older configs.
+
+- If `enabled` is present and `folder_indexes` or `indexed_files` are not present, the alias applies to both behaviors.
+- If `folder_indexes` or `indexed_files` are present, they override the alias for that behavior.
+
+CLI override flags can change parent-link behavior for a single run.
+
+Supported override flags:
+
+- `--parent-link-folder-indexes`
+- `--no-parent-link-folder-indexes`
+- `--parent-link-indexed-files`
+- `--no-parent-link-indexed-files`
+
+Examples:
+
+```bash
+doc-ledger fix --root docs --parent-link-indexed-files
+doc-ledger fix --root docs --no-parent-link-folder-indexes
+```
 
 ## `[sections.*].heading`
 
@@ -255,9 +318,48 @@ These booleans control which optional sections appear in generated README templa
 
 All four default to `true`.
 
-## Custom Index Example
+## Folder Indexes Only
 
-This config keeps the legacy `!README.md` folder index filename:
+This config uses the default split behavior and keeps parent links in folder indexes only:
+
+```toml
+root = "notes"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = true
+indexed_files = false
+```
+
+## File-Level Parent Links
+
+This config keeps parent links in both folder indexes and indexed files:
+
+```toml
+root = "notes"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = true
+indexed_files = true
+```
+
+## Disable Parent Links
+
+This config disables parent links everywhere:
+
+```toml
+root = "notes"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = false
+indexed_files = false
+```
+
+## Legacy Compatibility Example
+
+This config keeps the legacy `!README.md` folder index filename and uses the compatibility alias:
 
 ```toml
 root = "notes"

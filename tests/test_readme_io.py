@@ -109,6 +109,15 @@ def test_make_readme_template_uses_configured_index_file() -> None:
     assert "Parent index: [Docs](../README.md)" in result
 
 
+def test_make_readme_template_uses_legacy_index_file_when_configured() -> None:
+    folder = Path("/tmp/docs/guide")
+    root = Path("/tmp/docs")
+
+    result = make_readme_template(folder, root, "Docs", index_file="!README.md")
+
+    assert "Parent index: [Docs](../!README.md)" in result
+
+
 def test_make_readme_template_defaults_include_optional_sections() -> None:
     folder = Path("/tmp/docs")
 

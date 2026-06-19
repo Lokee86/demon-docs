@@ -156,7 +156,7 @@ def make_readme_template(
         f"This index summarizes the {folder_title.lower()} docs.",
     ]
     if folder != root and parent_title is not None:
-        if config.parent_link.enabled:
+        if config.parent_link.folder_indexes:
             lines.extend(
                 [
                     "",

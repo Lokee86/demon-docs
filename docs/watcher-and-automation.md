@@ -1,15 +1,15 @@
 # Watcher and Automation
 
-Parent index: [Docs](./README.md)
-
 doc-ledger has a watch mode for long-running docs maintenance, but it is still a convenience layer. Use `check` when you want a clean verification gate before commit or CI.
 
 ## Watch Commands
 
-- `python3 main.py fix --root docs`
-- `python3 main.py check --root docs`
-- `python3 main.py watch --root docs`
-- `python3 main.py watch --root docs --once`
+- `doc-ledger fix --root docs`
+- `doc-ledger check --root docs`
+- `doc-ledger watch --root docs`
+- `doc-ledger watch --root docs --once`
+
+`doc-ledger watch --help` shows the watch-specific flags and examples.
 
 `--once` runs a single reconciliation pass and exits. Regular watch mode runs one reconciliation pass immediately, then keeps observing the docs tree recursively.
 
@@ -49,13 +49,13 @@ log_file="$PWD/.cache/doc-ledger-watch.log"
 mkdir -p .cache
 
 start_doc_ledger_watch() {
-  nohup python3 main.py watch --root "$DOC_LEDGER_ROOT" > "$log_file" 2>&1 &
+  nohup doc-ledger watch --root "$DOC_LEDGER_ROOT" > "$log_file" 2>&1 &
   echo $! > "$pid_file"
 }
 
 if [ -s "$pid_file" ]; then
   pid="$(cat "$pid_file")"
-  if kill -0 "$pid" 2>/dev/null && ps -p "$pid" -o args= | grep -q "main.py watch"; then
+  if kill -0 "$pid" 2>/dev/null && ps -p "$pid" -o args= | grep -q "doc-ledger watch"; then
     :
   else
     start_doc_ledger_watch

@@ -27,6 +27,7 @@ prefix = "navmark"
 
 [parent_link]
 label = "Parent"
+indexed_files = true
 """.strip()
         + "\n",
         encoding="utf-8",
@@ -49,6 +50,124 @@ label = "Parent"
     assert cli.main(["check"]) == 0
 
 
+def test_public_config_end_to_end_default_parent_link_toggles(tmp_path: Path, monkeypatch) -> None:
+    project = tmp_path / "project"
+    notes = project / "notes"
+    guide = notes / "guide"
+    stubs = notes / "stubs"
+    guide.mkdir(parents=True)
+    stubs.mkdir(parents=True)
+    (project / ".doc-ledger.toml").write_text(
+        """
+root = "notes"
+index_file = "README.md"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (notes / "page.md").write_text("# Page\n", encoding="utf-8")
+    (stubs / "draft.md").write_text("# Draft\n", encoding="utf-8")
+    (guide / "topic.md").write_text("# Topic\n", encoding="utf-8")
+    monkeypatch.chdir(project)
+
+    assert cli.main(["fix"]) == 0
+
+    root_readme = (notes / "README.md").read_text(encoding="utf-8")
+    page_text = (notes / "page.md").read_text(encoding="utf-8")
+    draft_text = (stubs / "draft.md").read_text(encoding="utf-8")
+    guide_text = (guide / "README.md").read_text(encoding="utf-8")
+    topic_text = (guide / "topic.md").read_text(encoding="utf-8")
+
+    assert "- [guide](guide/README.md) - Guide documentation." in root_readme
+    assert "Parent index: [Notes](../README.md)" in guide_text
+    assert "Parent index:" not in page_text
+    assert "Parent index:" not in draft_text
+    assert "Parent index:" not in topic_text
+
+    assert cli.main(["check"]) == 0
+
+
+def test_public_config_end_to_end_indexed_files_toggle_enables_file_parent_links(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    project = tmp_path / "project"
+    notes = project / "notes"
+    guide = notes / "guide"
+    stubs = notes / "stubs"
+    guide.mkdir(parents=True)
+    stubs.mkdir(parents=True)
+    (project / ".doc-ledger.toml").write_text(
+        """
+root = "notes"
+index_file = "README.md"
+
+[parent_link]
+indexed_files = true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (notes / "page.md").write_text("# Page\n", encoding="utf-8")
+    (stubs / "draft.md").write_text("# Draft\n", encoding="utf-8")
+    (guide / "topic.md").write_text("# Topic\n", encoding="utf-8")
+    monkeypatch.chdir(project)
+
+    assert cli.main(["fix"]) == 0
+
+    page_text = (notes / "page.md").read_text(encoding="utf-8")
+    draft_text = (stubs / "draft.md").read_text(encoding="utf-8")
+    topic_text = (guide / "topic.md").read_text(encoding="utf-8")
+
+    assert "Parent index: [Notes](./README.md)" in page_text
+    assert "Parent index: [Notes](../README.md)" in draft_text
+    assert "Parent index: [Guide](./README.md)" in topic_text
+
+    assert cli.main(["check"]) == 0
+
+
+def test_public_config_end_to_end_folder_indexes_toggle_disables_child_readme_links(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    project = tmp_path / "project"
+    notes = project / "notes"
+    guide = notes / "guide"
+    stubs = notes / "stubs"
+    guide.mkdir(parents=True)
+    stubs.mkdir(parents=True)
+    (project / ".doc-ledger.toml").write_text(
+        """
+root = "notes"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = false
+indexed_files = true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (notes / "page.md").write_text("# Page\n", encoding="utf-8")
+    (stubs / "draft.md").write_text("# Draft\n", encoding="utf-8")
+    (guide / "topic.md").write_text("# Topic\n", encoding="utf-8")
+    monkeypatch.chdir(project)
+
+    assert cli.main(["fix"]) == 0
+
+    guide_readme = (guide / "README.md").read_text(encoding="utf-8")
+    page_text = (notes / "page.md").read_text(encoding="utf-8")
+    draft_text = (stubs / "draft.md").read_text(encoding="utf-8")
+    topic_text = (guide / "topic.md").read_text(encoding="utf-8")
+
+    assert "Parent index:" not in guide_readme
+    assert "Parent index: [Notes](./README.md)" in page_text
+    assert "Parent index: [Notes](../README.md)" in draft_text
+    assert "Parent index: [Guide](./README.md)" in topic_text
+
+    assert cli.main(["check"]) == 0
+
+
 def test_public_config_end_to_end_legacy_index_file_still_works_via_config_discovery(
     tmp_path: Path,
     monkeypatch,
@@ -63,6 +182,9 @@ def test_public_config_end_to_end_legacy_index_file_still_works_via_config_disco
         """
 root = "docs"
 index_file = "!README.md"
+
+[parent_link]
+indexed_files = true
 """.strip()
         + "\n",
         encoding="utf-8",
@@ -117,6 +239,9 @@ heading = "Folders"
 
 [drafts]
 folder = "_drafts"
+
+[parent_link]
+indexed_files = true
 """.strip()
         + "\n",
         encoding="utf-8",
@@ -156,6 +281,9 @@ include_patterns = ["**/*.md", "**/*.pdf", "**/*.png", "**/*.yaml"]
 
 [editable]
 parent_index_extensions = [".md", ".mdx"]
+
+[parent_link]
+indexed_files = true
 """.strip()
         + "\n",
         encoding="utf-8",

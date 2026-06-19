@@ -15,7 +15,6 @@ This `docs/` folder holds deeper operational and maintenance references for the 
 
 <!-- doc-ledger:files:start -->
 
-- [!README.md](!README.md) - !readme documentation.
 - [configuration.md](configuration.md) - Configuration documentation.
 - [reconciliation-model.md](reconciliation-model.md) - Reconciliation Model documentation.
 - [testing-and-fixtures.md](testing-and-fixtures.md) - Testing And Fixtures documentation.

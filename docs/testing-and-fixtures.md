@@ -1,7 +1,5 @@
 # Testing and Fixtures
 
-Parent index: [Docs](./README.md)
-
 doc-ledger is covered by focused pytest tests plus a few end-to-end flows that exercise real docs trees.
 
 ## Test Command

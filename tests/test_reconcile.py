@@ -62,6 +62,32 @@ def test_reconcile_tree_plans_missing_child_readme(tmp_path: Path) -> None:
     assert "Parent index: [Docs](../README.md)" in child_update.new_text
 
 
+def test_reconcile_tree_does_not_add_parent_index_to_normal_markdown_by_default(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "README.md").write_text("# Docs\n", encoding="utf-8")
+    page = root / "guide.md"
+    page.write_text("Guide body\n", encoding="utf-8")
+
+    result = reconcile_tree(root)
+
+    assert all(update.path != page for update in result.updates)
+
+
+def test_reconcile_tree_does_not_add_parent_index_to_stub_markdown_by_default(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "README.md").write_text("# Docs\n", encoding="utf-8")
+    stubs = root / "stubs"
+    stubs.mkdir()
+    draft = stubs / "draft.md"
+    draft.write_text("Draft body\n", encoding="utf-8")
+
+    result = reconcile_tree(root)
+
+    assert all(update.path != draft for update in result.updates)
+
+
 def test_reconcile_tree_uses_configured_index_file(tmp_path: Path) -> None:
     root = tmp_path / "docs"
     root.mkdir()
@@ -98,7 +124,10 @@ def test_reconcile_tree_uses_configured_parent_link_label(tmp_path: Path) -> Non
     root.mkdir()
     (root / "guide.md").write_text("Guide body\n", encoding="utf-8")
 
-    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(label="Parent directory")))
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(parent_link=ParentLinkConfig(label="Parent directory", indexed_files=True)),
+    )
     guide_update = next(update for update in result.updates if update.path == root / "guide.md")
 
     assert "Parent directory: [Docs](./README.md)" in guide_update.new_text
@@ -115,11 +144,24 @@ def test_reconcile_tree_removes_existing_parent_lines_when_disabled(tmp_path: Pa
     )
     (root / "README.md").write_text("# Docs\n", encoding="utf-8")
 
-    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(enabled=False)))
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(folder_indexes=False)))
     guide_update = next(update for update in result.updates if update.path == guide / "README.md")
 
     assert "Parent index:" not in guide_update.new_text
     assert "Guide body" in guide_update.new_text
+
+
+def test_reconcile_tree_suppresses_child_folder_parent_index_when_folder_indexes_disabled(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "README.md").write_text("# Docs\n", encoding="utf-8")
+    guide = root / "guide"
+    guide.mkdir()
+
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(folder_indexes=False)))
+    guide_update = next(update for update in result.updates if update.path == guide / "README.md")
+
+    assert "Parent index:" not in guide_update.new_text
 
 
 def test_reconcile_tree_uses_configured_draft_folder(tmp_path: Path) -> None:
@@ -129,7 +171,10 @@ def test_reconcile_tree_uses_configured_draft_folder(tmp_path: Path) -> None:
     drafts.mkdir()
     (drafts / "example.md").write_text("Example body\n", encoding="utf-8")
 
-    result = reconcile_tree(root, DocLedgerConfig(draft=DraftConfig(folder="_drafts")))
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(draft=DraftConfig(folder="_drafts"), parent_link=ParentLinkConfig(indexed_files=True)),
+    )
     root_update = next(update for update in result.updates if update.path == root / "README.md")
     example_update = next(update for update in result.updates if update.path == drafts / "example.md")
 
@@ -160,7 +205,7 @@ def test_reconcile_tree_keeps_existing_child_title_for_root_parent_display(tmp_p
     guide = root / "guide"
     guide.mkdir()
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
 
     guide_update = next(update for update in result.updates if update.path == guide / "README.md")
     assert "Parent index: [Docs](../README.md)" in guide_update.new_text
@@ -174,7 +219,7 @@ def test_reconcile_tree_uses_root_heading_when_no_child_parent_titles_exist(tmp_
     guide = root / "guide"
     guide.mkdir()
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
 
     guide_update = next(update for update in result.updates if update.path == guide / "README.md")
     assert "Parent index: [Documentation](../README.md)" in guide_update.new_text
@@ -215,7 +260,7 @@ More notes.
         encoding="utf-8",
     )
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
     updates_by_path = {update.path: update for update in result.updates}
     root_update = updates_by_path[root / "README.md"]
     example_update = updates_by_path[stubs / "example.md"]
@@ -273,7 +318,7 @@ More notes.
         encoding="utf-8",
     )
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
     root_update = next(update for update in result.updates if update.path == root / "README.md")
 
     assert root_update.new_text.count("## Direct Files") == 1
@@ -309,7 +354,7 @@ def test_reconcile_tree_plans_stub_file_update_once(tmp_path: Path) -> None:
     example = stubs / "example.md"
     example.write_text("Example body\n", encoding="utf-8")
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
     example_updates = [update for update in result.updates if update.path == example]
 
     assert len(example_updates) == 1
@@ -337,7 +382,7 @@ def test_reconcile_tree_updates_parent_indexes_for_markdown_files(tmp_path: Path
         encoding="utf-8",
     )
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
     updates_by_path = {update.path: update for update in result.updates}
 
     assert updates_by_path[root / "README.md"].new_text.startswith("# Space Docs\n\nRoot body")
@@ -410,7 +455,10 @@ def test_reconcile_tree_updates_parent_index_for_configured_editable_extension(t
     page = root / "page.mdx"
     page.write_text("# Page\n", encoding="utf-8")
 
-    config = DocLedgerConfig(file=FileConfig(include_patterns=["**/*.md", "**/*.mdx"]))
+    config = DocLedgerConfig(
+        file=FileConfig(include_patterns=["**/*.md", "**/*.mdx"]),
+        parent_link=ParentLinkConfig(indexed_files=True),
+    )
     config.file.editable_parent_index_extensions = [".md", ".mdx"]
 
     result = reconcile_tree(root, config)
@@ -549,7 +597,7 @@ def test_fix_preserves_existing_direct_file_description(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    assert apply_updates(reconcile_tree(root)) == 1
+    assert apply_updates(reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))) == 1
 
     readme_text = (root / "README.md").read_text(encoding="utf-8")
     assert "Custom alpha description." in readme_text
@@ -984,7 +1032,7 @@ Keep this note.
         encoding="utf-8",
     )
 
-    result = reconcile_tree(root)
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(indexed_files=True)))
 
     assert len(result.updates) == 1
     assert apply_updates(result) == 1

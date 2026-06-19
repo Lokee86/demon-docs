@@ -1,144 +1,485 @@
 # doc-ledger
 
-doc-ledger is a repo-local documentation index maintenance tool.
-It scans a configurable docs root and reconciles folder index files, direct file entries, draft/stub file entries, direct folder entries, and `Parent index` links.
+`doc-ledger` keeps folder index files in sync with a file tree.
 
-## What doc-ledger does
+Point it at a root folder, and it scans the folders and files inside it. For each folder, it creates or updates a local index file that lists the folder’s direct files, draft/stub files, and child folders. It can also add parent-index links so readers can move back up the tree.
 
-- Keeps folder index files in sync with the filesystem.
-- Adds or updates direct file entries for indexed files.
-- Adds or updates stub/draft entries for files inside `stubs/`-style draft folders.
-- Adds or updates direct folder entries for child folders.
-- Keeps `Parent index` links aligned with the current folder layout.
-- Preserves existing descriptions when a target is still present and recognizable.
+You keep owning the actual files and any hand-written index content. `doc-ledger` only owns clearly marked managed sections. `check` reports when the indexes no longer match the filesystem, and `fix` updates them. `watch` starts a persistent process that will watch a root folder and all its children and automatically updates indexes with any changes.
 
-## Quick Start
+The result is a file tree that can be moved, split, expanded, or reorganized without leaving stale index pages behind.
 
-The default docs root is `docs`.
-The default index file is `README.md`.
-The default stub/draft folder is `stubs/`.
+## What it manages
 
-Run the tool from the repo root:
+`doc-ledger` reconciles:
+
+- folder index files, such as `README.md`
+- direct file entries in each folder index
+- draft/stub file entries from a configured draft folder
+- direct child-folder entries
+- `Parent index` links in folder indexes by default, and in indexed files when configured
+
+It preserves hand-authored content outside managed index blocks.
+
+## Quick start
+
+From the `doc-ledger` repo:
 
 ```bash
-python3 main.py fix --root docs
-python3 main.py check --root docs
-python3 main.py watch --root docs
-python3 main.py watch --root docs --once
+doc-ledger fix --root docs
+doc-ledger check --root docs
 ```
 
-Config files are optional:
+`fix` writes needed updates.
+
+`check` verifies the same reconciliation without writing files.
+
+CLI help is available at the top level and for each subcommand:
 
 ```bash
-python3 main.py fix --config .doc-ledger.toml
-python3 main.py check --config .doc-ledger.toml
+doc-ledger --help
+doc-ledger -v
+doc-ledger --version
+doc-ledger fix --help
+doc-ledger check --help
+doc-ledger watch --help
+doc-ledger config paths
+doc-ledger config show
+doc-ledger config init --local
+doc-ledger config init --global
+```
+
+`-v` and `--version` are top-level version flags.
+
+Default conventions:
+
+```text
+docs root:       docs
+index file:      README.md
+draft folder:    stubs
+parent label:    Parent index
+marker prefix:   doc-ledger
 ```
 
 ## Commands
 
-- `fix`: Reconciles the docs tree and writes any needed updates.
-- `check`: Reconciles the docs tree without writing files. This is the verification gate.
-- `watch`: Watches the docs tree and reruns reconciliation when relevant files change.
-- `watch --once`: Runs one reconciliation pass and exits.
+```bash
+doc-ledger fix --root docs
+```
 
-## What It Edits
+Reconciles the docs tree and writes updates.
 
-- Folder index files in the managed docs root.
-- Direct file entries in managed README files.
-- Stub/draft file entries in managed README files.
-- Direct folder entries in managed README files.
-- `Parent index` lines in editable indexed files.
+```bash
+doc-ledger check --root docs
+```
 
-## What It Does Not Edit
+Verifies that the docs tree is already reconciled. Returns non-zero if `fix` would change files.
 
-- Hand-authored content outside the managed sections.
-- `stubs/` folders themselves as index targets.
-- Non-doc files that are not included by configuration.
-- Non-editable indexed files when parent-link editing is disabled by extension.
-- `.gitignore`-protected Python cache files and other generated cache artifacts.
+```bash
+doc-ledger watch --root docs
+```
 
-## Managed README Sections
+Runs one reconciliation immediately, then watches the docs tree for relevant filesystem changes.
 
-doc-ledger manages three section ids:
+```bash
+doc-ledger watch --root docs --once
+```
 
-- `files`
-- `stubs`
-- `folders`
+Runs the watcher path once and exits.
 
-Those sections render as HTML-comment-controlled blocks in each managed README.
-The default headings are:
+A config file can replace repeated command flags:
 
-- `Direct Files`
-- `Stub Files`
-- `Direct Folders`
+```bash
+doc-ledger fix --config .doc-ledger.toml
+doc-ledger check --config .doc-ledger.toml
+```
 
-Legacy headings such as `Top-Level Files` and `Top-Level Folders` are migrated forward when present.
+Config commands:
 
-## Parent Index Links
+```bash
+doc-ledger config paths
+doc-ledger config show
+doc-ledger config init --local
+doc-ledger config init --global
+```
 
-Each editable indexed file gets a `Parent index` line that points back to the owning README.
+## Config Selection
 
-- Normal files use `./README.md`.
-- Files inside the draft/stub folder use `../README.md`.
-- Child folder README files use `../README.md`.
-- The label is configurable, but the default label is `Parent index`.
+doc-ledger selects one base config before applying command-specific CLI overrides.
 
-## Stubs/Drafts
+Selection order:
 
-- The default draft folder is `stubs/`.
-- Draft folders do not get their own index file.
-- Draft file descriptions are prefixed with `Stub: ` by default.
-- Draft entries stay in the parent README’s stub section.
-- When a stub file graduates into the canonical folder, doc-ledger keeps the description when it can.
+1. `--config PATH`
+2. current-directory `.doc-ledger.toml`
+3. current-directory `doc-ledger.toml`
+4. global user config
+5. built-in defaults
 
-## Watch Mode
+There is no upward search and no merge between local and global config files.
 
-Watch mode is convenience for local automation, not the correctness gate.
-`check` remains the command to rely on in scripts and CI.
+`--root` still overrides the selected base config root.
 
-- Watch startup lines include a timestamp and the running PID.
-- Watch output shows reconciliation summaries.
-- Relevant filesystem changes trigger the same reconciliation path as `fix`.
-- The watcher ignores common editor junk and configured ignored paths.
+CLI override examples:
+
+```bash
+doc-ledger fix --root docs --index-file "!README.md"
+doc-ledger fix --root docs --draft-folder "_drafts"
+doc-ledger fix --root docs --include "**/*.png"
+doc-ledger fix --root docs --exclude "**/*.tmp"
+doc-ledger fix --root docs --marker-prefix "nav-ledger"
+doc-ledger fix --root docs --parent-label "Back to Index"
+doc-ledger fix --root docs --parent-link-folder-indexes
+doc-ledger fix --root docs --no-parent-link-folder-indexes
+doc-ledger fix --root docs --parent-link-indexed-files
+doc-ledger fix --root docs --no-parent-link-indexed-files
+```
+
+## Folder indexes
+
+Every normal folder under the managed root gets an index file.
+
+By default, the index file is:
+
+```text
+README.md
+```
+
+Draft folders do not get their own index. By default, the draft folder is:
+
+```text
+stubs/
+```
+
+For this tree:
+
+```text
+docs/
+  README.md
+  overview.md
+  stubs/
+    future-topic.md
+  guides/
+    README.md
+    setup.md
+```
+
+`doc-ledger` maintains:
+
+```text
+docs/README.md
+docs/guides/README.md
+```
+
+It indexes `future-topic.md` from the parent folder’s stub section, not from `stubs/README.md`.
+
+## Managed sections
+
+`doc-ledger` owns only the content between its marker comments.
+
+Default managed sections:
+
+```markdown
+## Direct Files
+<!-- doc-ledger:files:start -->
+<!-- doc-ledger:files:end -->
+
+## Stub Files
+<!-- doc-ledger:stubs:start -->
+<!-- doc-ledger:stubs:end -->
+
+## Direct Folders
+<!-- doc-ledger:folders:start -->
+<!-- doc-ledger:folders:end -->
+```
+
+Content outside those marker blocks remains hand-authored.
+
+## Parent links
+
+`doc-ledger` maintains parent navigation lines where configured.
+
+Default shape:
+
+```markdown
+Parent index: [Folder Name](./README.md)
+```
+
+Rules:
+
+- child folder indexes point to `../README.md`
+- normal files do not get a parent link by default
+- files inside `stubs/` do not get a parent link by default
+- the root index has no parent link
+
+The label and index filename are configurable. `indexed_files` turns file-level parent links on when you want them.
+
+Parent-link override flags:
+
+- `--parent-link-folder-indexes`
+- `--no-parent-link-folder-indexes`
+- `--parent-link-indexed-files`
+- `--no-parent-link-indexed-files`
+
+Examples:
+
+```bash
+doc-ledger fix --root docs --parent-link-indexed-files
+doc-ledger fix --root docs --no-parent-link-folder-indexes
+```
+
+## Description preservation
+
+`doc-ledger` tries to preserve existing index descriptions.
+
+It preserves descriptions when:
+
+- a file remains in place
+- a folder remains in place
+- a stub graduates into the parent folder
+- a canonical file moves into the stub folder
+- a cross-folder move can be matched unambiguously
+
+Stub graduation removes the configured stub prefix:
+
+```markdown
+- [topic.md](stubs/topic.md) - Stub: Topic documentation.
+```
+
+becomes:
+
+```markdown
+- [topic.md](topic.md) - Topic documentation.
+```
+
+Moving a canonical file into the stub folder applies the reverse transformation.
+
+If a stale entry no longer maps to a current file or folder, `doc-ledger` removes it and reports a reconciliation message.
 
 ## Configuration
 
-doc-ledger reads TOML configuration from `.doc-ledger.toml` or `doc-ledger.toml`.
-When no config file is supplied, the built-in defaults apply.
+`doc-ledger` looks for config files named:
 
-Important settings include:
+```text
+.doc-ledger.toml
+doc-ledger.toml
+```
 
-- `root`: docs root directory, default `docs`
-- `index_file`: folder index file name, default `README.md`
-- `markers.prefix`: managed marker prefix, default `doc-ledger`
-- `parent_link.label`: parent-link label, default `Parent index`
-- `sections.files.heading`, `sections.stubs.heading`, `sections.folders.heading`
-- `aliases.files`, `aliases.folders`
-- `drafts.folder`: draft folder name, default `stubs`
-- `drafts.description_prefix`: default `Stub: `
-- `files.include_patterns` and `files.exclude_patterns`
-- `editable.parent_index_extensions`
-- `descriptions.file_template` and `descriptions.folder_template`
-- `watch.debounce_seconds`, `watch.ignored_dirs`, and `watch.ignored_suffixes`
-- `template.include_ownership`, `template.include_does_not_belong`, `template.include_related_docs`, `template.include_notes`
+Discovery walks upward from the current directory. A nearer config wins over a farther config. In the same directory, `.doc-ledger.toml` wins over `doc-ledger.toml`.
+
+`--config` overrides discovery.
+
+`--root` overrides the configured root.
+
+Minimal config:
+
+```toml
+root = "docs"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = true
+indexed_files = false
+```
+
+Use the legacy compatibility switch if you want the older single flag:
+
+```toml
+root = "docs"
+
+[parent_link]
+enabled = true
+```
+
+Use file-level parent links:
+
+```toml
+root = "docs"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = true
+indexed_files = true
+```
+
+Disable all parent links:
+
+```toml
+root = "docs"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = false
+indexed_files = false
+```
+
+Use a custom draft folder:
+
+```toml
+[drafts]
+folder = "_drafts"
+description_prefix = "Draft: "
+```
+
+Customize section headings:
+
+```toml
+[sections.files]
+heading = "Files"
+
+[sections.stubs]
+heading = "Drafts"
+
+[sections.folders]
+heading = "Folders"
+```
+
+Customize marker prefix:
+
+```toml
+[markers]
+prefix = "docs-index"
+```
+
+Index non-Markdown files without editing them:
+
+```toml
+[files]
+include_patterns = ["**/*.md", "**/*.png", "**/*.pdf", "**/*.yaml"]
+
+[editable]
+parent_index_extensions = [".md", ".mdx"]
+```
+
+## Watch mode
+
+Watch mode is for local convenience. It is not a replacement for `check`.
+
+The watcher:
+
+- runs one reconciliation immediately on startup
+- watches the configured root recursively
+- reacts to relevant file and directory events
+- debounces noisy event bursts
+- runs one reconciliation at a time
+- schedules a follow-up pass if changes arrive during a run
+- logs timestamps and process IDs so watcher/fix races are visible
+
+Example:
+
+```bash
+doc-ledger watch --root docs
+```
+
+If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log.
+
+## Automation example
+
+A shell startup file can launch the watcher with a PID guard:
+
+```bash
+DOC_LEDGER_ROOT="${DOC_LEDGER_ROOT:-docs}"
+
+doc_ledger_pid_file="$PWD/.cache/doc-ledger-watch.pid"
+doc_ledger_log_file="$PWD/.cache/doc-ledger-watch.log"
+
+mkdir -p "$PWD/.cache"
+
+doc_ledger_watch_is_running() {
+  [ -s "$doc_ledger_pid_file" ] || return 1
+
+  local watcher_pid
+  watcher_pid="$(cat "$doc_ledger_pid_file" 2>/dev/null)" || return 1
+
+  case "$watcher_pid" in
+    ''|*[!0-9]*) return 1 ;;
+  esac
+
+  kill -0 "$watcher_pid" 2>/dev/null || return 1
+  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "doc-ledger watch"
+}
+
+start_doc_ledger_watch() {
+  setsid bash -c '
+    cd "$1" || exit 1
+    exec doc-ledger watch --root "$2" </dev/null >>"$3" 2>&1
+  ' _ "$PWD" "$DOC_LEDGER_ROOT" "$doc_ledger_log_file" >/dev/null 2>&1 &
+
+  echo $! > "$doc_ledger_pid_file"
+}
+
+if ! doc_ledger_watch_is_running; then
+  rm -f "$doc_ledger_pid_file"
+  start_doc_ledger_watch
+fi
+
+unset doc_ledger_pid_file
+unset doc_ledger_log_file
+```
+
+For `direnv`, source process startup scripts outside any `set -a` block so helper variables are not exported.
 
 ## Testing
 
-Run the doc-ledger tests from the repo root:
+Run the test suite:
 
 ```bash
 python3 -m pytest tests
 ```
 
-The repo also keeps Python cache artifacts out of commits with `.gitignore`, and the hygiene test fails if the working tree contains `__pycache__`, `.pyc`, or `.pyo` files.
+Useful manual smoke flow:
 
-## More Docs
+```bash
+doc-ledger fix --root docs
+doc-ledger check --root docs
+```
 
-- [Docs tree entry point](docs/README.md)
-- [docs/configuration.md](docs/configuration.md)
-- [docs/reconciliation-model.md](docs/reconciliation-model.md)
-- [docs/watcher-and-automation.md](docs/watcher-and-automation.md)
-- [docs/testing-and-fixtures.md](docs/testing-and-fixtures.md)
+For fixture stress testing, see:
 
-The docs tree uses `docs/README.md` as its index by default.
-Projects that want the legacy filename can opt in with `index_file = "!README.md"` in `.doc-ledger.toml`.
+```text
+docs/make-dummy-docs.sh
+```
+
+That script generates a synthetic documentation tree for manual reconciliation tests.
+
+## Safety boundaries
+
+`doc-ledger` does not:
+
+- validate semantic documentation quality
+- decide what a folder should own
+- rewrite arbitrary links inside document bodies
+- modify binary or non-editable files
+- inspect Git status
+- guarantee perfect rename detection
+
+It only reconciles the filesystem against the configured index model.
+
+## Using `!README.md`
+
+Some repos prefer `!README.md` so folder indexes sort first in file explorers.
+
+That is supported through config:
+
+```toml
+root = "docs"
+index_file = "!README.md"
+```
+
+With that config, parent links use `!README.md` automatically:
+
+```markdown
+Parent index: [Guides](./!README.md)
+```
+
+## Repository hygiene
+
+Do not commit runtime artifacts:
+
+```text
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+dummy-docs/
+```
+
+The repo `.gitignore` should exclude those paths.

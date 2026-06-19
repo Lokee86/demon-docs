@@ -20,19 +20,21 @@ def parent_index_for_file(
 
         config = default_config()
 
-    if not config.parent_link.enabled:
-        return None
-
     index_file = config.index_file
     if path == root / index_file:
         return None
 
     if path.name == index_file:
+        if not config.parent_link.folder_indexes:
+            return None
         parent_folder = path.parent.parent
         parent_title = title_lookup(parent_folder)
         return f"{config.parent_link.label}: [{parent_title}](../{index_file})"
 
     if not is_parent_link_editable(path, config):
+        return None
+
+    if not config.parent_link.indexed_files:
         return None
 
     if path.parent.name == config.draft.folder:
