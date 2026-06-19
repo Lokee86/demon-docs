@@ -18,12 +18,30 @@ from doc_ledger.paths import resolve_root
 from doc_ledger.watch import watch_root
 
 
+_CONFIG_SELECTION_ORDER_TEXT = (
+    "Config selection order:\n"
+    "  1. --config PATH\n"
+    "  2. ./.doc-ledger.toml\n"
+    "  3. ./doc-ledger.toml\n"
+    "  4. global user config\n"
+    "  5. built-in defaults"
+)
+
+_CONFIG_RULES_TEXT = (
+    "Config rules:\n"
+    "  - local config is current-directory only\n"
+    "  - there is no upward parent-directory search\n"
+    "  - local and global configs are not merged\n"
+    "  - CLI flags override the selected config"
+)
+
+
 def _add_root_argument(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--root", default=None, help="docs root directory to reconcile")
+    parser.add_argument("--root", metavar="PATH", default=None, help="docs root directory to reconcile")
 
 
 def _add_config_argument(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--config", default=None, help="explicit doc-ledger config file")
+    parser.add_argument("--config", metavar="PATH", default=None, help="explicit doc-ledger config file")
 
 
 def _add_config_selection_arguments(parser: argparse.ArgumentParser) -> None:
@@ -31,26 +49,28 @@ def _add_config_selection_arguments(parser: argparse.ArgumentParser) -> None:
         "--no-local-config",
         action="store_true",
         default=False,
-        help="skip the local config in the current directory",
+        help="skip current-directory local config",
     )
     parser.add_argument(
         "--no-global-config",
         action="store_true",
         default=False,
-        help="skip the global config fallback",
+        help="skip the global user config",
     )
 
 
 def _add_config_override_arguments(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--index-file", default=None, help="override the folder index filename")
-    parser.add_argument("--draft-folder", default=None, help="override the draft folder name")
+    parser.add_argument("--index-file", metavar="NAME", default=None, help="override the folder index filename")
+    parser.add_argument("--draft-folder", metavar="NAME", default=None, help="override the draft folder name")
     parser.add_argument(
         "--draft-description-prefix",
+        metavar="TEXT",
         default=None,
         help="override the draft file description prefix",
     )
     parser.add_argument(
         "--include",
+        metavar="PATTERN",
         dest="include_patterns",
         action="append",
         default=None,
@@ -58,13 +78,14 @@ def _add_config_override_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--exclude",
+        metavar="PATTERN",
         dest="exclude_patterns",
         action="append",
         default=None,
         help="add an exclude pattern for indexed files",
     )
-    parser.add_argument("--marker-prefix", default=None, help="override the managed marker prefix")
-    parser.add_argument("--parent-label", default=None, help="override the parent link label")
+    parser.add_argument("--marker-prefix", metavar="TEXT", default=None, help="override the managed marker prefix")
+    parser.add_argument("--parent-label", metavar="TEXT", default=None, help="override the parent link label")
 
     boolean_optional_action = getattr(argparse, "BooleanOptionalAction", None)
     if boolean_optional_action is None:  # pragma: no cover - compatibility fallback
@@ -214,9 +235,14 @@ def _init_config_file(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="doc-ledger",
-        description="doc-ledger reconciles index files with a folder tree.",
+        description="doc-ledger reconciles local index files with a file tree.",
         epilog=(
             "Examples:\n"
+            "  doc-ledger fix\n"
+            "  doc-ledger check\n"
+            "  doc-ledger watch\n"
+            "  doc-ledger config paths\n"
+            "  doc-ledger config show\n"
             "  doc-ledger fix --root docs\n"
             "  doc-ledger check --root docs\n"
             "  doc-ledger watch --root docs\n"
@@ -232,6 +258,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "fix",
         help="reconcile and write updated files",
         description="Reconcile the docs tree and write any needed updates.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"{_CONFIG_SELECTION_ORDER_TEXT}\n\n{_CONFIG_RULES_TEXT}",
     )
     _add_root_argument(fix_parser)
     _add_config_argument(fix_parser)
@@ -243,6 +271,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "check",
         help="reconcile without writing files",
         description="Verify that the docs tree is already reconciled.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"{_CONFIG_SELECTION_ORDER_TEXT}\n\n{_CONFIG_RULES_TEXT}",
     )
     _add_root_argument(check_parser)
     _add_config_argument(check_parser)
@@ -253,33 +283,61 @@ def _build_parser() -> argparse.ArgumentParser:
     watch_parser = subparsers.add_parser(
         "watch",
         help="watch the tree and rerun reconciliation",
-        description="Watch the docs tree and rerun reconciliation when relevant files change.",
+        description=(
+            "Watch runs in the foreground by default, runs one reconciliation immediately, "
+            "and then watches for relevant filesystem changes."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"{_CONFIG_SELECTION_ORDER_TEXT}\n\n{_CONFIG_RULES_TEXT}",
     )
     _add_root_argument(watch_parser)
     _add_config_argument(watch_parser)
     _add_config_selection_arguments(watch_parser)
     _add_config_override_arguments(watch_parser)
     watch_parser.add_argument("--once", action="store_true", help="run one reconciliation pass and exit")
+    watch_parser.add_argument(
+        "--debounce-seconds",
+        metavar="FLOAT",
+        type=float,
+        default=None,
+        help="override the watcher debounce interval",
+    )
     watch_parser.set_defaults(command="watch")
 
     config_parser = subparsers.add_parser(
         "config",
         help="inspect config path selection and resolved config",
-        description="Inspect config path selection and show the resolved selected config.",
+        description="Inspect current-directory local config lookup and show the resolved selected config.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Local config lookup is current-directory only.\n"
+            "There is no upward parent-directory search.\n"
+            "Local and global configs are not merged.\n"
+            "CLI flags override the selected config.\n\n"
+            "Subcommands:\n"
+            "  paths  print local, global, and selected config paths\n"
+            "  show   print the resolved selected config\n"
+            "  init   write a starter local or global config"
+        ),
     )
     config_subparsers = config_parser.add_subparsers(dest="config_command", required=True)
 
     config_paths_parser = config_subparsers.add_parser(
         "paths",
         help="show config path candidates",
-        description="Show current-directory, local, and global config paths.",
+        description="Print the current-directory local config, global user config, and selected config paths.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "This reports the current-directory local config candidates, the global user config path, "
+            "and the selected config path."
+        ),
     )
     config_paths_parser.set_defaults(command="config", config_command="paths")
 
     config_show_parser = config_subparsers.add_parser(
         "show",
         help="show the resolved selected config",
-        description="Show the resolved selected config after config-file selection.",
+        description="Print the resolved selected config after config-file selection and before CLI overrides.",
     )
     _add_config_argument(config_show_parser)
     _add_config_selection_arguments(config_show_parser)
@@ -288,7 +346,14 @@ def _build_parser() -> argparse.ArgumentParser:
     config_init_parser = config_subparsers.add_parser(
         "init",
         help="write a starter config file",
-        description="Write a starter config file in the current directory or global config location.",
+        description="Write a starter config file in the current directory or the global user config location.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Options:\n"
+            "  --local   write .doc-ledger.toml in the current directory\n"
+            "  --global  write the global config file\n"
+            "  --force   overwrite an existing config file"
+        ),
     )
     config_init_target = config_init_parser.add_mutually_exclusive_group(required=True)
     config_init_target.add_argument(
@@ -398,7 +463,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             if not root.exists():
                 parser.error(f"docs root does not exist: {root}")
 
-            return watch_root(root, config, once=args.once)
+            return watch_root(root, config, debounce_seconds=args.debounce_seconds, once=args.once)
         except SystemExit:
             raise
         except Exception as exc:  # pragma: no cover - defensive CLI boundary

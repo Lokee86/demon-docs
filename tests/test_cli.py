@@ -24,10 +24,16 @@ def _capture_help_output(args: list[str], capsys: pytest.CaptureFixture[str]) ->
 def test_main_help_shows_top_level_description_and_examples(capsys: pytest.CaptureFixture[str]) -> None:
     output = _capture_help_output(["--help"], capsys)
 
-    assert "doc-ledger reconciles index files with a folder tree." in output
+    assert "doc-ledger reconciles local index files with a file tree." in output
     assert "fix" in output
     assert "check" in output
     assert "watch" in output
+    assert "config" in output
+    assert "doc-ledger fix" in output
+    assert "doc-ledger check" in output
+    assert "doc-ledger watch" in output
+    assert "doc-ledger config paths" in output
+    assert "doc-ledger config show" in output
     assert "doc-ledger fix --root docs" in output
     assert "doc-ledger check --root docs" in output
     assert "doc-ledger watch --root docs" in output
@@ -42,19 +48,37 @@ def test_main_version_flags_exit_zero_and_print_version(flag: list[str], capsys:
 
     assert exc.value.code == 0
     output = capsys.readouterr().out
-    assert "doc-ledger 0.1.0" in output
+    assert output.strip() == "doc-ledger 0.1.0"
 
 
 def test_fix_help_includes_flag_help(capsys: pytest.CaptureFixture[str]) -> None:
     output = _capture_help_output(["fix", "--help"], capsys)
 
     assert "Reconcile the docs tree and write any needed updates." in output
-    assert "--root" in output
-    assert "--config" in output
+    assert "--root PATH" in output
+    assert "--config PATH" in output
+    assert "--no-local-config" in output
+    assert "--no-global-config" in output
+    assert "--index-file NAME" in output
+    assert "--draft-folder NAME" in output
+    assert "--draft-description-prefix TEXT" in output
+    assert "--include PATTERN" in output
+    assert "--exclude PATTERN" in output
+    assert "--marker-prefix TEXT" in output
+    assert "--parent-label TEXT" in output
     assert "--parent-link-folder-indexes" in output
     assert "--no-parent-link-folder-indexes" in output
     assert "--parent-link-indexed-files" in output
     assert "--no-parent-link-indexed-files" in output
+    assert "1. --config PATH" in output
+    assert "2. ./.doc-ledger.toml" in output
+    assert "3. ./doc-ledger.toml" in output
+    assert "4. global user config" in output
+    assert "5. built-in defaults" in output
+    assert "local config is current-directory only" in output
+    assert "there is no upward parent-directory search" in output
+    assert "local and global configs are not merged" in output
+    assert "CLI flags override the selected config" in output
     assert "docs root directory to reconcile" in output
     assert "explicit doc-ledger config file" in output
 
@@ -63,18 +87,99 @@ def test_check_help_includes_flag_help(capsys: pytest.CaptureFixture[str]) -> No
     output = _capture_help_output(["check", "--help"], capsys)
 
     assert "Verify that the docs tree is already reconciled." in output
-    assert "--root" in output
-    assert "--config" in output
+    assert "--root PATH" in output
+    assert "--config PATH" in output
+    assert "--no-local-config" in output
+    assert "--no-global-config" in output
+    assert "--index-file NAME" in output
+    assert "--draft-folder NAME" in output
+    assert "--draft-description-prefix TEXT" in output
+    assert "--include PATTERN" in output
+    assert "--exclude PATTERN" in output
+    assert "--marker-prefix TEXT" in output
+    assert "--parent-label TEXT" in output
+    assert "--parent-link-folder-indexes" in output
+    assert "--no-parent-link-folder-indexes" in output
+    assert "--parent-link-indexed-files" in output
+    assert "--no-parent-link-indexed-files" in output
+    assert "1. --config PATH" in output
+    assert "2. ./.doc-ledger.toml" in output
+    assert "3. ./doc-ledger.toml" in output
+    assert "4. global user config" in output
+    assert "5. built-in defaults" in output
+    assert "local config is current-directory only" in output
+    assert "there is no upward parent-directory search" in output
+    assert "local and global configs are not merged" in output
+    assert "CLI flags override the selected config" in output
 
 
 def test_watch_help_includes_once_flag_help(capsys: pytest.CaptureFixture[str]) -> None:
     output = _capture_help_output(["watch", "--help"], capsys)
 
-    assert "Watch the docs tree and rerun reconciliation when relevant files change." in output
-    assert "--root" in output
-    assert "--config" in output
+    assert "Watch runs in the foreground by default, runs one reconciliation immediately, and then watches for relevant filesystem changes." in output
+    assert "--root PATH" in output
+    assert "--config PATH" in output
+    assert "--no-local-config" in output
+    assert "--no-global-config" in output
+    assert "--index-file NAME" in output
+    assert "--draft-folder NAME" in output
+    assert "--draft-description-prefix TEXT" in output
+    assert "--include PATTERN" in output
+    assert "--exclude PATTERN" in output
+    assert "--marker-prefix TEXT" in output
+    assert "--parent-label TEXT" in output
+    assert "--parent-link-folder-indexes" in output
+    assert "--no-parent-link-folder-indexes" in output
+    assert "--parent-link-indexed-files" in output
+    assert "--no-parent-link-indexed-files" in output
     assert "--once" in output
+    assert "--debounce-seconds FLOAT" in output
     assert "run one reconciliation pass and exit" in output
+    assert "1. --config PATH" in output
+    assert "2. ./.doc-ledger.toml" in output
+    assert "3. ./doc-ledger.toml" in output
+    assert "4. global user config" in output
+    assert "5. built-in defaults" in output
+    assert "local config is current-directory only" in output
+    assert "there is no upward parent-directory search" in output
+    assert "local and global configs are not merged" in output
+    assert "CLI flags override the selected config" in output
+
+
+def test_config_help_includes_subcommands(capsys: pytest.CaptureFixture[str]) -> None:
+    output = _capture_help_output(["config", "--help"], capsys)
+
+    assert "paths" in output
+    assert "show" in output
+    assert "init" in output
+    assert "Local config lookup is current-directory only." in output
+    assert "There is no upward parent-directory search." in output
+    assert "Local and global configs are not merged." in output
+    assert "CLI flags override the selected config." in output
+
+
+def test_config_paths_help_explains_config_paths(capsys: pytest.CaptureFixture[str]) -> None:
+    output = _capture_help_output(["config", "paths", "--help"], capsys)
+
+    assert "Print the current-directory local config, global user config, and selected config paths." in output
+    assert "current-directory local config candidates" in output
+    assert "global user config path" in output
+    assert "selected config path" in output
+
+
+def test_config_show_help_explains_resolved_config_output(capsys: pytest.CaptureFixture[str]) -> None:
+    output = _capture_help_output(["config", "show", "--help"], capsys)
+
+    assert "resolved selected config" in output
+
+
+def test_config_init_help_includes_flags(capsys: pytest.CaptureFixture[str]) -> None:
+    output = _capture_help_output(["config", "init", "--help"], capsys)
+
+    assert "--local" in output
+    assert "--global" in output
+    assert "--force" in output
+    assert "global user config location" in output
 
 
 def test_fix_parent_link_flags_override_loaded_config(tmp_path: Path) -> None:
@@ -175,9 +280,10 @@ indexed_files = true
     )
     seen: dict[str, bool] = {}
 
-    def fake_watch_root(root, config, once=False):
+    def fake_watch_root(root, config, debounce_seconds=None, once=False):
         seen["folder_indexes"] = config.parent_link.folder_indexes
         seen["indexed_files"] = config.parent_link.indexed_files
+        seen["debounce_seconds"] = debounce_seconds
         seen["once"] = once
         return 0
 
@@ -196,7 +302,7 @@ indexed_files = true
         ]
     ) == 0
 
-    assert seen == {"folder_indexes": False, "indexed_files": False, "once": True}
+    assert seen == {"folder_indexes": False, "indexed_files": False, "debounce_seconds": None, "once": True}
 
 
 def test_fix_parent_link_indexed_files_flag_enables_file_links(tmp_path: Path) -> None:
