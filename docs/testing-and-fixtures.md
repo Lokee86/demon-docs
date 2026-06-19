@@ -4,6 +4,14 @@ doc-ledger is covered by focused pytest tests plus a few end-to-end flows that e
 
 ## Test Command
 
+For an install smoke check, run:
+
+```bash
+python3 -m pip install -e ".[dev]"
+doc-ledger --help
+doc-ledger --version
+```
+
 From the repo root, run:
 
 ```bash
@@ -55,7 +63,7 @@ The repo’s `.gitignore` already ignores that output directory.
 
 ## Manual Smoke Workflow
 
-A simple end-to-end smoke test looks like this:
+A simple end-to-end smoke test prefers the packaged CLI:
 
 ```bash
 ./docs/make-dummy-docs.sh

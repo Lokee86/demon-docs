@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from types import SimpleNamespace
+import importlib
 
 import pytest
 
@@ -180,6 +181,22 @@ def test_config_init_help_includes_flags(capsys: pytest.CaptureFixture[str]) -> 
     assert "--global" in output
     assert "--force" in output
     assert "global user config location" in output
+
+
+def test_python_module_entry_point_import_has_no_cli_side_effects(monkeypatch: pytest.MonkeyPatch) -> None:
+    import doc_ledger.cli as cli_module
+
+    called = {"value": False}
+
+    def fake_main() -> int:
+        called["value"] = True
+        return 0
+
+    monkeypatch.setattr(cli_module, "main", fake_main)
+    module = importlib.import_module("doc_ledger.__main__")
+
+    assert module.main is fake_main
+    assert called["value"] is False
 
 
 def test_fix_parent_link_flags_override_loaded_config(tmp_path: Path) -> None:

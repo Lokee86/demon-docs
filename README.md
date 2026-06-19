@@ -33,7 +33,33 @@ doc-ledger check --root docs
 
 `check` verifies the same reconciliation without writing files.
 
-`doc-ledger` is intended to run as the installed command shown above. Until packaging is added, `python3 main.py` remains the repo-local development fallback.
+## Installation
+
+For local development with editable installs and test dependencies:
+
+```bash
+python3 -m pip install -e ".[dev]"
+```
+
+For a normal local install:
+
+```bash
+python3 -m pip install .
+```
+
+Installed usage is:
+
+```bash
+doc-ledger fix
+doc-ledger check
+doc-ledger watch
+```
+
+For repo-local development fallback, use:
+
+```bash
+python3 main.py fix
+```
 
 CLI help is available at the top level and for each subcommand:
 
