@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
+import os
 from pathlib import Path
 import threading
 import time
@@ -53,6 +55,10 @@ class WatchScheduler:
         return True
 
 
+def _status_line(message: str, now: Callable[[], datetime] = datetime.now) -> str:
+    return f"{now().isoformat(timespec='seconds')} {message}"
+
+
 def watch_root(
     root: Path,
     config: DocLedgerConfig | None = None,
@@ -61,7 +67,7 @@ def watch_root(
 ) -> int:
     config = config or default_config()
     debounce_seconds = config.watch.debounce_seconds if debounce_seconds is None else debounce_seconds
-    print(f"doc-ledger watch watching {root}")
+    print(_status_line(f"doc-ledger watch watching {root} pid={os.getpid()}"))
     if once:
         _run_fix_and_report(root, config)
         return 0
@@ -96,9 +102,9 @@ def watch_root(
 def _run_fix_and_report(root: Path, config: DocLedgerConfig | None = None) -> int:
     result = reconcile_tree(root, config)
     changed = apply_updates(result)
-    print(f"doc-ledger watch updated {changed} file(s)")
+    print(_status_line(f"doc-ledger watch updated {changed} file(s)"))
     if result.messages:
-        print(f"doc-ledger watch reconciliation messages: {len(result.messages)}")
+        print(_status_line(f"doc-ledger watch reconciliation messages: {len(result.messages)}"))
     return changed
 
 

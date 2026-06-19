@@ -92,13 +92,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             changed = apply_updates(result)
             print(f"doc-ledger fix updated {changed} file(s)")
             if result.messages:
-                print(f"doc-ledger fix reconciliation messages: {len(result.messages)}")
+                for message in result.messages:
+                    print(f"message: {message}")
             return 0
 
         if result.updates:
             print("doc-ledger check failed")
             for update in result.updates:
                 print(str(update.path))
+            for message in result.messages:
+                print(f"message: {message}")
             return 1
 
         print("doc-ledger check passed")

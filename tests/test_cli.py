@@ -69,7 +69,7 @@ def test_fix_reports_summary(tmp_path: Path, capsys) -> None:
 
     output = capsys.readouterr().out
     assert "doc-ledger fix updated 1 file(s)" in output
-    assert "doc-ledger fix reconciliation messages: 1" in output
+    assert "message: Removed stale files entry from" in output
 
 
 def test_check_accepts_root(tmp_path: Path, capsys) -> None:
@@ -84,12 +84,31 @@ def test_check_accepts_root(tmp_path: Path, capsys) -> None:
 
 
 def test_check_reports_failure_output(tmp_path: Path, capsys) -> None:
-    tmp_path.mkdir(exist_ok=True)
+    readme_path = tmp_path / "!README.md"
+    readme_path.write_text(
+        """# Docs
+
+## Direct Files
+<!-- doc-ledger:files:start -->
+- [ghost.md](ghost.md) - Ghost documentation.
+<!-- doc-ledger:files:end -->
+
+## Stub Files
+<!-- doc-ledger:stubs:start -->
+<!-- doc-ledger:stubs:end -->
+
+## Direct Folders
+<!-- doc-ledger:folders:start -->
+<!-- doc-ledger:folders:end -->
+""",
+        encoding="utf-8",
+    )
 
     assert cli.main(["check", "--root", str(tmp_path)]) == 1
     output = capsys.readouterr().out
     assert "doc-ledger check failed" in output
-    assert str(tmp_path / "!README.md") in output
+    assert str(readme_path) in output
+    assert "message: Removed stale files entry from" in output
 
 
 def test_fix_rejects_missing_root(tmp_path: Path) -> None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -39,6 +40,10 @@ class FakeEvent:
         self.is_directory = is_directory
         self.event_type = event_type
         self.dest_path = dest_path
+
+
+def _strip_timestamp(line: str) -> str:
+    return re.sub(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\s+", "", line)
 
 
 def test_watch_scheduler_runs_once_for_single_event() -> None:
@@ -210,9 +215,13 @@ def test_watch_root_once_reports_startup_and_summary(tmp_path: Path, monkeypatch
 
     assert watch_root(tmp_path, once=True) == 0
 
-    output = capsys.readouterr().out
-    assert f"doc-ledger watch watching {tmp_path}" in output
-    assert "doc-ledger watch updated 3 file(s)" in output
+    output_lines = [_strip_timestamp(line) for line in capsys.readouterr().out.splitlines() if line]
+    startup_line = next(line for line in output_lines if line.startswith("doc-ledger watch watching"))
+    assert "doc-ledger watch watching" in startup_line
+    assert f"{tmp_path}" in startup_line
+    assert "pid=" in startup_line
+    assert "doc-ledger watch updated 3 file(s)" in output_lines
+    assert "doc-ledger watch reconciliation messages: 1" in output_lines
 
 
 def test_watch_root_runs_initial_fix_before_observer_start(tmp_path: Path, monkeypatch) -> None:
