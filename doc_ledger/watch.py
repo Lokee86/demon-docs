@@ -5,11 +5,11 @@ from pathlib import Path
 import threading
 import time
 
-from docs_index.reconcile import apply_updates
-from docs_index.reconcile import reconcile_tree
-
-IGNORED_DIRECTORIES = {".git", ".cache", "__pycache__"}
-IGNORED_SUFFIXES = ("~", ".swp", ".tmp", ".bak")
+from doc_ledger.config import DocLedgerConfig
+from doc_ledger.config import default_config
+from doc_ledger.reconcile import apply_updates
+from doc_ledger.reconcile import reconcile_tree
+from doc_ledger.scan import _is_indexable_file
 
 
 class WatchScheduler:
@@ -53,22 +53,29 @@ class WatchScheduler:
         return True
 
 
-def watch_root(root: Path, debounce_seconds: float = 0.75, once: bool = False) -> int:
+def watch_root(
+    root: Path,
+    config: DocLedgerConfig | None = None,
+    debounce_seconds: float | None = None,
+    once: bool = False,
+) -> int:
+    config = config or default_config()
+    debounce_seconds = config.watch.debounce_seconds if debounce_seconds is None else debounce_seconds
     print(f"doc-ledger watch watching {root}")
     if once:
-        _run_fix_and_report(root)
+        _run_fix_and_report(root, config)
         return 0
 
-    _run_fix_and_report(root)
+    _run_fix_and_report(root, config)
 
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 
-    scheduler = WatchScheduler(lambda: _run_fix_and_report(root), debounce_seconds=debounce_seconds)
+    scheduler = WatchScheduler(lambda: _run_fix_and_report(root, config), debounce_seconds=debounce_seconds)
 
     class DocsIndexEventHandler(FileSystemEventHandler):
         def on_any_event(self, event) -> None:  # type: ignore[override]
-            if _is_relevant_watch_event(event):
+            if _is_relevant_watch_event(event, config, root=root):
                 scheduler.mark_changed()
 
     observer = Observer()
@@ -86,8 +93,8 @@ def watch_root(root: Path, debounce_seconds: float = 0.75, once: bool = False) -
         observer.join()
 
 
-def _run_fix_and_report(root: Path) -> int:
-    result = reconcile_tree(root)
+def _run_fix_and_report(root: Path, config: DocLedgerConfig | None = None) -> int:
+    result = reconcile_tree(root, config)
     changed = apply_updates(result)
     print(f"doc-ledger watch updated {changed} file(s)")
     if result.messages:
@@ -101,31 +108,45 @@ def _sleep_interval(debounce_seconds: float) -> float:
     return min(debounce_seconds / 2, 0.25)
 
 
-def _is_relevant_watch_event(event) -> bool:
+def _is_relevant_watch_event(event, config: DocLedgerConfig | None = None, root: Path | None = None) -> bool:
+    config = config or default_config()
+    root = root or _watch_root_from_event(event)
     paths = [Path(getattr(event, "src_path", ""))]
     dest_path = getattr(event, "dest_path", None)
     if dest_path:
         paths.append(Path(dest_path))
 
     is_directory = bool(getattr(event, "is_directory", False))
-    return any(_is_relevant_watch_path(path, is_directory=is_directory) for path in paths)
+    return any(_is_relevant_watch_path(path, is_directory=is_directory, config=config, root=root) for path in paths)
 
 
-def _is_relevant_watch_path(path: Path, is_directory: bool) -> bool:
-    if _is_ignored_watch_path(path):
+def _is_relevant_watch_path(
+    path: Path,
+    is_directory: bool,
+    config: DocLedgerConfig | None = None,
+    root: Path | None = None,
+) -> bool:
+    config = config or default_config()
+    if _is_ignored_watch_path(path, config):
         return False
     if is_directory:
         return True
-    return path.suffix == ".md"
+    root = root or path.parent
+    return _is_indexable_file(root.resolve(strict=False), path.resolve(strict=False), config)
 
 
-def _is_ignored_watch_path(path: Path) -> bool:
-    if any(part in IGNORED_DIRECTORIES for part in path.parts):
+def _watch_root_from_event(event) -> Path:
+    path = Path(getattr(event, "src_path", ""))
+    return path.parent
+
+
+def _is_ignored_watch_path(path: Path, config: DocLedgerConfig) -> bool:
+    if any(part in config.watch.ignored_dirs for part in path.parts):
         return True
 
     name = path.name
     if name.startswith(".#"):
         return True
-    if any(name.endswith(suffix) for suffix in IGNORED_SUFFIXES):
+    if any(name.endswith(suffix) for suffix in config.watch.ignored_suffixes):
         return True
     return False

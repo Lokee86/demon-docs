@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from docs_index.cli import main
+from doc_ledger.cli import main
 
 
 if __name__ == "__main__":

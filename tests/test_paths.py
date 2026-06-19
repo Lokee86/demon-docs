@@ -7,7 +7,7 @@ from pathlib import Path
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOL_ROOT))
 
-from docs_index.paths import resolve_root
+from doc_ledger.paths import resolve_root
 
 
 def test_resolve_root_uses_explicit_cwd_for_relative_paths() -> None:
@@ -21,6 +21,13 @@ def test_resolve_root_uses_explicit_cwd_for_relative_paths() -> None:
 
 def test_resolve_root_returns_absolute_path_for_absolute_input() -> None:
     result = resolve_root("/var/tmp/docs")
+
+    assert result == Path("/var/tmp/docs")
+    assert result.is_absolute()
+
+
+def test_resolve_root_keeps_absolute_root_absolute_with_explicit_cwd() -> None:
+    result = resolve_root("/var/tmp/docs", cwd=Path("/tmp/workspace"))
 
     assert result == Path("/var/tmp/docs")
     assert result.is_absolute()

@@ -7,10 +7,16 @@ from pathlib import Path
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOL_ROOT))
 
-from docs_index.model import FileUpdate
-from docs_index.model import ReconcileResult
-from docs_index.reconcile import apply_updates
-from docs_index.reconcile import reconcile_tree
+from doc_ledger.model import FileUpdate
+from doc_ledger.model import ReconcileResult
+from doc_ledger.config import DocLedgerConfig
+from doc_ledger.config import DescriptionConfig
+from doc_ledger.config import DraftConfig
+from doc_ledger.config import FileConfig
+from doc_ledger.config import MarkerConfig
+from doc_ledger.config import ParentLinkConfig
+from doc_ledger.reconcile import apply_updates
+from doc_ledger.reconcile import reconcile_tree
 
 
 def test_reconcile_tree_returns_reconcile_result(tmp_path: Path) -> None:
@@ -56,6 +62,96 @@ def test_reconcile_tree_plans_missing_child_readme(tmp_path: Path) -> None:
     assert "Parent index: [Docs](../!README.md)" in child_update.new_text
 
 
+def test_reconcile_tree_uses_configured_index_file(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "guide.md").write_text("Guide body\n", encoding="utf-8")
+    guide = root / "guide"
+    guide.mkdir()
+
+    result = reconcile_tree(root, DocLedgerConfig(index_file="README.md"))
+    updates_by_path = {update.path: update for update in result.updates}
+
+    assert root / "README.md" in updates_by_path
+    assert guide / "README.md" in updates_by_path
+    assert "- [guide.md](guide.md) - Guide documentation." in updates_by_path[root / "README.md"].new_text
+    assert "- [guide](guide/README.md) - Guide documentation." in updates_by_path[root / "README.md"].new_text
+    assert "Parent index: [Docs](../README.md)" in updates_by_path[guide / "README.md"].new_text
+
+
+def test_reconcile_tree_uses_configured_marker_prefix(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "guide.md").write_text("Guide body\n", encoding="utf-8")
+    (root / "!README.md").write_text("# Docs\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(markers=MarkerConfig(prefix="nav-ledger")))
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "<!-- nav-ledger:files:start -->" in root_update.new_text
+    assert "<!-- nav-ledger:stubs:start -->" in root_update.new_text
+    assert "<!-- nav-ledger:folders:start -->" in root_update.new_text
+
+
+def test_reconcile_tree_uses_configured_parent_link_label(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "guide.md").write_text("Guide body\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(label="Parent directory")))
+    guide_update = next(update for update in result.updates if update.path == root / "guide.md")
+
+    assert "Parent directory: [Docs](./!README.md)" in guide_update.new_text
+
+
+def test_reconcile_tree_removes_existing_parent_lines_when_disabled(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    guide = root / "guide"
+    guide.mkdir()
+    (guide / "!README.md").write_text(
+        "# Guide\n\nParent index: [Docs](../!README.md)\n\nGuide body\n",
+        encoding="utf-8",
+    )
+    (root / "!README.md").write_text("# Docs\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(parent_link=ParentLinkConfig(enabled=False)))
+    guide_update = next(update for update in result.updates if update.path == guide / "!README.md")
+
+    assert "Parent index:" not in guide_update.new_text
+    assert "Guide body" in guide_update.new_text
+
+
+def test_reconcile_tree_uses_configured_draft_folder(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    drafts = root / "_drafts"
+    drafts.mkdir()
+    (drafts / "example.md").write_text("Example body\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(draft=DraftConfig(folder="_drafts")))
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+    example_update = next(update for update in result.updates if update.path == drafts / "example.md")
+
+    assert "- [example.md](_drafts/example.md) - Stub: Example documentation." in root_update.new_text
+    assert "Parent index: [Docs](../!README.md)" in example_update.new_text
+    assert all(update.path != drafts / "!README.md" for update in result.updates)
+
+
+def test_reconcile_tree_uses_configured_draft_prefix(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    drafts = root / "_drafts"
+    drafts.mkdir()
+    (drafts / "example.md").write_text("Example body\n", encoding="utf-8")
+
+    config = DocLedgerConfig(draft=DraftConfig(folder="_drafts", description_prefix="Draft: "))
+    result = reconcile_tree(root, config)
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [example.md](_drafts/example.md) - Draft: Example documentation." in root_update.new_text
+
+
 def test_reconcile_tree_keeps_existing_child_title_for_root_parent_display(tmp_path: Path) -> None:
     root = tmp_path / "docs"
     root.mkdir()
@@ -88,6 +184,9 @@ def test_reconcile_tree_migrates_root_top_level_sections(tmp_path: Path) -> None
     root = tmp_path / "docs"
     root.mkdir()
     (root / "alpha.md").write_text("Alpha body\n", encoding="utf-8")
+    stubs = root / "stubs"
+    stubs.mkdir()
+    (stubs / "example.md").write_text("Example body\n", encoding="utf-8")
     guide = root / "guide"
     guide.mkdir()
     (guide / "!README.md").write_text("# Guide\n", encoding="utf-8")
@@ -119,16 +218,27 @@ More notes.
     result = reconcile_tree(root)
     updates_by_path = {update.path: update for update in result.updates}
     root_update = updates_by_path[root / "!README.md"]
+    example_update = updates_by_path[stubs / "example.md"]
+    guide_update = updates_by_path[guide / "!README.md"]
 
+    assert "<!-- doc-ledger:files:start -->" in root_update.new_text
+    assert "<!-- doc-ledger:stubs:start -->" in root_update.new_text
+    assert "<!-- doc-ledger:folders:start -->" in root_update.new_text
     assert "## Top-Level Files" not in root_update.new_text
     assert "## Top-Level Folders" not in root_update.new_text
     assert "## Direct Files" in root_update.new_text
+    assert root_update.new_text.count("## Direct Files") == 1
+    assert root_update.new_text.count("## Stub Files") == 1
     assert "## Direct Folders" in root_update.new_text
+    assert root_update.new_text.count("## Direct Folders") == 1
     assert "- [alpha.md](alpha.md) - Custom alpha description." in root_update.new_text
+    assert "- [example.md](stubs/example.md) - Stub: Example documentation." in root_update.new_text
     assert "- [Guide](guide/!README.md) - Custom guide description." in root_update.new_text
     assert "## Rulebook" in root_update.new_text
     assert "## Related Docs" in root_update.new_text
     assert "## Notes" in root_update.new_text
+    assert "Parent index: [Docs](../!README.md)" in example_update.new_text
+    assert "Parent index: [Docs](../!README.md)" in guide_update.new_text
 
 
 def test_reconcile_tree_adds_only_missing_stub_section_for_top_level_migration(tmp_path: Path) -> None:
@@ -237,6 +347,79 @@ def test_reconcile_tree_updates_parent_indexes_for_markdown_files(tmp_path: Path
     assert "Parent index: [Space Docs](../!README.md)" in updates_by_path[guide / "!README.md"].new_text
 
 
+def test_reconcile_tree_renders_non_markdown_files_when_included(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "architecture.png").write_text("png body\n", encoding="utf-8")
+    (root / "openapi.yaml").write_text("yaml body\n", encoding="utf-8")
+
+    drafts = root / "stubs"
+    drafts.mkdir()
+    (drafts / "draft.pdf").write_text("pdf body\n", encoding="utf-8")
+
+    (root / "!README.md").write_text(
+        """# Docs
+
+## Direct Files
+<!-- doc-ledger:files:start -->
+- [architecture.png](architecture.png) - Custom architecture description.
+<!-- doc-ledger:files:end -->
+
+## Stub Files
+<!-- doc-ledger:stubs:start -->
+<!-- doc-ledger:stubs:end -->
+
+## Direct Folders
+<!-- doc-ledger:folders:start -->
+<!-- doc-ledger:folders:end -->
+""",
+        encoding="utf-8",
+    )
+
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(file=FileConfig(include_patterns=["**/*.md", "**/*.png", "**/*.yaml", "**/*.pdf"])),
+    )
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [architecture.png](architecture.png) - Custom architecture description." in root_update.new_text
+    assert "- [openapi.yaml](openapi.yaml) - Openapi documentation." in root_update.new_text
+    assert "- [draft.pdf](stubs/draft.pdf) - Stub: Draft documentation." in root_update.new_text
+    assert "Parent index" not in (root / "architecture.png").read_text(encoding="utf-8")
+    assert "Parent index" not in (root / "openapi.yaml").read_text(encoding="utf-8")
+    assert "Parent index" not in (drafts / "draft.pdf").read_text(encoding="utf-8")
+
+
+def test_reconcile_tree_does_not_read_or_rewrite_non_editable_included_files(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    diagram = root / "diagram.png"
+    diagram.write_bytes(b"\x89PNG\r\n\x1a\nbinary png data")
+    (root / "!README.md").write_text("# Docs\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(file=FileConfig(include_patterns=["**/*.md", "**/*.png"])))
+
+    assert all(update.path != diagram for update in result.updates)
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+    assert "- [diagram.png](diagram.png) - Diagram documentation." in root_update.new_text
+
+
+def test_reconcile_tree_updates_parent_index_for_configured_editable_extension(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    page = root / "page.mdx"
+    page.write_text("# Page\n", encoding="utf-8")
+
+    config = DocLedgerConfig(file=FileConfig(include_patterns=["**/*.md", "**/*.mdx"]))
+    config.file.editable_parent_index_extensions = [".md", ".mdx"]
+
+    result = reconcile_tree(root, config)
+    updates_by_path = {update.path: update for update in result.updates}
+
+    assert "Parent index: [Docs](./!README.md)" in updates_by_path[page].new_text
+    assert "- [page.mdx](page.mdx) - Page documentation." in updates_by_path[root / "!README.md"].new_text
+
+
 def test_reconcile_tree_populates_managed_sections(tmp_path: Path) -> None:
     root = tmp_path / "docs"
     root.mkdir()
@@ -266,6 +449,81 @@ def test_reconcile_tree_populates_managed_sections(tmp_path: Path) -> None:
     assert "doc-ledger:files:start" in updates_by_path[child_readme].new_text
     assert "doc-ledger:stubs:start" in updates_by_path[child_readme].new_text
     assert "doc-ledger:folders:start" in updates_by_path[child_readme].new_text
+
+
+def test_reconcile_tree_uses_configured_file_description_template_for_new_files(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "alpha.md").write_text("Alpha body\n", encoding="utf-8")
+
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(description=DescriptionConfig(file_template="File: {title}.")),
+    )
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [alpha.md](alpha.md) - File: Alpha." in root_update.new_text
+
+
+def test_reconcile_tree_uses_configured_folder_description_template_for_new_folders(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    child = root / "guide-folder"
+    child.mkdir()
+
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(description=DescriptionConfig(folder_template="Folder: {title}.")),
+    )
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [guide-folder](guide-folder/!README.md) - Folder: Guide Folder." in root_update.new_text
+
+
+def test_reconcile_tree_uses_configured_draft_prefix_for_new_stub_files(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    stubs = root / "stubs"
+    stubs.mkdir()
+    (stubs / "draft.md").write_text("Draft body\n", encoding="utf-8")
+
+    result = reconcile_tree(root, DocLedgerConfig(draft=DraftConfig(description_prefix="Draft: ")))
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [draft.md](stubs/draft.md) - Draft: Draft documentation." in root_update.new_text
+
+
+def test_reconcile_tree_preserves_existing_description_with_configured_fallbacks(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "alpha.md").write_text("Parent index: [Docs](./!README.md)\n\nAlpha body", encoding="utf-8")
+    (root / "!README.md").write_text(
+        """# Docs
+
+## Direct Files
+<!-- doc-ledger:files:start -->
+- [alpha.md](alpha.md) - Custom alpha description.
+<!-- doc-ledger:files:end -->
+
+## Stub Files
+<!-- doc-ledger:stubs:start -->
+<!-- doc-ledger:stubs:end -->
+
+## Direct Folders
+<!-- doc-ledger:folders:start -->
+<!-- doc-ledger:folders:end -->
+""",
+        encoding="utf-8",
+    )
+
+    result = reconcile_tree(
+        root,
+        DocLedgerConfig(description=DescriptionConfig(file_template="File: {title}.")),
+    )
+    root_update = next(update for update in result.updates if update.path == root / "!README.md")
+
+    assert "- [alpha.md](alpha.md) - Custom alpha description." in root_update.new_text
+    assert "File: Alpha." not in root_update.new_text
 
 
 def test_fix_preserves_existing_direct_file_description(tmp_path: Path) -> None:

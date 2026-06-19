@@ -4,35 +4,52 @@ from collections.abc import Callable
 import re
 from pathlib import Path
 
+from doc_ledger.config import DocLedgerConfig
+from doc_ledger.config import default_config
+from doc_ledger.config import is_parent_link_editable
+
 
 def parent_index_for_file(
     path: Path,
     root: Path,
     title_lookup: Callable[[Path], str],
+    config: DocLedgerConfig | None = None,
 ) -> str | None:
-    if path == root / "!README.md":
+    if config is None:
+        from doc_ledger.config import default_config
+
+        config = default_config()
+
+    if not config.parent_link.enabled:
         return None
 
-    if path.name == "!README.md":
-        parent_folder = path.parent.parent
-        parent_title = title_lookup(parent_folder)
-        return f"Parent index: [{parent_title}](../!README.md)"
-
-    if path.suffix != ".md":
+    index_file = config.index_file
+    if path == root / index_file:
         return None
 
-    if path.parent.name == "stubs":
+    if path.name == index_file:
         parent_folder = path.parent.parent
         parent_title = title_lookup(parent_folder)
-        return f"Parent index: [{parent_title}](../!README.md)"
+        return f"{config.parent_link.label}: [{parent_title}](../{index_file})"
+
+    if not is_parent_link_editable(path, config):
+        return None
+
+    if path.parent.name == config.draft.folder:
+        parent_folder = path.parent.parent
+        parent_title = title_lookup(parent_folder)
+        return f"{config.parent_link.label}: [{parent_title}](../{index_file})"
 
     parent_title = title_lookup(path.parent)
-    return f"Parent index: [{parent_title}](./!README.md)"
+    return f"{config.parent_link.label}: [{parent_title}](./{index_file})"
 
 
-def update_parent_index_line(text: str, desired_line: str | None) -> str:
+def update_parent_index_line(text: str, desired_line: str | None, label: str | None = None) -> str:
+    if label is None:
+        label = default_config().parent_link.label
+
     lines = text.splitlines()
-    parent_index_pattern = re.compile(r"^Parent index:\s+.*$")
+    parent_index_pattern = re.compile(rf"^{re.escape(label)}:\s+.*$")
     parent_index_line_index = next(
         (index for index, line in enumerate(lines) if parent_index_pattern.match(line)),
         None,

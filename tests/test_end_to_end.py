@@ -7,7 +7,7 @@ from pathlib import Path
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOL_ROOT))
 
-from docs_index import cli
+from doc_ledger import cli
 
 
 def test_fix_on_empty_docs_root_creates_root_readme(tmp_path: Path) -> None:
@@ -164,3 +164,182 @@ def test_fix_then_check_returns_clean(tmp_path: Path) -> None:
 
     assert cli.main(["fix", "--root", str(docs_root)]) == 0
     assert cli.main(["check", "--root", str(docs_root)]) == 0
+
+
+def test_default_config_preserves_space_rocks_doc_conventions(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "page.md").write_text("# Page\n", encoding="utf-8")
+    stubs_dir = docs_root / "stubs"
+    stubs_dir.mkdir()
+    (stubs_dir / "example.md").write_text("# Example\n", encoding="utf-8")
+    guide_dir = docs_root / "guide"
+    guide_dir.mkdir()
+    (guide_dir / "!README.md").write_text("# Guide\n", encoding="utf-8")
+    (docs_root / "!README.md").write_text(
+        """# Docs
+
+## Top-Level Files
+<!-- doc-ledger:files:start -->
+- [page.md](page.md) - Page documentation.
+<!-- doc-ledger:files:end -->
+
+## Top-Level Folders
+<!-- doc-ledger:folders:start -->
+- [Guide](guide/!README.md) - Guide documentation.
+<!-- doc-ledger:folders:end -->
+""",
+        encoding="utf-8",
+    )
+
+    assert cli.main(["fix", "--root", str(docs_root)]) == 0
+    assert cli.main(["check", "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "!README.md").read_text(encoding="utf-8")
+    page_text = (docs_root / "page.md").read_text(encoding="utf-8")
+    example_text = (stubs_dir / "example.md").read_text(encoding="utf-8")
+    guide_text = (guide_dir / "!README.md").read_text(encoding="utf-8")
+
+    assert root_readme.startswith("# Docs")
+    assert "## Top-Level Files" not in root_readme
+    assert "## Top-Level Folders" not in root_readme
+    assert "## Direct Files" in root_readme
+    assert "## Stub Files" in root_readme
+    assert "## Direct Folders" in root_readme
+    assert "<!-- doc-ledger:files:start -->" in root_readme
+    assert "<!-- doc-ledger:stubs:start -->" in root_readme
+    assert "<!-- doc-ledger:folders:start -->" in root_readme
+    assert "- [page.md](page.md) - Page documentation." in root_readme
+    assert "- [example.md](stubs/example.md) - Stub: Example documentation." in root_readme
+    assert "- [Guide](guide/!README.md) - Guide documentation." in root_readme
+    assert "Parent index: [Docs](./!README.md)" in page_text
+    assert "Parent index: [Docs](../!README.md)" in example_text
+    assert "Parent index: [Docs](../!README.md)" in guide_text
+
+
+def test_default_config_indexes_markdown_only_and_leaves_png_untouched(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "page.md").write_text("# Page\n", encoding="utf-8")
+    original_png = b"\x89PNG\r\n\x1a\nbinary\x00data"
+    (docs_root / "diagram.png").write_bytes(original_png)
+
+    assert cli.main(["fix", "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "!README.md").read_text(encoding="utf-8")
+    page_text = (docs_root / "page.md").read_text(encoding="utf-8")
+    diagram_bytes = (docs_root / "diagram.png").read_bytes()
+
+    assert "- [page.md](page.md) - Page documentation." in root_readme
+    assert "diagram.png" not in root_readme
+    assert "Parent index: [Docs](./!README.md)" in page_text
+    assert diagram_bytes == original_png
+
+
+def test_fix_with_configured_index_file_uses_readme_md(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "guide.md").write_text("# Guide\n", encoding="utf-8")
+    (docs_root / "guide").mkdir()
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text('index_file = "README.md"\n', encoding="utf-8")
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "README.md").read_text(encoding="utf-8")
+    guide_text = (docs_root / "guide.md").read_text(encoding="utf-8")
+    guide_readme = (docs_root / "guide" / "README.md").read_text(encoding="utf-8")
+
+    assert "- [guide.md](guide.md) - Guide documentation." in root_readme
+    assert "- [guide](guide/README.md) - Guide documentation." in root_readme
+    assert "README.md" not in root_readme.split("## Direct Files", 1)[1].split("## Stub Files", 1)[0]
+    assert "Parent index: [Docs](./README.md)" in guide_text
+    assert "Parent index: [Docs](../README.md)" in guide_readme
+
+
+def test_fix_with_configured_marker_prefix_uses_nav_ledgers(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "guide.md").write_text("# Guide\n", encoding="utf-8")
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text('[markers]\nprefix = "nav-ledger"\n', encoding="utf-8")
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "!README.md").read_text(encoding="utf-8")
+    assert "<!-- nav-ledger:files:start -->" in root_readme
+    assert "<!-- nav-ledger:stubs:start -->" in root_readme
+    assert "<!-- nav-ledger:folders:start -->" in root_readme
+
+
+def test_fix_with_configured_draft_folder_uses_drafts_section(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    drafts_dir = docs_root / "_drafts"
+    drafts_dir.mkdir()
+    (drafts_dir / "example.md").write_text("# Example\n", encoding="utf-8")
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text('[drafts]\nfolder = "_drafts"\n', encoding="utf-8")
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = (docs_root / "!README.md").read_text(encoding="utf-8")
+    example_text = (drafts_dir / "example.md").read_text(encoding="utf-8")
+
+    assert "- [example.md](_drafts/example.md) - Stub: Example documentation." in root_readme
+    assert "Parent index: [Docs](../!README.md)" in example_text
+    assert not (drafts_dir / "!README.md").exists()
+    assert "_drafts" not in root_readme.split("## Direct Folders", 1)[1].split("## Related Docs", 1)[0]
+
+
+def test_fix_renders_non_markdown_files_when_included(tmp_path: Path) -> None:
+    docs_root = tmp_path / "docs"
+    docs_root.mkdir()
+    (docs_root / "architecture.png").write_text("png body\n", encoding="utf-8")
+    (docs_root / "openapi.yaml").write_text("yaml body\n", encoding="utf-8")
+
+    drafts_dir = docs_root / "stubs"
+    drafts_dir.mkdir()
+    (drafts_dir / "draft.pdf").write_text("pdf body\n", encoding="utf-8")
+
+    readme_path = docs_root / "!README.md"
+    readme_path.write_text(
+        """# Docs
+
+## Direct Files
+<!-- doc-ledger:files:start -->
+- [architecture.png](architecture.png) - Custom architecture description.
+<!-- doc-ledger:files:end -->
+
+## Stub Files
+<!-- doc-ledger:stubs:start -->
+<!-- doc-ledger:stubs:end -->
+
+## Direct Folders
+<!-- doc-ledger:folders:start -->
+<!-- doc-ledger:folders:end -->
+""",
+        encoding="utf-8",
+    )
+
+    config_path = tmp_path / "doc-ledger.toml"
+    config_path.write_text(
+        """
+[files]
+include_patterns = ["**/*.md", "**/*.png", "**/*.yaml", "**/*.pdf"]
+""".strip(),
+        encoding="utf-8",
+    )
+
+    assert cli.main(["fix", "--config", str(config_path), "--root", str(docs_root)]) == 0
+
+    root_readme = readme_path.read_text(encoding="utf-8")
+    assert "- [architecture.png](architecture.png) - Custom architecture description." in root_readme
+    assert "- [openapi.yaml](openapi.yaml) - Openapi documentation." in root_readme
+    assert "- [draft.pdf](stubs/draft.pdf) - Stub: Draft documentation." in root_readme
+    assert "Parent index" not in (docs_root / "architecture.png").read_text(encoding="utf-8")
+    assert "Parent index" not in (docs_root / "openapi.yaml").read_text(encoding="utf-8")
+    assert "Parent index" not in (drafts_dir / "draft.pdf").read_text(encoding="utf-8")
