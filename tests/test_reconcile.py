@@ -435,6 +435,28 @@ def test_reconcile_tree_renders_non_markdown_files_when_included(tmp_path: Path)
     assert "Parent index" not in (drafts / "draft.pdf").read_text(encoding="utf-8")
 
 
+def test_reconcile_tree_uses_forward_slashes_for_generated_link_targets(tmp_path: Path) -> None:
+    root = tmp_path / "docs"
+    root.mkdir()
+    (root / "README.md").write_text("# Docs\n", encoding="utf-8")
+    (root / "alpha.md").write_text("Alpha body\n", encoding="utf-8")
+
+    stubs = root / "stubs"
+    stubs.mkdir()
+    (stubs / "draft.md").write_text("Draft body\n", encoding="utf-8")
+
+    guide = root / "guide"
+    guide.mkdir()
+
+    result = reconcile_tree(root)
+    root_update = next(update for update in result.updates if update.path == root / "README.md")
+
+    assert "- [alpha.md](alpha.md) - Alpha documentation." in root_update.new_text
+    assert "- [draft.md](stubs/draft.md) - Stub: Draft documentation." in root_update.new_text
+    assert "- [guide](guide/README.md) - Guide documentation." in root_update.new_text
+    assert "\\" not in root_update.new_text
+
+
 def test_reconcile_tree_does_not_read_or_rewrite_non_editable_included_files(tmp_path: Path) -> None:
     root = tmp_path / "docs"
     root.mkdir()

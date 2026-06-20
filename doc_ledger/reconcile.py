@@ -6,6 +6,7 @@ from doc_ledger.config import DocLedgerConfig
 from doc_ledger.config import default_config
 from doc_ledger.config import is_parent_link_editable
 from doc_ledger.model import FileUpdate, FolderInfo, IndexEntry, ReconcileResult
+from doc_ledger.path_format import posix_relative_path
 from doc_ledger.parent_index import parent_index_for_file
 from doc_ledger.parent_index import update_parent_index_line
 from doc_ledger.readme_io import description_from_file
@@ -480,7 +481,7 @@ def _render_folder_line(
 
 
 def _canonical_target(readme_path: Path, target_path: Path) -> str:
-    return str(target_path.relative_to(readme_path.parent))
+    return posix_relative_path(target_path, readme_path.parent)
 
 
 def _existing_stub_entry_for_direct_file(

@@ -6,6 +6,7 @@ from pathlib import Path
 from doc_ledger.config import DocLedgerConfig
 from doc_ledger.config import default_config
 from doc_ledger.model import DocsTree, FolderInfo
+from doc_ledger.path_format import posix_relative_path
 
 
 def scan_docs_tree(root: Path, config: DocLedgerConfig | None = None) -> DocsTree:
@@ -70,8 +71,7 @@ def _is_indexable_file(root: Path, path: Path, config: DocLedgerConfig) -> bool:
     if path.name == config.index_file:
         return False
 
-    relative_path = path.resolve(strict=False).relative_to(root)
-    path_text = str(relative_path)
+    path_text = posix_relative_path(path.resolve(strict=False), root)
 
     if any(_matches_root_relative_pattern(path_text, pattern) for pattern in config.file.exclude_patterns):
         return False

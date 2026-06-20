@@ -49,7 +49,7 @@ def test_main_version_flags_exit_zero_and_print_version(flag: list[str], capsys:
 
     assert exc.value.code == 0
     output = capsys.readouterr().out
-    assert output.strip() == "doc-ledger 0.1.0"
+    assert output.strip() == "doc-ledger 0.1.1"
 
 
 def test_fix_help_includes_flag_help(capsys: pytest.CaptureFixture[str]) -> None:

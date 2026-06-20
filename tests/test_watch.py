@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from pathlib import PureWindowsPath
 
 
 TOOL_ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +41,11 @@ class FakeEvent:
         self.is_directory = is_directory
         self.event_type = event_type
         self.dest_path = dest_path
+
+
+class FakeWindowsPath(PureWindowsPath):
+    def resolve(self, strict: bool = False):  # type: ignore[override]
+        return self
 
 
 def _strip_timestamp(line: str) -> str:
@@ -139,6 +145,15 @@ def test_watch_event_filter_accepts_relevant_paths() -> None:
     assert _is_relevant_watch_event(FakeEvent("/docs/guide.md"), root=root) is True
     assert _is_relevant_watch_event(FakeEvent("/docs/stubs", is_directory=True, event_type="created"), root=root) is True
     assert _is_relevant_watch_event(FakeEvent("/docs/temp.txt", dest_path="/docs/moved.md", event_type="moved"), root=root) is True
+
+
+def test_watch_event_filter_accepts_extended_windows_path_under_watched_root(monkeypatch) -> None:
+    monkeypatch.setattr("doc_ledger.watch.Path", FakeWindowsPath)
+
+    root = FakeWindowsPath(r"D:\repo\docs")
+    event = FakeEvent(r"\\?\D:\repo\docs\design\architecture.md")
+
+    assert _is_relevant_watch_event(event, root=root) is True
 
 
 def test_watch_event_filter_default_png_event_is_not_relevant() -> None:
