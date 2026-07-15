@@ -1,13 +1,13 @@
 # Testing and Fixtures
 
-doc-ledger is covered by focused pytest tests plus a few end-to-end flows that exercise real docs trees.
+doc-ledger is covered by focused Go package tests, watcher integration coverage, and a differential Python/Go parity test. The original pytest suite remains as legacy behavioral documentation.
 
 ## Test Command
 
 For an install smoke check, run:
 
 ```bash
-python3 -m pip install -e ".[dev]"
+go install ./cmd/doc-ledger
 doc-ledger --help
 doc-ledger --version
 ```
@@ -15,8 +15,10 @@ doc-ledger --version
 From the repo root, run:
 
 ```bash
-python3 -m pytest tests
+go test ./...
 ```
+
+Run the parity check alone with `make parity`. Run the retained legacy suite with `python -m pytest tests -q` when investigating a Python/Go difference.
 
 ## What the Tests Cover
 
@@ -63,7 +65,7 @@ The repo’s `.gitignore` already ignores that output directory.
 
 ## Manual Smoke Workflow
 
-A simple end-to-end smoke test prefers the packaged CLI:
+A simple end-to-end smoke test uses the Go CLI:
 
 ```bash
 ./docs/make-dummy-docs.sh
@@ -71,7 +73,7 @@ doc-ledger fix --root dummy-docs
 doc-ledger check --root dummy-docs
 ```
 
-If you are working from the repo checkout, `python3 main.py` can still be used as a development fallback. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff. That is a good way to verify description preservation, stale entry removal, and parent index updates on a realistic tree.
+If you are working from the repo checkout, `go run ./cmd/doc-ledger` is the primary fallback. `python main.py` is retained only for differential parity checks. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
 
 ## Fixture Guidance
 
@@ -82,6 +84,9 @@ If you are working from the repo checkout, `python3 main.py` can still be used a
 ## Related Files
 
 - `docs/make-dummy-docs.sh`
+- `tests/parity_test.go`
+- `internal/reconcile/reconcile_test.go`
+- `internal/watch/watch_test.go`
 - `tests/test_end_to_end.py`
 - `tests/test_public_config_end_to_end.py`
 - `tests/test_watch.py`

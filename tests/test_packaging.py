@@ -27,10 +27,10 @@ def test_pyproject_declares_project_name() -> None:
     assert pyproject["project"]["name"] == "doc-ledger"
 
 
-def test_pyproject_declares_console_script() -> None:
+def test_legacy_python_package_does_not_claim_primary_console_script() -> None:
     pyproject = _load_pyproject()
 
-    assert pyproject["project"]["scripts"]["doc-ledger"] == "doc_ledger.cli:main"
+    assert "scripts" not in pyproject["project"]
 
 
 def test_pyproject_declares_license_metadata() -> None:

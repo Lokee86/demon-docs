@@ -78,8 +78,8 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 
 ## Related Files
 
-- `doc_ledger/scan.py`
-- `doc_ledger/readme_io.py`
-- `doc_ledger/parent_index.py`
-- `doc_ledger/reconcile.py`
-- `doc_ledger/model.py`
+- `internal/scan/scan.go`
+- `internal/markdown/markdown.go`
+- `internal/reconcile/reconcile.go`
+- `internal/model/model.go`
+- `doc_ledger/` (legacy Python parity reference)

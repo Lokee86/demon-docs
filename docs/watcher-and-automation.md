@@ -98,6 +98,8 @@ Those timestamps make it easier to understand the order of events when a fix pas
 
 ## Related Files
 
-- `doc_ledger/watch.py`
-- `doc_ledger/cli.py`
+- `internal/watch/watch.go`
+- `internal/app/app.go`
+- `cmd/doc-ledger/main.go`
+- `doc_ledger/watch.py` (legacy reference)
 - `docs/make-dummy-docs.sh`

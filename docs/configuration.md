@@ -1,6 +1,6 @@
 # doc-ledger Configuration
 
-doc-ledger is configured with TOML. The config model lives in `doc_ledger/config.py` and is exercised by `tests/test_config.py` and `tests/test_public_config_end_to_end.py`.
+doc-ledger is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Python/Go parity test. `doc_ledger/config.py` remains as the legacy behavioral reference.
 
 CLI help is available with `doc-ledger --help`, and each subcommand also supports `--help`.
 Top-level version output is available with `doc-ledger -v` or `doc-ledger --version`.
@@ -411,6 +411,8 @@ In that setup:
 
 ## Related Files
 
-- `doc_ledger/config.py`
+- `internal/config/config.go`
+- `internal/config/config_test.go`
+- `doc_ledger/config.py` (legacy reference)
 - `tests/test_config.py`
 - `tests/test_public_config_end_to_end.py`

@@ -24,6 +24,9 @@ ENV/
 # Build/package output
 build/
 dist/
+bin/
+/doc-ledger
+/doc-ledger.exe
 *.egg-info/
 .eggs/
 

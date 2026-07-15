@@ -26,21 +26,21 @@ It preserves hand-authored content outside managed index blocks.
 
 ## Installation
 
-Install the latest tagged release from GitHub:
-
-```bash
-python3 -m pip install "doc-ledger @ git+https://github.com/Lokee86/doc-ledger.git@v0.1.0"
-```
-
-Install from a cloned checkout for development:
+The Go implementation is the primary doc-ledger executable. Install it from a checkout:
 
 ```bash
 git clone https://github.com/Lokee86/doc-ledger.git
 cd doc-ledger
-python3 -m pip install -e ".[dev]"
+go install ./cmd/doc-ledger
 ```
 
-After installation:
+Or build a repository-local binary:
+
+```bash
+go build -o bin/doc-ledger ./cmd/doc-ledger
+```
+
+Ensure the Go install directory is on `PATH`, then verify the executable:
 
 ```bash
 doc-ledger --help
@@ -60,18 +60,19 @@ doc-ledger check --root docs
 
 `check` verifies the same reconciliation without writing files.
 
-## Installation
+## Development
 
-For local development with editable installs and test dependencies:
+Run the primary Go test suite, including Python/Go parity coverage:
 
 ```bash
-python3 -m pip install -e ".[dev]"
+go test ./...
 ```
 
-For a normal local install:
+Build and run directly from the checkout:
 
 ```bash
-python3 -m pip install .
+go run ./cmd/doc-ledger fix
+go run ./cmd/doc-ledger check
 ```
 
 Installed usage is:
@@ -82,10 +83,10 @@ doc-ledger check
 doc-ledger watch
 ```
 
-For repo-local development fallback, use:
+The original Python implementation remains under `doc_ledger/` only as a legacy parity reference. It is not a canonical installed entrypoint. When differential testing requires it, use:
 
 ```bash
-python3 main.py fix
+python main.py fix
 ```
 
 CLI help is available at the top level and for each subcommand:
@@ -486,8 +487,10 @@ For `direnv`, source process startup scripts outside any `set -a` block so helpe
 Run the test suite:
 
 ```bash
-python3 -m pytest tests
+go test ./...
 ```
+
+Run only the cross-implementation parity test with `make parity`. The legacy Python suite can still be run with `python -m pytest tests -q`; it is retained to document the pre-port behavior and is not the primary release gate.
 
 Useful manual smoke flow:
 
@@ -539,6 +542,9 @@ Parent index: [Guides](./!README.md)
 Do not commit runtime artifacts:
 
 ```text
+bin/
+doc-ledger
+doc-ledger.exe
 __pycache__/
 *.pyc
 .pytest_cache/

@@ -1,0 +1,53 @@
+package markdown
+
+import (
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/Lokee86/doc-ledger/internal/config"
+)
+
+func TestGoldmarkIgnoresHeadingsInsideCodeFences(t *testing.T) {
+	source := "# Real\n\n```md\n## Related Docs\n```\n\nTail\n"
+	got := EnsureManaged(source, config.Default())
+	if strings.Index(got, "## Direct Files") < strings.Index(got, "```md") {
+		t.Fatalf("managed blocks anchored to fenced heading:\n%s", got)
+	}
+	if !strings.Contains(got, "```md\n## Related Docs\n```\n\nTail") {
+		t.Fatal("unmanaged fenced content changed")
+	}
+}
+func TestManagedReplacementPreservesOutsideBytes(t *testing.T) {
+	source := "# Docs\n\n<!-- user comment -->  \n\n## Direct Files\n<!-- doc-ledger:files:start -->\nold\n<!-- doc-ledger:files:end -->\n\n## Stub Files\n<!-- doc-ledger:stubs:start -->\n<!-- doc-ledger:stubs:end -->\n\n## Direct Folders\n<!-- doc-ledger:folders:start -->\n<!-- doc-ledger:folders:end -->\n\nTail  \n"
+	got, err := ReplaceManaged(source, "files", []string{"- [a.md](a.md) - A."}, config.Default())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(got, "# Docs\n\n<!-- user comment -->  \n") || !strings.HasSuffix(got, "\n\nTail  \n") {
+		t.Fatalf("unmanaged content changed: %q", got)
+	}
+}
+func TestConfiguredIndexAndParentLinks(t *testing.T) {
+	c := config.Default()
+	c.IndexFile = "!README.md"
+	c.Files.IndexFile = "!README.md"
+	c.ParentLink.IndexedFiles = true
+	root := filepath.Join("tmp", "docs")
+	if got := DesiredParent(filepath.Join(root, "guide", "!README.md"), root, func(string) string { return "Docs" }, c); got != "Parent index: [Docs](../!README.md)" {
+		t.Fatal(got)
+	}
+	if got := DesiredParent(filepath.Join(root, "page.md"), root, func(string) string { return "Docs" }, c); got != "Parent index: [Docs](./!README.md)" {
+		t.Fatal(got)
+	}
+}
+func TestTemplateAndDescriptions(t *testing.T) {
+	c := config.Default()
+	got := MakeTemplate(filepath.Join("tmp", "service-runbooks"), filepath.Join("tmp", "docs"), "Docs", "README.md", c)
+	if !strings.Contains(got, "# Service Runbooks") || !strings.Contains(got, "Parent index: [Docs](../README.md)") {
+		t.Fatal(got)
+	}
+	if DescriptionFromFile("draft-report.pdf", true, c) != "Stub: Draft Report documentation." {
+		t.Fatal("description mismatch")
+	}
+}

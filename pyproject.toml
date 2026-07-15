@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "doc-ledger"
 version = "0.1.1"
-description = "Reconcile local index files with a file tree."
+description = "Legacy Python reference implementation for doc-ledger."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
@@ -27,9 +27,6 @@ dependencies = [
 dev = [
   "pytest",
 ]
-
-[project.scripts]
-doc-ledger = "doc_ledger.cli:main"
 
 [tool.setuptools]
 include-package-data = false
