@@ -369,9 +369,44 @@ func configInitHelp(w io.Writer) {
 	fmt.Fprintln(w, "usage: doc-ledger config init [-h] (--local | --global) [--force]\n\nWrite a starter config file in the current directory or the global user config location.\n\noptions:\n  -h, --help  show this help message and exit\n  --local     write .doc-ledger.toml in the current directory\n  --global    write the global config file\n  --force     overwrite an existing config file\n\nOptions:\n  --local   write .doc-ledger.toml in the current directory\n  --global  write the global config file\n  --force   overwrite an existing config file")
 }
 
+const (
+	topUsageLine    = "usage: doc-ledger [-h] [-v] {fix,check,watch,config} ..."
+	configUsageLine = "usage: doc-ledger config [-h] {paths,show,init} ..."
+	configShowUsage = "usage: doc-ledger config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
+	configInitUsage = "usage: doc-ledger config init [-h] (--local | --global) [--force]"
+)
+
+func writeUnrecognized(w io.Writer, args []string) {
+	fmt.Fprintln(w, topUsageLine)
+	fmt.Fprintf(w, "doc-ledger: error: unrecognized arguments: %s\n", strings.Join(args, " "))
+}
+
+func writeConfigFlagError(w io.Writer, command string, err error) {
+	message := err.Error()
+	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
+		writeUnrecognized(w, []string{"--" + match[1]})
+		return
+	}
+	if match := missingValuePattern.FindStringSubmatch(message); match != nil {
+		if command == "show" {
+			fmt.Fprintln(w, configShowUsage)
+		}
+		fmt.Fprintf(w, "doc-ledger config %s: error: argument --%s: expected one argument\n", command, match[1])
+		return
+	}
+	fmt.Fprintf(w, "doc-ledger config %s: error: %s\n", command, message)
+}
+
+func configChoiceList() string {
+	if runtime.GOOS == "windows" {
+		return "'paths', 'show', 'init'"
+	}
+	return "paths, show, init"
+}
+
 func runConfig(args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		configHelp(errOut)
+		fmt.Fprintln(errOut, configUsageLine)
 		fmt.Fprintln(errOut, "doc-ledger config: error: the following arguments are required: config_command")
 		return 2
 	}
@@ -386,15 +421,16 @@ func runConfig(args []string, out, errOut io.Writer) int {
 			return 0
 		}
 		fs := flag.NewFlagSet("doc-ledger config paths", flag.ContinueOnError)
-		fs.SetOutput(errOut)
+		fs.SetOutput(io.Discard)
 		if err := fs.Parse(args[1:]); err != nil {
 			if errors.Is(err, flag.ErrHelp) {
 				return 0
 			}
+			writeConfigFlagError(errOut, "paths", err)
 			return 2
 		}
 		if fs.NArg() != 0 {
-			fmt.Fprintf(errOut, "doc-ledger error: unexpected argument: %s\n", fs.Arg(0))
+			writeUnrecognized(errOut, fs.Args())
 			return 2
 		}
 		cwd, _ := os.Getwd()
@@ -412,7 +448,7 @@ func runConfig(args []string, out, errOut io.Writer) int {
 			return 0
 		}
 		fs := flag.NewFlagSet("doc-ledger config show", flag.ContinueOnError)
-		fs.SetOutput(errOut)
+		fs.SetOutput(io.Discard)
 		var f commonFlags
 		fs.Var(&f.config, "config", "explicit doc-ledger config file")
 		fs.BoolVar(&f.noLocal, "no-local-config", false, "skip current-directory local config")
@@ -421,10 +457,11 @@ func runConfig(args []string, out, errOut io.Writer) int {
 			if errors.Is(err, flag.ErrHelp) {
 				return 0
 			}
+			writeConfigFlagError(errOut, "show", err)
 			return 2
 		}
 		if fs.NArg() != 0 {
-			fmt.Fprintf(errOut, "doc-ledger error: unexpected argument: %s\n", fs.Arg(0))
+			writeUnrecognized(errOut, fs.Args())
 			return 2
 		}
 		c, p, code := load(f, errOut)
@@ -438,23 +475,43 @@ func runConfig(args []string, out, errOut io.Writer) int {
 			configInitHelp(out)
 			return 0
 		}
+		localAt, globalAt := -1, -1
+		for index, arg := range args[1:] {
+			switch arg {
+			case "--local":
+				localAt = index
+			case "--global":
+				globalAt = index
+			}
+		}
+		if localAt < 0 && globalAt < 0 {
+			fmt.Fprintln(errOut, configInitUsage)
+			fmt.Fprintln(errOut, "doc-ledger config init: error: one of the arguments --local --global is required")
+			return 2
+		}
+		if localAt >= 0 && globalAt >= 0 {
+			fmt.Fprintln(errOut, configInitUsage)
+			if localAt < globalAt {
+				fmt.Fprintln(errOut, "doc-ledger config init: error: argument --global: not allowed with argument --local")
+			} else {
+				fmt.Fprintln(errOut, "doc-ledger config init: error: argument --local: not allowed with argument --global")
+			}
+			return 2
+		}
 		fs := flag.NewFlagSet("doc-ledger config init", flag.ContinueOnError)
-		fs.SetOutput(errOut)
-		local := fs.Bool("local", false, "write .doc-ledger.toml in current directory")
+		fs.SetOutput(io.Discard)
+		fs.Bool("local", false, "write .doc-ledger.toml in current directory")
 		global := fs.Bool("global", false, "write global config")
 		force := fs.Bool("force", false, "overwrite existing config")
 		if err := fs.Parse(args[1:]); err != nil {
 			if errors.Is(err, flag.ErrHelp) {
 				return 0
 			}
+			writeConfigFlagError(errOut, "init", err)
 			return 2
 		}
 		if fs.NArg() != 0 {
-			fmt.Fprintf(errOut, "doc-ledger error: unexpected argument: %s\n", fs.Arg(0))
-			return 2
-		}
-		if *local == *global {
-			fmt.Fprintln(errOut, "doc-ledger error: exactly one of --local or --global is required")
+			writeUnrecognized(errOut, fs.Args())
 			return 2
 		}
 		cwd, _ := os.Getwd()
@@ -476,7 +533,9 @@ func runConfig(args []string, out, errOut io.Writer) int {
 		fmt.Fprintln(out, target)
 		return 0
 	default:
-		return fail(errOut, fmt.Errorf("unknown config command: %s", args[0]))
+		fmt.Fprintln(errOut, configUsageLine)
+		fmt.Fprintf(errOut, "doc-ledger config: error: argument config_command: invalid choice: '%s' (choose from %s)\n", args[0], configChoiceList())
+		return 2
 	}
 }
 

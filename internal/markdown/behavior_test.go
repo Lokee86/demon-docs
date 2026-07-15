@@ -74,6 +74,30 @@ func TestUpdateParentInsertReplaceAndRemove(t *testing.T) {
 	}
 }
 
+func TestUpdateParentIgnoresFencedParentLinkCandidates(t *testing.T) {
+	fenced := "```markdown\nParent index: [Example](./README.md)\n```"
+	source := "# Title\n\n" + fenced + "\n\nIntro\n"
+
+	inserted := UpdateParent(source, "Parent index: [Docs](./README.md)", "Parent index")
+	if !strings.Contains(inserted, fenced) || strings.Count(inserted, "Parent index:") != 2 {
+		t.Fatalf("fenced candidate was replaced during insertion:\n%s", inserted)
+	}
+	if !strings.Contains(inserted, "# Title\n\nParent index: [Docs](./README.md)\n\n```markdown") {
+		t.Fatalf("structural parent link was not inserted after heading:\n%s", inserted)
+	}
+
+	withStructural := "# Title\n\nParent index: [Old](../README.md)\n\n" + fenced + "\n"
+	replaced := UpdateParent(withStructural, "Parent index: [New](../INDEX.md)", "Parent index")
+	if strings.Contains(replaced, "[Old]") || !strings.Contains(replaced, "Parent index: [New](../INDEX.md)") || !strings.Contains(replaced, fenced) {
+		t.Fatalf("replacement crossed the fenced-code boundary:\n%s", replaced)
+	}
+
+	removed := UpdateParent(source, "", "Parent index")
+	if removed != source {
+		t.Fatalf("fenced candidate was removed:\nwant %q\n got %q", source, removed)
+	}
+}
+
 func TestTemplateFeatureTogglesAndConfiguredParent(t *testing.T) {
 	c := config.Default()
 	c.IndexFile = "INDEX.md"

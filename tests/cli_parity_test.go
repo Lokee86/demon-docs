@@ -45,6 +45,17 @@ func TestPythonGoCLIContractParity(t *testing.T) {
 		{name: "missing option value", args: []string{"fix", "--root"}},
 		{name: "invalid float", args: []string{"watch", "--debounce-seconds", "nope"}},
 		{name: "invalid boolean argument", args: []string{"fix", "--parent-link-folder-indexes=nope"}},
+		{name: "missing config command", args: []string{"config"}},
+		{name: "unknown config command", args: []string{"config", "wat"}},
+		{name: "config paths positional", args: []string{"config", "paths", "extra"}},
+		{name: "config paths unknown option", args: []string{"config", "paths", "--bogus"}},
+		{name: "config show positional", args: []string{"config", "show", "extra"}},
+		{name: "config show unknown option", args: []string{"config", "show", "--bogus"}},
+		{name: "config show missing value", args: []string{"config", "show", "--config"}},
+		{name: "config init positional", args: []string{"config", "init", "--local", "extra"}},
+		{name: "config init unknown option", args: []string{"config", "init", "--bogus"}},
+		{name: "config init missing target", args: []string{"config", "init"}},
+		{name: "config init conflicting targets", args: []string{"config", "init", "--local", "--global"}},
 	}
 
 	for _, tc := range cases {

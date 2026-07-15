@@ -16,10 +16,11 @@ import (
 )
 
 type fakeWatcher struct {
-	events chan fsnotify.Event
-	errors chan error
-	mu     sync.Mutex
-	added  []string
+	events  chan fsnotify.Event
+	errors  chan error
+	mu      sync.Mutex
+	added   []string
+	failAdd func(string) error
 }
 
 func newFakeWatcher() *fakeWatcher {
@@ -28,12 +29,22 @@ func newFakeWatcher() *fakeWatcher {
 func (w *fakeWatcher) Add(path string) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	w.added = append(w.added, filepath.Clean(path))
+	path = filepath.Clean(path)
+	w.added = append(w.added, path)
+	if w.failAdd != nil {
+		return w.failAdd(path)
+	}
 	return nil
 }
 func (w *fakeWatcher) Close() error                  { return nil }
 func (w *fakeWatcher) Events() <-chan fsnotify.Event { return w.events }
 func (w *fakeWatcher) Errors() <-chan error          { return w.errors }
+func (w *fakeWatcher) setAddFailure(fail func(string) error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.failAdd = fail
+}
+
 func (w *fakeWatcher) hasWatch(path string) bool {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -157,6 +168,34 @@ func TestWatcherAddsNewNestedDirectories(t *testing.T) {
 		return err == nil && strings.Contains(string(data), "[topic.md](topic.md)")
 	})
 	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherReturnsDynamicDirectoryAddErrors(t *testing.T) {
+	root := t.TempDir()
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	_, done := startFakeWatch(t, root, config.Default(), nil, fake)
+
+	nested := filepath.Join(root, "new", "nested")
+	fake.setAddFailure(func(path string) error {
+		if path == filepath.Clean(nested) {
+			return errors.New("add nested watch failed")
+		}
+		return nil
+	})
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: filepath.Join(root, "new"), Op: fsnotify.Create}
+
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "watch directory "+nested) || !strings.Contains(err.Error(), "add nested watch failed") {
+			t.Fatalf("unexpected dynamic add error: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("dynamic directory add error was not returned")
+	}
 }
 
 func TestWatcherReconcilesDeletedWatchedDirectory(t *testing.T) {

@@ -487,7 +487,14 @@ func UpdateParent(source, desired, label string) string {
 		re = regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(label) + `:\s+.*$`)
 		parentPatternCache[label] = re
 	}
-	loc := re.FindStringIndex(source)
+	var loc []int
+	ranges := fencedCodeRanges(source)
+	for _, candidate := range re.FindAllStringIndex(source, -1) {
+		if !inRanges(candidate[0], ranges) {
+			loc = candidate
+			break
+		}
+	}
 	if loc != nil {
 		if desired != "" {
 			return source[:loc[0]] + desired + source[loc[1]:]

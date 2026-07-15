@@ -132,7 +132,9 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 			}
 			if event.Op&fsnotify.Create != 0 {
 				if st, err := os.Stat(event.Name); err == nil && st.IsDir() {
-					_ = addTree(w, event.Name, c, watchedDirs)
+					if err := addTree(w, event.Name, c, watchedDirs); err != nil {
+						return err
+					}
 				}
 			}
 			wasDirectory := watchedDirs[event.Name]
