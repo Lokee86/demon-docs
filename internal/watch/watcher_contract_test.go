@@ -1,0 +1,206 @@
+package watch
+
+import (
+	"bytes"
+	"context"
+	"errors"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/fsnotify/fsnotify"
+)
+
+type fakeWatcher struct {
+	events chan fsnotify.Event
+	errors chan error
+	mu     sync.Mutex
+	added  []string
+}
+
+func newFakeWatcher() *fakeWatcher {
+	return &fakeWatcher{events: make(chan fsnotify.Event, 32), errors: make(chan error, 4)}
+}
+func (w *fakeWatcher) Add(path string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.added = append(w.added, filepath.Clean(path))
+	return nil
+}
+func (w *fakeWatcher) Close() error                  { return nil }
+func (w *fakeWatcher) Events() <-chan fsnotify.Event { return w.events }
+func (w *fakeWatcher) Errors() <-chan error          { return w.errors }
+func (w *fakeWatcher) hasWatch(path string) bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	path = filepath.Clean(path)
+	for _, added := range w.added {
+		if added == path {
+			return true
+		}
+	}
+	return false
+}
+
+func installFakeWatcher(t *testing.T, fake *fakeWatcher, beforeCreate func()) {
+	t.Helper()
+	original := createWatcher
+	createWatcher = func() (eventWatcher, error) {
+		if beforeCreate != nil {
+			beforeCreate()
+		}
+		return fake, nil
+	}
+	t.Cleanup(func() { createWatcher = original })
+}
+
+func startFakeWatch(t *testing.T, root string, c config.Config, debounce *float64, fake *fakeWatcher) (context.CancelFunc, <-chan error) {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() { done <- Root(ctx, root, c, debounce, false, nil) }()
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(root) })
+	return cancel, done
+}
+
+func stopFakeWatch(t *testing.T, cancel context.CancelFunc, done <-chan error) {
+	t.Helper()
+	cancel()
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("watch did not stop after cancellation")
+	}
+}
+
+func TestInitialFixCompletesBeforeObserverCreation(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "docs")
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, func() {
+		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {
+			t.Fatalf("observer created before initial fix: %v", err)
+		}
+	})
+	cancel, done := startFakeWatch(t, root, config.Default(), nil, fake)
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherReportsObserverErrors(t *testing.T) {
+	root := t.TempDir()
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	_, done := startFakeWatch(t, root, config.Default(), nil, fake)
+	fake.errors <- errors.New("observer failed")
+	select {
+	case err := <-done:
+		if err == nil || !strings.Contains(err.Error(), "observer failed") || !strings.Contains(err.Error(), "watch ") {
+			t.Fatalf("unexpected observer error: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("observer error was not returned")
+	}
+}
+
+func TestWatcherHandlesFileRenameSourceAndDestination(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "old.md")
+	newPath := filepath.Join(root, "new.md")
+	if err := os.WriteFile(oldPath, []byte("# Old\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &zero, fake)
+	if err := os.Rename(oldPath, newPath); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: oldPath, Op: fsnotify.Rename}
+	fake.events <- fsnotify.Event{Name: newPath, Op: fsnotify.Create}
+	index := filepath.Join(root, "README.md")
+	waitFor(t, 3*time.Second, func() bool {
+		data, err := os.ReadFile(index)
+		return err == nil && strings.Contains(string(data), "[new.md](new.md)") && !strings.Contains(string(data), "[old.md](old.md)")
+	})
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherAddsNewNestedDirectories(t *testing.T) {
+	root := t.TempDir()
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &zero, fake)
+	nested := filepath.Join(root, "new", "nested")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: filepath.Join(root, "new"), Op: fsnotify.Create}
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(nested) })
+	topic := filepath.Join(nested, "topic.md")
+	if err := os.WriteFile(topic, []byte("# Topic\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: topic, Op: fsnotify.Create}
+	waitFor(t, 3*time.Second, func() bool {
+		data, err := os.ReadFile(filepath.Join(nested, "README.md"))
+		return err == nil && strings.Contains(string(data), "[topic.md](topic.md)")
+	})
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherReconcilesDeletedWatchedDirectory(t *testing.T) {
+	root := t.TempDir()
+	child := filepath.Join(root, "guide")
+	if err := os.MkdirAll(child, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &zero, fake)
+	if err := os.RemoveAll(child); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: child, Op: fsnotify.Remove}
+	index := filepath.Join(root, "README.md")
+	waitFor(t, 3*time.Second, func() bool {
+		data, err := os.ReadFile(index)
+		return err == nil && !bytes.Contains(data, []byte("guide/README.md"))
+	})
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestExplicitDebounceOverrideWins(t *testing.T) {
+	root := t.TempDir()
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	c := config.Default()
+	c.Watch.DebounceSeconds = 10
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, c, &zero, fake)
+	page := filepath.Join(root, "fast.md")
+	if err := os.WriteFile(page, []byte("# Fast\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	started := time.Now()
+	fake.events <- fsnotify.Event{Name: page, Op: fsnotify.Create}
+	waitFor(t, time.Second, func() bool {
+		data, err := os.ReadFile(filepath.Join(root, "README.md"))
+		return err == nil && strings.Contains(string(data), "[fast.md](fast.md)")
+	})
+	if time.Since(started) >= time.Second {
+		t.Fatal("configured debounce was used instead of explicit override")
+	}
+	stopFakeWatch(t, cancel, done)
+}

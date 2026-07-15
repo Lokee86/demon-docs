@@ -481,7 +481,7 @@ def test_fix_uses_global_config_when_cwd_has_no_local_config(tmp_path: Path, mon
     config_path.parent.mkdir(parents=True)
     config_path.write_text(
         f"""
-root = "{docs_root}"
+root = "{docs_root.as_posix()}"
 index_file = "!README.md"
 """.strip()
         + "\n",
@@ -530,7 +530,7 @@ index_file = "README.md"
     global_config.parent.mkdir(parents=True)
     global_config.write_text(
         f"""
-root = "{docs_root}"
+root = "{docs_root.as_posix()}"
 index_file = "README.md"
 """.strip()
         + "\n",
@@ -540,7 +540,7 @@ index_file = "README.md"
     explicit = tmp_path / "explicit.toml"
     explicit.write_text(
         f"""
-root = "{docs_root}"
+root = "{docs_root.as_posix()}"
 index_file = "!README.md"
 """.strip()
         + "\n",
@@ -573,7 +573,7 @@ index_file = "README.md"
     (docs_root / "page.md").write_text("# Page\n", encoding="utf-8")
     global_config.write_text(
         f"""
-root = "{docs_root}"
+root = "{docs_root.as_posix()}"
 index_file = "!README.md"
 """.strip()
         + "\n",
@@ -599,7 +599,7 @@ def test_fix_no_global_config_uses_defaults_when_no_cwd_config_exists(tmp_path: 
     (docs_root / "page.md").write_text("# Page\n", encoding="utf-8")
     global_config.write_text(
         f"""
-root = "{docs_root}"
+root = "{docs_root.as_posix()}"
 index_file = "!README.md"
 """.strip()
         + "\n",

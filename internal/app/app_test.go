@@ -16,7 +16,7 @@ func TestVersionAndUnknownCommandExitCodes(t *testing.T) {
 	}
 	out.Reset()
 	err.Reset()
-	if code := Run(context.Background(), []string{"nope"}, &out, &err); code != 2 || !strings.Contains(err.String(), "unknown command") {
+	if code := Run(context.Background(), []string{"nope"}, &out, &err); code != 2 || !strings.Contains(err.String(), "invalid choice") {
 		t.Fatalf("code=%d err=%q", code, err.String())
 	}
 }

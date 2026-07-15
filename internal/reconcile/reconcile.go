@@ -111,12 +111,29 @@ func Tree(root string, c config.Config) (model.ReconcileResult, error) {
 			}
 		}
 	}
+	type staleEntry struct {
+		indexPath, section, line string
+	}
+	var stale []staleEntry
 	for folder, es := range entries {
 		for _, e := range es {
 			if !matched[e] {
-				result.Messages = append(result.Messages, fmt.Sprintf("Removed stale %s entry from %s: %s", e.Section, filepath.Join(folder, c.IndexFile), e.OriginalLine))
+				stale = append(stale, staleEntry{filepath.Join(folder, c.IndexFile), e.Section, e.OriginalLine})
 			}
 		}
+	}
+	sort.Slice(stale, func(i, j int) bool {
+		left, right := stale[i], stale[j]
+		if pathOrderKey(left.indexPath) != pathOrderKey(right.indexPath) {
+			return pathOrderKey(left.indexPath) < pathOrderKey(right.indexPath)
+		}
+		if left.section != right.section {
+			return left.section < right.section
+		}
+		return left.line < right.line
+	})
+	for _, entry := range stale {
+		result.Messages = append(result.Messages, fmt.Sprintf("Removed stale %s entry from %s: %s", entry.section, entry.indexPath, entry.line))
 	}
 	return result, nil
 }
@@ -130,7 +147,7 @@ func Apply(result model.ReconcileResult) (int, error) {
 		if err := os.MkdirAll(filepath.Dir(u.Path), 0o755); err != nil {
 			return changed, fmt.Errorf("create parent for %s: %w", u.Path, err)
 		}
-		data := []byte(u.NewText)
+		data := textio.EncodeNew(u.NewText)
 		if u.OldText != nil {
 			doc, err := textio.Read(u.Path)
 			if err != nil {
@@ -165,6 +182,14 @@ func orderedFolders(tree model.DocsTree) []*model.FolderInfo {
 	})
 	return out
 }
+
+func pathOrderKey(path string) string {
+	if runtime.GOOS == "windows" {
+		return strings.ToLower(path)
+	}
+	return path
+}
+
 func rootChildTitles(root string, folders []*model.FolderInfo, texts map[string]string, c config.Config) ([]string, error) {
 	var result []string
 	rootIndex := filepath.Join(root, c.IndexFile)

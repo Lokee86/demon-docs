@@ -2,6 +2,7 @@ package textio
 
 import (
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/pmezard/go-difflib/difflib"
@@ -38,6 +39,13 @@ func (d Document) Encode(text string) []byte {
 		return []byte(d.encodeMixed(text))
 	}
 	if d.Newline == "\r\n" {
+		text = strings.ReplaceAll(text, "\n", "\r\n")
+	}
+	return []byte(text)
+}
+
+func EncodeNew(text string) []byte {
+	if runtime.GOOS == "windows" {
 		text = strings.ReplaceAll(text, "\n", "\r\n")
 	}
 	return []byte(text)

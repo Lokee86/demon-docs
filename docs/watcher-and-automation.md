@@ -26,6 +26,8 @@ Watch mode is built to rerun reconciliation when the docs tree changes.
 - If changes arrive during a fix, it schedules one more pass after the current run finishes.
 - It ignores configured ignored directories and ignored filename suffixes.
 - It applies the same include and exclude rules used by scanning when deciding whether a file event matters.
+- It adds watches for newly created nested directories and removes deleted or renamed watched directories from its tracked set.
+- Observer errors are surfaced instead of silently terminating observation.
 
 The watcher prints timestamped status lines and includes the current process ID in its startup line. That makes it easier to spot watcher/fix races in logs.
 
@@ -95,6 +97,8 @@ Watcher logs include timestamped status lines such as:
 ```
 
 Those timestamps make it easier to understand the order of events when a fix pass and a file change happen close together.
+
+Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence. The CI matrix runs the watcher package as part of the Linux and Windows Go suites.
 
 ## Related Files
 

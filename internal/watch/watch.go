@@ -26,6 +26,26 @@ type Scheduler struct {
 	now      func() time.Time
 }
 
+type eventWatcher interface {
+	Add(string) error
+	Close() error
+	Events() <-chan fsnotify.Event
+	Errors() <-chan error
+}
+
+type fsnotifyWatcher struct{ *fsnotify.Watcher }
+
+func (w fsnotifyWatcher) Events() <-chan fsnotify.Event { return w.Watcher.Events }
+func (w fsnotifyWatcher) Errors() <-chan error          { return w.Watcher.Errors }
+
+var createWatcher = func() (eventWatcher, error) {
+	w, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+	return fsnotifyWatcher{w}, nil
+}
+
 func NewScheduler(run func() error, debounce time.Duration) *Scheduler {
 	return &Scheduler{run: run, debounce: debounce, now: time.Now}
 }
@@ -76,7 +96,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	if once {
 		return nil
 	}
-	w, err := fsnotify.NewWatcher()
+	w, err := createWatcher()
 	if err != nil {
 		return fmt.Errorf("create watcher for %s: %w", root, err)
 	}
@@ -99,14 +119,14 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 		select {
 		case <-ctx.Done():
 			return nil
-		case err, ok := <-w.Errors:
+		case err, ok := <-w.Errors():
 			if !ok {
 				return nil
 			}
 			if err != nil {
 				return fmt.Errorf("watch %s: %w", root, err)
 			}
-		case event, ok := <-w.Events:
+		case event, ok := <-w.Events():
 			if !ok {
 				return nil
 			}
@@ -129,7 +149,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 		}
 	}
 }
-func addTree(w *fsnotify.Watcher, root string, c config.Config, watched map[string]bool) error {
+func addTree(w eventWatcher, root string, c config.Config, watched map[string]bool) error {
 	return filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err

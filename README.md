@@ -62,11 +62,14 @@ doc-ledger check --root docs
 
 ## Development
 
-Run the primary Go test suite, including Python/Go parity coverage:
+Run the complete local release gate, including the retained Python suite and exact-byte Python/Go parity:
 
 ```bash
-go test ./...
+python -m pip install -e ".[dev]"
+make release-check
 ```
+
+The release gate runs focused Go tests, the retained Python suite, exact-byte Python/Go parity, `go vet`, an executable build, and CLI smoke checks. GitHub Actions repeats Go and parity coverage on Linux and Windows.
 
 Build and run directly from the checkout:
 
@@ -88,6 +91,8 @@ The original Python implementation remains under `doc_ledger/` only as a legacy 
 ```bash
 python main.py fix
 ```
+
+Two intentional corrections from the legacy reference are part of the Go contract: headings and marker-like comments inside fenced code blocks are treated as code, and source files retain their original final-newline state. Both behaviors have focused byte-level tests and are not hidden by parity normalization.
 
 CLI help is available at the top level and for each subcommand:
 

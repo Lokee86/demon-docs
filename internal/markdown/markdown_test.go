@@ -51,3 +51,33 @@ func TestTemplateAndDescriptions(t *testing.T) {
 		t.Fatal("description mismatch")
 	}
 }
+
+func TestParentInsertionPreservesFinalNewlineState(t *testing.T) {
+	for _, test := range []struct {
+		name, source, want string
+	}{
+		{"absent", "# Page", "# Page\n\nParent index: [Docs](./README.md)"},
+		{"present", "# Page\n", "# Page\n\nParent index: [Docs](./README.md)\n"},
+		{"body_present", "# Page\n\nBody\n", "# Page\n\nParent index: [Docs](./README.md)\n\nBody\n"},
+		{"body_absent", "# Page\n\nBody", "# Page\n\nParent index: [Docs](./README.md)\n\nBody"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := UpdateParent(test.source, "Parent index: [Docs](./README.md)", "Parent index")
+			if got != test.want {
+				t.Fatalf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestMarkerLikeFenceContentIsNeverManaged(t *testing.T) {
+	c := config.Default()
+	source := "# Docs\n\n```md\n## Direct Files\n<!-- doc-ledger:files:start -->\nowned by user\n<!-- doc-ledger:files:end -->\n```\n\nTail\n"
+	got := EnsureManaged(source, c)
+	if !strings.Contains(got, "```md\n## Direct Files\n<!-- doc-ledger:files:start -->\nowned by user\n<!-- doc-ledger:files:end -->\n```") {
+		t.Fatalf("fenced marker-like content changed:\n%s", got)
+	}
+	if strings.Count(got, "<!-- doc-ledger:files:start -->") != 2 {
+		t.Fatalf("real managed section was not added separately:\n%s", got)
+	}
+}

@@ -23,6 +23,51 @@ type heading struct {
 	Line, Title       string
 }
 
+type sourceRange struct{ Start, End int }
+
+func fencedCodeRanges(source string) []sourceRange {
+	data := []byte(source)
+	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
+	var result []sourceRange
+	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		block, ok := n.(*ast.FencedCodeBlock)
+		if !ok || block.Lines().Len() == 0 {
+			return ast.WalkContinue, nil
+		}
+		lines := block.Lines()
+		result = append(result, sourceRange{Start: lines.At(0).Start, End: lines.At(lines.Len() - 1).Stop})
+		return ast.WalkContinue, nil
+	})
+	return result
+}
+
+func inRanges(offset int, ranges []sourceRange) bool {
+	for _, r := range ranges {
+		if offset >= r.Start && offset < r.End {
+			return true
+		}
+	}
+	return false
+}
+
+func structuralIndex(source, value string, from int, ranges []sourceRange) int {
+	for from <= len(source) {
+		relative := strings.Index(source[from:], value)
+		if relative < 0 {
+			return -1
+		}
+		position := from + relative
+		if !inRanges(position, ranges) {
+			return position
+		}
+		from = position + len(value)
+	}
+	return -1
+}
+
 func headings(source string) []heading {
 	data := []byte(source)
 	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
@@ -160,6 +205,7 @@ func sectionFromHeading(line string, c config.Config) string {
 func EnsureManaged(source string, c config.Config) string {
 	titles, starts, ends := titleMap(c), startMap(c), endMap(c)
 	hs := headings(source)
+	ranges := fencedCodeRanges(source)
 	legacy := false
 	for _, h := range hs {
 		if sectionFromHeading(h.Line, c) != "" {
@@ -169,20 +215,22 @@ func EnsureManaged(source string, c config.Config) string {
 	}
 	anyMarkers := false
 	for _, s := range sections {
-		if strings.Contains(source, starts[s]) || strings.Contains(source, ends[s]) {
+		if structuralIndex(source, starts[s], 0, ranges) >= 0 || structuralIndex(source, ends[s], 0, ranges) >= 0 {
 			anyMarkers = true
 		}
 	}
 	if legacy && !anyMarkers {
 		source = wrapLegacy(source, c)
 		hs = headings(source)
+		ranges = fencedCodeRanges(source)
 	} else if legacy {
 		source = normalizeLegacy(source, c)
 		hs = headings(source)
+		ranges = fencedCodeRanges(source)
 	}
 	missing := []string{}
 	for _, s := range sections {
-		present := strings.Contains(source, starts[s]) && strings.Contains(source, ends[s])
+		present := structuralIndex(source, starts[s], 0, ranges) >= 0 && structuralIndex(source, ends[s], 0, ranges) >= 0
 		if !present {
 			for _, h := range hs {
 				if h.Line == titles[s] {
@@ -290,11 +338,12 @@ func ReplaceManaged(source, section string, lines []string, c config.Config) (st
 	}
 	source = EnsureManaged(source, c)
 	startMarker, endMarker := startMap(c)[section], endMap(c)[section]
-	start := strings.Index(source, startMarker)
-	end := strings.Index(source[start+len(startMarker):], endMarker)
+	ranges := fencedCodeRanges(source)
+	start := structuralIndex(source, startMarker, 0, ranges)
+	end := structuralIndex(source, endMarker, start+len(startMarker), ranges)
 	spanEnd := 0
 	if end >= 0 {
-		spanEnd = start + len(startMarker) + end + len(endMarker)
+		spanEnd = end + len(endMarker)
 	} else {
 		spanEnd = findSectionEnd(source, start, section, c)
 	}
@@ -313,10 +362,11 @@ func findSectionEnd(source string, start int, section string, c config.Config) i
 		}
 	}
 	starts := startMap(c)
+	ranges := fencedCodeRanges(source)
 	for _, s := range sections {
 		if s != section {
-			if p := strings.Index(source[start+len(starts[section]):], starts[s]); p >= 0 {
-				return start + len(starts[section]) + p
+			if p := structuralIndex(source, starts[s], start+len(starts[section]), ranges); p >= 0 {
+				return p
 			}
 		}
 	}
@@ -325,6 +375,7 @@ func findSectionEnd(source string, start int, section string, c config.Config) i
 
 func ParseEntries(indexPath, source string, c config.Config) []*model.IndexEntry {
 	starts, ends := startMap(c), endMap(c)
+	ranges := fencedCodeRanges(source)
 	headingSections := map[int]string{}
 	for _, h := range headings(source) {
 		headingSections[h.Start] = sectionFromHeading(h.Line, c)
@@ -333,6 +384,10 @@ func ParseEntries(indexPath, source string, c config.Config) []*model.IndexEntry
 	current := ""
 	offset := 0
 	for _, line := range strings.Split(source, "\n") {
+		if inRanges(offset, ranges) {
+			offset += len(line) + 1
+			continue
+		}
 		if s := markerSection(line, starts); s != "" {
 			current = s
 			offset += len(line) + 1
@@ -350,7 +405,10 @@ func ParseEntries(indexPath, source string, c config.Config) []*model.IndexEntry
 		}
 		if current != "" {
 			if m := entryPattern.FindStringSubmatch(line); m != nil {
-				result = append(result, &model.IndexEntry{indexPath, current, m[1], m[2], m[3], line})
+				result = append(result, &model.IndexEntry{
+					IndexPath: indexPath, Section: current, LinkText: m[1],
+					LinkTarget: m[2], Description: m[3], OriginalLine: line,
+				})
 			}
 		}
 		offset += len(line) + 1
@@ -451,13 +509,17 @@ func UpdateParent(source, desired, label string) string {
 		return desired
 	}
 	h := hs[0]
-	end := h.End
-	if end < len(source) && source[end] == '\n' {
-		end++
-	}
-	suffix := source[end:]
+	suffix := source[h.End:]
 	suffix = strings.TrimPrefix(suffix, "\n")
-	return source[:h.End] + "\n\n" + desired + "\n\n" + suffix
+	suffix = strings.TrimPrefix(suffix, "\n")
+	result := source[:h.End] + "\n\n" + desired
+	if suffix != "" {
+		return result + "\n\n" + suffix
+	}
+	if strings.HasSuffix(source, "\n") {
+		return result + "\n"
+	}
+	return result
 }
 func ParentLineParts(line, label string) (string, string) {
 	re := regexp.MustCompile(`^` + regexp.QuoteMeta(label) + `:\s+\[([^\]]+)\]\(([^)]+)\)\s*$`)
