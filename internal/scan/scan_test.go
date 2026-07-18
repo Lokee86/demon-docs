@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func TestScanIncludesExcludesAndConfiguredIndex(t *testing.T) {
@@ -33,5 +33,44 @@ func TestScanIncludesExcludesAndConfiguredIndex(t *testing.T) {
 	}
 	if _, ok := tree.Folders[filepath.Join(root, "stubs")]; !ok {
 		t.Fatal("stub folder absent")
+	}
+}
+
+func TestScanPrunesPermanentAndDocignorePaths(t *testing.T) {
+	root := t.TempDir()
+	for _, rel := range []string{
+		"page.md",
+		"ignored.md",
+		"generated/topic.md",
+		".git/secret.md",
+		".demon-docs/state.md",
+		".obsidian/workspace.md",
+		"logseq/config.md",
+		"nested/.git/secret.md",
+	} {
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(root, ".docignore"), []byte("ignored.md\ngenerated/\n!.git/\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	tree, err := Tree(root, config.Default())
+	if err != nil {
+		t.Fatal(err)
+	}
+	rootInfo := tree.Folders[root]
+	if len(rootInfo.DirectFiles) != 1 || filepath.Base(rootInfo.DirectFiles[0]) != "page.md" {
+		t.Fatalf("unexpected direct files: %v", rootInfo.DirectFiles)
+	}
+	for _, rel := range []string{"generated", ".git", ".demon-docs", ".obsidian", "logseq", "nested/.git"} {
+		if _, ok := tree.Folders[filepath.Join(root, filepath.FromSlash(rel))]; ok {
+			t.Fatalf("ignored folder was traversed: %s", rel)
+		}
 	}
 }

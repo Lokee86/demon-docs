@@ -1,8 +1,10 @@
 # Build/package output
 build/
 bin/
-/doc-ledger
-/doc-ledger.exe
+/ddocs
+/ddocs.exe
+/demon
+/demon.exe
 
 # Local runtime/cache files
 .cache/

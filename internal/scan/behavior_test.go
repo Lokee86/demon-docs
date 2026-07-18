@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func TestNestedPatternsDraftsAndIndexExclusion(t *testing.T) {

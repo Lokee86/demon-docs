@@ -1,18 +1,18 @@
 # Watcher and Automation
 
-doc-ledger has a watch mode for long-running docs maintenance, but it is still a convenience layer. Use `check` when you want a clean verification gate before commit or CI.
+Demon Docs has a watch mode for long-running docs maintenance, but it is still a convenience layer. Use `check` when you want a clean verification gate before commit or CI.
 
 ## Watch Commands
 
-- `doc-ledger fix --root docs`
-- `doc-ledger check --root docs`
-- `doc-ledger watch --root docs`
-- `doc-ledger watch --root docs --once`
+- `ddocs fix --root docs`
+- `ddocs check --root docs`
+- `ddocs watch --root docs`
+- `ddocs watch --root docs --once`
 
-`doc-ledger watch --help` shows the watch-specific flags and examples.
+`ddocs watch --help` shows the watch-specific flags and examples.
 
 `--once` runs a single reconciliation pass and exits. Regular watch mode runs one reconciliation pass immediately, then keeps observing the docs tree recursively.
-Watch mode runs in the foreground by default. `doc-ledger` does not daemonize or own background lifecycle.
+Watch mode runs in the foreground by default. `Demon Docs` does not daemonize or own background lifecycle.
 
 ## What Watch Mode Does
 
@@ -41,59 +41,59 @@ Watch mode is useful while iterating locally, but it is not a replacement for `c
 
 ## Safer Detached Example
 
-If you run doc-ledger from a shell startup file, keep the launch explicit and let the wrapper handle the guard logic:
+If you run Demon Docs from a shell startup file, keep the launch explicit and let the wrapper handle the guard logic:
 
 ```bash
-DOC_LEDGER_ROOT="${DOC_LEDGER_ROOT:-docs}"
+DDOCS_ROOT="${DDOCS_ROOT:-docs}"
 
-doc_ledger_pid_file="$PWD/.cache/doc-ledger-watch.pid"
-doc_ledger_log_file="$PWD/.cache/doc-ledger-watch.log"
+ddocs_pid_file="$PWD/.cache/ddocs-watch.pid"
+ddocs_log_file="$PWD/.cache/ddocs-watch.log"
 
 mkdir -p "$PWD/.cache"
 
-doc_ledger_watch_is_running() {
-  [ -s "$doc_ledger_pid_file" ] || return 1
+ddocs_watch_is_running() {
+  [ -s "$ddocs_pid_file" ] || return 1
 
   local watcher_pid
-  watcher_pid="$(cat "$doc_ledger_pid_file" 2>/dev/null)" || return 1
+  watcher_pid="$(cat "$ddocs_pid_file" 2>/dev/null)" || return 1
 
   case "$watcher_pid" in
     ''|*[!0-9]*) return 1 ;;
   esac
 
   kill -0 "$watcher_pid" 2>/dev/null || return 1
-  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "doc-ledger watch"
+  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "ddocs watch"
 }
 
-start_doc_ledger_watch() {
+start_ddocs_watch() {
   setsid bash -c '
     cd "$1" || exit 1
-    exec doc-ledger watch --root "$2" </dev/null >>"$3" 2>&1
-  ' _ "$PWD" "$DOC_LEDGER_ROOT" "$doc_ledger_log_file" >/dev/null 2>&1 &
+    exec ddocs watch --root "$2" </dev/null >>"$3" 2>&1
+  ' _ "$PWD" "$DDOCS_ROOT" "$ddocs_log_file" >/dev/null 2>&1 &
 
-  echo $! > "$doc_ledger_pid_file"
+  echo $! > "$ddocs_pid_file"
 }
 
-if ! doc_ledger_watch_is_running; then
-  rm -f "$doc_ledger_pid_file"
-  start_doc_ledger_watch
+if ! ddocs_watch_is_running; then
+  rm -f "$ddocs_pid_file"
+  start_ddocs_watch
 fi
 
-unset doc_ledger_pid_file
-unset doc_ledger_log_file
+unset ddocs_pid_file
+unset ddocs_log_file
 ```
 
 When using `direnv`, source process startup files outside any `set -a` block so helper variables such as PID and log paths are not exported.
 
-This pattern keeps the process start explicit, writes logs to `.cache/doc-ledger-watch.log`, and avoids relying on shell aliases during startup.
+This pattern keeps the process start explicit, writes logs to `.cache/ddocs-watch.log`, and avoids relying on shell aliases during startup.
 
 ## Output
 
 Watcher logs include timestamped status lines such as:
 
 ```text
-2026-06-18T23:59:59 doc-ledger watch watching docs pid=12345
-2026-06-18T23:59:59 doc-ledger watch updated 3 file(s)
+2026-06-18T23:59:59 ddocs watch watching docs pid=12345
+2026-06-18T23:59:59 ddocs watch updated 3 file(s)
 ```
 
 Those timestamps make it easier to understand the order of events when a fix pass and a file change happen close together.
@@ -104,5 +104,6 @@ Watcher unit and temporary-filesystem integration tests cover source and destina
 
 - `internal/watch/watch.go`
 - `internal/app/app.go`
-- `cmd/doc-ledger/main.go`
+- `cmd/ddocs/main.go`
+- `cmd/demon/main.go`
 - `docs/make-dummy-docs.sh`

@@ -1,15 +1,18 @@
 # Testing and Fixtures
 
-doc-ledger is covered by focused Go package tests, watcher integration coverage, and Go CLI fixture regression gates. Go is the sole implementation and supported runtime.
+Demon Docs is covered by focused Go package tests, watcher integration coverage, and Go CLI fixture regression gates. Go is the sole implementation and supported runtime.
 
 ## Test Commands
 
 For an install smoke check, run:
 
 ```bash
-go install ./cmd/doc-ledger
-doc-ledger --help
-doc-ledger --version
+go install ./cmd/ddocs
+go install ./cmd/demon
+ddocs --help
+ddocs --version
+demon --help
+demon --version
 ```
 
 From the repo root, run the complete local release gate:
@@ -34,7 +37,7 @@ The ten scenarios cover defaults; custom index headings, markers, drafts, and no
 
 ## What the Tests Cover
 
-The doc-ledger tests are split across small, focused areas:
+The Demon Docs tests are split across small, focused areas:
 
 - CLI behavior
 - config loading and selection
@@ -54,7 +57,7 @@ Those tests keep the implementation honest without depending on a larger applica
 
 - the complete Go suite, including `./tests`, on Linux and Windows;
 - `go vet ./...`;
-- an executable build and basic CLI smoke tests.
+- both executable builds and basic CLI smoke tests for `ddocs` and `demon`.
 
 ## Release Requirements
 
@@ -63,7 +66,7 @@ A release is eligible only when all CI jobs pass. In particular:
 - Linux and Windows Go tests are green;
 - the ten-fixture Go CLI regression matrix is green;
 - focused specification tests cover the intentional compatibility corrections;
-- `go vet`, the executable build, and CLI smoke checks are green;
+- `go vet`, both executable builds, and CLI smoke checks for `ddocs` and `demon` are green;
 - repeated reconciliation is byte-identical and check mode remains non-mutating.
 
 ## Dummy Docs Fixture Generator
@@ -99,11 +102,11 @@ A simple end-to-end smoke test uses the Go CLI:
 
 ```bash
 ./docs/make-dummy-docs.sh
-doc-ledger fix --root dummy-docs
-doc-ledger check --root dummy-docs
+ddocs fix --root dummy-docs
+ddocs check --root dummy-docs
 ```
 
-If you are working from the repo checkout, `go run ./cmd/doc-ledger` is the primary fallback. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
+If you are working from the repo checkout, `go run ./cmd/ddocs` is the primary fallback. The equivalent alias is `go run ./cmd/demon`. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
 
 ## Fixture Guidance
 

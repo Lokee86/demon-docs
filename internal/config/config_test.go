@@ -9,7 +9,7 @@ import (
 
 func TestDefaultsAndAliases(t *testing.T) {
 	c := Default()
-	if c.Root != "docs" || c.IndexFile != "README.md" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles {
+	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles {
 		t.Fatalf("unexpected defaults: %+v", c)
 	}
 	dir := t.TempDir()

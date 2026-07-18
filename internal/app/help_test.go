@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func TestCommandHelpContract(t *testing.T) {
@@ -14,14 +14,14 @@ func TestCommandHelpContract(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"--help"}, []string{"doc-ledger reconciles local index files with a file tree.", "doc-ledger config paths", "doc-ledger --version"}},
-		{[]string{"fix", "-h"}, []string{"Reconcile the docs tree and write any needed updates.", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", "there is no upward parent-directory search"}},
+		{[]string{"--help"}, []string{"ddocs reconciles local index files with a file tree.", "ddocs config paths", "ddocs --version"}},
+		{[]string{"fix", "-h"}, []string{"Reconcile the docs tree and write any needed updates.", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", "./.demon-docs.toml", "./.doc-ledger.toml", "there is no upward parent-directory search"}},
 		{[]string{"check", "--help"}, []string{"Verify that the docs tree is already reconciled.", "--root PATH", "--no-parent-link-indexed-files", "CLI flags override the selected config"}},
 		{[]string{"watch", "-h"}, []string{"Watch runs in the foreground by default", "--once", "--debounce-seconds FLOAT", "run one reconciliation pass and exit"}},
 		{[]string{"config", "-h"}, []string{"paths", "show", "init", "Local config lookup is current-directory only.", "There is no upward parent-directory search."}},
-		{[]string{"config", "paths", "-h"}, []string{"current-directory local config", "global user config path", "selected config path"}},
+		{[]string{"config", "paths", "-h"}, []string{"current-directory local config", ".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml", "global user config path", "selected config path"}},
 		{[]string{"config", "show", "--help"}, []string{"resolved selected config", "--config PATH", "--no-local-config", "--no-global-config"}},
-		{[]string{"config", "init", "-h"}, []string{"global user config location", "--local", "--global", "--force"}},
+		{[]string{"config", "init", "-h"}, []string{"global user config location", ".demon-docs.toml", "--local", "--global", "--force"}},
 	}
 	for _, test := range tests {
 		t.Run(strings.Join(test.args, "_"), func(t *testing.T) {

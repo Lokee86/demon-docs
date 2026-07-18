@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func TestSchedulerDebouncesAndRunsFollowup(t *testing.T) {

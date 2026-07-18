@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -166,6 +166,40 @@ func TestWatcherAddsNewNestedDirectories(t *testing.T) {
 	waitFor(t, 3*time.Second, func() bool {
 		data, err := os.ReadFile(filepath.Join(nested, "README.md"))
 		return err == nil && strings.Contains(string(data), "[topic.md](topic.md)")
+	})
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherReloadsDocignoreAndAddsNewlyVisibleDirectories(t *testing.T) {
+	root := t.TempDir()
+	ignoredDir := filepath.Join(root, "ignored")
+	if err := os.MkdirAll(ignoredDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ignoredDir, "topic.md"), []byte("# Topic\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ignorePath := filepath.Join(root, ".docignore")
+	if err := os.WriteFile(ignorePath, []byte("ignored/\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &zero, fake)
+	if fake.hasWatch(ignoredDir) {
+		t.Fatal("ignored directory was watched before .docignore changed")
+	}
+
+	if err := os.WriteFile(ignorePath, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: ignorePath, Op: fsnotify.Write}
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(ignoredDir) })
+	waitFor(t, 3*time.Second, func() bool {
+		data, err := os.ReadFile(filepath.Join(root, "README.md"))
+		return err == nil && strings.Contains(string(data), "ignored/README.md")
 	})
 	stopFakeWatch(t, cancel, done)
 }

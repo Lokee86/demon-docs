@@ -33,7 +33,11 @@ jobs:
           go-version-file: go.mod
           cache: true
       - run: go vet ./...
-      - run: go build -o doc-ledger ./cmd/doc-ledger
-      - run: ./doc-ledger --help
-      - run: ./doc-ledger --version
-      - run: ./doc-ledger config paths
+      - run: go build -o ddocs ./cmd/ddocs
+      - run: go build -o demon ./cmd/demon
+      - run: ./ddocs --help
+      - run: ./ddocs --version
+      - run: ./ddocs config paths
+      - run: ./demon --help
+      - run: ./demon --version
+      - run: ./demon config paths

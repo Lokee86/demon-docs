@@ -9,12 +9,12 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
-	md "github.com/Lokee86/doc-ledger/internal/markdown"
-	"github.com/Lokee86/doc-ledger/internal/model"
-	"github.com/Lokee86/doc-ledger/internal/pathutil"
-	"github.com/Lokee86/doc-ledger/internal/scan"
-	"github.com/Lokee86/doc-ledger/internal/textio"
+	"github.com/Lokee86/demon-docs/internal/config"
+	md "github.com/Lokee86/demon-docs/internal/markdown"
+	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/pathutil"
+	"github.com/Lokee86/demon-docs/internal/scan"
+	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
 func Tree(root string, c config.Config) (model.ReconcileResult, error) {

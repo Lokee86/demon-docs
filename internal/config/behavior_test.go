@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadCompletePublicConfiguration(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "doc-ledger.toml")
+	path := filepath.Join(t.TempDir(), "demon-docs.toml")
 	text := `root = "manual"
 index_file = "INDEX.md"
 [markers]
@@ -99,16 +99,22 @@ func TestParentEnabledAliasAndExplicitKeys(t *testing.T) {
 
 func TestConfigSelectionPrecedence(t *testing.T) {
 	dir := t.TempDir()
-	dot := filepath.Join(dir, ".doc-ledger.toml")
-	plain := filepath.Join(dir, "doc-ledger.toml")
-	global := filepath.Join(dir, "xdg", "doc-ledger", "config.toml")
-	if err := os.WriteFile(plain, nil, 0o644); err != nil {
+	dot := filepath.Join(dir, ".demon-docs.toml")
+	plain := filepath.Join(dir, "demon-docs.toml")
+	legacyDot := filepath.Join(dir, ".doc-ledger.toml")
+	legacyPlain := filepath.Join(dir, "doc-ledger.toml")
+	global := filepath.Join(dir, "xdg", "demon-docs", "config.toml")
+	legacyGlobal := filepath.Join(dir, "xdg", "doc-ledger", "config.toml")
+	if err := os.WriteFile(legacyPlain, nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(filepath.Dir(global), 0o755); err != nil {
+	if err := os.WriteFile(legacyDot, nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(global, nil, 0o644); err != nil {
+	if err := os.MkdirAll(filepath.Dir(legacyGlobal), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(legacyGlobal, nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	env := func(key string) string {
@@ -120,19 +126,38 @@ func TestConfigSelectionPrecedence(t *testing.T) {
 	if got := Select(dir, "explicit.toml", false, false, env, dir); got != "explicit.toml" {
 		t.Fatal(got)
 	}
+	if got := Select(dir, "", false, false, env, dir); got != legacyDot {
+		t.Fatalf("legacy local dot=%s", got)
+	}
+	if err := os.WriteFile(plain, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
 	if got := Select(dir, "", false, false, env, dir); got != plain {
-		t.Fatal(got)
+		t.Fatalf("canonical local plain=%s", got)
 	}
 	if err := os.WriteFile(dot, nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if got := Select(dir, "", false, false, env, dir); got != dot {
-		t.Fatal(got)
+		t.Fatalf("canonical local dot=%s", got)
 	}
-	if got := Select(dir, "", true, false, env, dir); got != global {
-		t.Fatal(got)
+	globalOnly := filepath.Join(t.TempDir(), "project")
+	if err := os.Mkdir(globalOnly, 0o755); err != nil {
+		t.Fatal(err)
 	}
-	if got := Select(dir, "", true, true, env, dir); got != "" {
+	if got := Select(globalOnly, "", false, false, env, dir); got != legacyGlobal {
+		t.Fatalf("legacy global=%s", got)
+	}
+	if err := os.MkdirAll(filepath.Dir(global), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(global, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := Select(globalOnly, "", false, false, env, dir); got != global {
+		t.Fatalf("canonical global=%s", got)
+	}
+	if got := Select(globalOnly, "", true, true, env, dir); got != "" {
 		t.Fatal(got)
 	}
 }

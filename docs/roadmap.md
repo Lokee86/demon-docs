@@ -1,4 +1,4 @@
-# doc-ledger Roadmap
+# Demon Docs Roadmap
 
 This roadmap describes the planned product evolution in implementation order. Each phase builds on the deterministic repository model before adding broader projections, long-running operation, or optional assistance.
 
@@ -104,7 +104,7 @@ LLM output remains a proposal: it must be reviewable, attributable to its inputs
 - **Daemon as an operational layer:** the daemon only automates or schedules static core capabilities and may retain disposable caches; it adds no exclusive product capability, and the static CLI remains authoritative.
 - **Thin integrations:** CLI, MCP, Hermes, Claude Code, plugins, and other adapters use the same deterministic core rather than creating parallel repository models.
 - **Optional adapters:** language-specific analysis is enabled deliberately and does not reduce baseline usability.
-- **No semantic prose generation in core:** core doc-ledger behavior maintains structure and explicit references, not guessed explanations.
+- **No semantic prose generation in core:** core Demon Docs behavior maintains structure and explicit references, not guessed explanations.
 
 ## Dependency and Order
 

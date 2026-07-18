@@ -1,15 +1,15 @@
-# doc-ledger Configuration
+# Demon Docs Configuration
 
-doc-ledger is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Go CLI fixture regression matrix.
+Demon Docs is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Go CLI fixture regression matrix.
 
-CLI help is available with `doc-ledger --help`, and each subcommand also supports `--help`.
-Top-level version output is available with `doc-ledger -v` or `doc-ledger --version`.
+CLI help is available with `ddocs --help`, and each subcommand also supports `--help`.
+Top-level version output is available with `ddocs -v` or `ddocs --version`.
 The `config` subcommand provides:
 
-- `doc-ledger config paths`
-- `doc-ledger config show`
-- `doc-ledger config init --local`
-- `doc-ledger config init --global`
+- `ddocs config paths`
+- `ddocs config show`
+- `ddocs config init --local`
+- `ddocs config init --global`
 
 ## What Configuration Controls
 
@@ -44,38 +44,46 @@ The supported keys are:
 
 ## Selection
 
-doc-ledger selects one base config before applying command-specific CLI overrides.
+Demon Docs selects one base config before applying command-specific CLI overrides.
 
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.doc-ledger.toml`
-3. current-directory `doc-ledger.toml`
-4. global user config
-5. built-in defaults
+2. current-directory `.demon-docs.toml`
+3. current-directory `demon-docs.toml`
+4. legacy local compatibility fallbacks
+5. canonical global user config at `demon-docs/config.toml`
+6. legacy global compatibility fallback at `doc-ledger/config.toml`
+7. built-in defaults
 
 There is no upward parent-directory search and no merge between local and global config files.
 
+Compatibility fallbacks remain supported at lower priority:
+
+- `.doc-ledger.toml`
+- `doc-ledger.toml`
+- `doc-ledger/config.toml`
+
 `--root` still overrides the selected base config root.
 
-`doc-ledger config show` prints the selected base config.
-`doc-ledger config paths` prints the current-directory local config candidates and the global user config path.
-`doc-ledger config init --local` writes `.doc-ledger.toml` in the current directory.
-`doc-ledger config init --global` writes the global config file and creates parent directories as needed.
+`ddocs config show` prints the selected base config.
+`ddocs config paths` prints the current-directory local config candidates and the global user config path.
+`ddocs config init --local` writes `.demon-docs.toml` in the current directory.
+`ddocs config init --global` writes the global config file and creates parent directories as needed.
 
 CLI flags override the selected base config. Examples include:
 
 ```bash
-doc-ledger fix --root docs --index-file "!README.md"
-doc-ledger fix --root docs --draft-folder "_drafts"
-doc-ledger fix --root docs --include "**/*.png"
-doc-ledger fix --root docs --exclude "**/*.tmp"
-doc-ledger fix --root docs --marker-prefix "nav-ledger"
-doc-ledger fix --root docs --parent-label "Back to Index"
-doc-ledger fix --root docs --parent-link-folder-indexes
-doc-ledger fix --root docs --no-parent-link-folder-indexes
-doc-ledger fix --root docs --parent-link-indexed-files
-doc-ledger fix --root docs --no-parent-link-indexed-files
+ddocs fix --root docs --index-file "!README.md"
+ddocs fix --root docs --draft-folder "_drafts"
+ddocs fix --root docs --include "**/*.png"
+ddocs fix --root docs --exclude "**/*.tmp"
+ddocs fix --root docs --marker-prefix "nav-ledger"
+ddocs fix --root docs --parent-label "Back to Index"
+ddocs fix --root docs --parent-link-folder-indexes
+ddocs fix --root docs --no-parent-link-folder-indexes
+ddocs fix --root docs --parent-link-indexed-files
+ddocs fix --root docs --no-parent-link-indexed-files
 ```
 
 ## Default Configuration
@@ -124,7 +132,7 @@ folder_template = "{title} documentation."
 
 [watch]
 debounce_seconds = 0.75
-ignored_dirs = [".git", ".cache", "__pycache__"]
+ignored_dirs = [".cache", "__pycache__"]
 ignored_suffixes = ["~", ".swp", ".tmp", ".bak"]
 
 [template]
@@ -170,12 +178,12 @@ Projects that want `!README.md` should set `index_file = "!README.md"` in config
 `[parent_link].folder_indexes` controls parent links in folder index files.
 
 - Default: `true`
-- When `false`, doc-ledger does not insert or update parent links in child folder index files
+- When `false`, Demon Docs does not insert or update parent links in child folder index files
 
 `[parent_link].indexed_files` controls parent links in indexed files such as `page.md` and `topic.md`.
 
 - Default: `false`
-- When `true`, doc-ledger inserts or updates parent links in editable indexed files
+- When `true`, Demon Docs inserts or updates parent links in editable indexed files
 
 `[parent_link].enabled` is a compatibility alias for older configs.
 
@@ -194,8 +202,8 @@ Supported override flags:
 Examples:
 
 ```bash
-doc-ledger fix --root docs --parent-link-indexed-files
-doc-ledger fix --root docs --no-parent-link-folder-indexes
+ddocs fix --root docs --parent-link-indexed-files
+ddocs fix --root docs --no-parent-link-folder-indexes
 ```
 
 ## `[sections.*].heading`
@@ -256,6 +264,35 @@ include_patterns = ["**/*.md", "**/*.png", "**/*.pdf", "**/*.yaml"]
 exclude_patterns = ["**/*.tmp"]
 ```
 
+## `.docignore`
+
+A root-level `.docignore` file excludes paths from all Demon Docs filesystem traversal, including `fix`, `check`, and `watch`.
+
+Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the managed root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
+
+Example:
+
+```gitignore
+# Generated exports
+/generated/
+
+# Private working files
+*.private.md
+scratch/**
+
+# Re-include one file from an ignored pattern
+!scratch/README.md
+```
+
+The following directory names are permanently excluded at any depth and cannot be re-included with `!`:
+
+- `.git/`
+- `.demon-docs/`
+- `.obsidian/`
+- `logseq/`
+
+Watch mode reloads `.docignore` when it changes and adds watches for directories that become visible.
+
 ## `[editable].parent_index_extensions`
 
 `[editable].parent_index_extensions` controls which indexed files can receive parent index lines.
@@ -301,7 +338,8 @@ folder_template = "Folder: {title}."
 
 `[watch].ignored_dirs` lists directory names the watcher ignores.
 
-- Default: `[".git", ".cache", "__pycache__"]`
+- Default: `[".cache", "__pycache__"]`
+- These are watcher-only exclusions; shared traversal exclusions belong in `.docignore`
 
 `[watch].ignored_suffixes` lists filename suffixes the watcher ignores.
 

@@ -10,9 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
-	"github.com/Lokee86/doc-ledger/internal/reconcile"
-	"github.com/Lokee86/doc-ledger/internal/scan"
+	"github.com/Lokee86/demon-docs/internal/config"
+	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
+	"github.com/Lokee86/demon-docs/internal/reconcile"
+	"github.com/Lokee86/demon-docs/internal/scan"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -74,7 +75,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	if debounce != nil {
 		seconds = *debounce
 	}
-	fmt.Fprintf(out, "%s doc-ledger watch watching %s pid=%d\n", timestamp(), root, os.Getpid())
+	fmt.Fprintf(out, "%s ddocs watch watching %s pid=%d\n", timestamp(), root, os.Getpid())
 	run := func() error {
 		result, err := reconcile.Tree(root, c)
 		if err != nil {
@@ -84,9 +85,9 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "%s doc-ledger watch updated %d file(s)\n", timestamp(), changed)
+		fmt.Fprintf(out, "%s ddocs watch updated %d file(s)\n", timestamp(), changed)
 		if len(result.Messages) > 0 {
-			fmt.Fprintf(out, "%s doc-ledger watch reconciliation messages: %d\n", timestamp(), len(result.Messages))
+			fmt.Fprintf(out, "%s ddocs watch reconciliation messages: %d\n", timestamp(), len(result.Messages))
 		}
 		return nil
 	}
@@ -96,13 +97,17 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	if once {
 		return nil
 	}
+	policy, err := ignorepolicy.Load(root)
+	if err != nil {
+		return err
+	}
 	w, err := createWatcher()
 	if err != nil {
 		return fmt.Errorf("create watcher for %s: %w", root, err)
 	}
 	defer w.Close()
 	watchedDirs := map[string]bool{}
-	if err := addTree(w, root, c, watchedDirs); err != nil {
+	if err := addTree(w, root, root, c, policy, watchedDirs); err != nil {
 		return err
 	}
 	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
@@ -130,10 +135,28 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 			if !ok {
 				return nil
 			}
+			if policy.IsControlFile(event.Name) {
+				updated, err := ignorepolicy.Load(root)
+				if err != nil {
+					return err
+				}
+				policy = updated
+				if err := addTree(w, root, root, c, policy, watchedDirs); err != nil {
+					return err
+				}
+				scheduler.MarkChanged()
+				continue
+			}
 			if event.Op&fsnotify.Create != 0 {
 				if st, err := os.Stat(event.Name); err == nil && st.IsDir() {
-					if err := addTree(w, event.Name, c, watchedDirs); err != nil {
+					ignored, err := policy.Ignored(event.Name, true)
+					if err != nil {
 						return err
+					}
+					if !ignored && !watchIgnored(event.Name, c) {
+						if err := addTree(w, root, event.Name, c, policy, watchedDirs); err != nil {
+							return err
+						}
 					}
 				}
 			}
@@ -141,7 +164,17 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 && wasDirectory {
 				delete(watchedDirs, event.Name)
 			}
-			if wasDirectory || Relevant(event.Name, c, root) {
+			relevant := false
+			if wasDirectory {
+				ignored, err := policy.Ignored(event.Name, true)
+				if err != nil {
+					return err
+				}
+				relevant = !ignored && !watchIgnored(event.Name, c)
+			} else {
+				relevant = relevantWithPolicy(event.Name, c, policy)
+			}
+			if relevant {
 				scheduler.MarkChanged()
 			}
 		case <-ticker.C:
@@ -151,16 +184,26 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 		}
 	}
 }
-func addTree(w eventWatcher, root string, c config.Config, watched map[string]bool) error {
-	return filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+
+func addTree(w eventWatcher, root, start string, c config.Config, policy ignorepolicy.Policy, watched map[string]bool) error {
+	return filepath.WalkDir(start, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if !d.IsDir() {
 			return nil
 		}
-		if path != root && ignored(path, c) {
-			return filepath.SkipDir
+		if path != root {
+			ignored, err := policy.Ignored(path, true)
+			if err != nil {
+				return err
+			}
+			if ignored || watchIgnored(path, c) {
+				return filepath.SkipDir
+			}
+		}
+		if watched[path] {
+			return nil
 		}
 		if err := w.Add(path); err != nil {
 			return fmt.Errorf("watch directory %s: %w", path, err)
@@ -169,17 +212,29 @@ func addTree(w eventWatcher, root string, c config.Config, watched map[string]bo
 		return nil
 	})
 }
+
 func Relevant(path string, c config.Config, root string) bool {
-	if ignored(path, c) {
+	policy, err := ignorepolicy.Load(root)
+	return err == nil && relevantWithPolicy(path, c, policy)
+}
+
+func relevantWithPolicy(path string, c config.Config, policy ignorepolicy.Policy) bool {
+	if policy.IsControlFile(path) {
+		return true
+	}
+	ignored, err := policy.Ignored(path, false)
+	if err != nil || ignored || watchIgnored(path, c) {
 		return false
 	}
 	if st, err := os.Stat(path); err == nil && st.IsDir() {
-		return true
+		ignored, err := policy.Ignored(path, true)
+		return err == nil && !ignored
 	}
-	ok, err := scan.IsIndexable(root, path, c)
+	ok, err := scan.IsIndexable(policy.Root(), path, c)
 	return err == nil && ok
 }
-func ignored(path string, c config.Config) bool {
+
+func watchIgnored(path string, c config.Config) bool {
 	clean := filepath.Clean(path)
 	for _, part := range strings.Split(clean, string(filepath.Separator)) {
 		for _, name := range c.Watch.IgnoredDirs {
@@ -199,4 +254,5 @@ func ignored(path string, c config.Config) bool {
 	}
 	return false
 }
+
 func timestamp() string { return time.Now().Format("2006-01-02T15:04:05") }

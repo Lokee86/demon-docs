@@ -1,7 +1,8 @@
 .PHONY: build test test-go regression vet smoke release-check install clean
 
 build:
-	go build -o bin/doc-ledger ./cmd/doc-ledger
+	go build -o bin/ddocs ./cmd/ddocs
+	go build -o bin/demon ./cmd/demon
 
 test: test-go regression
 
@@ -15,14 +16,18 @@ vet:
 	go vet ./...
 
 smoke: build
-	./bin/doc-ledger --help >/dev/null
-	./bin/doc-ledger --version
-	./bin/doc-ledger config paths >/dev/null
+	./bin/ddocs --help >/dev/null
+	./bin/ddocs --version
+	./bin/ddocs config paths >/dev/null
+	./bin/demon --help >/dev/null
+	./bin/demon --version
+	./bin/demon config paths >/dev/null
 
 release-check: test vet build smoke
 
 install:
-	go install ./cmd/doc-ledger
+	go install ./cmd/ddocs
+	go install ./cmd/demon
 
 clean:
 	rm -rf bin

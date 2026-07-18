@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
-	"github.com/Lokee86/doc-ledger/internal/model"
+	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"

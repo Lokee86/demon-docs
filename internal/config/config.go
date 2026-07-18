@@ -52,13 +52,13 @@ func Default() Config {
 		Sections: Sections{"Direct Files", "Stub Files", "Direct Folders", []string{"Top-Level Files"}, []string{"Top-Level Folders"}},
 		Draft:    Draft{"stubs", "Stub: "}, Files: Files{DefaultIndexFile, []string{"**/*.md"}, []string{}, []string{".md"}},
 		Description: Description{"{title} documentation.", "{title} documentation."},
-		Watch:       Watch{0.75, []string{".git", ".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
+		Watch:       Watch{0.75, []string{".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
 		Template:    Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
 	}
 }
 
 func StarterText() string {
-	return "root = \"docs\"\nindex_file = \"README.md\"\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".git\", \".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "root = \"docs\"\nindex_file = \"README.md\"\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
@@ -224,7 +224,7 @@ func Load(path string) (Config, error) {
 }
 
 func LocalPath(cwd string) string {
-	for _, name := range []string{".doc-ledger.toml", "doc-ledger.toml"} {
+	for _, name := range []string{".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml"} {
 		p := filepath.Join(cwd, name)
 		if exists(p) {
 			return p
@@ -249,10 +249,16 @@ func Discover(start string) string {
 	}
 }
 func GlobalPath(env func(string) string, home string) string {
+	return filepath.Join(configHome(env, home), "demon-docs", "config.toml")
+}
+func LegacyGlobalPath(env func(string) string, home string) string {
+	return filepath.Join(configHome(env, home), "doc-ledger", "config.toml")
+}
+func configHome(env func(string) string, home string) string {
 	if xdg := env("XDG_CONFIG_HOME"); xdg != "" {
-		return filepath.Join(xdg, "doc-ledger", "config.toml")
+		return xdg
 	}
-	return filepath.Join(home, ".config", "doc-ledger", "config.toml")
+	return filepath.Join(home, ".config")
 }
 func Select(cwd, explicit string, noLocal, noGlobal bool, env func(string) string, home string) string {
 	if explicit != "" {
@@ -264,9 +270,10 @@ func Select(cwd, explicit string, noLocal, noGlobal bool, env func(string) strin
 		}
 	}
 	if !noGlobal {
-		p := GlobalPath(env, home)
-		if exists(p) {
-			return p
+		for _, p := range []string{GlobalPath(env, home), LegacyGlobalPath(env, home)} {
+			if exists(p) {
+				return p
+			}
 		}
 	}
 	return ""

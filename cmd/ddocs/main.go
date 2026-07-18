@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Lokee86/doc-ledger/internal/app"
+	"github.com/Lokee86/demon-docs/internal/app"
 )
 
 func main() {

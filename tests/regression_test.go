@@ -25,11 +25,11 @@ type processResult struct {
 func TestGoCLIRegressionMatrix(t *testing.T) {
 	_, file, _, _ := runtime.Caller(0)
 	repo := filepath.Dir(filepath.Dir(file))
-	bin := filepath.Join(t.TempDir(), "doc-ledger")
+	bin := filepath.Join(t.TempDir(), "ddocs")
 	if runtime.GOOS == "windows" {
 		bin += ".exe"
 	}
-	build := exec.Command("go", "build", "-o", bin, "./cmd/doc-ledger")
+	build := exec.Command("go", "build", "-o", bin, "./cmd/ddocs")
 	build.Dir = repo
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build Go CLI: %v\n%s", err, output)

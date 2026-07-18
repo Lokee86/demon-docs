@@ -8,9 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
-	"github.com/Lokee86/doc-ledger/internal/model"
-	"github.com/Lokee86/doc-ledger/internal/pathutil"
+	"github.com/Lokee86/demon-docs/internal/config"
+	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
+	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/pathutil"
 )
 
 func Tree(root string, c config.Config) (model.DocsTree, error) {
@@ -19,6 +20,10 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 		return model.DocsTree{}, err
 	}
 	tree := model.DocsTree{Root: filepath.Clean(abs), Folders: map[string]*model.FolderInfo{}}
+	policy, err := ignorepolicy.Load(tree.Root)
+	if err != nil {
+		return model.DocsTree{}, err
+	}
 	var walk func(string) error
 	walk = func(folder string) error {
 		entries, err := os.ReadDir(folder)
@@ -32,6 +37,13 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 		}
 		for _, entry := range entries {
 			p := filepath.Join(folder, entry.Name())
+			ignored, err := policy.Ignored(p, entry.IsDir())
+			if err != nil {
+				return err
+			}
+			if ignored {
+				continue
+			}
 			if entry.IsDir() {
 				if !stub && entry.Name() == c.Draft.Folder {
 					continue
@@ -49,22 +61,35 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 		}
 		if !stub {
 			stubDir := filepath.Join(folder, c.Draft.Folder)
-			if st, err := os.Stat(stubDir); err == nil && st.IsDir() {
-				stubEntries, err := os.ReadDir(stubDir)
-				if err != nil {
-					return err
-				}
-				for _, entry := range stubEntries {
-					if entry.IsDir() {
-						continue
-					}
-					p := filepath.Join(stubDir, entry.Name())
-					ok, err := IsIndexable(tree.Root, p, c)
+			ignored, err := policy.Ignored(stubDir, true)
+			if err != nil {
+				return err
+			}
+			if !ignored {
+				if st, err := os.Stat(stubDir); err == nil && st.IsDir() {
+					stubEntries, err := os.ReadDir(stubDir)
 					if err != nil {
 						return err
 					}
-					if ok {
-						info.StubFiles = append(info.StubFiles, p)
+					for _, entry := range stubEntries {
+						if entry.IsDir() {
+							continue
+						}
+						p := filepath.Join(stubDir, entry.Name())
+						ignored, err := policy.Ignored(p, false)
+						if err != nil {
+							return err
+						}
+						if ignored {
+							continue
+						}
+						ok, err := IsIndexable(tree.Root, p, c)
+						if err != nil {
+							return err
+						}
+						if ok {
+							info.StubFiles = append(info.StubFiles, p)
+						}
 					}
 				}
 			}
@@ -80,9 +105,15 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 		}
 		if !stub {
 			stubDir := filepath.Join(folder, c.Draft.Folder)
-			if st, err := os.Stat(stubDir); err == nil && st.IsDir() {
-				if err := walk(stubDir); err != nil {
-					return err
+			ignored, err := policy.Ignored(stubDir, true)
+			if err != nil {
+				return err
+			}
+			if !ignored {
+				if st, err := os.Stat(stubDir); err == nil && st.IsDir() {
+					if err := walk(stubDir); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -124,12 +155,14 @@ func IsIndexable(root, path string, c config.Config) (bool, error) {
 	}
 	return false, nil
 }
+
 func matches(path, pattern string) bool {
 	if glob(pattern, path) {
 		return true
 	}
 	return strings.HasPrefix(pattern, "**/") && glob(strings.TrimPrefix(pattern, "**/"), path)
 }
+
 func glob(pattern, value string) bool {
 	var b strings.Builder
 	b.WriteString("^")

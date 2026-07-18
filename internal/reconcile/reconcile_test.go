@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func write(t *testing.T, path, text string) {

@@ -1,20 +1,20 @@
-# doc-ledger
+# Demon Docs
 
 ## Motivation
 ## Usage
 ## Contributing
 
-`doc-ledger` keeps folder index files in sync with a file tree.
+`Demon Docs` keeps folder index files in sync with a file tree.
 
 Point it at a root folder, and it scans the folders and files inside it. For each folder, it creates or updates a local index file that lists the folder’s direct files, draft/stub files, and child folders. It can also add parent-index links so readers can move back up the tree.
 
-You keep owning the actual files and any hand-written index content. `doc-ledger` only owns clearly marked managed sections. `check` reports when the indexes no longer match the filesystem, and `fix` updates them. `watch` starts a persistent process that will watch a root folder and all its children and automatically updates indexes with any changes.
+You keep owning the actual files and any hand-written index content. `Demon Docs` only owns clearly marked managed sections. `check` reports when the indexes no longer match the filesystem, and `fix` updates them. `watch` starts a persistent process that will watch a root folder and all its children and automatically updates indexes with any changes.
 
 The result is a file tree that can be moved, split, expanded, or reorganized without leaving stale index pages behind.
 
 ## What it manages
 
-`doc-ledger` reconciles:
+`Demon Docs` reconciles:
 
 - folder index files, such as `README.md`
 - direct file entries in each folder index
@@ -26,34 +26,40 @@ It preserves hand-authored content outside managed index blocks.
 
 ## Installation
 
-Go is the sole implementation and supported runtime for doc-ledger. Install it from a checkout:
+Go is the sole implementation and supported runtime for Demon Docs. Install it from a checkout:
 
 ```bash
-git clone https://github.com/Lokee86/doc-ledger.git
-cd doc-ledger
-go install ./cmd/doc-ledger
+git clone https://github.com/Lokee86/demon-docs.git
+cd demon-docs
+go install ./cmd/ddocs
+go install ./cmd/demon
 ```
 
 Or build a repository-local binary:
 
 ```bash
-go build -o bin/doc-ledger ./cmd/doc-ledger
+go build -o bin/ddocs ./cmd/ddocs
+go build -o bin/demon ./cmd/demon
 ```
 
 Ensure the Go install directory is on `PATH`, then verify the executable:
 
 ```bash
-doc-ledger --help
-doc-ledger --version
+ddocs --help
+ddocs --version
+demon --help
+demon --version
 ```
+
+`ddocs` is the canonical command. `demon` is an installed alias backed by the same internal app implementation and has identical behavior.
 
 ## Quick Start
 
-From the `doc-ledger` repo:
+From the `Demon Docs` repo:
 
 ```bash
-doc-ledger fix --root docs
-doc-ledger check --root docs
+ddocs fix --root docs
+ddocs check --root docs
 ```
 
 `fix` writes needed updates.
@@ -68,21 +74,29 @@ Run the complete local Go release gate:
 make release-check
 ```
 
-The release gate runs focused Go tests, the Go CLI fixture regression matrix, `go vet`, an executable build, and CLI smoke checks. GitHub Actions runs the complete Go suite on Linux and Windows.
+The release gate runs focused Go tests, the Go CLI fixture regression matrix, `go vet`, both executable builds, and CLI smoke checks for `ddocs` and `demon`. GitHub Actions runs the complete Go suite on Linux and Windows.
 
 Build and run directly from the checkout:
 
 ```bash
-go run ./cmd/doc-ledger fix
-go run ./cmd/doc-ledger check
+go run ./cmd/ddocs fix
+go run ./cmd/ddocs check
 ```
 
 Installed usage is:
 
 ```bash
-doc-ledger fix
-doc-ledger check
-doc-ledger watch
+ddocs fix
+ddocs check
+ddocs watch
+```
+
+The installed alias behaves identically:
+
+```bash
+demon fix
+demon check
+demon watch
 ```
 
 Two intentional compatibility corrections are part of the Go contract: headings and marker-like comments inside fenced code blocks are treated as code, and source files retain their original final-newline state. Both behaviors have focused byte-level tests.
@@ -90,16 +104,16 @@ Two intentional compatibility corrections are part of the Go contract: headings 
 CLI help is available at the top level and for each subcommand:
 
 ```bash
-doc-ledger --help
-doc-ledger -v
-doc-ledger --version
-doc-ledger fix --help
-doc-ledger check --help
-doc-ledger watch --help
-doc-ledger config paths
-doc-ledger config show
-doc-ledger config init --local
-doc-ledger config init --global
+ddocs --help
+ddocs -v
+ddocs --version
+ddocs fix --help
+ddocs check --help
+ddocs watch --help
+ddocs config paths
+ddocs config show
+ddocs config init --local
+ddocs config init --global
 ```
 
 `-v` and `--version` are top-level version flags.
@@ -117,25 +131,25 @@ marker prefix:   doc-ledger
 ## Commands
 
 ```bash
-doc-ledger fix --root docs
+ddocs fix --root docs
 ```
 
 Reconciles the docs tree and writes updates.
 
 ```bash
-doc-ledger check --root docs
+ddocs check --root docs
 ```
 
 Verifies that the docs tree is already reconciled. Returns non-zero if `fix` would change files.
 
 ```bash
-doc-ledger watch --root docs
+ddocs watch --root docs
 ```
 
 Runs one reconciliation immediately, then watches the docs tree for relevant filesystem changes.
 
 ```bash
-doc-ledger watch --root docs --once
+ddocs watch --root docs --once
 ```
 
 Runs the watcher path once and exits.
@@ -143,30 +157,32 @@ Runs the watcher path once and exits.
 A config file can replace repeated command flags:
 
 ```bash
-doc-ledger fix --config .doc-ledger.toml
-doc-ledger check --config .doc-ledger.toml
+ddocs fix --config .demon-docs.toml
+ddocs check --config .demon-docs.toml
 ```
 
 Config commands:
 
 ```bash
-doc-ledger config paths
-doc-ledger config show
-doc-ledger config init --local
-doc-ledger config init --global
+ddocs config paths
+ddocs config show
+ddocs config init --local
+ddocs config init --global
 ```
 
 ## Config Selection
 
-doc-ledger selects one base config before applying command-specific CLI overrides.
+Demon Docs selects one base config before applying command-specific CLI overrides.
 
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.doc-ledger.toml`
-3. current-directory `doc-ledger.toml`
-4. global user config
-5. built-in defaults
+2. current-directory `.demon-docs.toml`
+3. current-directory `demon-docs.toml`
+4. legacy local compatibility fallbacks
+5. canonical global user config at `demon-docs/config.toml`
+6. legacy global compatibility fallback at `doc-ledger/config.toml`
+7. built-in defaults
 
 There is no upward parent-directory search and no merge between local and global config files.
 
@@ -175,16 +191,16 @@ There is no upward parent-directory search and no merge between local and global
 CLI override examples:
 
 ```bash
-doc-ledger fix --root docs --index-file "!README.md"
-doc-ledger fix --root docs --draft-folder "_drafts"
-doc-ledger fix --root docs --include "**/*.png"
-doc-ledger fix --root docs --exclude "**/*.tmp"
-doc-ledger fix --root docs --marker-prefix "nav-ledger"
-doc-ledger fix --root docs --parent-label "Back to Index"
-doc-ledger fix --root docs --parent-link-folder-indexes
-doc-ledger fix --root docs --no-parent-link-folder-indexes
-doc-ledger fix --root docs --parent-link-indexed-files
-doc-ledger fix --root docs --no-parent-link-indexed-files
+ddocs fix --root docs --index-file "!README.md"
+ddocs fix --root docs --draft-folder "_drafts"
+ddocs fix --root docs --include "**/*.png"
+ddocs fix --root docs --exclude "**/*.tmp"
+ddocs fix --root docs --marker-prefix "nav-ledger"
+ddocs fix --root docs --parent-label "Back to Index"
+ddocs fix --root docs --parent-link-folder-indexes
+ddocs fix --root docs --no-parent-link-folder-indexes
+ddocs fix --root docs --parent-link-indexed-files
+ddocs fix --root docs --no-parent-link-indexed-files
 ```
 
 ## Folder indexes
@@ -216,7 +232,7 @@ docs/
     setup.md
 ```
 
-`doc-ledger` maintains:
+`Demon Docs` maintains:
 
 ```text
 docs/README.md
@@ -227,7 +243,7 @@ It indexes `future-topic.md` from the parent folder’s stub section, not from `
 
 ## Managed sections
 
-`doc-ledger` owns only the content between its marker comments.
+`Demon Docs` owns only the content between its marker comments.
 
 Default managed sections:
 
@@ -249,7 +265,7 @@ Content outside those marker blocks remains hand-authored.
 
 ## Parent links
 
-`doc-ledger` maintains parent navigation lines where configured.
+`Demon Docs` maintains parent navigation lines where configured.
 
 Default shape:
 
@@ -276,13 +292,13 @@ Parent-link override flags:
 Examples:
 
 ```bash
-doc-ledger fix --root docs --parent-link-indexed-files
-doc-ledger fix --root docs --no-parent-link-folder-indexes
+ddocs fix --root docs --parent-link-indexed-files
+ddocs fix --root docs --no-parent-link-folder-indexes
 ```
 
 ## Description preservation
 
-`doc-ledger` tries to preserve existing index descriptions.
+`Demon Docs` tries to preserve existing index descriptions.
 
 It preserves descriptions when:
 
@@ -306,24 +322,35 @@ becomes:
 
 Moving a canonical file into the stub folder applies the reverse transformation.
 
-If a stale entry no longer maps to a current file or folder, `doc-ledger` removes it and reports a reconciliation message.
+If a stale entry no longer maps to a current file or folder, `Demon Docs` removes it and reports a reconciliation message.
 
 ## Configuration
 
-`doc-ledger` looks for config files named:
+`Demon Docs` looks for config files named:
+
+```text
+.demon-docs.toml
+demon-docs.toml
+demon-docs/config.toml
+```
+
+Compatibility fallbacks remain supported at lower priority:
 
 ```text
 .doc-ledger.toml
 doc-ledger.toml
+doc-ledger/config.toml
 ```
 
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.doc-ledger.toml`
-3. current-directory `doc-ledger.toml`
-4. global user config
-5. built-in defaults
+2. current-directory `.demon-docs.toml`
+3. current-directory `demon-docs.toml`
+4. legacy local compatibility fallbacks
+5. canonical global user config at `demon-docs/config.toml`
+6. legacy global compatibility fallback at `doc-ledger/config.toml`
+7. built-in defaults
 
 Local config lookup is current-directory only.
 There is no upward parent-directory search.
@@ -412,6 +439,31 @@ include_patterns = ["**/*.md", "**/*.png", "**/*.pdf", "**/*.yaml"]
 parent_index_extensions = [".md", ".mdx"]
 ```
 
+## Ignoring paths
+
+Place `.docignore` at the managed root to exclude files and directories from `fix`, `check`, and `watch`. It uses Git ignore syntax and is independent from `.gitignore`.
+
+```gitignore
+# Generated exports
+/generated/
+
+# Private notes
+*.private.md
+scratch/**
+!scratch/README.md
+```
+
+These directory names are always pruned at any depth and cannot be re-included:
+
+```text
+.git/
+.demon-docs/
+.obsidian/
+logseq/
+```
+
+Watch mode reloads `.docignore` when the file changes.
+
 ## Watch mode
 
 Watch mode is for local convenience. It is not a replacement for `check`.
@@ -429,7 +481,7 @@ The watcher:
 Example:
 
 ```bash
-doc-ledger watch --root docs
+ddocs watch --root docs
 ```
 
 If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log.
@@ -439,43 +491,43 @@ If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may
 A shell startup file can launch the watcher with a PID guard:
 
 ```bash
-DOC_LEDGER_ROOT="${DOC_LEDGER_ROOT:-docs}"
+DDOCS_ROOT="${DDOCS_ROOT:-docs}"
 
-doc_ledger_pid_file="$PWD/.cache/doc-ledger-watch.pid"
-doc_ledger_log_file="$PWD/.cache/doc-ledger-watch.log"
+ddocs_pid_file="$PWD/.cache/ddocs-watch.pid"
+ddocs_log_file="$PWD/.cache/ddocs-watch.log"
 
 mkdir -p "$PWD/.cache"
 
-doc_ledger_watch_is_running() {
-  [ -s "$doc_ledger_pid_file" ] || return 1
+ddocs_watch_is_running() {
+  [ -s "$ddocs_pid_file" ] || return 1
 
   local watcher_pid
-  watcher_pid="$(cat "$doc_ledger_pid_file" 2>/dev/null)" || return 1
+  watcher_pid="$(cat "$ddocs_pid_file" 2>/dev/null)" || return 1
 
   case "$watcher_pid" in
     ''|*[!0-9]*) return 1 ;;
   esac
 
   kill -0 "$watcher_pid" 2>/dev/null || return 1
-  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "doc-ledger watch"
+  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "ddocs watch"
 }
 
-start_doc_ledger_watch() {
+start_ddocs_watch() {
   setsid bash -c '
     cd "$1" || exit 1
-    exec doc-ledger watch --root "$2" </dev/null >>"$3" 2>&1
-  ' _ "$PWD" "$DOC_LEDGER_ROOT" "$doc_ledger_log_file" >/dev/null 2>&1 &
+    exec ddocs watch --root "$2" </dev/null >>"$3" 2>&1
+  ' _ "$PWD" "$DDOCS_ROOT" "$ddocs_log_file" >/dev/null 2>&1 &
 
-  echo $! > "$doc_ledger_pid_file"
+  echo $! > "$ddocs_pid_file"
 }
 
-if ! doc_ledger_watch_is_running; then
-  rm -f "$doc_ledger_pid_file"
-  start_doc_ledger_watch
+if ! ddocs_watch_is_running; then
+  rm -f "$ddocs_pid_file"
+  start_ddocs_watch
 fi
 
-unset doc_ledger_pid_file
-unset doc_ledger_log_file
+unset ddocs_pid_file
+unset ddocs_log_file
 ```
 
 For `direnv`, source process startup scripts outside any `set -a` block so helper variables are not exported.
@@ -500,8 +552,8 @@ The regression matrix retains ten fixture scenarios and validates each with `fix
 Useful manual smoke flow:
 
 ```bash
-doc-ledger fix --root docs
-doc-ledger check --root docs
+ddocs fix --root docs
+ddocs check --root docs
 ```
 
 For fixture stress testing, see:
@@ -514,7 +566,7 @@ That script generates a synthetic documentation tree for manual reconciliation t
 
 ## Safety boundaries
 
-`doc-ledger` does not:
+`Demon Docs` does not:
 
 - validate semantic documentation quality
 - decide what a folder should own
@@ -548,8 +600,10 @@ Do not commit runtime artifacts:
 
 ```text
 bin/
-doc-ledger
-doc-ledger.exe
+ddocs
+demon
+ddocs.exe
+demon.exe
 .cache/
 dummy-docs/
 ```

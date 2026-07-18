@@ -77,7 +77,7 @@ func TestConfigCommandsContract(t *testing.T) {
 		if code := Run(context.Background(), []string{"config", "paths"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("paths code=%d stderr=%q", code, stderr.String())
 		}
-		for _, value := range []string{"cwd = " + cwd, "local dot config = ", "local plain config = ", "selected local config = <none>", "global config = ", "selected config = <none>"} {
+		for _, value := range []string{"cwd = " + cwd, filepath.Join(cwd, ".demon-docs.toml"), filepath.Join(cwd, "demon-docs.toml"), filepath.Join(cwd, ".doc-ledger.toml"), "selected local config = <none>", filepath.Join(cwd, "xdg", "demon-docs", "config.toml"), filepath.Join(cwd, "xdg", "doc-ledger", "config.toml"), "selected config = <none>"} {
 			if !strings.Contains(stdout.String(), value) {
 				t.Errorf("paths missing %q:\n%s", value, stdout.String())
 			}
@@ -99,7 +99,7 @@ func TestConfigCommandsContract(t *testing.T) {
 		if code := Run(context.Background(), []string{"config", "init", "--local"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("init code=%d stderr=%q", code, stderr.String())
 		}
-		path := filepath.Join(cwd, ".doc-ledger.toml")
+		path := filepath.Join(cwd, ".demon-docs.toml")
 		if strings.TrimSpace(stdout.String()) != path {
 			t.Fatalf("init output=%q want=%q", stdout.String(), path)
 		}
@@ -111,6 +111,15 @@ func TestConfigCommandsContract(t *testing.T) {
 		stderr.Reset()
 		if code := Run(context.Background(), []string{"config", "init", "--local", "--force"}, &bytes.Buffer{}, &stderr); code != 0 || readTestFile(t, path) != original {
 			t.Fatalf("force code=%d stderr=%q", code, stderr.String())
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"config", "init", "--global"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("global init code=%d stderr=%q", code, stderr.String())
+		}
+		globalPath := filepath.Join(cwd, "xdg", "demon-docs", "config.toml")
+		if strings.TrimSpace(stdout.String()) != globalPath {
+			t.Fatalf("global init output=%q want=%q", stdout.String(), globalPath)
 		}
 	})
 }

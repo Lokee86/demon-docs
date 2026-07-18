@@ -1,6 +1,6 @@
-# doc-ledger Docs
+# Demon Docs Documentation
 
-The repo root [README.md](../README.md) is the starting point for doc-ledger.
+The repo root [README.md](../README.md) is the starting point for Demon Docs.
 This `docs/` folder holds deeper design, operational, and maintenance references for the tool.
 
 ## References
@@ -12,9 +12,9 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 - [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Focused design for graph-based agent context retrieval and thin integrations.
 - [Configuration](configuration.md): Config file shape, defaults, and supported overrides.
 - [Code-Symbol References](code-symbol-references.md): Focused Phase 4 design for deterministic declaration-level documentation references and language adapters.
-- [Reconciliation Model](reconciliation-model.md): How doc-ledger scans, plans, and applies index updates.
+- [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, and applies index updates.
 - [Watcher and Automation](watcher-and-automation.md): Watch mode behavior, timestamps, PID output, and automation guidance.
-- [Testing and Fixtures](testing-and-fixtures.md): Test layout, fixture strategy, and regression coverage for doc-ledger.
+- [Testing and Fixtures](testing-and-fixtures.md): Test layout, fixture strategy, and regression coverage for Demon Docs.
 - [Dummy Docs Fixture Generator](make-dummy-docs.sh): Manual fixture and stress generator for recursive docs-tree testing.
 
 ## Direct Files

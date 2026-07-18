@@ -6,7 +6,7 @@ This document describes the planned graph-based context retrieval layer and its 
 
 The same static graph and projection APIs should be exposed through:
 
-- the doc-ledger CLI;
+- the Demon Docs CLI;
 - MCP for broad interoperability;
 - Hermes;
 - Claude Code;
@@ -87,13 +87,13 @@ Context may refresh after concrete agent activity such as selecting a candidate,
 Names and final schemas are open, but the static CLI may expose operations shaped like:
 
 ```text
-doc-ledger context --mode orientation --path docs/README.md --format json
-doc-ledger context --mode implementation --symbol src/ledger/index.go::Reconcile --budget 12000
-doc-ledger context --mode change-impact --git-range HEAD~1..HEAD --format json
-doc-ledger context --mode documentation --concept "reverse index" --candidates
+ddocs context --mode orientation --path docs/README.md --format json
+ddocs context --mode implementation --symbol src/ledger/index.go::Reconcile --budget 12000
+ddocs context --mode change-impact --git-range HEAD~1..HEAD --format json
+ddocs context --mode documentation --concept "reverse index" --candidates
 
-doc-ledger graph query --path src/ledger --edges references,contains --depth 2
-doc-ledger graph export --format json
+ddocs graph query --path src/ledger --edges references,contains --depth 2
+ddocs graph export --format json
 ```
 
 An MCP adapter may expose corresponding tools such as `doc_ledger_context`, `doc_ledger_candidates`, `doc_ledger_graph_query`, and `doc_ledger_status`. These names and request/response schemas are illustrative. The adapter should return the same canonical identities, provenance, ordering, diagnostics, and truncation metadata as the CLI rather than implementing a parallel resolver.

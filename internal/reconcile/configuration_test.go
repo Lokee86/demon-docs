@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Lokee86/doc-ledger/internal/config"
-	"github.com/Lokee86/doc-ledger/internal/model"
+	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/model"
 )
 
 func plannedText(t *testing.T, result model.ReconcileResult, path string) string {
