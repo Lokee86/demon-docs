@@ -30,7 +30,7 @@ doc-ledger treats README files as structured documents with managed sections.
 
 If a README already has the expected managed sections, doc-ledger updates only the content inside those managed blocks.
 
-Goldmark determines which headings and HTML comments are Markdown structure. Heading- and marker-like text inside fenced code blocks is code content and is never treated as a managed section. Parent-link-shaped lines inside fenced code are likewise examples rather than editable parent links. This intentionally corrects the legacy Python parser, which could mistake fenced examples for real headings.
+Goldmark determines which headings and HTML comments are Markdown structure. Heading- and marker-like text inside fenced code blocks is code content and is never treated as a managed section. Parent-link-shaped lines inside fenced code are likewise examples rather than editable parent links. This is an intentional compatibility correction: fenced examples are not treated as real headings or managed sections.
 
 ## Missing README Creation
 
@@ -55,7 +55,7 @@ doc-ledger maintains parent index lines according to the configured parent-link 
 
 The parent index line is only written for file types that are configured as editable for parent links.
 
-Parent-link insertion, replacement, and removal preserve whether the source document ended with a newline. This intentionally differs from legacy Python cases where inserting a parent line could accidentally remove or add the final newline.
+Parent-link insertion, replacement, and removal preserve whether the source document ended with a newline. This is an intentional compatibility guarantee for source preservation.
 
 ## Entry Preservation
 
@@ -86,4 +86,3 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 - `internal/markdown/markdown.go`
 - `internal/reconcile/reconcile.go`
 - `internal/model/model.go`
-- `doc_ledger/` (legacy Python parity reference)

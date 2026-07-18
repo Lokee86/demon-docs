@@ -1,4 +1,4 @@
-package parity_test
+package regression_test
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-type parityFixture struct {
+type regressionFixture struct {
 	name  string
 	setup func(*testing.T, string)
 }
@@ -22,11 +22,7 @@ type processResult struct {
 	stdout, stderr string
 }
 
-func TestPythonGoParityMatrix(t *testing.T) {
-	python, err := exec.LookPath("python")
-	if err != nil {
-		t.Fatal("python is required for the parity release gate")
-	}
+func TestGoCLIRegressionMatrix(t *testing.T) {
 	_, file, _, _ := runtime.Caller(0)
 	repo := filepath.Dir(filepath.Dir(file))
 	bin := filepath.Join(t.TempDir(), "doc-ledger")
@@ -39,24 +35,24 @@ func TestPythonGoParityMatrix(t *testing.T) {
 		t.Fatalf("build Go CLI: %v\n%s", err, output)
 	}
 
-	for _, fixture := range parityFixtures() {
+	for _, fixture := range regressionFixtures() {
 		t.Run(fixture.name, func(t *testing.T) {
 			base := t.TempDir()
-			pyProject := filepath.Join(base, "python")
-			goProject := filepath.Join(base, "go")
-			fixture.setup(t, pyProject)
-			fixture.setup(t, goProject)
+			project := filepath.Join(base, "project")
+			fixture.setup(t, project)
 			env := replaceEnv(os.Environ(), "XDG_CONFIG_HOME", filepath.Join(base, "empty-xdg"))
 
-			py := runProcess(t, pyProject, env, python, filepath.Join(repo, "main.py"), "fix")
-			goResult := runProcess(t, goProject, env, bin, "fix")
-			compareProcess(t, "fix", py, goResult)
-			compareTreesExact(t, pyProject, goProject)
+			firstFix := runProcess(t, project, env, bin, "fix")
+			requireSuccess(t, "first fix", firstFix)
+			afterFirstFix := snapshot(t, project)
 
-			py = runProcess(t, pyProject, env, python, filepath.Join(repo, "main.py"), "check")
-			goResult = runProcess(t, goProject, env, bin, "check")
-			compareProcess(t, "check", py, goResult)
-			compareTreesExact(t, pyProject, goProject)
+			check := runProcess(t, project, env, bin, "check")
+			requireSuccess(t, "check", check)
+
+			secondFix := runProcess(t, project, env, bin, "fix")
+			requireSuccess(t, "second fix", secondFix)
+			afterSecondFix := snapshot(t, project)
+			compareSnapshots(t, "first fix", afterFirstFix, "second fix", afterSecondFix)
 		})
 	}
 }
@@ -78,36 +74,24 @@ func runProcess(t *testing.T, dir string, env []string, name string, args ...str
 			t.Fatalf("run %s: %v", name, err)
 		}
 	}
-	return processResult{
-		code:   code,
-		stdout: normalizeProcessOutput(out.String(), dir),
-		stderr: normalizeProcessOutput(stderr.String(), dir),
+	return processResult{code: code, stdout: out.String(), stderr: stderr.String()}
+}
+
+func requireSuccess(t *testing.T, command string, result processResult) {
+	t.Helper()
+	if result.code != 0 {
+		t.Fatalf("%s failed with code %d\nstdout=%q\nstderr=%q", command, result.code, result.stdout, result.stderr)
 	}
 }
 
-func normalizeProcessOutput(value, projectRoot string) string {
-	value = strings.ReplaceAll(value, projectRoot, "<PROJECT>")
-	value = strings.ReplaceAll(value, filepath.ToSlash(projectRoot), "<PROJECT>")
-	return strings.ReplaceAll(value, "\r\n", "\n")
-}
-
-func compareProcess(t *testing.T, command string, python, goResult processResult) {
+func compareSnapshots(t *testing.T, leftName string, left map[string][]byte, rightName string, right map[string][]byte) {
 	t.Helper()
-	if python != goResult {
-		t.Fatalf("%s process mismatch\npython=%+v\ngo=%+v", command, python, goResult)
-	}
-}
-
-func compareTreesExact(t *testing.T, pythonRoot, goRoot string) {
-	t.Helper()
-	pythonFiles := snapshot(t, pythonRoot)
-	goFiles := snapshot(t, goRoot)
-	keys := make([]string, 0, len(pythonFiles)+len(goFiles))
+	keys := make([]string, 0, len(left)+len(right))
 	seen := map[string]bool{}
-	for path := range pythonFiles {
+	for path := range left {
 		seen[path] = true
 	}
-	for path := range goFiles {
+	for path := range right {
 		seen[path] = true
 	}
 	for path := range seen {
@@ -115,13 +99,13 @@ func compareTreesExact(t *testing.T, pythonRoot, goRoot string) {
 	}
 	sort.Strings(keys)
 	for _, path := range keys {
-		pythonData, pythonOK := pythonFiles[path]
-		goData, goOK := goFiles[path]
-		if pythonOK != goOK {
-			t.Fatalf("file presence mismatch at %s: python=%t go=%t", path, pythonOK, goOK)
+		leftData, leftOK := left[path]
+		rightData, rightOK := right[path]
+		if leftOK != rightOK {
+			t.Fatalf("file presence mismatch at %s: %s=%t %s=%t", path, leftName, leftOK, rightName, rightOK)
 		}
-		if !bytes.Equal(pythonData, goData) {
-			t.Fatalf("byte mismatch at %s\n%s", path, firstByteDifference(pythonData, goData))
+		if !bytes.Equal(leftData, rightData) {
+			t.Fatalf("byte mismatch at %s\n%s", path, firstByteDifference(leftName, leftData, rightName, rightData))
 		}
 	}
 }
@@ -153,7 +137,7 @@ func snapshot(t *testing.T, root string) map[string][]byte {
 	return result
 }
 
-func firstByteDifference(left, right []byte) string {
+func firstByteDifference(leftName string, left []byte, rightName string, right []byte) string {
 	limit := len(left)
 	if len(right) < limit {
 		limit = len(right)
@@ -165,7 +149,7 @@ func firstByteDifference(left, right []byte) string {
 			break
 		}
 	}
-	return fmt.Sprintf("first difference=%d python_len=%d go_len=%d\npython=%q\ngo=%q", at, len(left), len(right), left, right)
+	return fmt.Sprintf("first difference=%d %s_len=%d %s_len=%d\n%s=%q\n%s=%q", at, leftName, len(left), rightName, len(right), leftName, left, rightName, right)
 }
 
 func replaceEnv(env []string, key, value string) []string {

@@ -105,5 +105,4 @@ Watcher unit and temporary-filesystem integration tests cover source and destina
 - `internal/watch/watch.go`
 - `internal/app/app.go`
 - `cmd/doc-ledger/main.go`
-- `doc_ledger/watch.py` (legacy reference)
 - `docs/make-dummy-docs.sh`

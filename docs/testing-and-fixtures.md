@@ -1,6 +1,6 @@
 # Testing and Fixtures
 
-doc-ledger is covered by focused Go package tests, watcher integration coverage, and differential Python/Go parity gates. The retained pytest suite remains a required release gate and behavioral reference.
+doc-ledger is covered by focused Go package tests, watcher integration coverage, and Go CLI fixture regression gates. Go is the sole implementation and supported runtime.
 
 ## Test Commands
 
@@ -15,7 +15,6 @@ doc-ledger --version
 From the repo root, run the complete local release gate:
 
 ```bash
-python -m pip install -e ".[dev]"
 make release-check
 ```
 
@@ -23,16 +22,15 @@ The individual gates are:
 
 ```bash
 make test-go
-make test-python
-make parity
+make regression
 make vet
 make build
 make smoke
 ```
 
-`make parity` runs the Python/Go fixture matrix and the exact CLI help/error contract matrix. It fails if Python or its dependencies are unavailable. The retained Python suite remains a required release gate rather than an optional diagnostic.
+`make regression` runs the Go CLI fixture regression matrix. It builds the binary once, then runs the ten retained fixture scenarios through `fix`, verifies that `check` succeeds on the clean result, runs `fix` again, and requires the complete fixture tree to be byte-identical after the first and second fixes.
 
-The parity matrix compares document presence and bytes exactly, including final-newline state and CRLF. Only process-output line endings and temporary fixture-root paths are normalized. Approved Go corrections—Goldmark ignoring fenced headings and exact final-newline preservation—have focused Go specification tests rather than being hidden by parity canonicalization.
+The ten scenarios cover defaults; custom index headings, markers, drafts, and non-Markdown editable files; direct-to-stub transition; stub graduation; unique and ambiguous file moves; unique and ambiguous folder moves; stale entry removal; and malformed managed blocks. Focused Go specification tests cover Goldmark ignoring fenced headings and exact final-newline preservation.
 
 ## What the Tests Cover
 
@@ -54,9 +52,7 @@ Those tests keep the implementation honest without depending on a larger applica
 
 `.github/workflows/ci.yml` runs:
 
-- focused Go package tests on Linux and Windows;
-- the retained Python suite with dependencies installed explicitly;
-- exact Python/Go parity on Linux and Windows;
+- the complete Go suite, including `./tests`, on Linux and Windows;
 - `go vet ./...`;
 - an executable build and basic CLI smoke tests.
 
@@ -65,9 +61,8 @@ Those tests keep the implementation honest without depending on a larger applica
 A release is eligible only when all CI jobs pass. In particular:
 
 - Linux and Windows Go tests are green;
-- the retained Python suite is green;
-- exact-byte parity is green on both platforms;
-- approved differences remain covered by focused specification tests;
+- the ten-fixture Go CLI regression matrix is green;
+- focused specification tests cover the intentional compatibility corrections;
 - `go vet`, the executable build, and CLI smoke checks are green;
 - repeated reconciliation is byte-identical and check mode remains non-mutating.
 
@@ -108,7 +103,7 @@ doc-ledger fix --root dummy-docs
 doc-ledger check --root dummy-docs
 ```
 
-If you are working from the repo checkout, `go run ./cmd/doc-ledger` is the primary fallback. `python main.py` is retained only for differential parity checks. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
+If you are working from the repo checkout, `go run ./cmd/doc-ledger` is the primary fallback. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
 
 ## Fixture Guidance
 
@@ -119,9 +114,7 @@ If you are working from the repo checkout, `go run ./cmd/doc-ledger` is the prim
 ## Related Files
 
 - `docs/make-dummy-docs.sh`
-- `tests/parity_test.go`
+- `tests/regression_test.go`
+- `tests/regression_fixtures_test.go`
 - `internal/reconcile/reconcile_test.go`
 - `internal/watch/watch_test.go`
-- `tests/test_end_to_end.py`
-- `tests/test_public_config_end_to_end.py`
-- `tests/test_watch.py`

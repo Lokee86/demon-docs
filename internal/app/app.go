@@ -19,7 +19,7 @@ import (
 	"github.com/Lokee86/doc-ledger/internal/watch"
 )
 
-const Version = "0.1.1"
+const Version = "0.2.0"
 
 type stringsFlag struct{ values []string }
 

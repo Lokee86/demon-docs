@@ -1,6 +1,6 @@
 module github.com/Lokee86/doc-ledger
 
-go 1.22
+go 1.26.5
 
 require (
 	github.com/BurntSushi/toml v1.4.0

@@ -26,7 +26,7 @@ It preserves hand-authored content outside managed index blocks.
 
 ## Installation
 
-The Go implementation is the primary doc-ledger executable. Install it from a checkout:
+Go is the sole implementation and supported runtime for doc-ledger. Install it from a checkout:
 
 ```bash
 git clone https://github.com/Lokee86/doc-ledger.git
@@ -62,14 +62,13 @@ doc-ledger check --root docs
 
 ## Development
 
-Run the complete local release gate, including the retained Python suite and exact-byte Python/Go parity:
+Run the complete local Go release gate:
 
 ```bash
-python -m pip install -e ".[dev]"
 make release-check
 ```
 
-The release gate runs focused Go tests, the retained Python suite, exact-byte Python/Go parity, `go vet`, an executable build, and CLI smoke checks. GitHub Actions repeats Go and parity coverage on Linux and Windows.
+The release gate runs focused Go tests, the Go CLI fixture regression matrix, `go vet`, an executable build, and CLI smoke checks. GitHub Actions runs the complete Go suite on Linux and Windows.
 
 Build and run directly from the checkout:
 
@@ -86,13 +85,7 @@ doc-ledger check
 doc-ledger watch
 ```
 
-The original Python implementation remains under `doc_ledger/` only as a legacy parity reference. It is not a canonical installed entrypoint. When differential testing requires it, use:
-
-```bash
-python main.py fix
-```
-
-Two intentional corrections from the legacy reference are part of the Go contract: headings and marker-like comments inside fenced code blocks are treated as code, and source files retain their original final-newline state. Both behaviors have focused byte-level tests and are not hidden by parity normalization.
+Two intentional compatibility corrections are part of the Go contract: headings and marker-like comments inside fenced code blocks are treated as code, and source files retain their original final-newline state. Both behaviors have focused byte-level tests.
 
 CLI help is available at the top level and for each subcommand:
 
@@ -492,10 +485,17 @@ For `direnv`, source process startup scripts outside any `set -a` block so helpe
 Run the test suite:
 
 ```bash
-go test ./...
+go test ./... -count=1
 ```
 
-Run only the cross-implementation parity test with `make parity`. The legacy Python suite can still be run with `python -m pytest tests -q`; it is retained to document the pre-port behavior and is not the primary release gate.
+Run the focused Go package tests and the Go CLI fixture regression matrix separately when needed:
+
+```bash
+make test-go
+make regression
+```
+
+The regression matrix retains ten fixture scenarios and validates each with `fix`, a clean successful `check`, a second `fix`, and byte-identical complete fixture trees after the first and second fixes.
 
 Useful manual smoke flow:
 
@@ -550,9 +550,6 @@ Do not commit runtime artifacts:
 bin/
 doc-ledger
 doc-ledger.exe
-__pycache__/
-*.pyc
-.pytest_cache/
 .cache/
 dummy-docs/
 ```

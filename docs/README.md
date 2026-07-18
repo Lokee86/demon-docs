@@ -1,11 +1,17 @@
 # doc-ledger Docs
 
 The repo root [README.md](../README.md) is the starting point for doc-ledger.
-This `docs/` folder holds deeper operational and maintenance references for the tool.
+This `docs/` folder holds deeper design, operational, and maintenance references for the tool.
 
 ## References
 
+- [Roadmap](roadmap.md): Planned implementation order from the deterministic repository graph through the required self-managed daemon and optional LLM assistance.
+- [Deterministic Typed Repository Graph](repository-graph.md): Focused design for the language-neutral deterministic repository graph.
+- [Code-Folder Reverse Indexes](reverse-indexes.md): Focused design for documentation coverage projected onto code targets.
+- [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Focused design for deterministic code facts and bounded entanglement projections.
+- [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Focused design for graph-based agent context retrieval and thin integrations.
 - [Configuration](configuration.md): Config file shape, defaults, and supported overrides.
+- [Code-Symbol References](code-symbol-references.md): Focused Phase 4 design for deterministic declaration-level documentation references and language adapters.
 - [Reconciliation Model](reconciliation-model.md): How doc-ledger scans, plans, and applies index updates.
 - [Watcher and Automation](watcher-and-automation.md): Watch mode behavior, timestamps, PID output, and automation guidance.
 - [Testing and Fixtures](testing-and-fixtures.md): Test layout, fixture strategy, and regression coverage for doc-ledger.
@@ -15,8 +21,14 @@ This `docs/` folder holds deeper operational and maintenance references for the 
 
 <!-- doc-ledger:files:start -->
 
+- [agent-context-and-integrations.md](agent-context-and-integrations.md) - Agent Context And Integrations documentation.
+- [code-dependency-and-entanglement.md](code-dependency-and-entanglement.md) - Code Dependency And Entanglement documentation.
+- [code-symbol-references.md](code-symbol-references.md) - Code Symbol References documentation.
 - [configuration.md](configuration.md) - Configuration documentation.
 - [reconciliation-model.md](reconciliation-model.md) - Reconciliation Model documentation.
+- [repository-graph.md](repository-graph.md) - Repository Graph documentation.
+- [reverse-indexes.md](reverse-indexes.md) - Reverse Indexes documentation.
+- [roadmap.md](roadmap.md) - Roadmap documentation.
 - [testing-and-fixtures.md](testing-and-fixtures.md) - Testing And Fixtures documentation.
 - [watcher-and-automation.md](watcher-and-automation.md) - Watcher And Automation documentation.
 <!-- doc-ledger:files:end -->
@@ -34,4 +46,3 @@ This `docs/` folder holds deeper operational and maintenance references for the 
 ## Notes
 
 - `docs/README.md` is the default docs-tree index file.
-- doc-ledger keeps Python cache files out of commits through `.gitignore` and the repo hygiene test.

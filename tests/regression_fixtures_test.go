@@ -1,4 +1,4 @@
-package parity_test
+package regression_test
 
 import (
 	"os"
@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func parityFixtures() []parityFixture {
-	return []parityFixture{
+func regressionFixtures() []regressionFixture {
+	return []regressionFixture{
 		{name: "defaults", setup: setupDefaults},
 		{name: "custom_index_headings_markers_drafts_non_markdown_editable", setup: setupCustomConfiguration},
 		{name: "direct_to_stub_transition", setup: setupDirectToStub},
