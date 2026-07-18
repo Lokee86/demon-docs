@@ -16,7 +16,7 @@ const FileName = ".docignore"
 
 var permanentDirectories = []string{
 	".git",
-	".demon-docs",
+	".ddocs",
 	".obsidian",
 	"logseq",
 }

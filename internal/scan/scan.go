@@ -15,12 +15,16 @@ import (
 )
 
 func Tree(root string, c config.Config) (model.DocsTree, error) {
+	return TreeWithIgnoreRoot(root, root, c)
+}
+
+func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.DocsTree, error) {
 	abs, err := filepath.Abs(root)
 	if err != nil {
 		return model.DocsTree{}, err
 	}
 	tree := model.DocsTree{Root: filepath.Clean(abs), Folders: map[string]*model.FolderInfo{}}
-	policy, err := ignorepolicy.Load(tree.Root)
+	policy, err := ignorepolicy.Load(ignoreRoot)
 	if err != nil {
 		return model.DocsTree{}, err
 	}
@@ -36,6 +40,9 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 			info.IndexPath = filepath.Join(folder, c.IndexFile)
 		}
 		for _, entry := range entries {
+			if entry.Type()&os.ModeSymlink != 0 {
+				continue
+			}
 			p := filepath.Join(folder, entry.Name())
 			ignored, err := policy.Ignored(p, entry.IsDir())
 			if err != nil {
@@ -72,7 +79,7 @@ func Tree(root string, c config.Config) (model.DocsTree, error) {
 						return err
 					}
 					for _, entry := range stubEntries {
-						if entry.IsDir() {
+						if entry.Type()&os.ModeSymlink != 0 || entry.IsDir() {
 							continue
 						}
 						p := filepath.Join(stubDir, entry.Name())

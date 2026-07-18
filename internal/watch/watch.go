@@ -13,6 +13,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/config"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
+	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
 	"github.com/fsnotify/fsnotify"
 )
@@ -68,6 +69,10 @@ func (s *Scheduler) RunIfPending() (bool, error) {
 }
 
 func Root(ctx context.Context, root string, c config.Config, debounce *float64, once bool, out io.Writer) error {
+	return RootWithIgnoreRoot(ctx, root, root, c, debounce, once, out)
+}
+
+func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.Config, debounce *float64, once bool, out io.Writer) error {
 	if out == nil {
 		out = io.Discard
 	}
@@ -77,11 +82,11 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	}
 	fmt.Fprintf(out, "%s ddocs watch watching %s pid=%d\n", timestamp(), root, os.Getpid())
 	run := func() error {
-		result, err := reconcile.Tree(root, c)
+		result, err := reconcile.TreeWithIgnoreRoot(root, ignoreRoot, c)
 		if err != nil {
 			return err
 		}
-		changed, err := reconcile.Apply(result)
+		changed, err := reconcile.ApplyWithin(result, root)
 		if err != nil {
 			return err
 		}
@@ -97,7 +102,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	if once {
 		return nil
 	}
-	policy, err := ignorepolicy.Load(root)
+	policy, err := ignorepolicy.Load(ignoreRoot)
 	if err != nil {
 		return err
 	}
@@ -107,6 +112,11 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 	}
 	defer w.Close()
 	watchedDirs := map[string]bool{}
+	if filepath.Clean(ignoreRoot) != filepath.Clean(root) {
+		if err := w.Add(ignoreRoot); err != nil {
+			return fmt.Errorf("watch repository root %s: %w", ignoreRoot, err)
+		}
+	}
 	if err := addTree(w, root, root, c, policy, watchedDirs); err != nil {
 		return err
 	}
@@ -136,7 +146,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 				return nil
 			}
 			if policy.IsControlFile(event.Name) {
-				updated, err := ignorepolicy.Load(root)
+				updated, err := ignorepolicy.Load(ignoreRoot)
 				if err != nil {
 					return err
 				}
@@ -147,7 +157,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 				scheduler.MarkChanged()
 				continue
 			}
-			if event.Op&fsnotify.Create != 0 {
+			if event.Op&fsnotify.Create != 0 && repository.Contains(root, event.Name) {
 				if st, err := os.Stat(event.Name); err == nil && st.IsDir() {
 					ignored, err := policy.Ignored(event.Name, true)
 					if err != nil {
@@ -172,7 +182,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 				}
 				relevant = !ignored && !watchIgnored(event.Name, c)
 			} else {
-				relevant = relevantWithPolicy(event.Name, c, policy)
+				relevant = relevantWithPolicy(event.Name, c, policy, root)
 			}
 			if relevant {
 				scheduler.MarkChanged()
@@ -214,13 +224,20 @@ func addTree(w eventWatcher, root, start string, c config.Config, policy ignorep
 }
 
 func Relevant(path string, c config.Config, root string) bool {
-	policy, err := ignorepolicy.Load(root)
-	return err == nil && relevantWithPolicy(path, c, policy)
+	return RelevantWithIgnoreRoot(path, c, root, root)
 }
 
-func relevantWithPolicy(path string, c config.Config, policy ignorepolicy.Policy) bool {
+func RelevantWithIgnoreRoot(path string, c config.Config, root, ignoreRoot string) bool {
+	policy, err := ignorepolicy.Load(ignoreRoot)
+	return err == nil && relevantWithPolicy(path, c, policy, root)
+}
+
+func relevantWithPolicy(path string, c config.Config, policy ignorepolicy.Policy, root string) bool {
 	if policy.IsControlFile(path) {
 		return true
+	}
+	if !repository.Contains(root, path) {
+		return false
 	}
 	ignored, err := policy.Ignored(path, false)
 	if err != nil || ignored || watchIgnored(path, c) {
@@ -230,7 +247,7 @@ func relevantWithPolicy(path string, c config.Config, policy ignorepolicy.Policy
 		ignored, err := policy.Ignored(path, true)
 		return err == nil && !ignored
 	}
-	ok, err := scan.IsIndexable(policy.Root(), path, c)
+	ok, err := scan.IsIndexable(root, path, c)
 	return err == nil && ok
 }
 

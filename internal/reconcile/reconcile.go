@@ -13,12 +13,17 @@ import (
 	md "github.com/Lokee86/demon-docs/internal/markdown"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/pathutil"
+	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
 func Tree(root string, c config.Config) (model.ReconcileResult, error) {
-	tree, err := scan.Tree(root, c)
+	return TreeWithIgnoreRoot(root, root, c)
+}
+
+func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.ReconcileResult, error) {
+	tree, err := scan.TreeWithIgnoreRoot(root, ignoreRoot, c)
 	if err != nil {
 		return model.ReconcileResult{}, err
 	}
@@ -139,6 +144,19 @@ func Tree(root string, c config.Config) (model.ReconcileResult, error) {
 }
 
 func Apply(result model.ReconcileResult) (int, error) {
+	return apply(result)
+}
+
+func ApplyWithin(result model.ReconcileResult, root string) (int, error) {
+	for _, update := range result.Updates {
+		if !repository.Contains(root, update.Path) {
+			return 0, fmt.Errorf("refusing to write outside docs root: %s", update.Path)
+		}
+	}
+	return apply(result)
+}
+
+func apply(result model.ReconcileResult) (int, error) {
 	changed := 0
 	for _, u := range result.Updates {
 		if u.OldText != nil && *u.OldText == u.NewText {

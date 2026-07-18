@@ -14,12 +14,14 @@ func TestCommandHelpContract(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"--help"}, []string{"ddocs reconciles local index files with a file tree.", "ddocs config paths", "ddocs --version"}},
-		{[]string{"fix", "-h"}, []string{"Reconcile the docs tree and write any needed updates.", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", "./.demon-docs.toml", "./.doc-ledger.toml", "there is no upward parent-directory search"}},
+		{[]string{"--help"}, []string{"ddocs reconciles local index files with a file tree.", "ddocs init --root docs", "ddocs config paths", "ddocs --version"}},
+		{[]string{"init", "--help"}, []string{"Initialize a Demon Docs repository", "--root PATH", ".ddocs/config.toml", "must already exist"}},
+		{[]string{"status", "--help"}, []string{"Show the Demon Docs repository", "usage: ddocs status"}},
+		{[]string{"fix", "-h"}, []string{"Reconcile the docs tree and write any needed updates.", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", ".ddocs/config.toml", "./.demon-docs.toml", "./.doc-ledger.toml", "repository config is discovered by searching upward"}},
 		{[]string{"check", "--help"}, []string{"Verify that the docs tree is already reconciled.", "--root PATH", "--no-parent-link-indexed-files", "CLI flags override the selected config"}},
 		{[]string{"watch", "-h"}, []string{"Watch runs in the foreground by default", "--once", "--debounce-seconds FLOAT", "run one reconciliation pass and exit"}},
-		{[]string{"config", "-h"}, []string{"paths", "show", "init", "Local config lookup is current-directory only.", "There is no upward parent-directory search."}},
-		{[]string{"config", "paths", "-h"}, []string{"current-directory local config", ".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml", "global user config path", "selected config path"}},
+		{[]string{"config", "-h"}, []string{"paths", "show", "init", ".ddocs/config.toml", "Legacy local config lookup remains current-directory only."}},
+		{[]string{"config", "paths", "-h"}, []string{"repository", ".ddocs/config.toml", ".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml", "Global config candidates"}},
 		{[]string{"config", "show", "--help"}, []string{"resolved selected config", "--config PATH", "--no-local-config", "--no-global-config"}},
 		{[]string{"config", "init", "-h"}, []string{"global user config location", ".demon-docs.toml", "--local", "--global", "--force"}},
 	}

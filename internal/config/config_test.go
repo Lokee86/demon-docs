@@ -51,11 +51,21 @@ func TestSelectionIsCurrentDirectoryOnly(t *testing.T) {
 	}
 }
 func TestStarterConfigLoads(t *testing.T) {
-	p := filepath.Join(t.TempDir(), "config.toml")
-	if err := os.WriteFile(p, []byte(StarterText()), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := Load(p); err != nil {
-		t.Fatal(err)
+	dir := t.TempDir()
+	for name, text := range map[string]string{
+		"legacy.toml": StarterText(),
+		"repo.toml":   RepositoryStarterText("manual"),
+	} {
+		p := filepath.Join(dir, name)
+		if err := os.WriteFile(p, []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err := Load(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if name == "repo.toml" && loaded.Root != "manual" {
+			t.Fatalf("docs_root not loaded: %+v", loaded)
+		}
 	}
 }

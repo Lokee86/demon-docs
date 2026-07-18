@@ -4,6 +4,14 @@ Demon Docs is configured with TOML. The primary config model lives in `internal/
 
 CLI help is available with `ddocs --help`, and each subcommand also supports `--help`.
 Top-level version output is available with `ddocs -v` or `ddocs --version`.
+Initialize a repository from its root directory:
+
+```bash
+ddocs init --root docs/
+```
+
+This creates `.ddocs/config.toml`. Commands run anywhere below that directory search upward for `.ddocs/`, treat its parent as the repository root, and resolve the configured docs root from there. `ddocs status` prints the resolved repository, docs root, config, and `.docignore` paths.
+
 The `config` subcommand provides:
 
 - `ddocs config paths`
@@ -15,7 +23,8 @@ The `config` subcommand provides:
 
 The supported keys are:
 
-- `root`
+- `docs_root`
+- `root` as a legacy standalone-config alias
 - `index_file`
 - `[markers].prefix`
 - `[parent_link].label`
@@ -49,14 +58,15 @@ Demon Docs selects one base config before applying command-specific CLI override
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.demon-docs.toml`
-3. current-directory `demon-docs.toml`
-4. legacy local compatibility fallbacks
-5. canonical global user config at `demon-docs/config.toml`
-6. legacy global compatibility fallback at `doc-ledger/config.toml`
-7. built-in defaults
+2. nearest `.ddocs/config.toml`, found by searching upward
+3. current-directory `.demon-docs.toml`
+4. current-directory `demon-docs.toml`
+5. legacy local compatibility fallbacks
+6. canonical global user config at `demon-docs/config.toml`
+7. legacy global compatibility fallback at `doc-ledger/config.toml`
+8. built-in defaults
 
-There is no upward parent-directory search and no merge between local and global config files.
+Repository config is discovered upward. Legacy standalone local configs remain current-directory only. Local and global config files are not merged.
 
 Compatibility fallbacks remain supported at lower priority:
 
@@ -64,10 +74,10 @@ Compatibility fallbacks remain supported at lower priority:
 - `doc-ledger.toml`
 - `doc-ledger/config.toml`
 
-`--root` still overrides the selected base config root.
+`--root` still overrides the selected docs root for `fix`, `check`, and `watch`.
 
 `ddocs config show` prints the selected base config.
-`ddocs config paths` prints the current-directory local config candidates and the global user config path.
+`ddocs config paths` prints the discovered repository config, current-directory legacy candidates, and global user config paths.
 `ddocs config init --local` writes `.demon-docs.toml` in the current directory.
 `ddocs config init --global` writes the global config file and creates parent directories as needed.
 
@@ -91,7 +101,7 @@ ddocs fix --root docs --no-parent-link-indexed-files
 The defaults reflect the standalone repo behavior:
 
 ```toml
-root = "docs"
+docs_root = "docs"
 index_file = "README.md"
 
 [markers]
@@ -142,13 +152,15 @@ include_related_docs = true
 include_notes = true
 ```
 
-## `root`
+## `docs_root` and legacy `root`
 
-`root` sets the docs tree root.
+`docs_root` sets the documentation tree relative to the repository root containing `.ddocs/`.
 
-- Default: `docs`
-- Used when `--root` is omitted and no config override is provided
-- `--root` always overrides the selected config root
+- `ddocs init --root docs/` writes `docs_root = "docs"`
+- Commands can run from any descendant of the repository root
+- `--root` overrides the selected docs root for a single command, resolves relative to the repository root, and cannot escape it
+
+Legacy standalone config files may continue using `root`; both keys load into the same docs-root setting, with `docs_root` taking precedence when both are present.
 
 ## `index_file`
 
@@ -266,32 +278,32 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-A root-level `.docignore` file excludes paths from all Demon Docs filesystem traversal, including `fix`, `check`, and `watch`.
+An initialized repository owns one `.docignore` file at its repository root, beside `.ddocs/`. It excludes paths from all Demon Docs filesystem traversal, including `fix`, `check`, and `watch`.
 
-Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the managed root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
+Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
 Example:
 
 ```gitignore
-# Generated exports
-/generated/
+# Generated exports inside docs/
+/docs/generated/
 
-# Private working files
-*.private.md
-scratch/**
+# Private working files below docs/
+docs/**/*.private.md
+docs/scratch/**
 
 # Re-include one file from an ignored pattern
-!scratch/README.md
+!docs/scratch/README.md
 ```
 
 The following directory names are permanently excluded at any depth and cannot be re-included with `!`:
 
 - `.git/`
-- `.demon-docs/`
+- `.ddocs/`
 - `.obsidian/`
 - `logseq/`
 
-Watch mode reloads `.docignore` when it changes and adds watches for directories that become visible.
+Watch mode watches the repository root for `.docignore` changes, reloads the rules, and adds watches for directories that become visible.
 
 ## `[editable].parent_index_extensions`
 

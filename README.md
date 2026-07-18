@@ -55,16 +55,17 @@ demon --version
 
 ## Quick Start
 
-From the `Demon Docs` repo:
+From the root of the repository you want Demon Docs to manage:
 
 ```bash
-ddocs fix --root docs
-ddocs check --root docs
+ddocs init --root docs/
+ddocs fix
+ddocs check
 ```
 
-`fix` writes needed updates.
+`init` creates `.ddocs/config.toml`, records `docs/` as the docs root, and makes the current directory the repository root.
 
-`check` verifies the same reconciliation without writing files.
+`fix` writes needed updates. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
 
 ## Development
 
@@ -107,6 +108,8 @@ CLI help is available at the top level and for each subcommand:
 ddocs --help
 ddocs -v
 ddocs --version
+ddocs init --help
+ddocs status --help
 ddocs fix --help
 ddocs check --help
 ddocs watch --help
@@ -131,19 +134,31 @@ marker prefix:   doc-ledger
 ## Commands
 
 ```bash
-ddocs fix --root docs
+ddocs init --root docs/
+```
+
+Initializes the current directory as the repository root and writes `.ddocs/config.toml`. The specified docs root must already exist inside the repository.
+
+```bash
+ddocs status
+```
+
+Shows the detected repository root, docs root, config path, and repository-owned `.docignore` path.
+
+```bash
+ddocs fix
 ```
 
 Reconciles the docs tree and writes updates.
 
 ```bash
-ddocs check --root docs
+ddocs check
 ```
 
 Verifies that the docs tree is already reconciled. Returns non-zero if `fix` would change files.
 
 ```bash
-ddocs watch --root docs
+ddocs watch
 ```
 
 Runs one reconciliation immediately, then watches the docs tree for relevant filesystem changes.
@@ -177,16 +192,17 @@ Demon Docs selects one base config before applying command-specific CLI override
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.demon-docs.toml`
-3. current-directory `demon-docs.toml`
-4. legacy local compatibility fallbacks
-5. canonical global user config at `demon-docs/config.toml`
-6. legacy global compatibility fallback at `doc-ledger/config.toml`
-7. built-in defaults
+2. nearest `.ddocs/config.toml`, found by searching upward
+3. current-directory `.demon-docs.toml`
+4. current-directory `demon-docs.toml`
+5. legacy local compatibility fallbacks
+6. canonical global user config at `demon-docs/config.toml`
+7. legacy global compatibility fallback at `doc-ledger/config.toml`
+8. built-in defaults
 
-There is no upward parent-directory search and no merge between local and global config files.
+Repository config is discovered upward. Legacy standalone local configs remain current-directory only. Local and global config files are not merged.
 
-`--root` still overrides the selected base config root.
+`--root` still overrides the selected docs root for a single command. In an initialized repository, relative overrides resolve from the repository root and cannot escape it.
 
 CLI override examples:
 
@@ -326,7 +342,15 @@ If a stale entry no longer maps to a current file or folder, `Demon Docs` remove
 
 ## Configuration
 
-`Demon Docs` looks for config files named:
+The canonical repository config is:
+
+```text
+.ddocs/config.toml
+```
+
+It is created by `ddocs init --root <docs-root>` and discovered by searching upward from the current directory.
+
+Legacy standalone and global configs remain supported:
 
 ```text
 .demon-docs.toml
@@ -345,24 +369,22 @@ doc-ledger/config.toml
 Selection order:
 
 1. `--config PATH`
-2. current-directory `.demon-docs.toml`
-3. current-directory `demon-docs.toml`
-4. legacy local compatibility fallbacks
-5. canonical global user config at `demon-docs/config.toml`
-6. legacy global compatibility fallback at `doc-ledger/config.toml`
-7. built-in defaults
+2. nearest `.ddocs/config.toml`, found by searching upward
+3. current-directory `.demon-docs.toml`
+4. current-directory `demon-docs.toml`
+5. legacy local compatibility fallbacks
+6. canonical global user config at `demon-docs/config.toml`
+7. legacy global compatibility fallback at `doc-ledger/config.toml`
+8. built-in defaults
 
-Local config lookup is current-directory only.
-There is no upward parent-directory search.
-Local and global config files are not merged.
-CLI flags override the selected config.
+Repository config is discovered upward. Legacy local config lookup is current-directory only. Local and global config files are not merged. CLI flags override the selected config.
 
-`--root` overrides the configured root.
+`--root` overrides the configured docs root.
 
-Minimal config:
+Minimal repository config:
 
 ```toml
-root = "docs"
+docs_root = "docs"
 index_file = "README.md"
 
 [parent_link]
@@ -441,28 +463,30 @@ parent_index_extensions = [".md", ".mdx"]
 
 ## Ignoring paths
 
-Place `.docignore` at the managed root to exclude files and directories from `fix`, `check`, and `watch`. It uses Git ignore syntax and is independent from `.gitignore`.
+Place `.docignore` at the repository root, beside `.ddocs/`, to exclude files and directories from `fix`, `check`, and `watch`. It uses Git ignore syntax and is independent from `.gitignore`.
+
+Patterns are relative to the repository root. Legacy standalone configurations continue treating the docs root as the ignore root.
 
 ```gitignore
-# Generated exports
-/generated/
+# Generated exports inside the docs root
+/docs/generated/
 
-# Private notes
-*.private.md
-scratch/**
-!scratch/README.md
+# Private notes anywhere below docs/
+docs/**/*.private.md
+docs/scratch/**
+!docs/scratch/README.md
 ```
 
 These directory names are always pruned at any depth and cannot be re-included:
 
 ```text
 .git/
-.demon-docs/
+.ddocs/
 .obsidian/
 logseq/
 ```
 
-Watch mode reloads `.docignore` when the file changes.
+Watch mode watches and reloads the repository-root `.docignore` even when the docs root is a nested directory.
 
 ## Watch mode
 
@@ -552,8 +576,9 @@ The regression matrix retains ten fixture scenarios and validates each with `fix
 Useful manual smoke flow:
 
 ```bash
-ddocs fix --root docs
-ddocs check --root docs
+ddocs init --root docs/
+ddocs fix
+ddocs check
 ```
 
 For fixture stress testing, see:
@@ -575,7 +600,7 @@ That script generates a synthetic documentation tree for manual reconciliation t
 - inspect Git status
 - guarantee perfect rename detection
 
-It only reconciles the filesystem against the configured index model.
+It only reconciles the configured docs root against the index model. Planned writes are rejected if they resolve outside that docs root, and symbolic-link entries are not traversed or edited.
 
 ## Using `!README.md`
 

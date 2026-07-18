@@ -8,14 +8,14 @@ import (
 
 func TestPermanentDirectoriesCannotBeReincluded(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, FileName), []byte("!.git/\n!.demon-docs/\n!.obsidian/\n!logseq/\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, FileName), []byte("!.git/\n!.ddocs/\n!.obsidian/\n!logseq/\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	policy, err := Load(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, rel := range []string{".git/config", ".demon-docs/index.db", ".obsidian/workspace.json", "logseq/config.edn", "nested/.git/config"} {
+	for _, rel := range []string{".git/config", ".ddocs/config.toml", ".obsidian/workspace.json", "logseq/config.edn", "nested/.git/config"} {
 		ignored, err := policy.Ignored(filepath.Join(root, filepath.FromSlash(rel)), false)
 		if err != nil {
 			t.Fatal(err)

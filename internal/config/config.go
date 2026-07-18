@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
+	"github.com/Lokee86/demon-docs/internal/repository"
 )
 
 const DefaultIndexFile = "README.md"
@@ -58,11 +60,20 @@ func Default() Config {
 }
 
 func StarterText() string {
-	return "root = \"docs\"\nindex_file = \"README.md\"\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "root = \"docs\"\n" + starterBody()
+}
+
+func RepositoryStarterText(docsRoot string) string {
+	return "docs_root = " + strconv.Quote(docsRoot) + "\n" + starterBody()
+}
+
+func starterBody() string {
+	return "index_file = \"README.md\"\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
 	Root      *string `toml:"root"`
+	DocsRoot  *string `toml:"docs_root"`
 	IndexFile *string `toml:"index_file"`
 	Markers   *struct {
 		Prefix *string `toml:"prefix"`
@@ -116,6 +127,9 @@ func Load(path string) (Config, error) {
 	}
 	if raw.Root != nil {
 		c.Root = *raw.Root
+	}
+	if raw.DocsRoot != nil {
+		c.Root = *raw.DocsRoot
 	}
 	if raw.IndexFile != nil {
 		c.IndexFile = *raw.IndexFile
@@ -265,6 +279,9 @@ func Select(cwd, explicit string, noLocal, noGlobal bool, env func(string) strin
 		return explicit
 	}
 	if !noLocal {
+		if location, ok := repository.Discover(cwd); ok {
+			return location.ConfigPath
+		}
 		if p := LocalPath(cwd); p != "" {
 			return p
 		}

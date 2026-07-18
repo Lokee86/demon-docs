@@ -14,8 +14,8 @@ import (
 	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/config"
-	"github.com/Lokee86/demon-docs/internal/pathutil"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
+	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/watch"
 )
 
@@ -96,7 +96,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {fix,check,watch,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -109,22 +109,133 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 0
 	}
 	switch args[0] {
+	case "init":
+		return runInit(args[1:], out, errOut)
+	case "status":
+		return runStatus(args[1:], out, errOut)
 	case "fix", "check", "watch":
 		return runTree(ctx, args[0], args[1:], out, errOut)
 	case "config":
 		return runConfig(args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {fix,check,watch,config} ...")
-		choices := "fix, check, watch, config"
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
+		choices := "init, status, fix, check, watch, config"
 		if runtime.GOOS == "windows" {
-			choices = "'fix', 'check', 'watch', 'config'"
+			choices = "'init', 'status', 'fix', 'check', 'watch', 'config'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {fix,check,watch,config} ...\n\nddocs reconciles local index files with a file tree.\n\npositional arguments:\n  {fix,check,watch,config}\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs check --root docs\n  ddocs watch --root docs\n  ddocs fix --config .demon-docs.toml\n  ddocs --version")
+	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...\n\nddocs reconciles local index files with a file tree.\n\npositional arguments:\n  {init,status,fix,check,watch,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
+}
+
+func initHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs init [-h] --root PATH\n\nInitialize a Demon Docs repository in the current directory.\n\noptions:\n  -h, --help   show this help message and exit\n  --root PATH  docs root, relative to the repository root\n\nThe command creates .ddocs/config.toml. The current directory becomes the repository root, and the docs root must already exist inside it.")
+}
+
+func runInit(args []string, out, errOut io.Writer) int {
+	if helpRequested(args) {
+		initHelp(out)
+		return 0
+	}
+	fs := flag.NewFlagSet("ddocs init", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	var root optionalString
+	fs.Var(&root, "root", "docs root, relative to the repository root")
+	if err := fs.Parse(args); err != nil {
+		writeInitParseError(errOut, err)
+		return 2
+	}
+	if fs.NArg() != 0 {
+		writeUnrecognized(errOut, fs.Args())
+		return 2
+	}
+	if !root.set {
+		fmt.Fprintln(errOut, "usage: ddocs init [-h] --root PATH")
+		fmt.Fprintln(errOut, "ddocs init: error: the following arguments are required: --root")
+		return 2
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fail(errOut, err)
+	}
+	cwd, err = filepath.Abs(cwd)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	if existing, ok := repository.FindMarker(cwd); ok {
+		fmt.Fprintf(errOut, "ddocs error: demon-docs repository already initialized at %s\n", existing)
+		return 2
+	}
+	relative, absolute, err := repository.ResolveDocsRoot(cwd, root.value)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	info, err := os.Stat(absolute)
+	if err != nil || !info.IsDir() {
+		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", absolute)
+		return 2
+	}
+	configPath, err := repository.Initialize(cwd, config.RepositoryStarterText(relative))
+	if err != nil {
+		return fail(errOut, err)
+	}
+	fmt.Fprintf(out, "initialized demon-docs repository at %s\nconfig: %s\ndocs root: %s\n", cwd, configPath, relative)
+	return 0
+}
+
+func statusHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs status [-h]\n\nShow the Demon Docs repository detected from the current directory.\n\noptions:\n  -h, --help  show this help message and exit")
+}
+
+func runStatus(args []string, out, errOut io.Writer) int {
+	if helpRequested(args) {
+		statusHelp(out)
+		return 0
+	}
+	if len(args) != 0 {
+		writeUnrecognized(errOut, args)
+		return 2
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fail(errOut, err)
+	}
+	location, ok := repository.Discover(cwd)
+	if !ok {
+		fmt.Fprintln(errOut, "ddocs error: no Demon Docs repository found")
+		return 2
+	}
+	resolved, err := config.Load(location.ConfigPath)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	scope, err := repository.ResolveScope(repository.ScopeOptions{
+		WorkingDirectory: cwd,
+		ConfigPath:       location.ConfigPath,
+		ConfiguredRoot:   resolved.Root,
+	})
+	if err != nil {
+		return fail(errOut, err)
+	}
+	fmt.Fprintf(out, "repository root = %s\ndocs root = %s\nconfig = %s\ndocignore = %s\ndocs root exists = %t\ndocignore exists = %t\n", scope.RepositoryRoot, scope.DocsRoot, scope.ConfigPath, scope.IgnorePath, repository.DocsRootExists(scope), pathExists(scope.IgnorePath))
+	return 0
+}
+
+func writeInitParseError(w io.Writer, err error) {
+	message := err.Error()
+	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
+		writeUnrecognized(w, []string{"--" + match[1]})
+		return
+	}
+	fmt.Fprintln(w, "usage: ddocs init [-h] --root PATH")
+	if match := missingValuePattern.FindStringSubmatch(message); match != nil {
+		fmt.Fprintf(w, "ddocs init: error: argument --%s: expected one argument\n", match[1])
+		return
+	}
+	fmt.Fprintf(w, "ddocs init: error: %s\n", message)
 }
 
 func treeUsage(command string) string {
@@ -167,7 +278,7 @@ func treeHelp(w io.Writer, command string) {
 	if command == "watch" {
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 	}
-	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  --root PATH           docs root directory to reconcile\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nConfig selection order:\n  1. --config PATH\n  2. ./.demon-docs.toml\n  3. ./demon-docs.toml\n  4. ./.doc-ledger.toml\n  5. ./doc-ledger.toml\n  6. global user config (demon-docs, then doc-ledger compatibility)\n  7. built-in defaults\n\nConfig rules:\n  - local config is current-directory only\n  - there is no upward parent-directory search\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions)
+	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  --root PATH           docs root directory to reconcile\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions)
 }
 
 var (
@@ -180,7 +291,7 @@ var (
 func writeTreeParseError(w io.Writer, command string, err error) {
 	message := err.Error()
 	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
-		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {fix,check,watch,config} ...")
+		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
 		fmt.Fprintf(w, "ddocs: error: unrecognized arguments: --%s\n", match[1])
 		return
 	}
@@ -234,7 +345,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {fix,check,watch,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
 		fmt.Fprintf(errOut, "ddocs: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
@@ -243,12 +354,12 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return code
 	}
 	applyOverrides(&c, flags)
-	root, err := resolveRoot(flags.root, c.Root, path)
+	scope, err := resolveScope(flags.root, c.Root, path)
 	if err != nil {
 		return fail(errOut, err)
 	}
-	if st, err := os.Stat(root); err != nil || !st.IsDir() {
-		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", root)
+	if !repository.DocsRootExists(scope) {
+		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", scope.DocsRoot)
 		return 2
 	}
 	if command == "watch" {
@@ -256,17 +367,17 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		if debounce >= 0 {
 			d = &debounce
 		}
-		if err := watch.Root(ctx, root, c, d, once, out); err != nil {
+		if err := watch.RootWithIgnoreRoot(ctx, scope.DocsRoot, scope.RepositoryRoot, c, d, once, out); err != nil {
 			return fail(errOut, err)
 		}
 		return 0
 	}
-	result, err := reconcile.Tree(root, c)
+	result, err := reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
 	if err != nil {
 		return fail(errOut, err)
 	}
 	if command == "fix" {
-		changed, err := reconcile.Apply(result)
+		changed, err := reconcile.ApplyWithin(result, scope.DocsRoot)
 		if err != nil {
 			return fail(errOut, err)
 		}
@@ -342,23 +453,27 @@ func applyOverrides(c *config.Config, f commonFlags) {
 		c.ParentLink.IndexedFiles = f.fileLinks.value
 	}
 }
-func resolveRoot(arg optionalString, configured, configPath string) (string, error) {
-	if arg.set {
-		return pathutil.Resolve(arg.value, "")
+func resolveScope(arg optionalString, configured, configPath string) (repository.Scope, error) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return repository.Scope{}, err
 	}
-	if configPath != "" {
-		return pathutil.Resolve(configured, filepath.Dir(configPath))
-	}
-	return pathutil.Resolve(configured, "")
+	return repository.ResolveScope(repository.ScopeOptions{
+		WorkingDirectory: cwd,
+		ConfigPath:       configPath,
+		ConfiguredRoot:   configured,
+		RootOverride:     arg.value,
+		HasRootOverride:  arg.set,
+	})
 }
 func fail(w io.Writer, err error) int { fmt.Fprintf(w, "ddocs error: %v\n", err); return 2 }
 
 func configHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs config [-h] {paths,show,init} ...\n\nInspect current-directory local config lookup and show the resolved selected config.\n\npositional arguments:\n  {paths,show,init}\n    paths            show config path candidates\n    show             show the resolved selected config\n    init             write a starter config file\n\noptions:\n  -h, --help         show this help message and exit\n\nLocal config lookup is current-directory only.\nThere is no upward parent-directory search.\nLocal and global configs are not merged.\nCLI flags override the selected config.\n\nSubcommands:\n  paths  print local, global, and selected config paths\n  show   print the resolved selected config\n  init   write a starter local or global config")
+	fmt.Fprintln(w, "usage: ddocs config [-h] {paths,show,init} ...\n\nInspect config discovery and show the resolved selected config.\n\npositional arguments:\n  {paths,show,init}\n    paths            show config path candidates\n    show             show the resolved selected config\n    init             write a legacy standalone config file\n\noptions:\n  -h, --help         show this help message and exit\n\nRepository config is discovered by searching upward for .ddocs/config.toml.\nLegacy local config lookup remains current-directory only.\nLocal and global configs are not merged.\nCLI flags override the selected config.\n\nSubcommands:\n  paths  print repository, local, global, and selected config paths\n  show   print the resolved selected config\n  init   write a legacy standalone local or global config")
 }
 
 func configPathsHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs config paths [-h]\n\nPrint the current-directory local config, global user config, and selected config paths.\n\noptions:\n  -h, --help  show this help message and exit\n\nThis reports the current-directory canonical config candidates first, then the legacy local candidates, the canonical global user config path, its legacy fallback, and the selected config path.\n\nLocal config candidates:\n  ./.demon-docs.toml\n  ./demon-docs.toml\n  ./.doc-ledger.toml\n  ./doc-ledger.toml\n\nGlobal config candidates:\n  demon-docs/config.toml\n  doc-ledger/config.toml")
+	fmt.Fprintln(w, "usage: ddocs config paths [-h]\n\nPrint repository, local, global, and selected config paths.\n\noptions:\n  -h, --help  show this help message and exit\n\nRepository config:\n  nearest .ddocs/config.toml found by searching upward\n\nLegacy local config candidates:\n  ./.demon-docs.toml\n  ./demon-docs.toml\n  ./.doc-ledger.toml\n  ./doc-ledger.toml\n\nGlobal config candidates:\n  demon-docs/config.toml\n  doc-ledger/config.toml")
 }
 
 func configShowHelp(w io.Writer) {
@@ -370,7 +485,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {fix,check,watch,config} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"
@@ -440,10 +555,15 @@ func runConfig(args []string, out, errOut io.Writer) int {
 		legacyDot := filepath.Join(cwd, ".doc-ledger.toml")
 		legacyPlain := filepath.Join(cwd, "doc-ledger.toml")
 		local := config.LocalPath(cwd)
+		repositoryRoot, repositoryConfig := "", ""
+		if location, ok := repository.Discover(cwd); ok {
+			repositoryRoot = location.Root
+			repositoryConfig = location.ConfigPath
+		}
 		global := config.GlobalPath(os.Getenv, home)
 		legacyGlobal := config.LegacyGlobalPath(os.Getenv, home)
 		selected := config.Select(cwd, "", false, false, os.Getenv, home)
-		fmt.Fprintf(out, "cwd = %s\nlocal dot config = %s exists=%s\nlocal plain config = %s exists=%s\nlegacy local dot config = %s exists=%s\nlegacy local plain config = %s exists=%s\nselected local config = %s\nglobal config = %s exists=%s\nlegacy global config = %s exists=%s\nselected config = %s\n", cwd, dot, existsText(dot), plain, existsText(plain), legacyDot, existsText(legacyDot), legacyPlain, existsText(legacyPlain), none(local), global, existsText(global), legacyGlobal, existsText(legacyGlobal), none(selected))
+		fmt.Fprintf(out, "cwd = %s\nrepository root = %s\nrepository config = %s\nlocal dot config = %s exists=%s\nlocal plain config = %s exists=%s\nlegacy local dot config = %s exists=%s\nlegacy local plain config = %s exists=%s\nselected local config = %s\nglobal config = %s exists=%s\nlegacy global config = %s exists=%s\nselected config = %s\n", cwd, none(repositoryRoot), none(repositoryConfig), dot, existsText(dot), plain, existsText(plain), legacyDot, existsText(legacyDot), legacyPlain, existsText(legacyPlain), none(local), global, existsText(global), legacyGlobal, existsText(legacyGlobal), none(selected))
 		return 0
 	case "show":
 		if helpRequested(args[1:]) {
@@ -551,9 +671,13 @@ func helpRequested(args []string) bool {
 	return false
 }
 
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 func existsText(p string) string {
-	_, err := os.Stat(p)
-	if err == nil {
+	if pathExists(p) {
 		return "True"
 	}
 	return "False"
@@ -580,5 +704,5 @@ func show(w io.Writer, c config.Config, path string) {
 	if selected == "" {
 		selected = "<built-in defaults>"
 	}
-	fmt.Fprintf(w, "selected_config_path = %s\nroot = %s\nindex_file = %s\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
 }

@@ -22,7 +22,7 @@ func TestVersionAndUnknownCommandExitCodes(t *testing.T) {
 }
 
 func TestHelpUsesStdoutAndSuccess(t *testing.T) {
-	for _, args := range [][]string{{"--help"}, {"fix", "--help"}, {"config", "paths", "--help"}, {"config", "show", "--help"}, {"config", "init", "--help"}} {
+	for _, args := range [][]string{{"--help"}, {"init", "--help"}, {"status", "--help"}, {"fix", "--help"}, {"config", "paths", "--help"}, {"config", "show", "--help"}, {"config", "init", "--help"}} {
 		var out, errOut bytes.Buffer
 		if code := Run(context.Background(), args, &out, &errOut); code != 0 || out.Len() == 0 || errOut.Len() != 0 {
 			t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), errOut.String())
@@ -31,7 +31,7 @@ func TestHelpUsesStdoutAndSuccess(t *testing.T) {
 }
 
 func TestMissingCommandAndUnexpectedArgumentsFail(t *testing.T) {
-	for _, args := range [][]string{nil, {"fix", "extra"}, {"config", "paths", "extra"}, {"config", "show", "extra"}, {"config", "init", "--local", "extra"}, {"config", "init", "--local", "--global"}} {
+	for _, args := range [][]string{nil, {"status", "extra"}, {"fix", "extra"}, {"config", "paths", "extra"}, {"config", "show", "extra"}, {"config", "init", "--local", "extra"}, {"config", "init", "--local", "--global"}} {
 		var out, errOut bytes.Buffer
 		if code := Run(context.Background(), args, &out, &errOut); code != 2 || errOut.Len() == 0 {
 			t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), errOut.String())
@@ -79,6 +79,106 @@ func TestCheckReportsDriftWithoutWriting(t *testing.T) {
 		t.Fatal("check wrote index")
 	}
 }
+func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
+	repoRoot := t.TempDir()
+	docsRoot := filepath.Join(repoRoot, "docs")
+	child := filepath.Join(docsRoot, "guide")
+	if err := os.MkdirAll(child, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(docsRoot, "page.md"), []byte("# Page\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(docsRoot, "ignored.md"), []byte("# Ignored\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	outsidePath := filepath.Join(repoRoot, "outside.md")
+	outsideText := "# Outside\n"
+	if err := os.WriteFile(outsidePath, []byte(outsideText), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	withWorkingDirectory(t, repoRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs/"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		configText, err := os.ReadFile(filepath.Join(repoRoot, ".ddocs", "config.toml"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(configText), `docs_root = "docs"`) {
+			t.Fatalf("config=%q", string(configText))
+		}
+		if err := os.WriteFile(filepath.Join(repoRoot, ".docignore"), []byte("/docs/ignored.md\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	withWorkingDirectory(t, child, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 0 {
+			t.Fatalf("fix code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		rootIndex := filepath.Join(docsRoot, "README.md")
+		if _, err := os.Stat(rootIndex); err != nil {
+			t.Fatal(err)
+		}
+		indexText, err := os.ReadFile(rootIndex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(indexText), "ignored.md") {
+			t.Fatalf("repository-level .docignore was not applied: %s", indexText)
+		}
+		outsideAfter, err := os.ReadFile(outsidePath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(outsideAfter) != outsideText {
+			t.Fatalf("outside file changed: %q", outsideAfter)
+		}
+		if _, err := os.Stat(filepath.Join(repoRoot, "README.md")); !os.IsNotExist(err) {
+			t.Fatal("repository root was reconciled instead of docs root")
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"status"}, &out, &errOut); code != 0 {
+			t.Fatalf("status code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		for _, value := range []string{"repository root = " + repoRoot, "docs root = " + docsRoot, "config = " + filepath.Join(repoRoot, ".ddocs", "config.toml"), "docignore = " + filepath.Join(repoRoot, ".docignore"), "docs root exists = true", "docignore exists = true"} {
+			if !strings.Contains(out.String(), value) {
+				t.Errorf("status missing %q:\n%s", value, out.String())
+			}
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"init", "--root", "."}, &out, &errOut); code != 2 || !strings.Contains(errOut.String(), "already initialized") {
+			t.Fatalf("reinit code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+	})
+}
+
+func TestStatusFailsOutsideRepository(t *testing.T) {
+	withWorkingDirectory(t, t.TempDir(), func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"status"}, &out, &errOut); code != 2 || !strings.Contains(errOut.String(), "no Demon Docs repository found") {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+	})
+}
+
+func TestInitRequiresExistingDocsRoot(t *testing.T) {
+	withWorkingDirectory(t, t.TempDir(), func(string) {
+		for _, args := range [][]string{{"init"}, {"init", "--root", "missing"}} {
+			var out, errOut bytes.Buffer
+			if code := Run(context.Background(), args, &out, &errOut); code != 2 {
+				t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), errOut.String())
+			}
+		}
+	})
+}
+
 func TestConfigInitAndShow(t *testing.T) {
 	cwd, err := os.Getwd()
 	if err != nil {

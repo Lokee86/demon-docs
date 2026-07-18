@@ -43,7 +43,7 @@ func TestScanPrunesPermanentAndDocignorePaths(t *testing.T) {
 		"ignored.md",
 		"generated/topic.md",
 		".git/secret.md",
-		".demon-docs/state.md",
+		".ddocs/config.toml",
 		".obsidian/workspace.md",
 		"logseq/config.md",
 		"nested/.git/secret.md",
@@ -68,7 +68,7 @@ func TestScanPrunesPermanentAndDocignorePaths(t *testing.T) {
 	if len(rootInfo.DirectFiles) != 1 || filepath.Base(rootInfo.DirectFiles[0]) != "page.md" {
 		t.Fatalf("unexpected direct files: %v", rootInfo.DirectFiles)
 	}
-	for _, rel := range []string{"generated", ".git", ".demon-docs", ".obsidian", "logseq", "nested/.git"} {
+	for _, rel := range []string{"generated", ".git", ".ddocs", ".obsidian", "logseq", "nested/.git"} {
 		if _, ok := tree.Folders[filepath.Join(root, filepath.FromSlash(rel))]; ok {
 			t.Fatalf("ignored folder was traversed: %s", rel)
 		}
