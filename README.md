@@ -10,7 +10,7 @@ It maintains folder indexes inside the configured docs root, a focused local-lin
 
 You keep owning the actual files and hand-written content. Index reconciliation owns only clearly marked managed sections. Link reconciliation changes only a resolved destination path while preserving authored labels, titles, aliases, queries, fragments, and surrounding prose. Codemap analysis exports and ranks evidence but does not silently add or remove authored code-map links.
 
-`check` reports pending or unresolved work, `fix` applies safe deterministic updates, `watch` runs the same reconciliation core after relevant filesystem changes, and `demon` provides optional repository-local background lifecycle around that watcher.
+`check` reports pending or unresolved work, `fix` applies safe deterministic updates, `watch` runs the same reconciliation core after relevant filesystem changes, and `demon` provides optional repository-local background lifecycle around that watcher. `mv` is a separate stateless refactoring command that moves a file or directory and rewrites affected links without requiring initialization.
 
 ## What it manages
 
@@ -22,6 +22,7 @@ You keep owning the actual files and hand-written content. Index reconciliation 
 - direct child-folder entries
 - `Parent index` links in folder indexes by default, and in indexed files when configured
 - local Markdown links, images, reference definitions, wiki links, and common HTML file targets
+- explicit file and directory moves with affected-link rewrites, dry-run planning, and no initialization requirement
 - undefined explicit and collapsed Markdown reference labels
 - stable file identities, link history, reverse indexes, and generated-write state in the private `.ddocs/` object repository
 - deterministic codemap extraction, evidence collection, holdout benchmarking, precision sampling, and tiered missing-link candidates
@@ -61,7 +62,16 @@ demon --version
 
 ## Quick Start
 
-From the root of the repository you want Demon Docs to manage:
+Use Demon Docs on an ordinary Markdown repository without initializing it:
+
+```bash
+ddocs mv --dry-run docs/old.md docs/new.md
+ddocs mv docs/old.md docs/new.md
+```
+
+The command scans from the current directory by default, or from the nearest initialized repository root when one exists. It moves files or directories and rewrites affected relative and incoming links without creating `.ddocs/`.
+
+For persistent index, link-history, watcher, and repository-management features, initialize the repository:
 
 ```bash
 ddocs init --root docs/
@@ -116,6 +126,7 @@ ddocs -v
 ddocs --version
 ddocs init --help
 ddocs status --help
+ddocs mv --help
 ddocs fix --help
 ddocs check --help
 ddocs watch --help
@@ -157,6 +168,14 @@ ddocs status
 ```
 
 Shows the detected repository root, docs root, config path, and repository-owned `.docignore` path.
+
+```bash
+ddocs mv [--root PATH] [--dry-run] SOURCE DESTINATION
+```
+
+Moves one repository-contained file or directory and rewrites affected local link destinations. It supports ordinary Markdown links and images, reference definitions, path-based wiki links and embeds, and supported local HTML targets. The command does not require or create `.ddocs/`; destination parents must already exist. When `DESTINATION` is an existing directory, the source is moved beneath it.
+
+See [Stateless Document Refactoring](docs/document-refactoring.md) for planning, safety, and rollback behavior.
 
 ```bash
 ddocs fix
@@ -660,12 +679,13 @@ That script generates a synthetic documentation tree for manual reconciliation t
 - decide semantic documentation quality or ownership
 - validate heading-anchor existence yet
 - rewrite link labels, titles, aliases, surrounding prose, binary files, or external target files
+- move paths outside the selected `ddocs mv` repository boundary or overwrite an existing non-directory destination
 - treat a codemap suggestion as an authored relationship
 - recommend removing an existing codemap link as irrelevant
 - guess when more than one link or code target is plausible
 - perform arbitrary historical selective reverts through later user edits
 
-Index writes are confined to the configured docs root. Link rewrites are confined to repository Markdown source files and require one deterministic target. Codemap commands remain export, benchmark, and review tooling; they do not silently modify authored codemap sections. Symbolic-link entries are not traversed or edited.
+Index writes are confined to the configured docs root. Link rewrites are confined to repository Markdown source files and require one deterministic target. Stateless moves are confined to their selected repository boundary, verify affected Markdown content before applying, and refuse affected ambiguous wiki targets rather than guessing. Codemap commands remain export, benchmark, and review tooling; they do not silently modify authored codemap sections. Symbolic-link entries are not traversed or edited.
 
 ## Using `!README.md`
 

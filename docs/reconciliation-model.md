@@ -79,6 +79,14 @@ Relative and absolute filesystem links are both checked. Targets may be non-Mark
 
 Generated rewrites are planned deterministically and then applied through a bounded worker pool. Each source still uses an expected-content hash and same-directory atomic replacement, so concurrency changes throughput rather than ownership or output semantics.
 
+## Explicit Stateless Moves
+
+`ddocs mv` exposes the same link parser, target resolver, and syntax-preserving renderer as an explicit filesystem refactoring command. Unlike normal link reconciliation, it does not depend on prior identity state: it resolves links against the pre-move filesystem, maps the source and every descendant to the requested destination, and recalculates affected paths before changing files.
+
+The move planner scans within an explicit repository boundary, supports files and directories, recalculates relative links inside moved Markdown sources, and rewrites incoming links to moved targets. It refuses an affected ambiguous wiki target rather than choosing a candidate. `--dry-run` returns the complete plan without writing. Apply verifies source hashes, moves the filesystem entry, performs atomic Markdown replacements, and attempts to restore both content and location if a rewrite fails.
+
+See [Stateless Document Refactoring](document-refactoring.md).
+
 Documentation indexes, Markdown links, and code-folder reverse indexes are selected independently with `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse`. `-i` / `--indexes` remains a compatibility alias for `--docs`. When any selector is supplied, only selected systems run.
 
 ## Safety Boundaries
@@ -99,6 +107,7 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 - `internal/scan/scan.go` — recursive documentation-tree inventory.
 - `internal/markdown/markdown.go` — managed-section parsing and source-preserving Markdown edits.
 - `internal/reconcile/reconcile.go` — forward-index planning and application.
-- `internal/links/` — repository-local link inventory, resolution, state, diagnostics, and rewrites.
+- `internal/links/` — repository-local link inventory, resolution, state, diagnostics, rewrites, and stateless move planning.
+- `internal/app/move.go` — explicit `ddocs mv` command orchestration.
 - `internal/model/model.go` — shared reconciliation structures.
 - `internal/app/app.go` — `check`, `fix`, and `watch` orchestration.

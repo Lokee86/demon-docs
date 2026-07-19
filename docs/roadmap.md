@@ -15,7 +15,7 @@ This roadmap describes the current product state and the next implementation tra
 - `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `-i` / `--indexes` remains a compatibility alias for `--docs`.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
 
-### Repository-local link reconciliation
+### Repository-local link reconciliation and refactoring
 
 - Repository Markdown is scanned subject to `.docignore` and permanent traversal exclusions.
 - Supported local forms include inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links, wiki embeds, and common local HTML `href`, `src`, and `poster` targets.
@@ -23,8 +23,10 @@ This roadmap describes the current product state and the next implementation tra
 - Link labels, titles, aliases, angle wrapping, query strings, fragments, source newline style, and surrounding prose are preserved.
 - Undefined explicit or collapsed reference labels are reported.
 - Generated rewrites use bounded concurrency while retaining deterministic planning, source-hash checks, and atomic per-file replacement.
+- `ddocs mv` explicitly moves a file or directory and rewrites affected incoming and moved-source links without requiring or creating `.ddocs/` state.
+- Move planning supports dry runs, repository boundaries, case-only renames, affected ambiguity refusal, source-hash preflight, and best-effort rollback.
 
-See [Markdown Link Reconciliation](markdown-links.md).
+See [Markdown Link Reconciliation](markdown-links.md) and [Stateless Document Refactoring](document-refactoring.md).
 
 ### Reverse code-folder indexes
 
@@ -163,7 +165,8 @@ Optional LLM assistance may eventually propose documentation changes from determ
 ## Code map
 
 - `internal/reconcile/` — forward documentation index planning and application.
-- `internal/links/` — repository-local link graph, identity state, diagnostics, and rewrites.
+- `internal/links/` — repository-local link graph, identity state, diagnostics, rewrites, and stateless move planning.
+- `internal/app/move.go` — explicit repository-bounded document refactoring CLI.
 - `internal/demon/` — repository-local owner, feeder, heartbeat, shutdown, and log state.
 - `internal/app/demon.go` — daemon CLI and shell integration.
 - `internal/codemap/` — authored codemap extraction and deterministic datasets.

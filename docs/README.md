@@ -9,6 +9,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [Codemap Missing-Link Evidence](codemap-evidence.md): Implemented codemap export, evidence, holdout benchmarking, precision evaluation, current metrics, and decision-safety rules.
 - [Suggestions, Repairs, and Change History](review-ledger.md): Suggestion decisions, Git-backed applied-change history, undo granularity, and repair blocks.
 - [Markdown Link Reconciliation](markdown-links.md): Repository-scoped link validation, persistent identity state, supported syntax, and deterministic path repair.
+- [Stateless Document Refactoring](document-refactoring.md): Explicit file and directory moves with dry-run planning and affected-link rewrites, without requiring initialization.
 - [Repository Demon](repository-demon.md): Self-managed watcher ownership, shell and agent feeders, worktrees, shutdown, recovery, and logs.
 - [Configuration](configuration.md): Config selection, repository settings, defaults, and supported CLI overrides.
 - [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, applies, and verifies deterministic index and link updates.
@@ -33,6 +34,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [codemap-evidence.md](codemap-evidence.md) - Codemap Evidence documentation.
 - [configuration.md](configuration.md) - Configuration documentation.
 - [context-injection-benchmarking.md](context-injection-benchmarking.md) - Future context-injection benchmarking research plan.
+- [document-refactoring.md](document-refactoring.md) - Stateless file and directory moves with affected-link repair.
 - [link-performance.md](link-performance.md) - Recorded link reconciliation, move, and mass-rename performance.
 - [markdown-links.md](markdown-links.md) - Markdown Links documentation.
 - [reconciliation-model.md](reconciliation-model.md) - Reconciliation Model documentation.
