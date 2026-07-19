@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "corpus": "space-rocks",
+  "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+  "cases": [
+    {
+      "name": "exact path mention recovers managed block implementation",
+      "kind": "exact_path_mention",
+      "document": "docs/data/data-sync-and-ssot-pipeline.md",
+      "target": "tools/data_sync/data_sync/block_io.py",
+      "evidence_basis": "observed outside the codemap section",
+      "document_text": "Managed block handling is implemented by `tools/data_sync/data_sync/block_io.py`.",
+      "repository_files": ["tools/data_sync/data_sync/block_io.py"]
+    },
+    {
+      "name": "unique basename mention recovers reviewed target",
+      "kind": "unique_basename_mention",
+      "document": "docs/data/data-sync-and-ssot-pipeline.md",
+      "target": "tools/data_sync/data_sync/block_io.py",
+      "evidence_basis": "synthetic isolated signal using a reviewed target; no basename-only positive exists in the trusted sample",
+      "document_text": "Managed block handling is owned by `block_io.py`.",
+      "repository_files": ["tools/data_sync/data_sync/block_io.py", "tools/data_sync/data_sync/config.py"]
+    },
+    {
+      "name": "sibling signal recovers respawn combat integration",
+      "kind": "sibling_of_existing_target",
+      "document": "docs/services/game-server/simulation/players/player-respawn.md",
+      "target": "services/game-server/internal/game/combat.go",
+      "evidence_basis": "observed trusted targets in the same package",
+      "repository_files": ["services/game-server/internal/game/session.go", "services/game-server/internal/game/combat.go"],
+      "existing_targets": ["services/game-server/internal/game/session.go"]
+    },
+    {
+      "name": "test counterpart recovers client connection test",
+      "kind": "test_counterpart",
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/tests/unit/test_client_connection_service.gd",
+      "evidence_basis": "observed reviewed source and test pair",
+      "repository_files": ["client/scripts/networking/client_connection_service.gd", "client/tests/unit/test_client_connection_service.gd"],
+      "existing_targets": ["client/scripts/networking/client_connection_service.gd"]
+    },
+    {
+      "name": "dependency neighbor recovers low-level network client",
+      "kind": "dependency_neighbor",
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/network_client.gd",
+      "evidence_basis": "observed runtime dependency from the reviewed connection service",
+      "repository_files": ["client/scripts/networking/client_connection_service.gd", "client/scripts/networking/network_client.gd"],
+      "existing_targets": ["client/scripts/networking/client_connection_service.gd"],
+      "dependency_edges": [
+        {"source": "client/scripts/networking/client_connection_service.gd", "target": "client/scripts/networking/network_client.gd", "relation": "uses"}
+      ]
+    },
+    {
+      "name": "document cochange recovers websocket packet codec",
+      "kind": "git_cochange_with_document",
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/packets/packet_codec.gd",
+      "evidence_basis": "observed in Space Rocks Git history",
+      "repository_files": ["client/scripts/networking/packets/packet_codec.gd"],
+      "commits": [
+        {"id": "space-rocks-observed-doc-cochange", "paths": ["docs/services/client/networking-flow/websocket-connection-lifecycle.md", "client/scripts/networking/packets/packet_codec.gd"]}
+      ]
+    },
+    {
+      "name": "target cochange recovers websocket packet codec",
+      "kind": "git_cochange_with_existing_target",
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/packets/packet_codec.gd",
+      "evidence_basis": "reviewed targets connected by an observed cochange",
+      "repository_files": ["client/scripts/networking/client_connection_service.gd", "client/scripts/networking/packets/packet_codec.gd"],
+      "existing_targets": ["client/scripts/networking/client_connection_service.gd"],
+      "commits": [
+        {"id": "space-rocks-observed-target-cochange", "paths": ["client/scripts/networking/client_connection_service.gd", "client/scripts/networking/packets/packet_codec.gd"]}
+      ]
+    },
+    {
+      "name": "related document recovers shared Rails store",
+      "kind": "related_document_target",
+      "document": "docs/services/player-data/profile-stats-flow.md",
+      "target": "services/player-data/playerdata/rails_store.go",
+      "evidence_basis": "same reviewed target is accepted by the related HTTP protocol document",
+      "repository_files": ["services/player-data/playerdata/runtime.go", "services/player-data/playerdata/rails_store.go"],
+      "existing_targets": ["services/player-data/playerdata/runtime.go"],
+      "related_documents": [
+        {"path": "docs/protocol/player-data-http-api.md", "targets": ["services/player-data/playerdata/rails_store.go"]}
+      ]
+    }
+  ]
+}
