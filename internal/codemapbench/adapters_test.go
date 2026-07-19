@@ -104,13 +104,9 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 			{Kind: evidence.KindTestCounterpart, Source: "src/test_history.go", Count: 1},
 			{Kind: evidence.KindGitTargetCoChange, Source: "src/owner.go", Count: 2},
 		}},
-		{Path: "src/test_supported_context_test.go", Evidence: []evidence.Evidence{
-			{Kind: evidence.KindTestCounterpart, Source: "src/test_supported_context.go", Count: 1},
+		{Path: "src/test_supported_hard_test.go", Evidence: []evidence.Evidence{
+			{Kind: evidence.KindTestCounterpart, Source: "src/test_supported_hard.go", Count: 1},
 			{Kind: evidence.KindSiblingTarget, Source: "src/owner.go", Count: 1},
-		}},
-		{Path: "src/symbol_supported_hard_test.go", Evidence: []evidence.Evidence{
-			{Kind: evidence.KindTestCounterpart, Source: "src/symbol_supported_hard.go", Count: 1},
-			{Kind: evidence.KindDeclaredSymbolMention, Detail: "TestNamedBehavior", Count: 1},
 		}},
 		{Path: "src/implementation_counterpart_context.go", Evidence: []evidence.Evidence{
 			{Kind: evidence.KindTestCounterpart, Source: "src/implementation_counterpart_context_test.go", Count: 1},
@@ -141,7 +137,7 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 	if got := byTarget["src/dependency_hard.go"]; got.Score < HardLinkDependencyMinimumScore || got.Tier != SuggestionTierHardLink {
 		t.Fatalf("dependency-backed hard link = %#v", got)
 	}
-	for _, target := range []string{"src/related_hard.go", "src/symbol_supported_hard_test.go", "src/implementation_counterpart_hard.go"} {
+	for _, target := range []string{"src/related_hard.go", "src/test_supported_hard_test.go", "src/implementation_counterpart_hard.go"} {
 		if got := byTarget[target]; got.Tier != SuggestionTierHardLink {
 			t.Fatalf("%s tier = %q, want hard link: %#v", target, got.Tier, suggestions)
 		}
@@ -152,7 +148,6 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 		"src/explicit_symbol_context.go",
 		"src/test_only_context.go",
 		"src/test_history_context.go",
-		"src/test_supported_context_test.go",
 		"src/implementation_counterpart_context.go",
 		"src/related_only_context.go",
 	} {

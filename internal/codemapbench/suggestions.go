@@ -189,12 +189,7 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	// Filename-based test counterparts need independent semantic support so a
 	// similarly named test in another service cannot qualify by structure alone.
 	if item.hasTestCounterpart && (item.hasDependencyNeighbor || item.hasRelatedDocumentTarget || item.hasSiblingTarget) {
-		// Generic test counterparts remain context unless an earlier explicit path
-		// or declared-symbol rule independently establishes ownership.
-		if item.targetIsTest {
-			return false
-		}
-		return item.suggestion.Score >= HardLinkImplementationCounterpartMinimumScore
+		return item.targetIsTest || item.suggestion.Score >= HardLinkImplementationCounterpartMinimumScore
 	}
 	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
 		return true
