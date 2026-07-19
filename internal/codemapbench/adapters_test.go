@@ -2,6 +2,7 @@ package codemapbench
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -23,7 +24,7 @@ func TestResolvedLinksFromDatasetFiltersAndNormalizes(t *testing.T) {
 	}
 }
 
-func TestSuggestionsFromEvidenceUsesOccurrenceScore(t *testing.T) {
+func TestSuggestionsFromEvidenceWeightsAndCapsOccurrences(t *testing.T) {
 	candidates := []evidence.Candidate{{
 		Path: "src/runtime.go",
 		Evidence: []evidence.Evidence{
@@ -32,8 +33,49 @@ func TestSuggestionsFromEvidenceUsesOccurrenceScore(t *testing.T) {
 		},
 	}}
 	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
-	if len(suggestions) != 1 || suggestions[0].Score != 3 || suggestions[0].Document != "docs/runtime.md" || len(suggestions[0].Evidence) != 2 {
+	if len(suggestions) != 1 || suggestions[0].Score != 12 || suggestions[0].Document != "docs/runtime.md" || len(suggestions[0].Evidence) != 2 {
 		t.Fatalf("unexpected suggestions: %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidenceRejectsWeakSingleSignals(t *testing.T) {
+	candidates := []evidence.Candidate{
+		{Path: "src/history.go", Evidence: []evidence.Evidence{{Kind: evidence.KindGitDocumentCoChange, Source: "docs/runtime.md", Count: 10}}},
+		{Path: "src/sibling.go", Evidence: []evidence.Evidence{{Kind: evidence.KindSiblingTarget, Source: "src/runtime.go", Count: 1}}},
+	}
+	if suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates); len(suggestions) != 0 {
+		t.Fatalf("weak single-signal candidates were admitted: %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidenceDiscountsBroadFanout(t *testing.T) {
+	candidates := []evidence.Candidate{{
+		Path:     "src/narrow_test.go",
+		Evidence: []evidence.Evidence{{Kind: evidence.KindTestCounterpart, Source: "src/narrow.go", Count: 1}},
+	}}
+	for index := 0; index < 4; index++ {
+		candidates = append(candidates, evidence.Candidate{
+			Path:     fmt.Sprintf("src/broad_%d.go", index),
+			Evidence: []evidence.Evidence{{Kind: evidence.KindDependencyNeighbor, Source: "src/root.go", Detail: "outbound:imports", Count: 1}},
+		})
+	}
+	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
+	if len(suggestions) != 5 || suggestions[0].Target != "src/narrow_test.go" {
+		t.Fatalf("broad fanout outranked narrow evidence: %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidenceBoundsEachDocument(t *testing.T) {
+	candidates := make([]evidence.Candidate, 0, 40)
+	for index := 0; index < 40; index++ {
+		candidates = append(candidates, evidence.Candidate{
+			Path:     fmt.Sprintf("src/file_%02d.go", index),
+			Evidence: []evidence.Evidence{{Kind: evidence.KindExactPathMention, Count: 1}},
+		})
+	}
+	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
+	if len(suggestions) != DefaultSuggestionLimitPerDocument {
+		t.Fatalf("got %d suggestions, want %d", len(suggestions), DefaultSuggestionLimitPerDocument)
 	}
 }
 

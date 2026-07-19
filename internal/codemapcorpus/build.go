@@ -18,6 +18,7 @@ func Build(repositoryRoot string, dataset codemap.Dataset, options Options) (Cor
 	if err != nil {
 		return Corpus{}, err
 	}
+	paths := repositoryPaths(files)
 	documents, err := loadDocuments(root, dataset)
 	if err != nil {
 		return Corpus{}, err
@@ -34,6 +35,7 @@ func Build(repositoryRoot string, dataset codemap.Dataset, options Options) (Cor
 	return Corpus{
 		RepositoryRoot:    root,
 		RepositoryFiles:   files,
+		RepositoryPaths:   paths,
 		Documents:         documents,
 		TargetsByDocument: targets,
 		DependencyEdges:   dependencies,

@@ -22,6 +22,7 @@ type Options struct {
 type Corpus struct {
 	RepositoryRoot    string
 	RepositoryFiles   []string
+	RepositoryPaths   []string
 	Documents         map[string]string
 	TargetsByDocument map[string][]string
 	DependencyEdges   []evidence.DependencyEdge
@@ -39,10 +40,14 @@ func (c Corpus) Input(documentPath string, existingTargets []string) (evidence.I
 	if !ok {
 		return evidence.Input{}, fmt.Errorf("document %s is not in the corpus", documentPath)
 	}
+	repositoryPaths := c.RepositoryPaths
+	if len(repositoryPaths) == 0 {
+		repositoryPaths = c.RepositoryFiles
+	}
 	return evidence.Input{
 		DocumentPath:     documentPath,
 		DocumentText:     text,
-		RepositoryFiles:  c.RepositoryFiles,
+		RepositoryFiles:  repositoryPaths,
 		ExistingTargets:  cloneStrings(existingTargets),
 		DependencyEdges:  c.DependencyEdges,
 		Commits:          c.Commits,

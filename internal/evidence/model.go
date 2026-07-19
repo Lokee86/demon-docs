@@ -64,9 +64,13 @@ func normalizePath(value string) string {
 	if value == "" {
 		return ""
 	}
+	directory := strings.HasSuffix(value, "/")
 	clean := path.Clean(value)
 	if clean == "." || strings.HasPrefix(clean, "../") || clean == ".." || strings.HasPrefix(clean, "/") {
 		return ""
+	}
+	if directory {
+		clean += "/"
 	}
 	return clean
 }

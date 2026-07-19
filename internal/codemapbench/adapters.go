@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
-	"github.com/Lokee86/demon-docs/internal/evidence"
 )
 
 // ResolvedLinksFromDataset converts exact, resolved authored codemap entries
@@ -23,28 +21,6 @@ func ResolvedLinksFromDataset(dataset codemap.Dataset) []Link {
 	}
 	normalized, _ := normalizeKnownLinks(links)
 	return normalized
-}
-
-// SuggestionsFromEvidence converts deterministic evidence candidates into the
-// benchmark's suggestion shape. Scores are simple evidence occurrence totals;
-// ranking policy can replace this adapter later without changing collection.
-func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) []Suggestion {
-	result := make([]Suggestion, 0, len(candidates))
-	for _, candidate := range candidates {
-		suggestion := Suggestion{Link: Link{Document: document, Target: candidate.Path}}
-		for _, item := range candidate.Evidence {
-			suggestion.Score += float64(item.Count)
-			detail := fmt.Sprintf("%s:%s", item.Kind, item.Detail)
-			if item.Source != "" {
-				detail = fmt.Sprintf("%s:%s:%s", item.Kind, item.Source, item.Detail)
-			}
-			suggestion.Evidence = append(suggestion.Evidence, detail)
-		}
-		sort.Strings(suggestion.Evidence)
-		result = append(result, suggestion)
-	}
-	sortSuggestions(result)
-	return result
 }
 
 // DecodeTrustedReviewLinks reads the conservative reviewed-link corpus used by

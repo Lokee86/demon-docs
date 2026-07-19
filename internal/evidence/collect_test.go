@@ -57,6 +57,16 @@ func TestCollectProducesDeterministicEvidence(t *testing.T) {
 	}
 }
 
+func TestCollectPreservesDirectoryCandidates(t *testing.T) {
+	input := Input{
+		DocumentPath:    "docs/runtime.md",
+		DocumentText:    "The manual producer remains at `services/diagnostic/cmd/submit/`.",
+		RepositoryFiles: []string{"services/diagnostic/cmd/submit/"},
+	}
+	candidate := findCandidate(t, Collect(input), "services/diagnostic/cmd/submit/")
+	assertKind(t, candidate, KindExactPathMention)
+}
+
 func TestUniqueBasenameMentionRequiresUniqueRepositoryPath(t *testing.T) {
 	input := Input{
 		DocumentPath: "docs/example.md",

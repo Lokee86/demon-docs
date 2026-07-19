@@ -16,36 +16,41 @@ func (c *collector) collectMentions(documentText string) {
 	}
 
 	for _, file := range files {
-		if containsToken(text, file) {
-			c.add(file, KindExactPathMention, "", file, 1)
+		if count := tokenCount(text, file); count > 0 {
+			c.add(file, KindExactPathMention, "", file, count)
 			continue
 		}
 		base := path.Base(file)
-		if basenameCounts[base] == 1 && containsToken(text, base) {
-			c.add(file, KindUniqueBasenameMention, "", base, 1)
+		if basenameCounts[base] == 1 {
+			if count := tokenCount(text, base); count > 0 {
+				c.add(file, KindUniqueBasenameMention, "", base, count)
+			}
 		}
 	}
 }
 
-func containsToken(text, token string) bool {
+func tokenCount(text, token string) int {
 	if token == "" {
-		return false
+		return 0
 	}
+	count := 0
 	for offset := 0; offset <= len(text)-len(token); {
 		index := strings.Index(text[offset:], token)
 		if index < 0 {
-			return false
+			break
 		}
 		index += offset
 		beforeOK := index == 0 || !isPathRune(rune(text[index-1]))
 		after := index + len(token)
 		afterOK := after == len(text) || !isPathRune(rune(text[after]))
 		if beforeOK && afterOK {
-			return true
+			count++
+			offset = after
+			continue
 		}
 		offset = index + 1
 	}
-	return false
+	return count
 }
 
 func isPathRune(value rune) bool {
