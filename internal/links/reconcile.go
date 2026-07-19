@@ -76,15 +76,19 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 
 	for _, source := range markdownSources(inventory) {
 		if rewrite, ok := internal[source.record.ID]; ok {
-			plan.Rewrites = append(plan.Rewrites, rewrite.rewrite)
-			plan.Updates = append(plan.Updates, rewrite.update)
+			if rewrite.rewrite.SourceFileID != "" {
+				plan.Rewrites = append(plan.Rewrites, rewrite.rewrite)
+			}
+			if rewrite.update.Path != "" {
+				plan.Updates = append(plan.Updates, rewrite.update)
+			}
 			plan.Links.Links = append(plan.Links.Links, rewrite.records...)
 			plan.Messages = append(plan.Messages, rewrite.messages...)
 			continue
 		}
 		previousSource := previousByID[source.record.ID]
 		previousRecords := previousBySource[source.record.ID]
-		if initialized && sourceUnchanged(previousSource, source.record) && recordsReusable(previousRecords) {
+		if initialized && sourceUnchanged(previousSource, source.record) && previousSource.LinkParserVersion == linkParserVersion && recordsReusable(previousRecords) {
 			for _, record := range previousRecords {
 				record.SourcePath = source.record.Path
 				plan.Links.Links = append(plan.Links.Links, record)
@@ -142,6 +146,7 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 		records := append([]LinkRecord(nil), previousRecords...)
 		var replacements []replacement
 		var messages []string
+		metadataChanged := false
 		for index := range records {
 			target := movedTargets[records[index].TargetFileID]
 			if target == nil {
@@ -153,8 +158,12 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 			if !local {
 				continue
 			}
-			newPath := renderTargetPath(style, records[index].RawPath, sourcePath, targetPath)
+			newPath := renderTargetForSyntax(records[index].Syntax, records[index].RawPath, style, sourcePath, targetPath)
 			if newPath == records[index].RawPath {
+				records[index].SourcePath = currentSource.Path
+				records[index].ResolvedPath = target.Path
+				records[index].Status = "valid"
+				metadataChanged = true
 				continue
 			}
 			replacements = append(replacements, replacement{
@@ -172,6 +181,9 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 			messages = append(messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", currentSource.Path, records[index].Line, replacements[len(replacements)-1].oldValue, newPath))
 		}
 		if len(replacements) == 0 {
+			if metadataChanged {
+				result[sourceID] = internalRewritePlan{records: records}
+			}
 			continue
 		}
 		transformations := transformationsFor(replacements)
@@ -196,10 +208,11 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 	if err != nil {
 		return fmt.Errorf("read Markdown source %s: %w", source.path, err)
 	}
-	occurrences := parseMarkdownLinks(document.Text)
+	parsed := parseMarkdownDocument(document.Text)
+	source.record.LinkParserVersion = linkParserVersion
 	var replacements []replacement
 	ordinal := 0
-	for _, found := range occurrences {
+	for _, found := range parsed.Links {
 		resolved, style, local := resolveLocalTarget(found.RawPath, source.path, found.Angle)
 		if !local {
 			continue
@@ -212,27 +225,28 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			continue
 		}
 		originalTarget := found.RawPath + found.Suffix
-		previous := findPreviousLink(previousRecords, ordinal, originalTarget)
+		previous := findPreviousLink(previousRecords, ordinal, originalTarget, found.Syntax)
 		record := LinkRecord{
-			ID:           deterministicLinkID(source.record.ID, ordinal, found.Syntax, originalTarget),
-			SourceFileID: source.record.ID,
-			SourcePath:   source.record.Path,
-			Ordinal:      ordinal,
-			Start:        found.Start,
-			End:          found.End,
-			Line:         found.Line,
-			Column:       found.Column,
-			Syntax:       found.Syntax,
-			RawPath:      found.RawPath,
-			Suffix:       found.Suffix,
-			Angle:        found.Angle,
-			Target:       originalTarget,
+			ID:            deterministicLinkID(source.record.ID, ordinal, found.Syntax, originalTarget),
+			SourceFileID:  source.record.ID,
+			SourcePath:    source.record.Path,
+			Ordinal:       ordinal,
+			Start:         found.Start,
+			End:           found.End,
+			Line:          found.Line,
+			Column:        found.Column,
+			Syntax:        found.Syntax,
+			RawPath:       found.RawPath,
+			Suffix:        found.Suffix,
+			Angle:         found.Angle,
+			Target:        originalTarget,
+			ParserVersion: linkParserVersion,
 		}
 		if previous != nil && previous.ID != "" {
 			record.ID = previous.ID
 		}
 		ordinal++
-		targetRecord, actualPath := inventory.exact(resolved)
+		targetRecord, actualPath := exactTargetForSyntax(inventory, resolved, found.Syntax)
 		if targetRecord == nil {
 			if _, statErr := os.Stat(resolved); statErr == nil {
 				targetRecord, actualPath, err = inventory.ensureTarget(resolved, "")
@@ -245,10 +259,10 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			record.TargetFileID = targetRecord.ID
 			record.ResolvedPath = storePath(inventory.root, actualPath)
 			record.Status = "valid"
-			if filepath.Clean(actualPath) != filepath.Clean(resolved) {
+			if targetCaseMismatch(found.Syntax, resolved, actualPath) {
 				record.Status = "case_mismatch"
 				if initialized {
-					newPath := renderTargetPath(style, found.RawPath, source.path, actualPath)
+					newPath := renderTargetForSyntax(found.Syntax, found.RawPath, style, source.path, actualPath)
 					replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
 					record.RawPath = newPath
 					record.Target = newPath + found.Suffix
@@ -269,8 +283,8 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 				candidates = []string{moved}
 			}
 		}
-		if initialized && len(candidates) == 0 {
-			candidates = candidatePaths(inventory, resolved, preferredID)
+		if len(candidates) == 0 && (initialized || found.Syntax == "wiki") {
+			candidates = candidatePathsForSyntax(inventory, resolved, preferredID, found.Syntax)
 		}
 		record.Candidates = displayPaths(inventory.root, candidates)
 		switch len(candidates) {
@@ -286,17 +300,47 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			}
 			record.TargetFileID = targetRecord.ID
 			record.ResolvedPath = storePath(inventory.root, actualPath)
-			record.Status = "moved"
-			newPath := renderTargetPath(style, found.RawPath, source.path, actualPath)
-			replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
-			record.RawPath = newPath
-			record.Target = newPath + found.Suffix
-			plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+			newPath := renderTargetForSyntax(found.Syntax, found.RawPath, style, source.path, actualPath)
+			if newPath == found.RawPath {
+				record.Status = "valid"
+			} else {
+				record.Status = "moved"
+				replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+				record.RawPath = newPath
+				record.Target = newPath + found.Suffix
+				plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+			}
 		default:
 			record.Status = "ambiguous"
 			plan.Unresolved++
 			plan.Messages = append(plan.Messages, fmt.Sprintf("Ambiguous link in %s:%d:%d: %s; candidates: %s", source.record.Path, found.Line, found.Column, originalTarget, strings.Join(record.Candidates, ", ")))
 		}
+		plan.Links.Links = append(plan.Links.Links, record)
+	}
+	for _, missing := range parsed.UndefinedReferences {
+		originalTarget := missing.Label
+		previous := findPreviousLink(previousRecords, ordinal, originalTarget, "reference_use")
+		record := LinkRecord{
+			ID:            deterministicLinkID(source.record.ID, ordinal, "reference_use", originalTarget),
+			SourceFileID:  source.record.ID,
+			SourcePath:    source.record.Path,
+			Ordinal:       ordinal,
+			Start:         missing.Start,
+			End:           missing.End,
+			Line:          missing.Line,
+			Column:        missing.Column,
+			Syntax:        "reference_use",
+			RawPath:       originalTarget,
+			Target:        originalTarget,
+			Status:        "undefined_reference",
+			ParserVersion: linkParserVersion,
+		}
+		if previous != nil && previous.ID != "" {
+			record.ID = previous.ID
+		}
+		ordinal++
+		plan.Unresolved++
+		plan.Messages = append(plan.Messages, fmt.Sprintf("Undefined reference label in %s:%d:%d: %s", source.record.Path, missing.Line, missing.Column, missing.Label))
 		plan.Links.Links = append(plan.Links.Links, record)
 	}
 	if initialized && len(replacements) > 0 {
@@ -348,7 +392,7 @@ func recordsReusable(records []LinkRecord) bool {
 		return false
 	}
 	for _, record := range records {
-		if record.Status != "valid" {
+		if record.ParserVersion != linkParserVersion || record.Status != "valid" {
 			return false
 		}
 	}
@@ -406,15 +450,15 @@ func previousLinkIndex(manifest LinksManifest) map[string][]LinkRecord {
 	return result
 }
 
-func findPreviousLink(records []LinkRecord, ordinal int, target string) *LinkRecord {
+func findPreviousLink(records []LinkRecord, ordinal int, target, syntax string) *LinkRecord {
 	for index := range records {
-		if records[index].Ordinal == ordinal && records[index].Target == target {
+		if records[index].Ordinal == ordinal && records[index].Target == target && records[index].Syntax == syntax {
 			return &records[index]
 		}
 	}
 	var match *LinkRecord
 	for index := range records {
-		if records[index].Target == target {
+		if records[index].Target == target && records[index].Syntax == syntax {
 			if match != nil {
 				return nil
 			}

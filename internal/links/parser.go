@@ -17,7 +17,7 @@ type occurrence struct {
 type byteRange struct{ Start, End int }
 
 func parseMarkdownLinks(source string) []occurrence {
-	protected := fencedRanges(source)
+	protected := protectedMarkdownRanges(source)
 	result := parseReferenceDefinitions(source, protected)
 	for i := 0; i < len(source); {
 		if end, ok := rangeEnd(i, protected); ok {
@@ -44,6 +44,8 @@ func parseMarkdownLinks(source string) []occurrence {
 		}
 		i++
 	}
+	result = append(result, parseHTMLLinks(source, protected)...)
+	result = append(result, parseWikiLinks(source, protected)...)
 	sort.Slice(result, func(i, j int) bool { return result[i].Start < result[j].Start })
 	return result
 }

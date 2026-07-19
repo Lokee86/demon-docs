@@ -25,10 +25,18 @@ The link scanner handles:
 
 - inline links such as `[Guide](guide.md)`;
 - images such as `![Diagram](assets/diagram.png)`;
-- angle-wrapped destinations such as `[File](<files/a b.pdf>)`; and
-- reference definitions such as `[guide]: docs/guide.md`.
+- angle-wrapped destinations such as `[File](<files/a b.pdf>)`;
+- reference definitions such as `[guide]: docs/guide.md`;
+- path-based wiki links such as `[[guide]]`, `[[docs/guide|Guide]]`, and `![[assets/diagram.png]]`; and
+- local HTML targets in common `href`, `src`, and `poster` attributes.
 
-Link-like text inside fenced code blocks and inline code spans is ignored. Heading fragments and query strings are preserved when a path is rewritten. Heading-anchor existence is not yet validated. HTML links, wiki-link syntax, and undefined reference labels are outside this first implementation.
+Extensionless wiki targets resolve as Markdown files. A unique matching Markdown basename elsewhere in the repository is accepted for Obsidian-style wiki links; ambiguous matches are reported and left unchanged. Wiki aliases and embed markers are preserved during repair.
+
+Explicit and collapsed reference uses such as `[Guide][guide]` and `[guide][]` are checked against reference definitions. Missing labels are reported as unresolved links. Shortcut references such as `[guide]` remain untreated because they are indistinguishable from ordinary bracketed prose without a definition.
+
+HTML target coverage includes `a[href]`, `link[href]`, `img[src]`, `script[src]`, `source[src]`, `video[src]`, `video[poster]`, `audio[src]`, and `iframe[src]`.
+
+Link-like text inside fenced code blocks and inline code spans is ignored. Heading fragments and query strings are preserved when a path is rewritten. Heading-anchor existence is not yet validated.
 
 ## Persistent State
 
@@ -103,7 +111,7 @@ ddocs watch -l
 
 Supplying both selectors runs both systems, the same as supplying neither.
 
-`check` reports pending rewrites, broken links, ambiguous links, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events.
+`check` reports pending rewrites, broken links, ambiguous links, undefined reference labels, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events and prints each reconciliation diagnostic rather than only a message count.
 
 When links are enabled, watch mode observes the repository root because moves of non-Markdown targets can require Markdown updates. It also watches the nearest existing parent directories of explicitly linked external targets, so an external rename or removal can trigger the same bounded reconciliation attempt. Index-only watch mode remains scoped to the configured docs root.
 

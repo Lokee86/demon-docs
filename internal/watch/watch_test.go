@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -81,6 +82,24 @@ func TestWatchConvergesWithoutSelfWriteLoop(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("watcher did not shut down")
+	}
+}
+
+func TestWatchPrintsActualReconciliationMessages(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("[missing](missing.md)\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	if err := RootSelected(context.Background(), root, root, config.Default(), Features{Links: true}, nil, true, &out); err != nil {
+		t.Fatal(err)
+	}
+	text := out.String()
+	if !strings.Contains(text, "Broken link in README.md") {
+		t.Fatalf("watch output did not include the diagnostic: %q", text)
+	}
+	if strings.Contains(text, "reconciliation messages:") {
+		t.Fatalf("watch output still used the opaque count: %q", text)
 	}
 }
 

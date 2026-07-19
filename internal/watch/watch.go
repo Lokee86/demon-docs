@@ -67,7 +67,7 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 	var externalDirectories []string
 	run := func() error {
 		changed := 0
-		messages := 0
+		var diagnostics []string
 		unresolved := 0
 		if features.Indexes {
 			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
@@ -79,7 +79,7 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 				return err
 			}
 			changed += count
-			messages += len(result.Messages)
+			diagnostics = append(diagnostics, result.Messages...)
 		}
 		if features.Links {
 			plan, err := links.Reconcile(repositoryRoot)
@@ -91,7 +91,7 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 				return err
 			}
 			changed += count
-			messages += len(plan.Messages)
+			diagnostics = append(diagnostics, plan.Messages...)
 			unresolved = plan.Unresolved
 			externalDirectories = externalWatchDirectories(plan.Files)
 			if watcher != nil {
@@ -101,8 +101,8 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 			}
 		}
 		fmt.Fprintf(out, "%s ddocs watch updated %d file(s)\n", timestamp(), changed)
-		if messages > 0 {
-			fmt.Fprintf(out, "%s ddocs watch reconciliation messages: %d\n", timestamp(), messages)
+		for _, message := range diagnostics {
+			fmt.Fprintf(out, "%s ddocs watch: %s\n", timestamp(), message)
 		}
 		if unresolved > 0 {
 			fmt.Fprintf(out, "%s ddocs watch unresolved links: %d\n", timestamp(), unresolved)

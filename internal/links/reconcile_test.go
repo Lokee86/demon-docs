@@ -166,6 +166,140 @@ func TestAbsoluteExternalTargetCanMoveIntoRepository(t *testing.T) {
 	}
 }
 
+func TestHTMLAndWikiLinksRepairMovedTargets(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "<a href=\"docs/guide.md#part\">Guide</a>\n[[docs/guide|Guide]]\n")
+	writeTestFile(t, filepath.Join(root, "docs", "guide.md"), "# Guide\n")
+
+	first, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Save(first); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "manual"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(root, "docs", "guide.md"), filepath.Join(root, "manual", "guide.md")); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.Updates) != 1 {
+		t.Fatalf("updates = %d, want 1; messages=%v", len(second.Updates), second.Messages)
+	}
+	updated := second.Updates[0].NewText
+	if !strings.Contains(updated, "manual/guide.md#part") {
+		t.Fatalf("HTML link was not repaired: %q", updated)
+	}
+	if !strings.Contains(updated, "[[manual/guide|Guide]]") {
+		t.Fatalf("wiki link style was not preserved: %q", updated)
+	}
+}
+
+func TestUndefinedReferenceLabelIsUnresolved(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[Guide][missing]\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertUndefinedReference(t, plan)
+	if err := Save(plan); err != nil {
+		t.Fatal(err)
+	}
+	second, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertUndefinedReference(t, second)
+}
+
+func TestBareWikiLinkResolvesUniqueRepositoryNote(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[[Design]]\n")
+	writeTestFile(t, filepath.Join(root, "docs", "Design.md"), "# Design\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Unresolved != 0 || len(plan.Links.Links) != 1 || plan.Links.Links[0].Status != "valid" {
+		t.Fatalf("bare wiki link was not resolved: unresolved=%d links=%#v messages=%v", plan.Unresolved, plan.Links.Links, plan.Messages)
+	}
+}
+
+func TestBareWikiFolderMoveUpdatesGraphWithoutRewritingSource(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[[Guide]]\n")
+	writeTestFile(t, filepath.Join(root, "docs", "Guide.md"), "# Guide\n")
+
+	first, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Save(first); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "manual"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(root, "docs", "Guide.md"), filepath.Join(root, "manual", "Guide.md")); err != nil {
+		t.Fatal(err)
+	}
+
+	second, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.Updates) != 0 || len(second.Links.Links) != 1 {
+		t.Fatalf("folder-only wiki move should update graph only: %#v", second)
+	}
+	if second.Links.Links[0].ResolvedPath != "manual/Guide.md" || second.Links.Links[0].Status != "valid" {
+		t.Fatalf("wiki graph target was not refreshed: %#v", second.Links.Links[0])
+	}
+}
+
+func TestBareWikiLinkReportsAmbiguousRepositoryNotes(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[[Design]]\n")
+	writeTestFile(t, filepath.Join(root, "one", "Design.md"), "# One\n")
+	writeTestFile(t, filepath.Join(root, "two", "Design.md"), "# Two\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Unresolved != 1 || len(plan.Links.Links) != 1 || plan.Links.Links[0].Status != "ambiguous" {
+		t.Fatalf("ambiguous wiki link was not reported: unresolved=%d links=%#v messages=%v", plan.Unresolved, plan.Links.Links, plan.Messages)
+	}
+}
+
+func assertUndefinedReference(t *testing.T, plan Plan) {
+	t.Helper()
+	if plan.Unresolved != 1 || len(plan.Links.Links) != 1 {
+		t.Fatalf("unexpected plan: unresolved=%d links=%#v messages=%v", plan.Unresolved, plan.Links.Links, plan.Messages)
+	}
+	if plan.Links.Links[0].Status != "undefined_reference" {
+		t.Fatalf("status = %q", plan.Links.Links[0].Status)
+	}
+	found := false
+	for _, message := range plan.Messages {
+		if strings.Contains(message, "Undefined reference label") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("missing diagnostic: %v", plan.Messages)
+	}
+}
+
 func writeTestFile(t *testing.T, path, contents string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

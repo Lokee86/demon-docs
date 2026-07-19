@@ -27,3 +27,35 @@ func TestResolveLocalTargetRejectsWebURLsButAcceptsAbsolutePaths(t *testing.T) {
 		t.Fatal("absolute filesystem path was not treated as local")
 	}
 }
+
+func TestParseMarkdownLinksFindsHTMLAndWikiTargets(t *testing.T) {
+	source := "<a href=\"docs/guide.md#part\">Guide</a>\n<img src='assets/image.png'>\n[[notes/design|Design]]\n![[assets/diagram.svg]]\n`[[ignored]]`\n"
+	found := parseMarkdownLinks(source)
+	if len(found) != 4 {
+		t.Fatalf("found %d links, want 4: %#v", len(found), found)
+	}
+	want := []struct {
+		path, suffix, syntax string
+	}{
+		{"docs/guide.md", "#part", "html"},
+		{"assets/image.png", "", "html"},
+		{"notes/design", "", "wiki"},
+		{"assets/diagram.svg", "", "wiki"},
+	}
+	for i := range want {
+		if found[i].RawPath != want[i].path || found[i].Suffix != want[i].suffix || found[i].Syntax != want[i].syntax {
+			t.Fatalf("link %d = %#v, want %#v", i, found[i], want[i])
+		}
+	}
+}
+
+func TestParseMarkdownDocumentReportsUndefinedExplicitReferences(t *testing.T) {
+	source := "[known][guide]\n[missing][nope]\n[collapsed][]\n[guide]: docs/guide.md\n`[ignored][missing]`\n"
+	parsed := parseMarkdownDocument(source)
+	if len(parsed.UndefinedReferences) != 2 {
+		t.Fatalf("undefined references = %#v", parsed.UndefinedReferences)
+	}
+	if parsed.UndefinedReferences[0].Label != "nope" || parsed.UndefinedReferences[1].Label != "collapsed" {
+		t.Fatalf("unexpected undefined labels: %#v", parsed.UndefinedReferences)
+	}
+}
