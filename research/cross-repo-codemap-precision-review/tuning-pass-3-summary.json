@@ -1,0 +1,121 @@
+{
+  "algorithm_baseline": "b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1",
+  "source_keys": [
+    "schema_version",
+    "seed",
+    "known_links",
+    "visible_links",
+    "hidden_links",
+    "recovered_links",
+    "recovered_suggestions",
+    "missed_links",
+    "unmatched_suggestions",
+    "already_linked_suggestions",
+    "duplicate_suggestions",
+    "invalid_suggestions",
+    "raw_suggestion_count",
+    "unique_suggestion_count",
+    "precision",
+    "recall"
+  ],
+  "space_rocks_pool": {
+    "suggestion_count": 4493,
+    "tiers": {
+      "context": 3872,
+      "hard_link": 621
+    },
+    "known_link_count": 4333
+  },
+  "space_rocks_precision": {
+    "hard_link": {
+      "total": 68,
+      "valid_missing_link": 51,
+      "accepted_non_junk": 67,
+      "overall_precision": 0.75,
+      "acceptance_precision": 0.9852941176470589
+    },
+    "context": {
+      "total": 82,
+      "valid_missing_link": 19,
+      "accepted_non_junk": 65,
+      "overall_precision": 0.23170731707317074,
+      "acceptance_precision": 0.7926829268292683
+    },
+    "hard_link_sample_valid_recall": 0.7285714285714285,
+    "hard_link_suggestions_per_document": 2.72,
+    "precision_at_1": 0.6,
+    "precision_at_3": 0.5466666666666666,
+    "precision_at_5": 0.528
+  },
+  "space_rocks_holdout": {
+    "hidden": 10,
+    "recovered": 10,
+    "missed": 0,
+    "hard_recovered": 4,
+    "context_recovered": 6,
+    "precision": 0.034482758620689655,
+    "recall": 1
+  },
+  "review_comparison": {
+    "retained": {
+      "valid": 83,
+      "plausible": 34
+    },
+    "suppressed": {
+      "incorrect": 4
+    },
+    "retained_by_split": {
+      "tuning": {
+        "valid": 64,
+        "plausible": 25
+      },
+      "validation": {
+        "valid": 19,
+        "plausible": 9
+      }
+    },
+    "tier_changes": []
+  },
+  "cross_repository": {
+    "calculation_corpus": {
+      "repository_count": 5,
+      "hidden_link_count": 18,
+      "recovered_link_count": 11,
+      "hard_recovered_count": 4,
+      "context_recovered_count": 7,
+      "unique_suggestion_count": 148,
+      "recall": 0.6111111111111112,
+      "positive_only_precision": 0.07432432432432433
+    },
+    "primary": {
+      "repository_count": 1,
+      "hidden_link_count": 8,
+      "recovered_link_count": 6,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 4,
+      "unique_suggestion_count": 24,
+      "recall": 0.75,
+      "positive_only_precision": 0.25
+    },
+    "diagnostic": {
+      "repository_count": 4,
+      "hidden_link_count": 10,
+      "recovered_link_count": 5,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 3,
+      "unique_suggestion_count": 124,
+      "recall": 0.5,
+      "positive_only_precision": 0.04032258064516129
+    },
+    "stress": {
+      "repository_count": 1,
+      "hidden_link_count": 10,
+      "recovered_link_count": 3,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 3,
+      "unique_suggestion_count": 30,
+      "recall": 0.3,
+      "positive_only_precision": 0.1
+    }
+  }
+}

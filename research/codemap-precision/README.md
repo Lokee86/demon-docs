@@ -176,6 +176,30 @@ The complete pinned Space Rocks source pool also remains 621 `hard_link` and 3,8
 
 The canonical default-seed positive holdout remains 10/10 recovered, with four hard and six context suggestions. This pass therefore improves cross-repository hard-tier confidence without reducing measured Space Rocks precision or holdout recovery.
 
+## Fifth tuning pass: narrow incidental-target rejection
+
+The fifth pass is selected from the separate cross-repository precision review. It does not change score thresholds or hard-link qualification. Instead, it removes three demonstrated classes of context noise only when they lack independent support:
+
+- dependency lockfiles supported only by path or basename evidence;
+- deeply nested asset, example, fixture, sample, or test-data targets produced only by unique-basename matching; and
+- children of `.github/workflows/` produced only by unique-basename matching.
+
+Any explicit path, dependency, declared-symbol, related-document, sibling, Git co-change, or other structural evidence preserves the candidate. This distinction was required to retain a reviewed Space Rocks `go.sum` context suggestion while removing the exact-path-only `Cargo.lock` error from the cross-repository corpus.
+
+The Space Rocks benchmark is unchanged:
+
+| Tier/metric | Result |
+|---|---:|
+| Hard-link suggestions | 68 |
+| Hard-link strict precision | 75.00% (51/68) |
+| Hard-link relevance precision | 98.53% (67/68) |
+| Hard-link recovery within labeled valid links | 72.86% (51/70) |
+| Context suggestions | 82 |
+
+The complete source pool also remains 621 `hard_link` and 3,872 `context` candidates across 4,493 suggestions. The canonical holdout remains 10/10, with four hard and six context recoveries.
+
+A proposed generic test-counterpart demotion was rejected during validation: it reduced labeled-valid hard-link recovery from 51/70 to 33/70 while leaving strict hard-link precision at 75.00%. The final implementation retains the established test-counterpart behavior.
+
 ## Reproduction
 
 From the Demon Docs repository, with the pinned Space Rocks checkout available:

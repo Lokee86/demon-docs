@@ -66,6 +66,20 @@ Against the frozen holdouts:
 
 This is a tier-confidence improvement rather than a recall increase. It demonstrates that a narrow rule learned from multiple repositories can move known-good relationships into the direct-review surface without lowering held-out recovery.
 
+## Incidental-target negative-evidence pass
+
+The next pass used the manually reviewed four-repository tuning split and reserved Bifrost for validation. It suppresses only unsupported dependency lockfiles and weak basename-only matches to deeply nested content or workflow infrastructure. Explicit, structural, or semantic corroboration preserves the candidate.
+
+Results at algorithm commit `b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1`:
+
+- all 83 valid and 34 plausible suggestions in the frozen review sample remain;
+- all four reviewed incorrect suggestions are removed;
+- Bifrost remains unchanged and recovers 2/3 hidden links, both in the hard tier;
+- the ordinary calculation corpus remains 11/18 recovered with four hard recoveries; and
+- the separate gbrain index stress result remains 3/10, all context.
+
+A generic test-counterpart demotion was rejected after Space Rocks validation showed a large loss of valid hard-link coverage with no precision gain. The final pass contains no broad test-target penalty.
+
 ## Acceptance requirements
 
 A primary candidate should normally provide:

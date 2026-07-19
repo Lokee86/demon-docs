@@ -62,6 +62,33 @@ The narrowest justified tuning target is negative evidence for incidental target
 
 The pass should not lower global thresholds or convert all relevant context into hard links. Its target is fewer clearly incorrect candidates while preserving the current 95.70% tuning-set relevance and the frozen positive-link recovery benchmark.
 
+## Incidental-target tuning pass
+
+Final algorithm: `b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1`
+
+The pass adds narrow negative evidence rather than changing global thresholds:
+
+- dependency lockfiles are suppressed only when path or basename evidence is unsupported by another structural or semantic signal;
+- deeply nested asset, example, fixture, sample, or test-data targets are suppressed when they arise only from weak unique-basename evidence;
+- children of `.github/workflows/` are suppressed under the same weak-evidence condition; and
+- explicit path mentions, dependency relationships, declared symbols, related-document targets, sibling evidence, and Git co-change continue to preserve relevant context.
+
+The fixed review sample changes as follows:
+
+| Scope | Retained valid | Retained plausible | Suppressed incorrect | Retained strict precision | Retained relevance |
+|---|---:|---:|---:|---:|---:|
+| Overall | 83 | 34 | 4 | 70.94% (83/117) | 100.00% |
+| Tuning repositories | 64 | 25 | 4 | 71.91% (64/89) | 100.00% |
+| Bifrost validation | 19 | 9 | 0 | 67.86% (19/28) | 100.00% |
+
+No reviewed valid or plausible suggestion changes tier or disappears. Four replacement context candidates surfaced after the removals: `rust-toolchain.toml` and the three Genesis solver implementations. Manual inspection found all four to be direct owners explicitly named by their documents.
+
+The frozen cross-repository holdout remains 11/18 recovered with four hard and seven context recoveries. Bifrost remains 2/3 recovered, both hard tier. The separate gbrain index stress result remains 3/10, all context.
+
+Space Rocks validation remains unchanged at 75.00% hard-link strict precision, 98.53% hard-link relevance, 51/70 labeled-valid hard-link recovery, 621 hard candidates, 3,872 context candidates, and 10/10 canonical holdout recovery.
+
+A broader rule that demoted generic test counterparts was evaluated and rejected. It left hard precision at 75.00% but reduced labeled-valid hard-link recovery from 51/70 to 33/70. The final pass therefore does not alter test-counterpart tiering.
+
 ## Limitations
 
 This is a single-reviewer semantic judgment pass. The corpus is dominated by repository-wide architecture and agent-guidance documents, and only three unmatched hard-tier suggestions were available. A later adjudication pass or additional repositories with scoped feature documents would strengthen the precision estimate.

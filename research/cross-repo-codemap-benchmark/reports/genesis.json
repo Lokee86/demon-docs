@@ -68,15 +68,6 @@
   "unmatched_suggestions": [
     {
       "document": ".github/contributing/ARCHITECTURE.md",
-      "target": ".github/workflows/scripts/",
-      "score": 0.9592498662725258,
-      "evidence": [
-        "unique_basename_mention:scripts"
-      ],
-      "tier": "context"
-    },
-    {
-      "document": ".github/contributing/ARCHITECTURE.md",
       "target": "examples/",
       "score": 2,
       "evidence": [
@@ -99,24 +90,6 @@
       "score": 2,
       "evidence": [
         "exact_path_mention:genesis/assets/"
-      ],
-      "tier": "context"
-    },
-    {
-      "document": ".github/contributing/ARCHITECTURE.md",
-      "target": "genesis/assets/meshes/camera/",
-      "score": 0.9592498662725258,
-      "evidence": [
-        "unique_basename_mention:camera"
-      ],
-      "tier": "context"
-    },
-    {
-      "document": ".github/contributing/ARCHITECTURE.md",
-      "target": "genesis/assets/meshes/chopping-board/source/",
-      "score": 0.9592498662725258,
-      "evidence": [
-        "unique_basename_mention:source"
       ],
       "tier": "context"
     },
@@ -254,6 +227,33 @@
       "score": 0.9592498662725258,
       "evidence": [
         "unique_basename_mention:fem_solver.py"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/mpm_solver.py",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:mpm_solver.py"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/pbd_solver.py",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:pbd_solver.py"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/sf_solver.py",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:sf_solver.py"
       ],
       "tier": "context"
     },

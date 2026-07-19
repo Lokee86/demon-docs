@@ -1,6 +1,6 @@
 # Cross-repository benchmark results
 
-Frozen algorithm baseline: `6ea39964a77919c3a6228b475904e9c530a16a4d`.
+Frozen algorithm baseline: `b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1`.
 
 Monolithic per-file indexes are excluded from the calculation corpus. They remain visible as a separate stress result.
 
