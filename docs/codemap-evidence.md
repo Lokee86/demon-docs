@@ -38,6 +38,18 @@ Ranked candidates are separated without discarding the broader relationship set:
 
 A tier is not an automatic write decision. It does not declare an existing link irrelevant, and it does not bypass persisted declines or human review. Schema-1 reports created before tiers existed may omit the field; evaluation treats that legacy empty value as `context` and rejects unknown non-empty tier values.
 
+## Negative Evidence
+
+The ranking layer rejects only narrowly demonstrated incidental targets:
+
+- dependency lockfiles when exact-path or basename evidence has no independent support;
+- deeply nested assets, examples, fixtures, samples, or test data produced only by unique-basename matching; and
+- children of `.github/workflows/` produced only by unique-basename matching.
+
+Explicit path evidence preserves nested content and workflow targets. Declared symbols, dependencies, related documents, siblings, test counterparts, and Git co-change preserve supported lockfile or basename candidates. These filters remove demonstrated noise without treating a file class as universally irrelevant.
+
+The complete current algorithm is documented in [Codemap Suggestion Algorithm](codemap-suggestion-algorithm.md). The benchmark and tuning history is recorded in [Codemap Algorithm Development Log](codemap-algorithm-development-log.md).
+
 ## Safety Contract
 
 - Existing codemap targets are never returned as missing-link candidates.

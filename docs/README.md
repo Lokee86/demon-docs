@@ -11,7 +11,9 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 - [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Focused design for deterministic code facts and bounded entanglement projections.
 - [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Focused design for graph-based agent context retrieval and thin integrations.
 - [Context-Injection Benchmarking](context-injection-benchmarking.md): Future research plan for a four-quadrant OSS corpus, paired no-context controls, and an intentionally constructed harness control.
-- [Context-Injection Benchmarking](context-injection-benchmarking.md): Future research plan for evaluating agent context across code/documentation quality quadrants and matched control conditions.
+- [Codemap Missing-Link Evidence](codemap-evidence.md): Deterministic evidence inputs, suggestion tiers, and safety boundaries.
+- [Codemap Suggestion Algorithm](codemap-suggestion-algorithm.md): Current admission, scoring, negative-evidence, ranking, tiering, and readiness contract.
+- [Codemap Algorithm Development Log](codemap-algorithm-development-log.md): Chronological benchmark, tuning, rejected-experiment, commit, and artifact ledger.
 - [Configuration](configuration.md): Config file shape, defaults, and supported overrides.
 - [Markdown Link Reconciliation](markdown-links.md): Repository-scoped local link validation, persistent identity state, and path repair.
 - [Code-Symbol References](code-symbol-references.md): Focused Phase 4 design for deterministic declaration-level documentation references and language adapters.
@@ -27,6 +29,9 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 - [agent-context-and-integrations.md](agent-context-and-integrations.md) - Agent Context And Integrations documentation.
 - [code-dependency-and-entanglement.md](code-dependency-and-entanglement.md) - Code Dependency And Entanglement documentation.
 - [code-symbol-references.md](code-symbol-references.md) - Code Symbol References documentation.
+- [codemap-algorithm-development-log.md](codemap-algorithm-development-log.md) - Chronological codemap algorithm and tuning record.
+- [codemap-evidence.md](codemap-evidence.md) - Codemap evidence and safety contract.
+- [codemap-suggestion-algorithm.md](codemap-suggestion-algorithm.md) - Current codemap suggestion algorithm reference.
 - [configuration.md](configuration.md) - Configuration documentation.
 - [context-injection-benchmarking.md](context-injection-benchmarking.md) - Future context-injection benchmarking research plan.
 - [markdown-links.md](markdown-links.md) - Markdown Links documentation.
