@@ -104,7 +104,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,reverse-index,codemap,config,demon} ...")
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -123,6 +123,8 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runStatus(args[1:], out, errOut)
 	case "fix", "check", "watch":
 		return runTree(ctx, args[0], args[1:], out, errOut)
+	case "reverse-index":
+		return runReverseIndex(ctx, args[1:], out, errOut)
 	case "codemap":
 		return runCodemap(ctx, args[1:], out, errOut)
 	case "config":
@@ -130,17 +132,17 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "demon":
 		return runDemon(ctx, args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
-		choices := "init, status, fix, check, watch, codemap, config, demon"
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,reverse-index,codemap,config,demon} ...")
+		choices := "init, status, fix, check, watch, reverse-index, codemap, config, demon"
 		if runtime.GOOS == "windows" {
-			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config', 'demon'"
+			choices = "'init', 'status', 'fix', 'check', 'watch', 'reverse-index', 'codemap', 'config', 'demon'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version")
+	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,reverse-index,codemap,config,demon} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,reverse-index,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    reverse-index       generate code-folder indexes from codemaps\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs reverse-index check\n  ddocs reverse-index fix\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version")
 }
 
 func initHelp(w io.Writer) {
@@ -644,7 +646,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,reverse-index,codemap,config,demon} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"
