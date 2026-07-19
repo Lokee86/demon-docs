@@ -9,6 +9,9 @@ func TestExtractDefaultParsesSpaceRocksStyleCodeMap(t *testing.T) {
 	if len(result.Diagnostics) != 0 {
 		t.Fatalf("unexpected diagnostics: %#v", result.Diagnostics)
 	}
+	if result.SectionCount != 1 {
+		t.Fatalf("got %d codemap sections, want 1", result.SectionCount)
+	}
 	if len(result.Entries) != 3 {
 		t.Fatalf("got %d entries, want 3: %#v", len(result.Entries), result.Entries)
 	}
@@ -44,7 +47,7 @@ func TestExtractSupportsRepositorySpecificHeading(t *testing.T) {
 func TestExtractIgnoresProseOnlyBoundaryBullets(t *testing.T) {
 	source := "## Code map\r\n\r\n- explain the boundary later.\r\n"
 	result := ExtractDefault("docs/future.md", source)
-	if len(result.Entries) != 0 || len(result.Diagnostics) != 0 {
+	if len(result.Entries) != 0 || len(result.Diagnostics) != 0 || result.SectionCount != 1 {
 		t.Fatalf("unexpected result: %#v", result)
 	}
 }

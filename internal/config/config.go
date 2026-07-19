@@ -33,6 +33,8 @@ type Watch struct {
 	IgnoredDirs, IgnoredSuffixes []string
 }
 type Demon struct{ Run bool }
+type ReverseIndex struct{ Roots []string }
+type Codemap struct{ Headings []string }
 type Template struct {
 	ManagedSections                                                          []string
 	IncludeOwnership, IncludeDoesNotBelong, IncludeRelatedDocs, IncludeNotes bool
@@ -48,6 +50,8 @@ type Config struct {
 	Watch           Watch
 	Template        Template
 	Demon           Demon
+	ReverseIndex    ReverseIndex
+	Codemap         Codemap
 }
 
 func Default() Config {
@@ -56,10 +60,17 @@ func Default() Config {
 		Markers: Marker{"doc-ledger"}, ParentLink: ParentLink{"Parent index", true, false},
 		Sections: Sections{"Direct Files", "Stub Files", "Direct Folders", []string{"Top-Level Files"}, []string{"Top-Level Folders"}},
 		Draft:    Draft{"stubs", "Stub: "}, Files: Files{DefaultIndexFile, []string{"**/*.md"}, []string{}, []string{".md"}},
-		Description: Description{"{title} documentation.", "{title} documentation."},
-		Watch:       Watch{0.75, []string{".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
-		Template:    Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
-		Demon:       Demon{Run: true},
+		Description:  Description{"{title} documentation.", "{title} documentation."},
+		Watch:        Watch{0.75, []string{".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
+		Template:     Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
+		Demon:        Demon{Run: true},
+		ReverseIndex: ReverseIndex{Roots: []string{}},
+		Codemap: Codemap{Headings: []string{
+			"Code map",
+			"Codemap",
+			"Code or source map",
+			"Code and test map",
+		}},
 	}
 }
 
@@ -72,7 +83,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[demon]\nrun = true\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "index_file = \"README.md\"\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
@@ -113,6 +124,13 @@ type rawConfig struct {
 	Demon *struct {
 		Run *bool `toml:"run"`
 	} `toml:"demon"`
+	ReverseIndex *struct {
+		Roots   *[]string `toml:"roots"`
+		Folders *[]string `toml:"folders"`
+	} `toml:"reverse_index"`
+	Codemap *struct {
+		Headings *[]string `toml:"headings"`
+	} `toml:"codemap"`
 	Aliases *struct {
 		Files   *[]string `toml:"files"`
 		Folders *[]string `toml:"folders"`
@@ -218,6 +236,16 @@ func Load(path string) (Config, error) {
 	}
 	if d := raw.Demon; d != nil && d.Run != nil {
 		c.Demon.Run = *d.Run
+	}
+	if r := raw.ReverseIndex; r != nil {
+		if r.Roots != nil {
+			c.ReverseIndex.Roots = *r.Roots
+		} else if r.Folders != nil {
+			c.ReverseIndex.Roots = *r.Folders
+		}
+	}
+	if m := raw.Codemap; m != nil && m.Headings != nil {
+		c.Codemap.Headings = *m.Headings
 	}
 	if a := raw.Aliases; a != nil {
 		if a.Files != nil {

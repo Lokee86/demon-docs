@@ -26,6 +26,9 @@ The supported keys are:
 - `docs_root`
 - `root` as a legacy standalone-config alias
 - `index_file`
+- `[reverse_index].roots`
+- `[reverse_index].folders` as a compatibility alias
+- `[codemap].headings`
 - `[markers].prefix`
 - `[parent_link].label`
 - `[parent_link].folder_indexes`
@@ -106,20 +109,26 @@ Compatibility fallbacks remain supported at lower priority:
 
 CLI flags override the selected base config. The reconciliation selectors are operational flags rather than persistent configuration:
 
-- `-i` / `--indexes` runs index reconciliation only when used without the link selector.
-- `-l` / `--links` runs link reconciliation only when used without the index selector.
-- Supplying both selectors, or neither selector, runs both systems.
+- `-d` / `--docs` selects documentation-folder indexes.
+- `-l` / `--links` selects Markdown link reconciliation.
+- `-r` / `--reverse` selects code-folder reverse indexes.
+- `-i` / `--indexes` remains a compatibility alias for `--docs`.
+- When any selector is supplied, only selected systems run.
+- Without selectors, docs and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
 - The selectors apply to `check`, `fix`, and `watch`.
 
 Examples include:
 
 ```bash
-ddocs check -i
+ddocs check -d
 ddocs check -l
-ddocs fix --indexes
+ddocs check -r
+ddocs fix --docs
 ddocs fix --links
-ddocs watch -i
+ddocs fix --reverse
+ddocs watch -d
 ddocs watch -l
+ddocs watch -r
 ddocs fix --root docs --index-file "!README.md"
 ddocs fix --root docs --draft-folder "_drafts"
 ddocs fix --root docs --include "**/*.png"
@@ -139,6 +148,12 @@ The defaults reflect the standalone repo behavior:
 ```toml
 docs_root = "docs"
 index_file = "README.md"
+
+[reverse_index]
+roots = []
+
+[codemap]
+headings = ["Code map", "Codemap", "Code or source map", "Code and test map"]
 
 [markers]
 prefix = "doc-ledger"
@@ -211,6 +226,39 @@ Legacy standalone config files may continue using `root`; both keys load into th
 - To keep the legacy filename, set `index_file = "!README.md"`.
 
 Projects that want `!README.md` should set `index_file = "!README.md"` in config.
+
+## `[reverse_index].roots`
+
+`[reverse_index].roots` selects the repository folders where code-folder reverse indexes may be generated. There is no repository-wide default; an empty list requires `--reverse-root` whenever `-r` / `--reverse` is selected.
+
+Configured roots are resolved relative to the repository root and traversed recursively. Only folders beneath those roots can receive reverse-index managed sections. Overlapping roots are collapsed to the broadest selected root.
+
+```toml
+[reverse_index]
+roots = ["client", "services/game-server", "services/player-data"]
+```
+
+`--reverse-root PATH` overrides configured roots for one `check`, `fix`, or `watch` invocation and may be repeated. Relative paths resolve from the current working directory; absolute paths are accepted when they remain inside the repository.
+
+```bash
+ddocs check -r --reverse-root services/game-server
+ddocs fix -r --reverse-root client --reverse-root services/player-data
+cd services/game-server
+ddocs watch -r --once --reverse-root .
+```
+
+`[reverse_index].folders` remains accepted as an alias for older experimental configs, but `roots` is the canonical key.
+
+## `[codemap].headings`
+
+`[codemap].headings` defines the authored Markdown section headings recognized as codemaps. Matching is case-insensitive and ignores trailing Markdown heading markers.
+
+```toml
+[codemap]
+headings = ["Implementation map", "Source map"]
+```
+
+`--codemap-heading TEXT` replaces the configured headings for one reconciliation invocation and may be repeated. Reverse reconciliation returns an error when the documentation scope contains no matching codemap section. A matching section with no code targets returns a separate empty-codemap error.
 
 ## `[markers].prefix`
 
@@ -318,7 +366,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository owns one `.docignore` file at its repository root, beside `.ddocs/`. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events.
+An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -343,7 +391,7 @@ The following directory names are permanently excluded at any depth and cannot b
 - `.obsidian/`
 - `logseq/`
 
-Watch mode watches the repository root for `.docignore` changes, reloads the rules, and adds watches for directories that become visible. Index-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
+Watch mode watches the repository root for the base `.docignore`. `ddocs watch -r` watches only the selected reverse roots plus their ancestor directories, detects nested `.docignore` changes, reloads the hierarchy, and adds watches for directories that become visible. Documentation-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
 
 ## `[editable].parent_index_extensions`
 

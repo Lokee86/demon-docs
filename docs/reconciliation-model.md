@@ -77,7 +77,7 @@ The first link-enabled fix or watch pass records a baseline and reports issues w
 
 Relative and absolute filesystem links are both checked. Targets may be non-Markdown files or may resolve outside the repository. Only Markdown source files inside the repository are rewritten, and only the destination path changes; labels, titles, queries, and fragments remain intact.
 
-Index and link reconciliation are separate operations selected with `-i` / `--indexes` and `-l` / `--links`. Neither selector means both.
+Documentation indexes, Markdown links, and code-folder reverse indexes are selected independently with `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse`. `-i` / `--indexes` remains a compatibility alias for `--docs`. When any selector is supplied, only selected systems run.
 
 ## Safety Boundaries
 

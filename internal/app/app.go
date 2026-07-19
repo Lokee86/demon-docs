@@ -19,6 +19,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
 	"github.com/Lokee86/demon-docs/internal/repository"
+	"github.com/Lokee86/demon-docs/internal/reverseindex"
 	"github.com/Lokee86/demon-docs/internal/watch"
 )
 
@@ -57,8 +58,9 @@ func (b *optionalBool) IsBoolFlag() bool { return true }
 type commonFlags struct {
 	root, config, index, draft, prefix, marker, parent optionalString
 	noLocal, noGlobal                                  bool
-	indexesOnly, linksOnly                             bool
+	docsOnly, linksOnly, reverseOnly                   bool
 	includes, excludes                                 stringsFlag
+	reverseRoots, codemapHeadings                      stringsFlag
 	folderLinks, fileLinks                             optionalBool
 }
 
@@ -67,10 +69,16 @@ func addCommon(fs *flag.FlagSet, c *commonFlags) {
 	fs.Var(&c.config, "config", "explicit ddocs config file")
 	fs.BoolVar(&c.noLocal, "no-local-config", false, "skip current-directory local config")
 	fs.BoolVar(&c.noGlobal, "no-global-config", false, "skip the global user config")
-	fs.BoolVar(&c.indexesOnly, "i", false, "reconcile indexes")
-	fs.BoolVar(&c.indexesOnly, "indexes", false, "reconcile indexes")
+	fs.BoolVar(&c.docsOnly, "d", false, "reconcile documentation indexes")
+	fs.BoolVar(&c.docsOnly, "docs", false, "reconcile documentation indexes")
+	fs.BoolVar(&c.docsOnly, "i", false, "compatibility alias for --docs")
+	fs.BoolVar(&c.docsOnly, "indexes", false, "compatibility alias for --docs")
 	fs.BoolVar(&c.linksOnly, "l", false, "reconcile links")
 	fs.BoolVar(&c.linksOnly, "links", false, "reconcile links")
+	fs.BoolVar(&c.reverseOnly, "r", false, "reconcile reverse indexes")
+	fs.BoolVar(&c.reverseOnly, "reverse", false, "reconcile reverse indexes")
+	fs.Var(&c.reverseRoots, "reverse-root", "override configured reverse-index roots; repeat as needed")
+	fs.Var(&c.codemapHeadings, "codemap-heading", "override configured codemap headings; repeat as needed")
 	fs.Var(&c.index, "index-file", "override the folder index filename")
 	fs.Var(&c.draft, "draft-folder", "override the draft folder name")
 	fs.Var(&c.prefix, "draft-description-prefix", "override the draft file description prefix")
@@ -104,7 +112,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -130,7 +138,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "demon":
 		return runDemon(ctx, args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		choices := "init, status, fix, check, watch, codemap, config, demon"
 		if runtime.GOOS == "windows" {
 			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config', 'demon'"
@@ -140,7 +148,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...\n\nddocs reconciles folder indexes and repository-local links in Markdown documents with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version")
+	fmt.Fprintf(w, "%s\n\nddocs reconciles documentation indexes, reverse indexes, and repository-local links in Markdown documents with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation-folder indexes\n  -l, --links           repository-local Markdown links\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -251,40 +259,26 @@ func writeInitParseError(w io.Writer, err error) {
 }
 
 func treeUsage(command string) string {
-	return map[string]string{
-		"fix": "usage: ddocs fix [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
-			"                      [--no-global-config] [--index-file NAME]\n" +
-			"                      [--draft-folder NAME] [--draft-description-prefix TEXT]\n" +
-			"                      [--include PATTERN] [--exclude PATTERN]\n" +
-			"                      [--marker-prefix TEXT] [--parent-label TEXT]\n" +
-			"                      [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
-			"                      [--parent-link-indexed-files | --no-parent-link-indexed-files]",
-		"check": "usage: ddocs check [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
-			"                        [--no-global-config] [--index-file NAME]\n" +
-			"                        [--draft-folder NAME]\n" +
-			"                        [--draft-description-prefix TEXT] [--include PATTERN]\n" +
-			"                        [--exclude PATTERN] [--marker-prefix TEXT]\n" +
-			"                        [--parent-label TEXT]\n" +
-			"                        [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
-			"                        [--parent-link-indexed-files | --no-parent-link-indexed-files]",
-		"watch": "usage: ddocs watch [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
-			"                        [--no-global-config] [--index-file NAME]\n" +
-			"                        [--draft-folder NAME]\n" +
-			"                        [--draft-description-prefix TEXT] [--include PATTERN]\n" +
-			"                        [--exclude PATTERN] [--marker-prefix TEXT]\n" +
-			"                        [--parent-label TEXT]\n" +
-			"                        [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
-			"                        [--parent-link-indexed-files | --no-parent-link-indexed-files]\n" +
-			"                        [--once] [--debounce-seconds FLOAT]",
-	}[command]
+	usage := fmt.Sprintf("usage: ddocs %s [-h] [-d] [-l] [-r] [--root PATH] [--config PATH]\n", command) +
+		"                     [--no-local-config] [--no-global-config] [--index-file NAME]\n" +
+		"                     [--reverse-root PATH] [--codemap-heading TEXT]\n" +
+		"                     [--draft-folder NAME] [--draft-description-prefix TEXT]\n" +
+		"                     [--include PATTERN] [--exclude PATTERN]\n" +
+		"                     [--marker-prefix TEXT] [--parent-label TEXT]\n" +
+		"                     [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
+		"                     [--parent-link-indexed-files | --no-parent-link-indexed-files]"
+	if command == "watch" {
+		usage += "\n                     [--once] [--debounce-seconds FLOAT]"
+	}
+	return usage
 }
 
 func treeHelp(w io.Writer, command string) {
 	usage := treeUsage(command)
 	description := map[string]string{
-		"fix":   "Reconcile selected indexes and links and write needed updates.",
-		"check": "Verify that selected indexes and links are already reconciled.",
-		"watch": "Watch runs in the foreground by default, runs one reconciliation immediately, and then watches for relevant filesystem changes. Each reconciliation diagnostic is printed as an individual message.",
+		"fix":   "Reconcile selected documentation indexes, links, and reverse indexes and write needed updates.",
+		"check": "Verify that selected documentation indexes, links, and reverse indexes are already reconciled.",
+		"watch": "Watch runs in the foreground by default, runs selected reconciliation immediately, and then watches for relevant filesystem changes. Each reconciliation diagnostic is printed as an individual message.",
 	}[command]
 	watchOptions := ""
 	watchNotes := ""
@@ -292,7 +286,7 @@ func treeHelp(w io.Writer, command string) {
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 		watchNotes = "\nWatcher lifecycle:\n  - ddocs watch remains attached to the current terminal\n  - use ddocs demon for detached, repository-local self-management\n"
 	}
-	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -i, --indexes         reconcile indexes only when used without -l\n  -l, --links           reconcile links only when used without -i\n  --root PATH           docs root directory to reconcile\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nLink reconciliation:\n  - validates and repairs Markdown links, images, and reference definitions\n  - supports wiki links such as [[guide]], [[docs/guide|Guide]], and ![[image.png]]\n  - validates local HTML href, src, and poster targets\n  - reports undefined explicit or collapsed reference labels such as [Guide][guide] and [guide][]\n  - leaves shortcut references such as [guide] untreated unless a definition exists\n%s\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions, watchNotes)
+	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -d, --docs            reconcile documentation-folder indexes\n  -l, --links           reconcile repository-local Markdown links\n  -r, --reverse         reconcile code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n  --root PATH           docs root directory to reconcile\n  --reverse-root PATH   replace [reverse_index].roots for this run; repeat as needed\n  --codemap-heading TEXT\n                        replace [codemap].headings for this run; repeat as needed\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nSelector rules:\n  - when any selector is supplied, only selected systems run\n  - without selectors, docs and links run\n  - without selectors, reverse also runs when reverse roots are configured or supplied\n\nLink reconciliation:\n  - validates and repairs Markdown links, images, and reference definitions\n  - supports wiki links such as [[guide]], [[docs/guide|Guide]], and ![[image.png]]\n  - validates local HTML href, src, and poster targets\n  - reports undefined explicit or collapsed reference labels such as [Guide][guide] and [guide][]\n  - leaves shortcut references such as [guide] untreated unless a definition exists\n\nReverse-index rules:\n  - -r/--reverse requires [reverse_index].roots or at least one --reverse-root\n  - relative --reverse-root paths resolve from the current working directory\n  - absolute --reverse-root paths must remain inside the repository\n  - --codemap-heading matching is case-insensitive and replaces configured headings\n  - reverse reconciliation errors when no matching codemap section exists\n  - a matching codemap section with no code targets is reported separately\n%s\nExamples:\n  ddocs %s -d\n  ddocs %s -l\n  ddocs %s -r --reverse-root services/game-server\n  ddocs %s -d -r\n  ddocs %s -r --codemap-heading \"Implementation map\"\n\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions, watchNotes, command, command, command, command, command)
 }
 
 var (
@@ -305,7 +299,7 @@ var (
 func writeTreeParseError(w io.Writer, command string, err error) {
 	message := err.Error()
 	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
-		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(w, topUsageLine)
 		fmt.Fprintf(w, "ddocs: error: unrecognized arguments: --%s\n", match[1])
 		return
 	}
@@ -359,7 +353,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		fmt.Fprintf(errOut, "ddocs: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
@@ -372,17 +366,24 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 	if err != nil {
 		return fail(errOut, err)
 	}
-	features := selectedFeatures(flags)
-	if features.Indexes && !repository.DocsRootExists(scope) {
+	features := selectedFeatures(flags, c)
+	if (features.Indexes || features.Reverse) && !repository.DocsRootExists(scope) {
 		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", scope.DocsRoot)
 		return 2
+	}
+	reverseOptions := reverseOptions{}
+	if features.Reverse {
+		reverseOptions, err = resolveReverseOptions(flags, c, scope)
+		if err != nil {
+			return fail(errOut, err)
+		}
 	}
 	if command == "watch" {
 		var d *float64
 		if debounce >= 0 {
 			d = &debounce
 		}
-		if err := watch.RootSelected(ctx, scope.DocsRoot, scope.RepositoryRoot, c, features, d, once, out); err != nil {
+		if err := runSelectedWatch(ctx, scope, c, features, reverseOptions, d, once, out); err != nil {
 			return fail(errOut, err)
 		}
 		return 0
@@ -396,6 +397,13 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		}
 	}
 	linkPlan := links.Plan{}
+	reversePlan := reverseindex.Plan{}
+	if features.Reverse {
+		reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
+		if err != nil {
+			return fail(errOut, err)
+		}
+	}
 	if command == "fix" {
 		changed := 0
 		if features.Indexes {
@@ -416,9 +424,17 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			}
 			changed += count
 		}
+		if features.Reverse {
+			count, err := reverseindex.Apply(scope.RepositoryRoot, reversePlan)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			changed += count
+		}
 		fmt.Fprintf(out, "ddocs fix updated %d file(s)\n", changed)
 		writeMessages(out, indexResult.Messages)
 		writeMessages(out, linkPlan.Messages)
+		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
 		if linkPlan.Unresolved > 0 {
 			fmt.Fprintf(out, "ddocs fix unresolved %d link(s)\n", linkPlan.Unresolved)
 			return 1
@@ -432,7 +448,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			return fail(errOut, err)
 		}
 	}
-	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed()
+	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed() || features.Reverse && reversePlan.Failed()
 	if failed {
 		fmt.Fprintln(out, "ddocs check failed")
 		for _, update := range indexResult.Updates {
@@ -441,19 +457,24 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		for _, update := range linkPlan.Updates {
 			fmt.Fprintln(out, update.Path)
 		}
+		for _, update := range reversePlan.Updates {
+			fmt.Fprintln(out, update.Path)
+		}
 		writeMessages(out, indexResult.Messages)
 		writeMessages(out, linkPlan.Messages)
+		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
 		return 1
 	}
 	fmt.Fprintln(out, "ddocs check passed")
 	return 0
 }
 
-func selectedFeatures(flags commonFlags) watch.Features {
-	if !flags.indexesOnly && !flags.linksOnly {
-		return watch.Features{Indexes: true, Links: true}
+func selectedFeatures(flags commonFlags, c config.Config) watch.Features {
+	if !flags.docsOnly && !flags.linksOnly && !flags.reverseOnly {
+		reverseConfigured := len(c.ReverseIndex.Roots) > 0 || len(flags.reverseRoots.values) > 0 || len(flags.codemapHeadings.values) > 0
+		return watch.Features{Indexes: true, Links: true, Reverse: reverseConfigured}
 	}
-	return watch.Features{Indexes: flags.indexesOnly, Links: flags.linksOnly}
+	return watch.Features{Indexes: flags.docsOnly, Links: flags.linksOnly, Reverse: flags.reverseOnly}
 }
 
 func writeMessages(out io.Writer, messages []string) {
@@ -534,7 +555,7 @@ func codemapHelp(w io.Writer) {
 }
 
 func codemapExportHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
+	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace configured headings\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
 }
 
 func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -603,6 +624,7 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 2
 	}
 	format := codemap.DefaultFormat()
+	format.SectionHeadings = append([]string(nil), resolved.Codemap.Headings...)
 	if len(headings.values) > 0 {
 		format.SectionHeadings = headings.values
 	}
@@ -865,5 +887,5 @@ func show(w io.Writer, c config.Config, path string) {
 	if selected == "" {
 		selected = "<built-in defaults>"
 	}
-	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
 }
