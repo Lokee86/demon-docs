@@ -62,6 +62,47 @@ func TestFixIsIdempotentAndUsesConfiguredIndexEverywhere(t *testing.T) {
 		t.Fatalf("not idempotent: %+v", second.Updates)
 	}
 }
+func TestMultipleTrailingBlankLinesRemainIdempotent(t *testing.T) {
+	root := t.TempDir()
+	indexPath := filepath.Join(root, "README.md")
+	pagePath := filepath.Join(root, "page.md")
+	write(t, indexPath, "# Docs\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n<!-- doc-ledger:files:end -->\n\n## Stub Files\n<!-- doc-ledger:stubs:start -->\n<!-- doc-ledger:stubs:end -->\n\n## Direct Folders\n<!-- doc-ledger:folders:start -->\n<!-- doc-ledger:folders:end -->\n\n\n")
+	write(t, pagePath, "# Page\n\nBody.\n\n\n")
+
+	c := config.Default()
+	c.ParentLink.IndexedFiles = true
+	first, err := Tree(root, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Apply(first); err != nil {
+		t.Fatal(err)
+	}
+
+	indexAfterFirst, err := os.ReadFile(indexPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pageAfterFirst, err := os.ReadFile(pagePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix(string(indexAfterFirst), "\n\n\n") {
+		t.Fatalf("index trailing blank lines changed: %q", string(indexAfterFirst))
+	}
+	if !strings.HasSuffix(string(pageAfterFirst), "\n\n\n") {
+		t.Fatalf("page trailing blank lines changed: %q", string(pageAfterFirst))
+	}
+
+	second, err := Tree(root, c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.Updates) != 0 {
+		t.Fatalf("multiple trailing blank lines caused repeated drift: %+v", second.Updates)
+	}
+}
+
 func TestCheckPlanningDoesNotMutate(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "page.md")
