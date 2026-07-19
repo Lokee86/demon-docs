@@ -6,7 +6,7 @@ This benchmark measures the usefulness of Demon Docs' current missing-link sugge
 
 - Corpus: Space Rocks at revision `3387c94d10fdb94008f27b404098f3e0c32d911c`.
 - Authored links remain visible during generation; `.worktrees/` documents are excluded.
-- The committed source report contains 4,493 unique unmatched suggestions across 149 mapped documents: [current-source-report.json](current-source-report.json).
+- The current source pool contains 4,493 unique unmatched suggestions across 149 mapped documents. The large source report is regenerated temporarily for validation and is intentionally not committed.
 
 Keeping authored links visible matters: a target already represented in a document's codemap is not a missing link.
 
