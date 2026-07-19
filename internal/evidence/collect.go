@@ -27,6 +27,7 @@ func Collect(input Input) []Candidate {
 		items:    map[string]map[string]*Evidence{},
 	}
 	c.collectMentions(input.DocumentText)
+	c.collectDeclaredSymbols(input.DocumentText, input.SymbolDeclarations)
 	c.collectStructure(input.ExistingTargets)
 	c.collectDependencies(input.ExistingTargets, input.DependencyEdges)
 	c.collectHistory(document, input.ExistingTargets, input.Commits)

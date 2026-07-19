@@ -11,6 +11,7 @@ type Kind string
 const (
 	KindExactPathMention      Kind = "exact_path_mention"
 	KindUniqueBasenameMention Kind = "unique_basename_mention"
+	KindDeclaredSymbolMention Kind = "declared_symbol_mention"
 	KindSiblingTarget         Kind = "sibling_of_existing_target"
 	KindTestCounterpart       Kind = "test_counterpart"
 	KindDependencyNeighbor    Kind = "dependency_neighbor"
@@ -35,14 +36,20 @@ type RelatedDocument struct {
 	Targets []string
 }
 
+type SymbolDeclaration struct {
+	Path   string
+	Symbol string
+}
+
 type Input struct {
-	DocumentPath     string
-	DocumentText     string
-	RepositoryFiles  []string
-	ExistingTargets  []string
-	DependencyEdges  []DependencyEdge
-	Commits          []Commit
-	RelatedDocuments []RelatedDocument
+	DocumentPath       string
+	DocumentText       string
+	RepositoryFiles    []string
+	ExistingTargets    []string
+	DependencyEdges    []DependencyEdge
+	Commits            []Commit
+	RelatedDocuments   []RelatedDocument
+	SymbolDeclarations []SymbolDeclaration
 }
 
 type Evidence struct {

@@ -139,7 +139,7 @@ func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {
 		source = string(item.Kind)
 	}
 	detail := ""
-	if item.Kind == evidence.KindDependencyNeighbor {
+	if item.Kind == evidence.KindDependencyNeighbor || item.Kind == evidence.KindDeclaredSymbolMention {
 		detail = item.Detail
 	}
 	return evidenceAtom{kind: item.Kind, source: source, detail: detail}
@@ -157,6 +157,7 @@ func admitSuggestionCandidate(candidate evidence.Candidate) bool {
 		switch kind {
 		case evidence.KindExactPathMention,
 			evidence.KindUniqueBasenameMention,
+			evidence.KindDeclaredSymbolMention,
 			evidence.KindTestCounterpart,
 			evidence.KindDependencyNeighbor,
 			evidence.KindRelatedDocumentTarget:
@@ -172,6 +173,8 @@ func evidenceWeight(kind evidence.Kind) float64 {
 		return 6
 	case evidence.KindUniqueBasenameMention:
 		return 4
+	case evidence.KindDeclaredSymbolMention:
+		return 7
 	case evidence.KindTestCounterpart:
 		return 6
 	case evidence.KindDependencyNeighbor:

@@ -20,14 +20,15 @@ type Options struct {
 }
 
 type Corpus struct {
-	RepositoryRoot    string
-	RepositoryFiles   []string
-	RepositoryPaths   []string
-	Documents         map[string]string
-	TargetsByDocument map[string][]string
-	DependencyEdges   []evidence.DependencyEdge
-	Commits           []evidence.Commit
-	RelatedDocuments  map[string][]evidence.RelatedDocument
+	RepositoryRoot     string
+	RepositoryFiles    []string
+	RepositoryPaths    []string
+	Documents          map[string]string
+	TargetsByDocument  map[string][]string
+	DependencyEdges    []evidence.DependencyEdge
+	Commits            []evidence.Commit
+	RelatedDocuments   map[string][]evidence.RelatedDocument
+	SymbolDeclarations []evidence.SymbolDeclaration
 }
 
 func (c Corpus) KnownTargets(documentPath string) []string {
@@ -45,13 +46,14 @@ func (c Corpus) Input(documentPath string, existingTargets []string) (evidence.I
 		repositoryPaths = c.RepositoryFiles
 	}
 	return evidence.Input{
-		DocumentPath:     documentPath,
-		DocumentText:     text,
-		RepositoryFiles:  repositoryPaths,
-		ExistingTargets:  cloneStrings(existingTargets),
-		DependencyEdges:  c.DependencyEdges,
-		Commits:          c.Commits,
-		RelatedDocuments: cloneRelated(c.RelatedDocuments[documentPath]),
+		DocumentPath:       documentPath,
+		DocumentText:       text,
+		RepositoryFiles:    repositoryPaths,
+		ExistingTargets:    cloneStrings(existingTargets),
+		DependencyEdges:    c.DependencyEdges,
+		Commits:            c.Commits,
+		RelatedDocuments:   cloneRelated(c.RelatedDocuments[documentPath]),
+		SymbolDeclarations: cloneSymbols(c.SymbolDeclarations),
 	}, nil
 }
 
@@ -97,4 +99,8 @@ func cloneRelated(values []evidence.RelatedDocument) []evidence.RelatedDocument 
 		result[index] = evidence.RelatedDocument{Path: value.Path, Targets: cloneStrings(value.Targets)}
 	}
 	return result
+}
+
+func cloneSymbols(values []evidence.SymbolDeclaration) []evidence.SymbolDeclaration {
+	return append([]evidence.SymbolDeclaration(nil), values...)
 }
