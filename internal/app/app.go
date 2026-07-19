@@ -526,7 +526,7 @@ func resolveScope(arg optionalString, configured, configPath string) (repository
 func fail(w io.Writer, err error) int { fmt.Fprintf(w, "ddocs error: %v\n", err); return 2 }
 
 func codemapHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n\noptions:\n  -h, --help            show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark,precision} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark,precision}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           evaluate a labeled precision benchmark\n\noptions:\n  -h, --help            show this help message and exit")
 }
 
 func codemapExportHelp(w io.Writer) {
@@ -535,7 +535,7 @@ func codemapExportHelp(w io.Writer) {
 
 func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark} ...")
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark,precision} ...")
 		fmt.Fprintln(errOut, "ddocs codemap: error: the following arguments are required: codemap_command")
 		return 2
 	}
@@ -546,9 +546,12 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if args[0] == "benchmark" {
 		return runCodemapBenchmark(ctx, args[1:], out, errOut)
 	}
+	if args[0] == "precision" {
+		return runCodemapPrecision(ctx, args[1:], out, errOut)
+	}
 	if args[0] != "export" {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark} ...")
-		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export, benchmark)\n", args[0])
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark,precision} ...")
+		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export, benchmark, precision)\n", args[0])
 		return 2
 	}
 	if helpRequested(args[1:]) {

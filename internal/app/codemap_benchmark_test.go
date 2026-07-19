@@ -108,7 +108,7 @@ func TestCodemapHelpListsBenchmark(t *testing.T) {
 	if code := Run(context.Background(), []string{"codemap", "--help"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("code=%d stderr=%q", code, stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "{export,benchmark}") || !strings.Contains(stdout.String(), "missing-link benchmark") {
+	if !strings.Contains(stdout.String(), "{export,benchmark,precision}") || !strings.Contains(stdout.String(), "missing-link benchmark") || !strings.Contains(stdout.String(), "precision") {
 		t.Fatalf("unexpected help:\n%s", stdout.String())
 	}
 }
