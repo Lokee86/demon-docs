@@ -63,3 +63,34 @@ func TestCodemapExportSupportsOutputAndCustomHeading(t *testing.T) {
 		}
 	})
 }
+
+func TestCodemapExportSupportsConfiguredTargetRoots(t *testing.T) {
+	withWorkingDirectory(t, t.TempDir(), func(root string) {
+		writeTestFile(t, filepath.Join(root, ".ddocs", "config.toml"), "docs_root = \"docs\"\n")
+		writeTestFile(t, filepath.Join(root, "services", "game", "internal", "runtime.go"), "package internal\n")
+		writeTestFile(t, filepath.Join(root, "docs", "guide.md"), "## Code map\n\n```text\ninternal/runtime.go\n```\n")
+
+		var stdout, stderr bytes.Buffer
+		args := []string{"codemap", "export", "--target-root", "services/game"}
+		if code := Run(context.Background(), args, &stdout, &stderr); code != 0 {
+			t.Fatalf("code=%d stderr=%q", code, stderr.String())
+		}
+		var dataset codemap.Dataset
+		if err := json.Unmarshal(stdout.Bytes(), &dataset); err != nil {
+			t.Fatal(err)
+		}
+		if len(dataset.Entries) != 1 || dataset.Entries[0].Resolution.ResolvedPath != "services/game/internal/runtime.go" {
+			t.Fatalf("unexpected dataset: %#v", dataset)
+		}
+	})
+}
+
+func TestCodemapExportHelpIncludesTargetRoot(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := Run(context.Background(), []string{"codemap", "export", "--help"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("code=%d stderr=%q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "--target-root PATH") || !strings.Contains(stdout.String(), "component root") {
+		t.Fatalf("help missing target-root contract:\n%s", stdout.String())
+	}
+}

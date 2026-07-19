@@ -25,6 +25,7 @@ const (
 	ResolutionSymbolUnverified ResolutionStatus = "symbol_unverified"
 	ResolutionPatternResolved  ResolutionStatus = "pattern_resolved"
 	ResolutionPatternMissing   ResolutionStatus = "pattern_missing"
+	ResolutionAmbiguous        ResolutionStatus = "ambiguous"
 	ResolutionUnsupported      ResolutionStatus = "unsupported"
 )
 
@@ -50,6 +51,7 @@ type TargetRecord struct {
 	Size         int64            `json:"size,omitempty"`
 	SHA256       string           `json:"sha256,omitempty"`
 	Matches      []TargetMatch    `json:"matches,omitempty"`
+	Candidates   []string         `json:"candidates,omitempty"`
 }
 
 type DatasetEntry struct {
@@ -165,31 +167,72 @@ func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Form
 		return TargetRecord{Status: ResolutionUnsupported}, nil
 	}
 	baseTarget, hasSymbol := targetFilePart(entry.Target)
-	if baseTarget == "" {
+	if baseTarget == "" || isTemplateTarget(baseTarget) {
 		return TargetRecord{Status: ResolutionUnsupported}, nil
 	}
-	base := repositoryRoot
-	if format.TargetBase == TargetBaseDocument {
-		base = filepath.Dir(filepath.Join(repositoryRoot, filepath.FromSlash(documentPath)))
-	}
-	candidate := filepath.Clean(filepath.Join(base, filepath.FromSlash(baseTarget)))
-	if filepath.IsAbs(filepath.FromSlash(baseTarget)) {
-		candidate = filepath.Clean(filepath.FromSlash(baseTarget))
-	}
-	if !within(repositoryRoot, candidate) {
-		return TargetRecord{Status: ResolutionOutsideRepo}, nil
-	}
-	resolvedPath, err := repositoryRelative(repositoryRoot, candidate)
+	candidates, outside, err := targetCandidates(repositoryRoot, documentPath, baseTarget, format)
 	if err != nil {
 		return TargetRecord{}, err
 	}
-	if hasPattern(baseTarget) {
-		return resolvePattern(repositoryRoot, candidate, resolvedPath)
+	if len(candidates) == 0 {
+		if outside {
+			return TargetRecord{Status: ResolutionOutsideRepo}, nil
+		}
+		return TargetRecord{Status: ResolutionMissing}, nil
 	}
-	info, err := os.Stat(candidate)
-	if os.IsNotExist(err) {
+	if hasPattern(baseTarget) {
+		primary, err := resolvePatterns(repositoryRoot, candidates[:1])
+		if err != nil || primary.Status == ResolutionPatternResolved || len(candidates) == 1 {
+			return primary, err
+		}
+		return resolvePatterns(repositoryRoot, candidates[1:])
+	}
+
+	type existingTarget struct {
+		path string
+		info os.FileInfo
+	}
+	existing := make([]existingTarget, 0, len(candidates))
+	primaryInfo, primaryErr := os.Stat(candidates[0])
+	if primaryErr == nil {
+		existing = append(existing, existingTarget{path: candidates[0], info: primaryInfo})
+	} else if !os.IsNotExist(primaryErr) {
+		return TargetRecord{}, primaryErr
+	}
+	if len(existing) == 0 {
+		for _, candidate := range candidates[1:] {
+			info, statErr := os.Stat(candidate)
+			if os.IsNotExist(statErr) {
+				continue
+			}
+			if statErr != nil {
+				return TargetRecord{}, statErr
+			}
+			existing = append(existing, existingTarget{path: candidate, info: info})
+		}
+	}
+	if len(existing) == 0 {
+		resolvedPath, err := repositoryRelative(repositoryRoot, candidates[0])
+		if err != nil {
+			return TargetRecord{}, err
+		}
 		return TargetRecord{Status: ResolutionMissing, ResolvedPath: resolvedPath}, nil
 	}
+	if len(existing) > 1 {
+		record := TargetRecord{Status: ResolutionAmbiguous, Exists: true}
+		for _, target := range existing {
+			relative, err := repositoryRelative(repositoryRoot, target.path)
+			if err != nil {
+				return TargetRecord{}, err
+			}
+			record.Candidates = append(record.Candidates, relative)
+		}
+		sort.Strings(record.Candidates)
+		return record, nil
+	}
+
+	candidate, info := existing[0].path, existing[0].info
+	resolvedPath, err := repositoryRelative(repositoryRoot, candidate)
 	if err != nil {
 		return TargetRecord{}, err
 	}
@@ -213,39 +256,90 @@ func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Form
 	return record, nil
 }
 
-func resolvePattern(repositoryRoot, patternPath, resolvedPattern string) (TargetRecord, error) {
-	matches, err := filepath.Glob(patternPath)
-	if err != nil {
-		return TargetRecord{Status: ResolutionUnsupported, ResolvedPath: resolvedPattern}, nil
+func targetCandidates(repositoryRoot, documentPath, target string, format Format) ([]string, bool, error) {
+	if filepath.IsAbs(filepath.FromSlash(target)) {
+		candidate := filepath.Clean(filepath.FromSlash(target))
+		if !within(repositoryRoot, candidate) {
+			return nil, true, nil
+		}
+		return []string{candidate}, false, nil
 	}
-	sort.Strings(matches)
-	record := TargetRecord{
-		Status:       ResolutionPatternMissing,
-		ResolvedPath: resolvedPattern,
-		Exists:       len(matches) > 0,
+
+	bases := []string{repositoryRoot}
+	if format.TargetBase == TargetBaseDocument {
+		bases[0] = filepath.Dir(filepath.Join(repositoryRoot, filepath.FromSlash(documentPath)))
 	}
-	for _, match := range matches {
-		if !within(repositoryRoot, match) {
+	for _, root := range format.TargetRoots {
+		base := filepath.Clean(filepath.Join(repositoryRoot, filepath.FromSlash(root)))
+		if !within(repositoryRoot, base) {
+			return nil, true, fmt.Errorf("target root %s is outside repository root", root)
+		}
+		bases = append(bases, base)
+	}
+
+	seen := map[string]struct{}{}
+	candidates := make([]string, 0, len(bases))
+	outside := false
+	for _, base := range bases {
+		candidate := filepath.Clean(filepath.Join(base, filepath.FromSlash(target)))
+		if !within(repositoryRoot, candidate) {
+			outside = true
 			continue
 		}
-		info, err := os.Stat(match)
+		key := strings.ToLower(candidate)
+		if _, exists := seen[key]; exists {
+			continue
+		}
+		seen[key] = struct{}{}
+		candidates = append(candidates, candidate)
+	}
+	return candidates, outside, nil
+}
+
+func resolvePatterns(repositoryRoot string, patternPaths []string) (TargetRecord, error) {
+	record := TargetRecord{Status: ResolutionPatternMissing}
+	seen := map[string]struct{}{}
+	for _, patternPath := range patternPaths {
+		resolvedPattern, err := repositoryRelative(repositoryRoot, patternPath)
 		if err != nil {
 			return TargetRecord{}, err
 		}
-		relative, err := repositoryRelative(repositoryRoot, match)
-		if err != nil {
-			return TargetRecord{}, err
+		if record.ResolvedPath == "" {
+			record.ResolvedPath = resolvedPattern
 		}
-		item := TargetMatch{Path: relative, IsDir: info.IsDir(), Size: info.Size()}
-		if !info.IsDir() {
-			contents, err := os.ReadFile(match)
+		matches, err := filepath.Glob(patternPath)
+		if err != nil {
+			return TargetRecord{Status: ResolutionUnsupported, ResolvedPath: resolvedPattern}, nil
+		}
+		sort.Strings(matches)
+		for _, match := range matches {
+			if !within(repositoryRoot, match) {
+				continue
+			}
+			relative, err := repositoryRelative(repositoryRoot, match)
 			if err != nil {
 				return TargetRecord{}, err
 			}
-			item.SHA256 = digest(contents)
+			if _, exists := seen[relative]; exists {
+				continue
+			}
+			seen[relative] = struct{}{}
+			info, err := os.Stat(match)
+			if err != nil {
+				return TargetRecord{}, err
+			}
+			item := TargetMatch{Path: relative, IsDir: info.IsDir(), Size: info.Size()}
+			if !info.IsDir() {
+				contents, err := os.ReadFile(match)
+				if err != nil {
+					return TargetRecord{}, err
+				}
+				item.SHA256 = digest(contents)
+			}
+			record.Matches = append(record.Matches, item)
 		}
-		record.Matches = append(record.Matches, item)
 	}
+	sort.Slice(record.Matches, func(i, j int) bool { return record.Matches[i].Path < record.Matches[j].Path })
 	if len(record.Matches) > 0 {
 		record.Status = ResolutionPatternResolved
 		record.Exists = true
@@ -254,7 +348,11 @@ func resolvePattern(repositoryRoot, patternPath, resolvedPattern string) (Target
 }
 
 func hasPattern(target string) bool {
-	return strings.ContainsAny(target, "*?[")
+	return strings.ContainsAny(target, "*?")
+}
+
+func isTemplateTarget(target string) bool {
+	return strings.ContainsAny(target, "<>\"") || strings.Contains(target, "{") || strings.Contains(target, "}")
 }
 
 func targetFilePart(target string) (string, bool) {

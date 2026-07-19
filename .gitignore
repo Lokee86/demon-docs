@@ -8,6 +8,8 @@ bin/
 
 # Local runtime/cache files
 .cache/
+/.ddocs/
+/.worktrees/
 .codex-hackathon/
 *.log
 *.pid

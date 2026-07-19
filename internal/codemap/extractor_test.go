@@ -17,7 +17,7 @@ func TestExtractDefaultParsesSpaceRocksStyleCodeMap(t *testing.T) {
 	if first.DocumentPath != "docs/runtime.md" || first.Target != "client/scripts/runtime/gameplay.gd" {
 		t.Fatalf("unexpected first entry: %#v", first)
 	}
-	if first.Kind != TargetFile || first.Context != "Runtime owners" || first.Description != "" {
+	if first.Kind != TargetFile || first.Syntax != SyntaxBullet || first.Heading != "Code map" || first.Context != "Runtime owners" || first.Description != "" {
 		t.Fatalf("unexpected first metadata: %#v", first)
 	}
 	if first.Source.Line != 7 || first.Source.Column != 4 || first.Source.EndColumn != 37 {
@@ -41,54 +41,52 @@ func TestExtractSupportsRepositorySpecificHeading(t *testing.T) {
 	}
 }
 
-func TestExtractReportsUnsupportedAuthoredListEntry(t *testing.T) {
-	source := "## Code map\r\n\r\n- TODO: add paths later.\r\n"
+func TestExtractIgnoresProseOnlyBoundaryBullets(t *testing.T) {
+	source := "## Code map\r\n\r\n- explain the boundary later.\r\n"
 	result := ExtractDefault("docs/future.md", source)
-	if len(result.Entries) != 0 || len(result.Diagnostics) != 1 {
+	if len(result.Entries) != 0 || len(result.Diagnostics) != 0 {
 		t.Fatalf("unexpected result: %#v", result)
-	}
-	got := result.Diagnostics[0]
-	if got.Code != "unparsed_entry" || got.Source.Line != 3 || got.RawLine != "- TODO: add paths later." {
-		t.Fatalf("unexpected diagnostic: %#v", got)
 	}
 }
 
-func TestExtractIgnoresFencesAndStopsAtPeerHeading(t *testing.T) {
-	source := "## Code map\n\n```md\n- `ignored/in/fence.go`\n```\n\n- `src/kept.go`\n\n## Related docs\n\n- `ignored/after.go`\n"
+func TestExtractTreatsTODOOnlyMapAsEmpty(t *testing.T) {
+	result := ExtractDefault("docs/future.md", "## Code map\n\n- TODO: add paths later.\n")
+	if len(result.Entries) != 0 || len(result.Diagnostics) != 0 {
+		t.Fatalf("unexpected placeholder result: %#v", result)
+	}
+}
+
+func TestExtractSkipsFencesOutsideCodeMapAndStopsAtPeerHeading(t *testing.T) {
+	source := "```md\n## Code map\n- `ignored/in/fence.go`\n```\n\n## Code map\n\n- `src/kept.go`\n\n## Related docs\n\n- `ignored/after.go`\n"
 	result := ExtractDefault("docs/a.md", source)
 	if len(result.Entries) != 1 || result.Entries[0].Target != "src/kept.go" {
 		t.Fatalf("unexpected result: %#v", result)
 	}
 }
 
-func TestExtractCreatesOneEntryPerTargetOnAListLine(t *testing.T) {
-	source := "## Code map\n\n- `src/a.go` and `src/b.go` implement the boundary.\n"
-	result := ExtractDefault("docs/a.md", source)
-	if len(result.Entries) != 2 {
-		t.Fatalf("got %d entries, want 2: %#v", len(result.Entries), result.Entries)
-	}
-	for _, entry := range result.Entries {
-		if entry.Description != "implement the boundary." {
-			t.Fatalf("unexpected shared description: %#v", entry)
-		}
-	}
-}
-
-func TestExtractDoesNotTreatInlineSymbolsInDescriptionsAsPathTargets(t *testing.T) {
-	source := "## Code map\n\n- `src/a.go` owns `Handler`.\n"
+func TestExtractTreatsOnlyFirstBulletCodeSpanAsTarget(t *testing.T) {
+	source := "## Code map\n\n- `src/a.go` creates `Handler` and calls `src/b.go`.\n"
 	result := ExtractDefault("docs/a.md", source)
 	if len(result.Entries) != 1 || result.Entries[0].Target != "src/a.go" {
 		t.Fatalf("unexpected result: %#v", result)
 	}
+	if result.Entries[0].Description != "creates `Handler` and calls `src/b.go`." {
+		t.Fatalf("unexpected description: %#v", result.Entries[0])
+	}
 }
 
-func TestExtractAcceptsBarePrimarySymbolTargets(t *testing.T) {
-	source := "## Code map\n\n- `DevtoolsWindowController` owns window lifecycle.\n"
+func TestExtractPreservesBareSymbolBullet(t *testing.T) {
+	source := "## Code map\n\n- `Handler` owns orchestration.\n- `math/rand.Rand` provides the random source.\n"
 	result := ExtractDefault("docs/a.md", source)
-	if len(result.Diagnostics) != 0 || len(result.Entries) != 1 {
+	if len(result.Entries) != 2 || result.Entries[0].Target != "Handler" || result.Entries[0].Kind != TargetSymbol || result.Entries[1].Kind != TargetSymbol {
 		t.Fatalf("unexpected result: %#v", result)
 	}
-	if result.Entries[0].Target != "DevtoolsWindowController" || result.Entries[0].Kind != TargetSymbol {
-		t.Fatalf("unexpected symbol entry: %#v", result.Entries[0])
+}
+
+func TestExtractSupportsEqualsDescriptionPairs(t *testing.T) {
+	source := "## Code map\n\n```text\nsrc/runtime.go\n= owns runtime behavior\n```\n"
+	result := ExtractDefault("docs/a.md", source)
+	if len(result.Entries) != 1 || result.Entries[0].Syntax != SyntaxFencedEquals || result.Entries[0].Description != "owns runtime behavior" {
+		t.Fatalf("unexpected result: %#v", result)
 	}
 }

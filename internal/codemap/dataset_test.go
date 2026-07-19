@@ -39,7 +39,7 @@ func TestBuildDatasetScansAndResolvesCodeMaps(t *testing.T) {
 	if len(dataset.Documents) != 1 || dataset.Documents[0].Path != "docs/guide.md" {
 		t.Fatalf("unexpected documents: %#v", dataset.Documents)
 	}
-	if dataset.Documents[0].EntryCount != 5 || dataset.Documents[0].DiagnosticCount != 1 {
+	if dataset.Documents[0].EntryCount != 5 || dataset.Documents[0].DiagnosticCount != 0 {
 		t.Fatalf("unexpected document counts: %#v", dataset.Documents[0])
 	}
 	if len(dataset.Entries) != 5 {
@@ -55,7 +55,7 @@ func TestBuildDatasetScansAndResolvesCodeMaps(t *testing.T) {
 			t.Fatalf("unexpected pattern matches: %#v", entry.Resolution.Matches)
 		}
 	}
-	if len(dataset.Diagnostics) != 1 || dataset.Diagnostics[0].Code != "unparsed_entry" {
+	if len(dataset.Diagnostics) != 0 {
 		t.Fatalf("unexpected diagnostics: %#v", dataset.Diagnostics)
 	}
 	if dataset.Documents[0].SHA256 == "" || dataset.Entries[0].Resolution.SHA256 == "" {
@@ -79,6 +79,57 @@ func TestBuildDatasetSupportsDocumentRelativeTargets(t *testing.T) {
 	entry := dataset.Entries[0]
 	if entry.Resolution.ResolvedPath != "docs/code/example.go" || entry.Resolution.Status != ResolutionResolved {
 		t.Fatalf("unexpected resolution: %#v", entry.Resolution)
+	}
+}
+
+func TestBuildDatasetSupportsConfiguredComponentRoots(t *testing.T) {
+	repository := t.TempDir()
+	writeFixture(t, repository, "services/game/internal/spatial/index.go", "package spatial\n")
+	writeFixture(t, repository, "docs/guide.md", "## Code map\n\n```text\ninternal/spatial/index.go\n```\n")
+	format := DefaultFormat()
+	format.TargetRoots = []string{"services/game"}
+
+	dataset, err := BuildDataset(repository, filepath.Join(repository, "docs"), format)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dataset.Entries) != 1 {
+		t.Fatalf("unexpected entries: %#v", dataset.Entries)
+	}
+	resolution := dataset.Entries[0].Resolution
+	if resolution.Status != ResolutionResolved || resolution.ResolvedPath != "services/game/internal/spatial/index.go" {
+		t.Fatalf("unexpected component resolution: %#v", resolution)
+	}
+}
+
+func TestBuildDatasetReportsAmbiguousComponentRoots(t *testing.T) {
+	repository := t.TempDir()
+	writeFixture(t, repository, "services/a/internal/runtime.go", "package internal\n")
+	writeFixture(t, repository, "services/b/internal/runtime.go", "package internal\n")
+	writeFixture(t, repository, "docs/guide.md", "## Code map\n\n```text\ninternal/runtime.go\n```\n")
+	format := DefaultFormat()
+	format.TargetRoots = []string{"services/a", "services/b"}
+
+	dataset, err := BuildDataset(repository, filepath.Join(repository, "docs"), format)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resolution := dataset.Entries[0].Resolution
+	if resolution.Status != ResolutionAmbiguous || len(resolution.Candidates) != 2 {
+		t.Fatalf("unexpected ambiguous resolution: %#v", resolution)
+	}
+}
+
+func TestBuildDatasetPreservesTemplateTargetsWithoutFilesystemErrors(t *testing.T) {
+	repository := t.TempDir()
+	writeFixture(t, repository, "docs/guide.md", "## Code map\n\n```text\nweb/public/<slug>/index.html\n```\n")
+
+	dataset, err := BuildDataset(repository, filepath.Join(repository, "docs"), DefaultFormat())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dataset.Entries) != 1 || dataset.Entries[0].Resolution.Status != ResolutionUnsupported {
+		t.Fatalf("unexpected template resolution: %#v", dataset.Entries)
 	}
 }
 

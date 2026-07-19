@@ -530,7 +530,7 @@ func codemapHelp(w io.Writer) {
 }
 
 func codemapExportHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --output PATH       write JSON to a file instead of stdout")
+	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
 }
 
 func runCodemap(args []string, out, errOut io.Writer) int {
@@ -557,6 +557,7 @@ func runCodemap(args []string, out, errOut io.Writer) int {
 	fs.SetOutput(io.Discard)
 	var flags commonFlags
 	var headings stringsFlag
+	var targetRoots stringsFlag
 	var output optionalString
 	targetBase := string(codemap.TargetBaseRepository)
 	fs.Var(&flags.root, "root", "override the configured docs root")
@@ -565,6 +566,7 @@ func runCodemap(args []string, out, errOut io.Writer) int {
 	fs.BoolVar(&flags.noGlobal, "no-global-config", false, "skip the global user config")
 	fs.Var(&headings, "heading", "accepted code-map heading")
 	fs.StringVar(&targetBase, "target-base", targetBase, "repository or document")
+	fs.Var(&targetRoots, "target-root", "repository-relative component root")
 	fs.Var(&output, "output", "write JSON to a file")
 	if err := fs.Parse(args[1:]); err != nil {
 		fmt.Fprintf(errOut, "ddocs codemap export: error: %v\n", err)
@@ -595,6 +597,7 @@ func runCodemap(args []string, out, errOut io.Writer) int {
 		format.SectionHeadings = headings.values
 	}
 	format.TargetBase = codemap.TargetBase(targetBase)
+	format.TargetRoots = targetRoots.values
 	dataset, err := codemap.BuildDataset(scope.RepositoryRoot, scope.DocsRoot, format)
 	if err != nil {
 		return fail(errOut, err)

@@ -7,7 +7,23 @@ const (
 	TargetUnknown   TargetKind = "unknown"
 	TargetFile      TargetKind = "file"
 	TargetDirectory TargetKind = "directory"
+	TargetGlob      TargetKind = "glob"
 	TargetSymbol    TargetKind = "symbol"
+)
+
+// SyntaxKind records the authored Markdown shape without prescribing one
+// canonical source format.
+type SyntaxKind string
+
+const (
+	SyntaxBullet            SyntaxKind = "bullet"
+	SyntaxFenced            SyntaxKind = "fenced"
+	SyntaxFencedArrow       SyntaxKind = "fenced-arrow"
+	SyntaxFencedEquals      SyntaxKind = "fenced-equals"
+	SyntaxFencedIndented    SyntaxKind = "fenced-indented"
+	SyntaxFencedLeadingPath SyntaxKind = "fenced-leading-path"
+	SyntaxLegacyIndented    SyntaxKind = "legacy-indented"
+	SyntaxLegacyInline      SyntaxKind = "legacy-inline"
 )
 
 // SourceSpan identifies a target in its source document. Lines and columns are
@@ -20,11 +36,14 @@ type SourceSpan struct {
 }
 
 // Entry is one normalized authored relationship from a document to a code
-// target. Context is the nearest subheading inside the code-map section.
+// target. Context is the nearest nested heading or prose group label inside the
+// code-map section.
 type Entry struct {
 	DocumentPath string     `json:"document_path"`
+	Heading      string     `json:"heading,omitempty"`
 	Target       string     `json:"target"`
 	Kind         TargetKind `json:"kind"`
+	Syntax       SyntaxKind `json:"syntax,omitempty"`
 	Context      string     `json:"context,omitempty"`
 	Description  string     `json:"description,omitempty"`
 	Source       SourceSpan `json:"source"`
@@ -47,7 +66,6 @@ type Result struct {
 	Diagnostics []Diagnostic
 }
 
-// Format describes how a repository labels code-map sections.
 type TargetBase string
 
 const (
@@ -59,11 +77,15 @@ const (
 type Format struct {
 	SectionHeadings []string
 	TargetBase      TargetBase
+	// TargetRoots are repository-relative component roots tried after the
+	// primary target base. They allow component-relative authored paths without
+	// silently guessing a component from document location.
+	TargetRoots []string
 }
 
 func DefaultFormat() Format {
 	return Format{
-		SectionHeadings: []string{"code map", "codemap"},
+		SectionHeadings: []string{"code map", "codemap", "code or source map", "code and test map"},
 		TargetBase:      TargetBaseRepository,
 	}
 }
