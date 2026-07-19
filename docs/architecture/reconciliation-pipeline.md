@@ -4,11 +4,13 @@ Parent index: [Architecture](./README.md)
 
 ## Purpose
 
-This document describes the implemented documentation-tree scan, managed-index parsing, parent navigation, preservation rules, planning, application, and shared reconciliation safety boundary.
+This document describes the implemented documentation-tree scan and forward-index reconciliation flow: how filesystem inventory becomes a deterministic plan of index, description, and parent-link updates.
 
 ## Overview
 
-Demon Docs keeps indexes and local Markdown links in a predictable shape by scanning the filesystem, reading existing managed index blocks and link state, and planning the smallest set of repository-contained updates needed to bring them back into sync.
+Demon Docs keeps folder indexes in a predictable shape by scanning the managed tree, matching current files and folders to existing generated entries, and planning the smallest repository-contained update set.
+
+The byte-level transformation and newline-preservation boundary is owned separately by [Managed Markdown Transformation](managed-markdown-transformation.md). Repository-local link reconciliation is owned by [Markdown Link Reconciliation](markdown-link-reconciliation.md).
 
 ## Code root
 
@@ -53,7 +55,7 @@ The scan model is descriptive only. It records what exists on disk and where Dem
 
 ## README Index Behavior
 
-Demon Docs treats README files as structured documents with managed sections.
+Demon Docs treats README files as structured documents with managed sections. The exact structural recognition, migration, bounded replacement, parent-line editing, and byte-preservation rules are documented in [Managed Markdown Transformation](managed-markdown-transformation.md).
 
 - Managed blocks are wrapped in HTML comment markers.
 - The managed sections are Direct Files, Stub Files, and Direct Folders.
@@ -168,6 +170,7 @@ go test ./internal/scan ./internal/markdown ./internal/reconcile -count=1
 - [Getting Started](../guides/getting-started.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
+- [Managed Markdown Transformation](managed-markdown-transformation.md)
 - [Application Orchestration](application-orchestration.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)

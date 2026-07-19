@@ -4,13 +4,21 @@ Parent index: [Research](./README.md)
 
 ## Purpose
 
-This document records the deterministic evidence system for potentially missing codemap links, its commands, signals, suggestion tiers, curated precision results, corpora, and decision-safety contract.
+This document records retained codemap evidence findings, current measured baselines, corpus provenance, and safety interpretation. Implemented extraction, corpus, ranking, benchmark methodology, precision governance, and report contracts are owned by the focused architecture, research, and reference documents linked below.
 
 ## Overview
 
-Demon Docs can extract authored code maps, build a deterministic repository corpus, rank possible missing targets, evaluate the result against controlled holdouts or curated labels, and expose current candidates through the repository review ledger.
+Demon Docs has implemented a deterministic missing-link analysis pipeline and review surface. This page retains the evidence interpretation and recorded sample results rather than serving as the canonical implementation specification.
 
 The system only suggests potentially missing relationships. It never recommends that an existing codemap link is irrelevant or should be removed.
+
+Current implementation owners:
+
+- [Codemap Pipeline](../architecture/codemap-pipeline.md)
+- [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md)
+- [Codemap Benchmark Methodology](codemap-benchmark-methodology.md)
+- [Codemap Precision Governance](codemap-precision-governance.md)
+- [Codemap Report Formats](../reference/codemap-report-formats.md)
 
 ## Research status
 
@@ -65,15 +73,9 @@ This separates strict permanent-link precision from the broader question of whet
 
 ## Current Architecture
 
-The implementation is split into explicit boundaries:
+Current architecture has been decomposed into focused owners. See [Codemap Pipeline](../architecture/codemap-pipeline.md) for the end-to-end boundary and its links to extraction, corpus, evidence/ranking, benchmark, precision, and report documents.
 
-1. `internal/codemap` extracts authored targets without deciding what is missing.
-2. `internal/codemapcorpus` gathers repository facts such as files, dependencies, symbols, tests, related documents, and Git history.
-3. `internal/evidence` converts normalized facts into inspectable evidence records and fingerprints.
-4. `internal/codemapbench` orchestrates holdouts, ranking, tier assignment, and deterministic reports.
-5. `internal/codemapprecision` evaluates curated labels and aggregates metrics.
-
-The evidence collector does not parse arbitrary prose into semantic graph truth. It accepts normalized facts supplied by the codemap parser, repository corpus adapters, Git reader, and future code-graph providers.
+This research page records observed quality and interpretation. It is not authoritative for current weights, adapter support, schema fields, or command behavior.
 
 ## Evidence Signals
 
@@ -182,6 +184,11 @@ The primary curated baseline is repository- and sample-specific. Self-authored D
 ## Related docs
 
 - [Research](README.md)
+- [Codemap Pipeline](../architecture/codemap-pipeline.md)
+- [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md)
+- [Codemap Benchmark Methodology](codemap-benchmark-methodology.md)
+- [Codemap Precision Governance](codemap-precision-governance.md)
+- [Codemap Report Formats](../reference/codemap-report-formats.md)
 - [Reverse Indexes](../architecture/reverse-indexes.md)
 - [Roadmap](../planning/roadmap.md)
 - [Planned Code Intelligence](../planning/code-intelligence/README.md)

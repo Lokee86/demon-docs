@@ -536,6 +536,8 @@ Update that map when a production package, command group, or durable ownership b
 
 A map entry is not sufficient by itself. The linked document must actually explain the package responsibility, flow, non-ownership boundary, and relevant tests or public contract.
 
+Package-level coverage is also not sufficient when one package owns several independent stateful flows. Every durable mutation boundary, persistent model, concurrency boundary, machine-readable contract, and safe-extension seam requires a canonical explanation at an appropriate level of detail. `docs/development/behavioral-contract-matrix.md` maps critical invariants to the tests and release gates that protect them.
+
 ## Related docs
 
 - [Documentation Procedure](documentation-procedure.md)

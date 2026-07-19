@@ -10,6 +10,8 @@ This document maps every current production package and public command family to
 
 Coverage is ownership-based rather than one-file-per-package. A focused utility package may be documented inside the architecture page for the subsystem it serves. A major independent boundary requires its own current architecture or operations owner.
 
+Package coverage is only the first layer. Every independent stateful flow, mutation boundary, persistent model, concurrency boundary, machine-readable contract, and safe-extension seam must also have a canonical explanation and a protecting behavioral contract where practical.
+
 The map covers current production code under `cmd/` and `internal/`. Planning packages do not exist in code and therefore are not counted as current implementation coverage.
 
 ## Coverage rules
@@ -53,11 +55,11 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 | Package | Responsibility | Canonical current docs |
 | --- | --- | --- |
 | `internal/scan/` | Documentation-tree inventory and scope | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Ignore and Traversal](../architecture/ignore-and-traversal.md) |
-| `internal/markdown/` | Managed sections, headings, parent links, source-preserving text changes | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Managed Files and State](../reference/managed-files-and-state.md), [Compatibility and Migrations](../reference/compatibility-and-migrations.md) |
-| `internal/reconcile/` | Forward index planning and application | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Getting Started](../guides/getting-started.md) |
-| `internal/model/` | Shared file-update and reconciliation structures | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md) |
-| `internal/pathutil/` | Relative path rendering used by generated documentation links | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) |
-| `internal/textio/` | Newline-aware text reads used by generated edits | [Managed Files and State](../reference/managed-files-and-state.md), [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md) |
+| `internal/markdown/` | Managed sections, headings, parent links, templates, and source-span transformations | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md), [Managed Files and State](../reference/managed-files-and-state.md) |
+| `internal/reconcile/` | Forward-index matching, transition preservation, planning, containment, and application | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) |
+| `internal/model/` | Shared file-update and reconciliation structures | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) |
+| `internal/pathutil/` | Relative path rendering used by generated documentation links | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) |
+| `internal/textio/` | LF, CRLF, mixed-ending, and final-newline preservation | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md), [Managed Files and State](../reference/managed-files-and-state.md) |
 
 ## Link and review coverage
 
@@ -83,11 +85,11 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 
 | Package | Responsibility | Canonical current docs |
 | --- | --- | --- |
-| `internal/codemap/` | Codemap extraction, normalized entries, datasets, selected insertion | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
-| `internal/codemapcorpus/` | Repository files, symbols, dependencies, history, and related-fact corpus | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
-| `internal/evidence/` | Deterministic structural, mention, history, and symbol evidence | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
-| `internal/codemapbench/` | Holdouts, current suggestions, ranking, tiers, reports | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
-| `internal/codemapprecision/` | Curated-label evaluation and aggregate metrics | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
+| `internal/codemap/` | Authored extraction, normalized entries, target resolution, datasets, stripping, and selected insertion | [Codemap Extraction and Dataset](../architecture/codemap-extraction-and-dataset.md), [Codemap Pipeline](../architecture/codemap-pipeline.md) |
+| `internal/codemapcorpus/` | Repository files, local dependency adapters, symbols, history, and related-document facts | [Codemap Corpus and Adapters](../architecture/codemap-corpus-adapters.md), [Codemap Pipeline](../architecture/codemap-pipeline.md) |
+| `internal/evidence/` | Deterministic mention, structural, dependency, history, related-document, and symbol evidence | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) |
+| `internal/codemapbench/` | Admission, score, tiers, current suggestions, controlled holdouts, classifications, and benchmark reports | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md), [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md), [Codemap Report Formats](../reference/codemap-report-formats.md) |
+| `internal/codemapprecision/` | Deterministic samples, audit validation, labels, and aggregate/subgroup metrics | [Codemap Precision Governance](../research/codemap-precision-governance.md), [Codemap Report Formats](../reference/codemap-report-formats.md) |
 
 ## Public command coverage
 
@@ -103,7 +105,7 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 | `mv` | [Stateless Document Refactoring](../guides/document-refactoring.md) | [CLI Reference](../reference/cli.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) |
 | Reverse indexes | [Adopting Reverse Indexes](../guides/reverse-indexes.md) | [Reverse Index Architecture](../architecture/reverse-indexes.md) |
 | Suggestions and changes | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) | [Review Ledger](../architecture/review-ledger.md) |
-| Codemap export/benchmark/precision | [Evaluating Codemap Suggestions](../guides/evaluating-codemap-suggestions.md) | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md), [CLI Reference](../reference/cli.md) |
+| Codemap export/benchmark/precision | [Evaluating Codemap Suggestions](../guides/evaluating-codemap-suggestions.md) | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Report Formats](../reference/codemap-report-formats.md), [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md), [Codemap Precision Governance](../research/codemap-precision-governance.md), [CLI Reference](../reference/cli.md) |
 | Foreground `watch` | [CI and Automation](../guides/ci-and-automation.md) | [Watcher and Automation](../operations/watcher-and-automation.md) |
 | Repository demon | [CI and Automation](../guides/ci-and-automation.md) | [Repository Demon](../operations/repository-demon.md) |
 | External feeder adapters | Host-specific integration | [Host Adapter Feeder Integration](../operations/host-adapters.md) |
@@ -129,12 +131,14 @@ When production packages or public commands change:
 
 1. list current `cmd/` and `internal/` directories;
 2. map the changed owner to this document;
-3. update the canonical current document, not only the roadmap;
-4. add or update a task guide when normal user workflow changes;
-5. update exact reference for flags, configuration, formats, state, or diagnostics;
-6. update limits when an incomplete surface changes;
-7. run documentation reconciliation and link checks; and
-8. run the normal Go test and vet gates.
+3. identify affected stateful flows, mutation boundaries, persistent models, concurrency boundaries, and extension seams;
+4. update the canonical current document, not only the roadmap;
+5. update the [Behavioral Contract Matrix](behavioral-contract-matrix.md) when a durable invariant or protecting test changes;
+6. add or update a task guide when normal user workflow changes;
+7. update exact reference for flags, configuration, formats, state, or diagnostics;
+8. update limits when an incomplete surface changes;
+9. run documentation reconciliation and link checks; and
+10. run the normal Go test and vet gates.
 
 A missing row is a documentation defect. A row pointing only to research or planning is also a documentation defect for current code.
 
@@ -170,6 +174,8 @@ Review the linked content, not only the existence of links in this matrix.
 - [Documentation Procedure](../documentation-procedure.md)
 - [Repository Layout](repository-layout.md)
 - [Testing and Fixtures](testing-and-fixtures.md)
+- [Behavioral Contract Matrix](behavioral-contract-matrix.md)
+- [Safe Extension Procedures](safe-extension-procedures.md)
 - [Current Product Limitations](../limits/current-limitations.md)
 - [Roadmap](../planning/roadmap.md)
 
