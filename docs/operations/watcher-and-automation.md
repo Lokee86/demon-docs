@@ -126,6 +126,8 @@ go test ./internal/watch ./internal/app -count=1
 - [Operations](README.md)
 - [CI and Automation](../guides/ci-and-automation.md)
 - [Repository Demon](repository-demon.md)
+- [Watch Scheduler and Reconciliation Serialization](../architecture/watch-scheduler.md)
+- [Dynamic Watch Scope](dynamic-watch-scope.md)
 - [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
 - [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
 

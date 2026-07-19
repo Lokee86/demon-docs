@@ -12,6 +12,8 @@ Demon Docs keeps authored files in the ordinary repository filesystem. Private `
 
 The private repository exists to make later reconciliation deterministic. It is not an alternate authoring model and does not replace Git.
 
+The storage mechanics and optimistic transaction protocol are owned in detail by [Private Object Repository](private-object-repository.md). This page owns how that storage composes with authored files, review history, runtime state, and recovery.
+
 ## Code root
 
 ```text
@@ -156,6 +158,7 @@ make release-check
 ## Related docs
 
 - [Managed Files and State](../reference/managed-files-and-state.md)
+- [Private Object Repository](private-object-repository.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
 - [Review Ledger](review-ledger.md)

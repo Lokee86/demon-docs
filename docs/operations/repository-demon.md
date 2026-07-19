@@ -219,8 +219,10 @@ go test ./internal/demon ./internal/app -count=1
 - [CI and Automation](../guides/ci-and-automation.md)
 - [CLI Reference](../reference/cli.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
+- [Repository Demon Lease Protocol](../architecture/repository-demon-lease-protocol.md)
 - [Repository State and Transactions](../architecture/repository-state-and-transactions.md)
 - [Watcher and Automation](watcher-and-automation.md)
+- [Dynamic Watch Scope](dynamic-watch-scope.md)
 - [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
 
 ## Notes
