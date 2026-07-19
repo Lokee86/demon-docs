@@ -50,6 +50,29 @@ The supported keys are:
 - `[template].include_does_not_belong`
 - `[template].include_related_docs`
 - `[template].include_notes`
+- `[demon].run`
+
+## Repository Demon
+
+Initialized repositories permit the self-managing watcher by default:
+
+```toml
+[demon]
+run = true
+```
+
+Use `ddocs demon run --false` to persistently disable it, or
+`ddocs demon run --true` to re-enable it. `ddocs demon --status` reports the
+repository-local owner and active shell/agent feeders; `ddocs demon --logs`
+prints the bounded repository-local log. Demon runtime state is stored under
+`.ddocs/runtime/` and is not part of document traversal or mutable object
+storage.
+
+The demon is an operational convenience around the existing watcher, not a
+correctness dependency. `check`, `fix`, and foreground `watch` remain available
+when it is disabled. Shell hooks use `shell` feeders; MCP and native host
+adapters can use the host-neutral `agent` feeder lifecycle without moving host
+logic into Demon Docs core. See [Repository Demon](repository-demon.md).
 
 ## Selection
 
@@ -157,6 +180,9 @@ folder_template = "{title} documentation."
 debounce_seconds = 0.75
 ignored_dirs = [".cache", "__pycache__"]
 ignored_suffixes = ["~", ".swp", ".tmp", ".bak"]
+
+[demon]
+run = true
 
 [template]
 include_ownership = true

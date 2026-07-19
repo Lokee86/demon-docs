@@ -503,6 +503,41 @@ logseq/
 
 Watch mode watches and reloads the repository-root `.docignore` even when the docs root is a nested directory.
 
+## Repository demon
+
+Initialized repositories permit the self-managing repository watcher by
+default. One fresh demon owner serves each local `.ddocs/` repository while
+shell or agent feeders remain active:
+
+```bash
+ddocs demon run
+ddocs demon --status
+ddocs demon --logs
+ddocs demon run --false
+ddocs demon run --true
+```
+
+Install automatic shell entry and exit tracking in Bash with:
+
+```bash
+eval "$(ddocs demon __shell-hook bash)"
+```
+
+Or in a PowerShell profile with:
+
+```powershell
+Invoke-Expression (& ddocs demon __shell-hook powershell)
+```
+
+Shell feeding is implemented by the CLI. MCP and native agent integrations are
+separate adapters that can use the same host-neutral `agent` feeder protocol.
+The demon does not host those integrations or deliver agent context.
+
+Runtime ownership, feeder heartbeats, shutdown requests, and bounded logs live
+under `.ddocs/runtime/`. The existing `ddocs watch` command remains a foreground
+watcher for explicit terminal-controlled use. See
+[Repository Demon](docs/repository-demon.md).
+
 ## Watch mode
 
 Watch mode is for local convenience. It is not a replacement for `check`.
@@ -525,51 +560,15 @@ ddocs watch --root docs
 
 If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log.
 
-## Automation example
+## Watcher automation
 
-A shell startup file can launch the watcher with a PID guard:
+Do not add a second PID-file or `setsid` wrapper around `ddocs watch` when the
+repository demon is enabled. The demon already owns detached startup,
+single-owner coordination, feeder heartbeats, shutdown grace, and logs.
 
-```bash
-DDOCS_ROOT="${DDOCS_ROOT:-docs}"
-
-ddocs_pid_file="$PWD/.cache/ddocs-watch.pid"
-ddocs_log_file="$PWD/.cache/ddocs-watch.log"
-
-mkdir -p "$PWD/.cache"
-
-ddocs_watch_is_running() {
-  [ -s "$ddocs_pid_file" ] || return 1
-
-  local watcher_pid
-  watcher_pid="$(cat "$ddocs_pid_file" 2>/dev/null)" || return 1
-
-  case "$watcher_pid" in
-    ''|*[!0-9]*) return 1 ;;
-  esac
-
-  kill -0 "$watcher_pid" 2>/dev/null || return 1
-  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "ddocs watch"
-}
-
-start_ddocs_watch() {
-  setsid bash -c '
-    cd "$1" || exit 1
-    exec ddocs watch --root "$2" </dev/null >>"$3" 2>&1
-  ' _ "$PWD" "$DDOCS_ROOT" "$ddocs_log_file" >/dev/null 2>&1 &
-
-  echo $! > "$ddocs_pid_file"
-}
-
-if ! ddocs_watch_is_running; then
-  rm -f "$ddocs_pid_file"
-  start_ddocs_watch
-fi
-
-unset ddocs_pid_file
-unset ddocs_log_file
-```
-
-For `direnv`, source process startup scripts outside any `set -a` block so helper variables are not exported.
+Use foreground `ddocs watch` only when you deliberately want the process
+attached to the current terminal. See [Watcher and
+Automation](docs/watcher-and-automation.md) for the distinction.
 
 ## Testing
 

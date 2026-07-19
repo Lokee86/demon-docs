@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/Lokee86/demon-docs/internal/repository"
@@ -31,6 +32,7 @@ type Watch struct {
 	DebounceSeconds              float64
 	IgnoredDirs, IgnoredSuffixes []string
 }
+type Demon struct{ Run bool }
 type Template struct {
 	ManagedSections                                                          []string
 	IncludeOwnership, IncludeDoesNotBelong, IncludeRelatedDocs, IncludeNotes bool
@@ -45,6 +47,7 @@ type Config struct {
 	Description     Description
 	Watch           Watch
 	Template        Template
+	Demon           Demon
 }
 
 func Default() Config {
@@ -56,6 +59,7 @@ func Default() Config {
 		Description: Description{"{title} documentation.", "{title} documentation."},
 		Watch:       Watch{0.75, []string{".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
 		Template:    Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
+		Demon:       Demon{Run: true},
 	}
 }
 
@@ -68,7 +72,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "index_file = \"README.md\"\n\n[demon]\nrun = true\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
@@ -106,6 +110,9 @@ type rawConfig struct {
 		IgnoredDirs     *[]string `toml:"ignored_dirs"`
 		IgnoredSuffixes *[]string `toml:"ignored_suffixes"`
 	} `toml:"watch"`
+	Demon *struct {
+		Run *bool `toml:"run"`
+	} `toml:"demon"`
 	Aliases *struct {
 		Files   *[]string `toml:"files"`
 		Folders *[]string `toml:"folders"`
@@ -209,6 +216,9 @@ func Load(path string) (Config, error) {
 			c.Watch.IgnoredSuffixes = *w.IgnoredSuffixes
 		}
 	}
+	if d := raw.Demon; d != nil && d.Run != nil {
+		c.Demon.Run = *d.Run
+	}
 	if a := raw.Aliases; a != nil {
 		if a.Files != nil {
 			c.Sections.LegacyFilesHeadings = *a.Files
@@ -237,6 +247,94 @@ func Load(path string) (Config, error) {
 	return c, nil
 }
 
+// SetDemonRun changes only the [demon].run setting and atomically replaces the
+// config file. The line-oriented edit intentionally keeps comments, unknown
+// keys, and formatting outside this setting intact.
+func SetDemonRun(path string, enabled bool) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	text := string(data)
+	updated := setDemonRunText(text, enabled)
+	if updated == text {
+		return nil
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".config.toml-*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if err := tmp.Chmod(0o644); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if _, err := tmp.WriteString(updated); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmpName, path)
+}
+
+func setDemonRunText(text string, enabled bool) string {
+	value := strconv.FormatBool(enabled)
+	lines := strings.SplitAfter(text, "\n")
+	section := -1
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r\n"))
+		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
+			if trimmed == "[demon]" {
+				section = i
+				continue
+			}
+			if section >= 0 {
+				lines = append(lines[:i], append([]string{"run = " + value + "\n"}, lines[i:]...)...)
+				return strings.Join(lines, "")
+			}
+		}
+		if section >= 0 {
+			content := strings.TrimSuffix(strings.TrimSuffix(line, "\n"), "\r")
+			if strings.HasPrefix(strings.TrimSpace(content), "run") {
+				prefix := content[:len(content)-len(strings.TrimLeft(content, " \t"))]
+				rest := strings.TrimSpace(strings.TrimSpace(content)[len("run"):])
+				if strings.HasPrefix(rest, "=") {
+					comment := ""
+					if at := strings.Index(rest, "#"); at >= 0 {
+						comment = " " + strings.TrimSpace(rest[at:])
+					}
+					ending := "\n"
+					if strings.HasSuffix(line, "\r\n") {
+						ending = "\r\n"
+					}
+					lines[i] = prefix + "run = " + value + comment + ending
+					return strings.Join(lines, "")
+				}
+			}
+		}
+	}
+	if section >= 0 {
+		ending := ""
+		if len(text) > 0 && !strings.HasSuffix(text, "\n") {
+			ending = "\n"
+		}
+		lines = append(lines, ending+"run = "+value+"\n")
+		return strings.Join(lines, "")
+	}
+	separator := ""
+	if text != "" && !strings.HasSuffix(text, "\n") {
+		separator = "\n"
+	}
+	return text + separator + "\n[demon]\nrun = " + value + "\n"
+}
+
 func LocalPath(cwd string) string {
 	for _, name := range []string{".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml"} {
 		p := filepath.Join(cwd, name)
@@ -262,6 +360,35 @@ func Discover(start string) string {
 		p = parent
 	}
 }
+
+// DiscoverWithin searches legacy local configs upward without crossing an
+// initialized Demon Docs repository boundary.
+func DiscoverWithin(start, boundary string) string {
+	p, err := filepath.Abs(start)
+	if err != nil {
+		return ""
+	}
+	if info, statErr := os.Stat(p); statErr == nil && !info.IsDir() {
+		p = filepath.Dir(p)
+	}
+	boundary, err = filepath.Abs(boundary)
+	if err != nil {
+		return ""
+	}
+	for {
+		if found := LocalPath(p); found != "" {
+			return found
+		}
+		if p == boundary {
+			return ""
+		}
+		parent := filepath.Dir(p)
+		if parent == p || !repository.Contains(boundary, parent) && parent != boundary {
+			return ""
+		}
+		p = parent
+	}
+}
 func GlobalPath(env func(string) string, home string) string {
 	return filepath.Join(configHome(env, home), "demon-docs", "config.toml")
 }
@@ -281,6 +408,11 @@ func Select(cwd, explicit string, noLocal, noGlobal bool, env func(string) strin
 	if !noLocal {
 		if location, ok := repository.Discover(cwd); ok {
 			return location.ConfigPath
+		}
+		if root, ok := repository.FindMarker(cwd); ok {
+			if p := DiscoverWithin(cwd, root); p != "" {
+				return p
+			}
 		}
 		if p := LocalPath(cwd); p != "" {
 			return p

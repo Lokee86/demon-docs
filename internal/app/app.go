@@ -104,7 +104,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -127,18 +127,20 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runCodemap(ctx, args[1:], out, errOut)
 	case "config":
 		return runConfig(args[1:], out, errOut)
+	case "demon":
+		return runDemon(ctx, args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
-		choices := "init, status, fix, check, watch, codemap, config"
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		choices := "init, status, fix, check, watch, codemap, config, demon"
 		if runtime.GOOS == "windows" {
-			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config'"
+			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config', 'demon'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs codemap export\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
+	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version")
 }
 
 func initHelp(w io.Writer) {
@@ -301,7 +303,7 @@ var (
 func writeTreeParseError(w io.Writer, command string, err error) {
 	message := err.Error()
 	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
-		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
+		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
 		fmt.Fprintf(w, "ddocs: error: unrecognized arguments: --%s\n", match[1])
 		return
 	}
@@ -355,7 +357,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
 		fmt.Fprintf(errOut, "ddocs: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
@@ -642,7 +644,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"

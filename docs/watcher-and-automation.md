@@ -1,118 +1,87 @@
 # Watcher and Automation
 
-Demon Docs has a watch mode for long-running docs maintenance, but it is still a convenience layer. Use `check` when you want a clean verification gate before commit or CI.
+Demon Docs exposes the same watcher through two operational surfaces:
+
+- `ddocs watch` runs explicitly in the foreground;
+- the [Repository Demon](repository-demon.md) manages a detached watcher while shells or agents are actively feeding it.
+
+Both surfaces call the same deterministic reconciliation core. Neither is required for `ddocs check` or `ddocs fix`.
 
 ## Watch Commands
 
-- `ddocs fix --root docs`
-- `ddocs check --root docs`
-- `ddocs watch --root docs`
-- `ddocs watch --root docs --once`
-- `ddocs watch -i`
-- `ddocs watch -l`
+```bash
+ddocs watch --root docs
+ddocs watch --root docs --once
+ddocs watch -i
+ddocs watch -l
+```
 
 `ddocs watch --help` shows the watch-specific flags and examples.
 
-`--once` runs a single reconciliation pass and exits. Regular watch mode runs one reconciliation pass immediately, then keeps observing recursively. Index-only mode watches the docs root; link-enabled mode watches the repository root so moves of non-Markdown targets can trigger link repair.
-Watch mode runs in the foreground by default. `Demon Docs` does not daemonize or own background lifecycle.
+`--once` runs one reconciliation pass and exits. Regular watch mode runs one reconciliation immediately and then observes relevant filesystem changes until the foreground process is stopped.
 
-## What Watch Mode Does
+Index-only mode watches the docs root. Link-enabled mode watches the repository root so changes and moves involving non-Markdown targets can trigger link reconciliation.
 
-Watch mode reruns the same selected reconciliation operations used by `fix` when relevant repository content changes.
+## What the Watcher Does
 
-- It starts with an immediate reconciliation pass before observation begins.
+The watcher reruns the same selected operations used by `fix` when relevant repository content changes.
+
+- It starts with an immediate reconciliation pass.
 - It watches the docs root for `-i`, or the repository root when links are enabled.
 - It reacts to relevant file events and directory create, delete, and move events.
-- It debounces bursts of changes.
-- It runs one fix at a time.
-- If changes arrive during a fix, it schedules one more pass after the current run finishes.
-- It ignores configured ignored directories and ignored filename suffixes.
-- Index events use the same include and exclude rules as index scanning.
-- Link events include Markdown source changes and changes to any non-ignored local target file type.
-- Explicit external targets add watches on their nearest existing parent directories so external rename and removal events can trigger reconciliation.
-- Generated Markdown rewrites persist their expected new content hash and affected link IDs before watcher feedback is handled.
-- A watcher event whose current content hash matches the pending generated-write record is consumed instead of being reparsed as a user edit.
-- A mismatched hash invalidates the pending suppression and the file is processed normally, preserving concurrent user edits.
-- The repository-root `.docignore` applies to repository traversal; explicitly linked external targets remain individually observable.
-- It adds watches for newly created nested directories and removes deleted or renamed watched directories from its tracked set.
-- Observer errors are surfaced instead of silently terminating observation.
+- It debounces event bursts.
+- It runs one reconciliation at a time.
+- If changes arrive during a run, it schedules one follow-up pass.
+- It applies `.docignore`, configured ignored directories, ignored suffixes, and index include/exclude rules.
+- It observes Markdown source changes and changes to non-ignored local link targets.
+- Explicit external targets add watches on their nearest existing parent directories.
+- It adds watches for newly created nested directories and removes deleted or renamed watched directories.
+- Observer errors are surfaced rather than silently terminating observation.
 
-The watcher prints timestamped status lines and includes the current process ID in its startup line. That makes it easier to spot watcher/fix races in logs.
+Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
 
-## Practical Usage
+## Foreground Watch versus Repository Demon
 
-Watch mode is useful while iterating locally, but it is not a replacement for `check`.
+Use foreground `watch` when you deliberately want the process attached to the current terminal, its output visible directly, or its lifetime controlled manually.
 
-- Use `watch` while editing docs and fixtures.
-- Use `check` before commit or in CI.
-- Expect `fix` to report `0` updated files when the watcher already reconciled the tree for you.
+Use the repository demon for normal self-managed local operation. Do not wrap `ddocs watch` in an additional PID-file, `setsid`, scheduled-task, or shell-startup daemonization script when the repository demon is enabled. A second lifecycle wrapper can create competing watchers and misleading status.
 
-## Safer Detached Example
-
-If you run Demon Docs from a shell startup file, keep the launch explicit and let the wrapper handle the guard logic:
-
-```bash
-DDOCS_ROOT="${DDOCS_ROOT:-docs}"
-
-ddocs_pid_file="$PWD/.cache/ddocs-watch.pid"
-ddocs_log_file="$PWD/.cache/ddocs-watch.log"
-
-mkdir -p "$PWD/.cache"
-
-ddocs_watch_is_running() {
-  [ -s "$ddocs_pid_file" ] || return 1
-
-  local watcher_pid
-  watcher_pid="$(cat "$ddocs_pid_file" 2>/dev/null)" || return 1
-
-  case "$watcher_pid" in
-    ''|*[!0-9]*) return 1 ;;
-  esac
-
-  kill -0 "$watcher_pid" 2>/dev/null || return 1
-  ps -p "$watcher_pid" -o args= 2>/dev/null | grep -Fq "ddocs watch"
-}
-
-start_ddocs_watch() {
-  setsid bash -c '
-    cd "$1" || exit 1
-    exec ddocs watch --root "$2" </dev/null >>"$3" 2>&1
-  ' _ "$PWD" "$DDOCS_ROOT" "$ddocs_log_file" >/dev/null 2>&1 &
-
-  echo $! > "$ddocs_pid_file"
-}
-
-if ! ddocs_watch_is_running; then
-  rm -f "$ddocs_pid_file"
-  start_ddocs_watch
-fi
-
-unset ddocs_pid_file
-unset ddocs_log_file
-```
-
-When using `direnv`, source process startup files outside any `set -a` block so helper variables such as PID and log paths are not exported.
-
-This pattern keeps the process start explicit, writes logs to `.cache/ddocs-watch.log`, and avoids relying on shell aliases during startup.
+The repository demon owns detached process startup, single-owner coordination, feeder heartbeats, shutdown grace, stale-owner recovery, and bounded repository-local logs. See [Repository Demon](repository-demon.md).
 
 ## Output
 
-Watcher logs include timestamped status lines such as:
+Foreground watcher output includes timestamped status lines and the current process ID:
 
 ```text
 2026-06-18T23:59:59 ddocs watch watching docs pid=12345
 2026-06-18T23:59:59 ddocs watch updated 3 file(s)
 ```
 
-Those timestamps make it easier to understand the order of events when a fix pass and a file change happen close together.
+Detached watcher output is written to the bounded log set under `.ddocs/runtime/logs/` and is available through:
 
-Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence. The CI matrix runs the watcher package as part of the Linux and Windows Go suites.
+```bash
+ddocs demon --logs
+```
+
+## Practical Usage
+
+- Use `ddocs watch` for an explicit foreground session.
+- Use the repository demon for automatic shell or agent-driven lifecycle.
+- Use `ddocs check` before commit or in CI.
+- Use `ddocs fix` for deterministic recovery or a deliberate one-shot repair.
+- Expect `fix` to report zero updated files when a watcher already reconciled the tree.
+
+## Test Coverage
+
+Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence.
+
+Repository-demon tests separately cover ownership exclusion and stale recovery, feeder expiry and counting, read-only status snapshots, shell-feeder reuse, bounded logs, shutdown grace, linked-worktree discovery, persistent enablement, and generated shell-hook contracts.
 
 ## Related Files
 
 - `internal/watch/watch.go`
-- `internal/links/`
-- `internal/app/app.go`
-- `cmd/ddocs/main.go`
-- `cmd/demon/main.go`
-- `docs/make-dummy-docs.sh`
+- `internal/watch/scheduler.go`
+- `internal/demon/runtime.go`
+- `internal/demon/log.go`
+- `internal/app/demon.go`
+- `internal/repository/worktree.go`

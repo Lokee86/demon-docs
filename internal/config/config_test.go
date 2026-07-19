@@ -4,12 +4,13 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
 func TestDefaultsAndAliases(t *testing.T) {
 	c := Default()
-	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles {
+	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles || !c.Demon.Run {
 		t.Fatalf("unexpected defaults: %+v", c)
 	}
 	dir := t.TempDir()
@@ -34,6 +35,57 @@ extensions = [".md", ".mdx"]
 		t.Fatalf("aliases not preserved: %+v", c)
 	}
 }
+
+func TestDemonRunDefaultsAndAtomicEditPreserveText(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.toml")
+	original := "# keep this comment\nunknown = \"value\"\n\n[demon]\n# preserve me\nrun = true # trailing\n\n[watch]\ndebounce_seconds = 0.5\n"
+	if err := os.WriteFile(path, []byte(original), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetDemonRun(path, false); err != nil {
+		t.Fatal(err)
+	}
+	updated, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(updated)
+	for _, want := range []string{"# keep this comment", "unknown = \"value\"", "# preserve me", "run = false # trailing", "debounce_seconds = 0.5"} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("updated config missing %q: %s", want, text)
+		}
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Demon.Run {
+		t.Fatal("disabled demon was loaded as enabled")
+	}
+	if err := SetDemonRun(path, true); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err = Load(path)
+	if err != nil || !loaded.Demon.Run {
+		t.Fatalf("re-enable failed: %+v %v", loaded, err)
+	}
+}
+
+func TestDemonRunAddsMissingSection(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.toml")
+	if err := os.WriteFile(path, []byte("root = \"docs\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetDemonRun(path, false); err != nil {
+		t.Fatal(err)
+	}
+	text, _ := os.ReadFile(path)
+	if !strings.Contains(string(text), "[demon]\nrun = false\n") {
+		t.Fatalf("missing demon section: %q", text)
+	}
+}
 func TestSelectionIsCurrentDirectoryOnly(t *testing.T) {
 	parent := t.TempDir()
 	child := filepath.Join(parent, "child")
@@ -48,6 +100,26 @@ func TestSelectionIsCurrentDirectoryOnly(t *testing.T) {
 	}
 	if Discover(child) == "" {
 		t.Fatal("legacy discovery should still search parent")
+	}
+}
+
+func TestDiscoverWithinDoesNotCrossRepositoryBoundary(t *testing.T) {
+	root := t.TempDir()
+	child := filepath.Join(root, "docs", "guide")
+	if err := os.MkdirAll(child, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".demon-docs.toml"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := DiscoverWithin(child, filepath.Join(root, "docs")); got != "" {
+		t.Fatalf("discovery crossed boundary: %s", got)
+	}
+	if err := os.WriteFile(filepath.Join(root, "docs", ".demon-docs.toml"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got := DiscoverWithin(child, filepath.Join(root, "docs")); got != filepath.Join(root, "docs", ".demon-docs.toml") {
+		t.Fatalf("bounded discovery missed config: %s", got)
 	}
 }
 func TestStarterConfigLoads(t *testing.T) {
