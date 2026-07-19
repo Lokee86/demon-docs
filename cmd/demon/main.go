@@ -13,8 +13,17 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	args := os.Args[1:]
-	if len(args) > 0 && (args[0] == "run" || args[0] == "--status" || args[0] == "--logs" || strings.HasPrefix(args[0], "__")) {
+	if len(args) > 0 && args[0] != "demon" && isDemonCommand(args[0]) {
 		args = append([]string{"demon"}, args...)
 	}
 	os.Exit(app.Run(ctx, args, os.Stdout, os.Stderr))
+}
+
+func isDemonCommand(command string) bool {
+	switch command {
+	case "run", "acquire", "heartbeat", "release", "--status", "--logs":
+		return true
+	default:
+		return strings.HasPrefix(command, "__")
+	}
 }

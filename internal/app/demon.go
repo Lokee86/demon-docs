@@ -17,7 +17,7 @@ import (
 )
 
 func demonHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs demon [-h] {run,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership.")
+	fmt.Fprintln(w, "usage: demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n       ddocs demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  acquire --client NAME [PATH] register an external agent feeder\n  heartbeat --token TOKEN [PATH]\n                               refresh an external agent feeder\n  release --token TOKEN [PATH] release an external agent feeder\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership.")
 }
 
 func demonRunHelp(w io.Writer) {
@@ -40,6 +40,12 @@ func runDemon(ctx context.Context, args []string, out, errOut io.Writer) int {
 	switch args[0] {
 	case "run":
 		return demonRun(ctx, args[1:], out, errOut)
+	case "acquire":
+		return demonAcquire(args[1:], out, errOut)
+	case "heartbeat":
+		return demonHeartbeat(args[1:], out, errOut)
+	case "release":
+		return demonRelease(args[1:], out, errOut)
 	case "--status":
 		return demonStatus(args[1:], out, errOut)
 	case "--logs":

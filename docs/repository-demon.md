@@ -36,20 +36,30 @@ Two feeder kinds are supported:
 
 Each feeder has an opaque token and its own heartbeat record. Leaving one shell or finishing one agent job removes only that feeder. It does not shut down a demon still needed by another feeder.
 
-The generic agent feeder boundary is deliberately host-neutral. Demon Docs does not need to know whether an agent feeder came from Codex, Hermes, an MCP server, Claude Code, or another plugin. Each adapter is responsible for registering before work begins and unregistering on every terminal path, including success, failure, cancellation, timeout, and spawn failure.
+The generic agent feeder boundary is deliberately host-neutral. Demon Docs does not need to know whether an agent feeder came from Codex, Hermes, an MCP server, Claude Code, or another plugin. Each adapter supplies a client name, registers before work begins, refreshes its opaque token while work continues, and releases the token on every terminal path, including success, failure, cancellation, timeout, and spawn failure.
 
 The generic feeder protocol exists in Demon Docs core. Thin MCP, Codex, Hermes, and other host adapters remain integration work; the daemon does not invoke those hosts itself.
 
-Agent registration is operational only. It keeps the watcher alive while an adapter is active; it does not make the demon an MCP server, context service, or host integration.
+Agent registration is operational only. It keeps the watcher alive while an adapter is active; it does not make the demon an MCP server, context service, or host integration. A missed release is bounded by feeder expiry, and a later heartbeat can recover a missing or stale demon owner.
 
 ## Public Commands
 
 ```bash
+demon run
+demon acquire --client mcp
+demon heartbeat --token TOKEN
+demon release --token TOKEN
+demon --status
+demon --logs
+```
+
+The same operations are available through the general CLI by prefixing them with `ddocs`:
+
+```bash
 ddocs demon run
-ddocs demon run --false
-ddocs demon run --true
-ddocs demon --status
-ddocs demon --logs
+ddocs demon acquire --client codex
+ddocs demon heartbeat --token TOKEN
+ddocs demon release --token TOKEN
 ```
 
 `ddocs demon run` ensures the demon is enabled, registers the current shell as a feeder, and starts the detached watcher when necessary.
@@ -57,6 +67,12 @@ ddocs demon --logs
 `ddocs demon run --false` persists `[demon].run = false`, removes current feeders, and requests shutdown.
 
 `ddocs demon run --true` persists `[demon].run = true`, clears an earlier shutdown request, and allows a feeder to start the demon again.
+
+`demon acquire --client NAME` registers an externally managed `agent` feeder and prints `token=... claimed=...`. MCP, Codex, Hermes, and other adapters retain that token for the lifetime of their repository session.
+
+`demon heartbeat --token TOKEN` refreshes that feeder. If the repository still has active demand but the demon owner is missing or stale, the heartbeat claims ownership and starts a replacement watcher.
+
+`demon release --token TOKEN` removes only that feeder. Other shells and agents remain unaffected, and the demon stops after the configured grace period once no fresh feeders remain.
 
 `ddocs demon --status` is read-only. It reports:
 
@@ -70,7 +86,7 @@ ddocs demon --logs
 
 `ddocs demon --logs` prints retained repository-local logs from oldest to newest.
 
-The hidden `__enter`, `__leave`, `__feed`, and `__serve` commands are adapter and lifecycle plumbing rather than normal interactive commands.
+The hidden `__enter`, `__leave`, `__feed`, and `__serve` commands remain internal shell and detached-process plumbing. External agent adapters use the public `acquire`, `heartbeat`, and `release` commands instead.
 
 ## Shell Integration
 
@@ -116,7 +132,7 @@ Runtime files live below `.ddocs/runtime/`:
     demon.log.4
 ```
 
-The owner record stores the ownership token, detached PID, startup time, and last heartbeat. Feeder files store their token, kind, process information, and last heartbeat.
+The owner record stores the ownership token, detached PID, startup time, and last heartbeat. Feeder files store their token, kind, optional external client name, process information, and last heartbeat.
 
 Runtime state is operational and disposable. It is excluded from document traversal and is separate from the schema-versioned `.ddocs/` object repository used for link and repository state.
 

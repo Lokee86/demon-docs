@@ -10,18 +10,23 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 )
 
 const (
-	OwnerFile       = "owner.json"
-	OwnerHeartbeat  = "owner-heartbeat"
-	ShutdownRequest = "shutdown-request"
-	FeedersDir      = "feeders"
-	LogsDir         = "logs"
-	DemonLog        = "demon.log"
+	OwnerFile          = "owner.json"
+	OwnerHeartbeat     = "owner-heartbeat"
+	ShutdownRequest    = "shutdown-request"
+	FeedersDir         = "feeders"
+	LogsDir            = "logs"
+	DemonLog           = "demon.log"
+	ownerLockDir       = "owner.lock"
+	ownerLockTokenFile = "token"
+
+	ownerLockRetry      = 2 * time.Millisecond
+	ownerLockTimeout    = 15 * time.Second
+	ownerLockStaleAfter = 10 * time.Second
 )
 
 type Timing struct {
@@ -57,6 +62,7 @@ type Owner struct {
 type Feeder struct {
 	Token     string    `json:"token"`
 	Kind      string    `json:"kind"`
+	Client    string    `json:"client,omitempty"`
 	PID       int       `json:"pid,omitempty"`
 	ParentPID int       `json:"parent_pid,omitempty"`
 	Heartbeat time.Time `json:"heartbeat"`
@@ -150,61 +156,115 @@ func exclusiveJSON(path string, value any) error {
 }
 
 func (r *Runtime) Claim(pid int) (Owner, bool, error) {
-	if err := r.ensureRuntime(); err != nil {
+	unlock, err := r.acquireOwnerLock()
+	if err != nil {
 		return Owner{}, false, err
 	}
-	for attempt := 0; attempt < 3; attempt++ {
-		token, err := newToken()
-		if err != nil {
+	defer unlock()
+
+	token, err := newToken()
+	if err != nil {
+		return Owner{}, false, err
+	}
+	current, readErr := r.ReadOwner()
+	if readErr == nil {
+		if time.Since(current.Heartbeat) <= r.Timing.OwnerLease {
+			return current, false, nil
+		}
+		if err := r.quarantineOwner(token); err != nil {
 			return Owner{}, false, err
 		}
-		now := time.Now().UTC()
-		owner := Owner{Token: token, PID: pid, StartedAt: now, Heartbeat: now}
-		claimPath := filepath.Join(r.Paths.Runtime, ".owner-claim-"+token)
-		if err := atomicJSON(claimPath, owner); err != nil {
-			return Owner{}, false, err
-		}
-		// A hard-link publication is atomic and fails if owner.json already
-		// exists. os.Rename would replace the destination on Unix.
-		err = os.Link(claimPath, r.Paths.Owner)
-		_ = os.Remove(claimPath)
-		if err != nil && !errors.Is(err, os.ErrExist) {
-			// Some Windows filesystems do not support hard links. An exclusive
-			// create preserves the no-replacement ownership guarantee there.
-			if _, statErr := os.Stat(r.Paths.Owner); os.IsNotExist(statErr) {
-				err = exclusiveJSON(r.Paths.Owner, owner)
+	} else if !os.IsNotExist(readErr) {
+		info, statErr := os.Stat(r.Paths.Owner)
+		if statErr != nil {
+			if !os.IsNotExist(statErr) {
+				return Owner{}, false, statErr
 			}
-		}
-		if err == nil {
-			_ = os.WriteFile(r.Paths.Heartbeat, []byte(now.Format(time.RFC3339Nano)+"\n"), 0o644)
-			return owner, true, nil
-		}
-		if !errors.Is(err, os.ErrExist) {
-			// On Windows a destination race can be reported as an access error.
-			if _, statErr := os.Stat(r.Paths.Owner); statErr != nil {
+		} else {
+			if time.Since(info.ModTime()) <= r.Timing.OwnerLease {
+				return Owner{}, false, fmt.Errorf("unable to read fresh demon owner: %w", readErr)
+			}
+			if err := r.quarantineOwner(token); err != nil {
 				return Owner{}, false, err
 			}
 		}
-		current, readErr := r.ReadOwner()
-		if readErr == nil && time.Since(current.Heartbeat) <= r.Timing.OwnerLease {
+	}
+
+	now := time.Now().UTC()
+	owner := Owner{Token: token, PID: pid, StartedAt: now, Heartbeat: now}
+	claimPath := filepath.Join(r.Paths.Runtime, ".owner-claim-"+token)
+	if err := atomicJSON(claimPath, owner); err != nil {
+		return Owner{}, false, err
+	}
+	defer os.Remove(claimPath)
+
+	// Hard-link publication is atomic and fails instead of replacing an
+	// owner published by an older client that does not honor owner.lock.
+	err = os.Link(claimPath, r.Paths.Owner)
+	if err != nil && !errors.Is(err, os.ErrExist) {
+		if _, statErr := os.Stat(r.Paths.Owner); os.IsNotExist(statErr) {
+			err = exclusiveJSON(r.Paths.Owner, owner)
+		}
+	}
+	if err != nil {
+		if current, readErr := r.ReadOwner(); readErr == nil && time.Since(current.Heartbeat) <= r.Timing.OwnerLease {
 			return current, false, nil
 		}
-		if readErr != nil {
-			info, statErr := os.Stat(r.Paths.Owner)
-			if statErr == nil && time.Since(info.ModTime()) <= r.Timing.OwnerLease {
-				time.Sleep(time.Millisecond)
-				continue
+		return Owner{}, false, err
+	}
+	_ = os.WriteFile(r.Paths.Heartbeat, []byte(now.Format(time.RFC3339Nano)+"\n"), 0o644)
+	return owner, true, nil
+}
+
+func (r *Runtime) quarantineOwner(token string) error {
+	stale := r.Paths.Owner + ".stale-" + token
+	if err := os.Rename(r.Paths.Owner, stale); err != nil {
+		return err
+	}
+	_ = os.Remove(stale)
+	return nil
+}
+
+func (r *Runtime) acquireOwnerLock() (func(), error) {
+	if err := r.ensureRuntime(); err != nil {
+		return nil, err
+	}
+	lockToken, err := newToken()
+	if err != nil {
+		return nil, err
+	}
+	lockPath := filepath.Join(r.Paths.Runtime, ownerLockDir)
+	tokenPath := filepath.Join(lockPath, ownerLockTokenFile)
+	deadline := time.Now().Add(ownerLockTimeout)
+	var lastErr error
+	for {
+		err := os.Mkdir(lockPath, 0o700)
+		if err == nil {
+			if err := os.WriteFile(tokenPath, []byte(lockToken+"\n"), 0o600); err != nil {
+				_ = os.RemoveAll(lockPath)
+				return nil, err
 			}
+			return func() {
+				data, readErr := os.ReadFile(tokenPath)
+				if readErr == nil && string(data) == lockToken+"\n" {
+					_ = os.Remove(tokenPath)
+					_ = os.Remove(lockPath)
+				}
+			}, nil
 		}
-		// A stale lease is recoverable. Rename first so a new claimant never
-		// deletes a freshly-created owner file.
-		stale := r.Paths.Owner + ".stale-" + token
-		if err := os.Rename(r.Paths.Owner, stale); err != nil {
+		lastErr = err
+		if info, statErr := os.Stat(lockPath); statErr == nil && time.Since(info.ModTime()) > ownerLockStaleAfter {
+			_ = os.RemoveAll(lockPath)
 			continue
 		}
-		_ = os.Remove(stale)
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("timed out waiting for demon owner lock: %w", lastErr)
+		}
+		// Windows may briefly report access denied while another claimant
+		// removes the directory. Treat every post-Ensure mkdir failure as
+		// contention until the bounded deadline expires.
+		time.Sleep(ownerLockRetry)
 	}
-	return Owner{}, false, fmt.Errorf("unable to claim demon ownership")
 }
 
 func (r *Runtime) ReadOwner() (Owner, error) {
@@ -227,6 +287,11 @@ func (r *Runtime) OwnerFresh() (Owner, bool) {
 func (r *Runtime) Heartbeat(owner Owner) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	unlock, err := r.acquireOwnerLock()
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	current, err := r.ReadOwner()
 	if err != nil {
 		return err
@@ -245,6 +310,11 @@ func (r *Runtime) Heartbeat(owner Owner) error {
 func (r *Runtime) SetPID(token string, pid int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	unlock, err := r.acquireOwnerLock()
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	current, err := r.ReadOwner()
 	if err != nil {
 		return err
@@ -259,6 +329,11 @@ func (r *Runtime) SetPID(token string, pid int) error {
 func (r *Runtime) Release(owner Owner) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	unlock, err := r.acquireOwnerLock()
+	if err != nil {
+		return err
+	}
+	defer unlock()
 	current, err := r.ReadOwner()
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -277,18 +352,7 @@ func (r *Runtime) Release(owner Owner) error {
 }
 
 func (r *Runtime) AddFeeder(kind string, pid, parentPID int) (Feeder, error) {
-	if kind != "shell" && kind != "agent" {
-		return Feeder{}, fmt.Errorf("invalid feeder kind %q", kind)
-	}
-	if err := r.Ensure(); err != nil {
-		return Feeder{}, err
-	}
-	token, err := newToken()
-	if err != nil {
-		return Feeder{}, err
-	}
-	f := Feeder{Token: token, Kind: kind, PID: pid, ParentPID: parentPID, Heartbeat: time.Now().UTC()}
-	return f, atomicJSON(filepath.Join(r.Paths.Feeders, token+".json"), f)
+	return r.addFeeder(kind, "", pid, parentPID)
 }
 
 func (r *Runtime) FindFeeder(kind string, parentPID int) (Feeder, bool) {
@@ -310,24 +374,12 @@ func (r *Runtime) feederPath(token string) string {
 }
 
 func (r *Runtime) FeedHeartbeat(feeder Feeder) error {
-	path := r.feederPath(feeder.Token)
-	var current Feeder
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, &current); err != nil {
-		return err
-	}
-	if current.Token != feeder.Token {
-		return fmt.Errorf("feeder token mismatch")
-	}
-	current.Heartbeat = time.Now().UTC()
-	return atomicJSON(path, current)
+	_, err := r.HeartbeatFeeder(feeder.Token)
+	return err
 }
 
 func (r *Runtime) RemoveFeeder(token string) error {
-	if token == "" || strings.ContainsAny(token, `/\\`) {
+	if !validFeederToken(token) {
 		return fmt.Errorf("invalid feeder token")
 	}
 	err := os.Remove(r.feederPath(token))

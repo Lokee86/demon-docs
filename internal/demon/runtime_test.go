@@ -13,7 +13,7 @@ import (
 func testRuntime(t *testing.T) *Runtime {
 	t.Helper()
 	r := New(t.TempDir())
-	r.Timing = Timing{FeederHeartbeat: 10 * time.Millisecond, FeederExpiry: time.Second, ShutdownGrace: time.Second, OwnerLease: time.Second}
+	r.Timing = Timing{FeederHeartbeat: 10 * time.Millisecond, FeederExpiry: time.Second, ShutdownGrace: time.Second, OwnerLease: 10 * time.Second}
 	return r
 }
 

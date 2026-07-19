@@ -533,12 +533,15 @@ default. One fresh demon owner serves each local `.ddocs/` repository while
 shell or agent feeders remain active:
 
 ```bash
-ddocs demon run
-ddocs demon --status
-ddocs demon --logs
-ddocs demon run --false
-ddocs demon run --true
+demon run
+demon --status
+demon --logs
+demon acquire --client mcp
+demon heartbeat --token TOKEN
+demon release --token TOKEN
 ```
+
+The same lifecycle commands are available as `ddocs demon ...`. `demon acquire`, `heartbeat`, and `release` form the host-neutral feeder interface used by MCP, Codex, Hermes, and other agent adapters.
 
 Install automatic shell entry and exit tracking in Bash with:
 
@@ -552,9 +555,10 @@ Or in a PowerShell profile with:
 Invoke-Expression (& ddocs demon __shell-hook powershell)
 ```
 
-Shell feeding is implemented by the CLI. MCP and native agent integrations are
-separate adapters that can use the same host-neutral `agent` feeder protocol.
-The demon does not host those integrations or deliver agent context.
+Shell feeding is implemented by the CLI. MCP and native agent integrations use
+the public host-neutral lifecycle: acquire a token with a client name, refresh
+it before feeder expiry, and release it on every terminal path. The demon does
+not host those integrations or deliver agent context.
 
 Runtime ownership, feeder heartbeats, shutdown requests, and bounded logs live
 under `.ddocs/runtime/`. The existing `ddocs watch` command remains a foreground
