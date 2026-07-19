@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 43834,
+      "sha256": "ad5f460dee1a9936b94524a17db2407fee197a4101f6588cba7b412193e5fd4a",
+      "entry_count": 14,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/bifrost.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 648,
+          "column": 1,
+          "end_line": 648,
+          "end_column": 53
+        },
+        "raw_line": "| Main Bifrost struct & queuing | `core/bifrost.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/bifrost.go",
+        "exists": true,
+        "size": 333147,
+        "sha256": "3089abe95a054384176fff9048f1caf89d8ee01d6dd3bd064230eb2baae2b884"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/provider.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 650,
+          "column": 1,
+          "end_line": 650,
+          "end_column": 65
+        },
+        "raw_line": "| Provider interface (30+ methods) | `core/schemas/provider.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/provider.go",
+        "exists": true,
+        "size": 41343,
+        "sha256": "dfb148505d693243e2246a600eb00dcd5cb7f36168574bb1bd431482a383ede4"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/bifrost.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 651,
+          "column": 1,
+          "end_line": 651,
+          "end_column": 65
+        },
+        "raw_line": "| ModelProvider enum & context keys | `core/schemas/bifrost.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/bifrost.go",
+        "exists": true,
+        "size": 117251,
+        "sha256": "05755f21f1e0ec4064e5f807a632f732a573899ddb7e74660d1fa4f0450f6e4d"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/plugin.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 652,
+          "column": 1,
+          "end_line": 652,
+          "end_column": 68
+        },
+        "raw_line": "| Plugin interfaces & pooled HTTP types | `core/schemas/plugin.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/plugin.go",
+        "exists": true,
+        "size": 19679,
+        "sha256": "6fe6eec77ac94ee878ba9e222af98fd2dc7ffe768a6a3ba72241bf3d6be72c66"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/context.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 653,
+          "column": 1,
+          "end_line": 653,
+          "end_column": 64
+        },
+        "raw_line": "| BifrostContext (mutable context) | `core/schemas/context.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/context.go",
+        "exists": true,
+        "size": 26625,
+        "sha256": "db53d4800b1b7018ee5420dcbb1edb9abebebb1b064390b1ce9b527fa1a91a0b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/chatcompletions.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 654,
+          "column": 1,
+          "end_line": 654,
+          "end_column": 61
+        },
+        "raw_line": "| Chat completion types | `core/schemas/chatcompletions.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/chatcompletions.go",
+        "exists": true,
+        "size": 76161,
+        "sha256": "3b90bc7b25ab622060cbcc07f8dbe3b561ead05ba09e7a03fe78b9467f92a081"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/schemas/responses.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 655,
+          "column": 1,
+          "end_line": 655,
+          "end_column": 53
+        },
+        "raw_line": "| Responses API types | `core/schemas/responses.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/schemas/responses.go",
+        "exists": true,
+        "size": 145570,
+        "sha256": "6bafb0f6ff2aea0111dc6c9335d64508326f8fbc373c6f7b4ca7d205c1e44764"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "core/providers/utils/utils.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 657,
+          "column": 1,
+          "end_line": 657,
+          "end_column": 73
+        },
+        "raw_line": "| Shared provider utils & SSE parsing | `core/providers/utils/utils.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "core/providers/utils/utils.go",
+        "exists": true,
+        "size": 123933,
+        "sha256": "c2edd89a287e72ae5978f00a69b3fa3f0230f457f2798090722a590193bc6bf8"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "framework/streaming/accumulator.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 658,
+          "column": 1,
+          "end_line": 658,
+          "end_column": 64
+        },
+        "raw_line": "| Streaming accumulator | `framework/streaming/accumulator.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "framework/streaming/accumulator.go",
+        "exists": true,
+        "size": 25323,
+        "sha256": "1c18b5427a809831ac0719785151715c1a94ef3962baf450d052151551a0b327"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "transports/bifrost-http/handlers/inference.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 659,
+          "column": 1,
+          "end_line": 659,
+          "end_column": 76
+        },
+        "raw_line": "| HTTP inference handler | `transports/bifrost-http/handlers/inference.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "transports/bifrost-http/handlers/inference.go",
+        "exists": true,
+        "size": 149961,
+        "sha256": "fa8074b7ab92d27fdb1e79dd3d95313df36dd0db46991b106270f072ec13af93"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "transports/bifrost-http/handlers/governance.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 660,
+          "column": 1,
+          "end_line": 660,
+          "end_column": 73
+        },
+        "raw_line": "| Governance handler | `transports/bifrost-http/handlers/governance.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "transports/bifrost-http/handlers/governance.go",
+        "exists": true,
+        "size": 182376,
+        "sha256": "3cd346bc9eef79b1d0560509fe742e875ed95f7ccb7d8bc4f25dbdb944a0775c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "transports/config.schema.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 661,
+          "column": 1,
+          "end_line": 661,
+          "end_column": 69
+        },
+        "raw_line": "| Config schema (source of truth) | `transports/config.schema.json` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "transports/config.schema.json",
+        "exists": true,
+        "size": 277928,
+        "sha256": "117b98ed78aaa8703ba084d48baef64d674422f9ae22381061285c525d6f0fe0"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "transports/bifrost-http/handlers/devpprof.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 662,
+          "column": 1,
+          "end_line": 662,
+          "end_column": 72
+        },
+        "raw_line": "| Pool debug profiler | `transports/bifrost-http/handlers/devpprof.go` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "transports/bifrost-http/handlers/devpprof.go",
+        "exists": true,
+        "size": 21693,
+        "sha256": "4b79d7245aec94ce249589a08fe1870c340102e0363e8a3b3053edb5af38cb4d"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files Quick Reference",
+        "target": "docs/docs.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 666,
+          "column": 1,
+          "end_line": 666,
+          "end_column": 45
+        },
+        "raw_line": "| Docs navigation config | `docs/docs.json` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/docs.json",
+        "exists": true,
+        "size": 41670,
+        "sha256": "cb2f28ff0085e37fbff87e3a4eb49edab44f1858437fe70fdddeb2f818c8ec6c"
+      }
+    }
+  ],
+  "diagnostics": []
+}

@@ -1,0 +1,351 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-genesis-v1",
+  "known_links": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/__init__.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/scene.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/simulator.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/morphs.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/solvers.py"
+    }
+  ],
+  "visible_links": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/scene.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/simulator.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/morphs.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/solvers.py"
+    }
+  ],
+  "hidden_links": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/__init__.py"
+    }
+  ],
+  "recovered_links": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/__init__.py"
+    }
+  ],
+  "recovered_suggestions": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/__init__.py",
+      "score": 4,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/scene.py:inbound:python_relative_import"
+      ],
+      "tier": "context"
+    }
+  ],
+  "missed_links": [],
+  "unmatched_suggestions": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": ".github/workflows/scripts/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:scripts"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "examples/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:examples/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:genesis/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:genesis/assets/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/camera/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:camera"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/chopping-board/source/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:source"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/",
+      "score": 2.3840786147046145,
+      "evidence": [
+        "sibling_of_existing_target:genesis/engine/scene.py:",
+        "sibling_of_existing_target:genesis/engine/simulator.py:",
+        "unique_basename_mention:engine"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/couplers/__init__.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:genesis/engine/entities/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/__init__.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:genesis/engine/materials/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/FEM/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:FEM:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/MPM/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:MPM:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/PBD/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:PBD:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/SF/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:SF"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/SPH/",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:SPH:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/sensors/__init__.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:genesis/engine/solvers/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/__init__.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/base_solver.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/fem_solver.py",
+      "score": 0.9592498662725258,
+      "evidence": [
+        "unique_basename_mention:fem_solver.py"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/states/cache.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/states/solvers.py",
+      "score": 1.3333333333333333,
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/",
+      "score": 2.1155091715440775,
+      "evidence": [
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:",
+        "unique_basename_mention:options"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/__init__.py",
+      "score": 5.156259305271551,
+      "evidence": [
+        "dependency_neighbor:genesis/options/solvers.py:inbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/misc.py",
+      "score": 3.679978319557381,
+      "evidence": [
+        "dependency_neighbor:genesis/options/morphs.py:outbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/options.py",
+      "score": 7.67997831955738,
+      "evidence": [
+        "dependency_neighbor:genesis/options/morphs.py:outbound:python_relative_import",
+        "dependency_neighbor:genesis/options/solvers.py:outbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/surfaces.py",
+      "score": 2.1155091715440775,
+      "evidence": [
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:",
+        "unique_basename_mention:surfaces.py"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "tests/",
+      "score": 2,
+      "evidence": [
+        "exact_path_mention:tests/"
+      ],
+      "tier": "context"
+    }
+  ],
+  "already_linked_suggestions": [],
+  "duplicate_suggestions": [],
+  "invalid_suggestions": [],
+  "raw_suggestion_count": 30,
+  "unique_suggestion_count": 30,
+  "precision": 0.03333333333333333,
+  "recall": 1
+}

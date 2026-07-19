@@ -36,5 +36,8 @@ research/context-benchmarking/clones/
 research/context-benchmarking/runs/
 research/context-benchmarking/workspaces/
 research/context-benchmarking/**/source/
+research/cross-repo-codemap-benchmark/clones/
+research/cross-repo-codemap-benchmark/checkouts/
+research/cross-repo-codemap-benchmark/runs/
 
 notes.txt

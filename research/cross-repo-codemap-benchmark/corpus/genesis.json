@@ -1,0 +1,58 @@
+{
+  "id": "genesis",
+  "class": "native_key_files_section",
+  "languages": [
+    "Python"
+  ],
+  "extraction_mode": "leading_entry",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 1,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+  "docs_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+  "code_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+  "docs_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+  "documents_scanned": [
+    ".github/contributing/ARCHITECTURE.md"
+  ],
+  "resolved_pair_count": 5,
+  "resolved_document_count": 1,
+  "resolved_target_count": 5,
+  "pairs": [
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/__init__.py",
+      "marker": "Key Files Reference",
+      "line": 105,
+      "resolved_target": "genesis/__init__.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/scene.py",
+      "marker": "Key Files Reference",
+      "line": 106,
+      "resolved_target": "genesis/engine/scene.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/simulator.py",
+      "marker": "Key Files Reference",
+      "line": 107,
+      "resolved_target": "genesis/engine/simulator.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/morphs.py",
+      "marker": "Key Files Reference",
+      "line": 108,
+      "resolved_target": "genesis/options/morphs.py"
+    },
+    {
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/solvers.py",
+      "marker": "Key Files Reference",
+      "line": 109,
+      "resolved_target": "genesis/options/solvers.py"
+    }
+  ]
+}

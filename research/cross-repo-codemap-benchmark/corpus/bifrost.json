@@ -1,0 +1,122 @@
+{
+  "id": "bifrost",
+  "class": "native_key_files_section",
+  "languages": [
+    "Go",
+    "TypeScript"
+  ],
+  "extraction_mode": "leading_entry",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 3,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/maximhq/bifrost.git",
+  "docs_repository": "https://github.com/maximhq/bifrost.git",
+  "code_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+  "docs_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 14,
+  "resolved_document_count": 1,
+  "resolved_target_count": 14,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost.go",
+      "marker": "Key Files Quick Reference",
+      "line": 648,
+      "resolved_target": "core/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/provider.go",
+      "marker": "Key Files Quick Reference",
+      "line": 650,
+      "resolved_target": "core/schemas/provider.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/bifrost.go",
+      "marker": "Key Files Quick Reference",
+      "line": 651,
+      "resolved_target": "core/schemas/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/plugin.go",
+      "marker": "Key Files Quick Reference",
+      "line": 652,
+      "resolved_target": "core/schemas/plugin.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context.go",
+      "marker": "Key Files Quick Reference",
+      "line": 653,
+      "resolved_target": "core/schemas/context.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/chatcompletions.go",
+      "marker": "Key Files Quick Reference",
+      "line": 654,
+      "resolved_target": "core/schemas/chatcompletions.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/responses.go",
+      "marker": "Key Files Quick Reference",
+      "line": 655,
+      "resolved_target": "core/schemas/responses.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/utils/utils.go",
+      "marker": "Key Files Quick Reference",
+      "line": 657,
+      "resolved_target": "core/providers/utils/utils.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator.go",
+      "marker": "Key Files Quick Reference",
+      "line": 658,
+      "resolved_target": "framework/streaming/accumulator.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/inference.go",
+      "marker": "Key Files Quick Reference",
+      "line": 659,
+      "resolved_target": "transports/bifrost-http/handlers/inference.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance.go",
+      "marker": "Key Files Quick Reference",
+      "line": 660,
+      "resolved_target": "transports/bifrost-http/handlers/governance.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/config.schema.json",
+      "marker": "Key Files Quick Reference",
+      "line": 661,
+      "resolved_target": "transports/config.schema.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/devpprof.go",
+      "marker": "Key Files Quick Reference",
+      "line": 662,
+      "resolved_target": "transports/bifrost-http/handlers/devpprof.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/docs.json",
+      "marker": "Key Files Quick Reference",
+      "line": 666,
+      "resolved_target": "docs/docs.json"
+    }
+  ]
+}

@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-beads-rust-v1",
+  "known_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/cli/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/config/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/error/structured.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/rich.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/model/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/events.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/schema.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/sqlite.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/history.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/path.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/hash.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/id.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/validation/mod.rs"
+    }
+  ],
+  "visible_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/cli/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/config/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/error/structured.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/rich.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/events.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/schema.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/sqlite.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/history.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/hash.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/id.rs"
+    }
+  ],
+  "hidden_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/model/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/path.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/validation/mod.rs"
+    }
+  ],
+  "recovered_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/path.rs"
+    }
+  ],
+  "recovered_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/path.rs",
+      "score": 2.7862465289312905,
+      "evidence": [
+        "sibling_of_existing_target:src/sync/history.rs:",
+        "sibling_of_existing_target:src/sync/mod.rs:",
+        "unique_basename_mention:path.rs"
+      ],
+      "tier": "context"
+    }
+  ],
+  "missed_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/model/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/validation/mod.rs"
+    }
+  ],
+  "unmatched_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": ".beads/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:.beads/:x9"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": ".beads/SYNC_SAFETY_INVARIANTS.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:.beads/SYNC_SAFETY_INVARIANTS.md:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:.github/workflows/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "Cargo.lock",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:Cargo.lock:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "Cargo.toml",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:Cargo.toml:x3"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "benches/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:benches/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "benches/storage_perf.rs",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:benches/storage_perf.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/AGENT_INTEGRATION.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/AGENT_INTEGRATION.md:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/CI_SUPPLY_CHAIN.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/CI_SUPPLY_CHAIN.md:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/E2E_SYNC_TESTS.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/E2E_SYNC_TESTS.md"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/SYNC_MAINTENANCE_CHECKLIST.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/SYNC_MAINTENANCE_CHECKLIST.md:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/SYNC_SAFETY.md",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:docs/SYNC_SAFETY.md"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:src/:x5"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cli/",
+      "score": 2.7862465289312905,
+      "evidence": [
+        "sibling_of_existing_target:src/cli/mod.rs:",
+        "unique_basename_mention:cli"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/config/",
+      "score": 2.048106036074205,
+      "evidence": [
+        "sibling_of_existing_target:src/config/mod.rs:",
+        "unique_basename_mention:config:x5"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/config/routing.rs",
+      "score": 2.048106036074205,
+      "evidence": [
+        "sibling_of_existing_target:src/config/mod.rs:",
+        "unique_basename_mention:routing.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/error/",
+      "score": 1.7862465289312905,
+      "evidence": [
+        "sibling_of_existing_target:src/error/structured.rs:",
+        "unique_basename_mention:error:x4"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:format:x5"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/csv.rs",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:csv.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/markdown.rs",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:markdown.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/output.rs",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:output.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/syntax.rs",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:syntax.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/format/text.rs",
+      "score": 1.4171762825027479,
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:text.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/storage/",
+      "score": 4.571825050360035,
+      "evidence": [
+        "sibling_of_existing_target:src/storage/events.rs:",
+        "sibling_of_existing_target:src/storage/schema.rs:",
+        "sibling_of_existing_target:src/storage/sqlite.rs:",
+        "unique_basename_mention:storage:x4"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/sync/",
+      "score": 3.2920296742201796,
+      "evidence": [
+        "exact_path_mention:src/sync/:x2",
+        "sibling_of_existing_target:src/sync/history.rs:",
+        "sibling_of_existing_target:src/sync/mod.rs:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/",
+      "score": 2.333657757869457,
+      "evidence": [
+        "sibling_of_existing_target:src/util/hash.rs:",
+        "sibling_of_existing_target:src/util/id.rs:",
+        "unique_basename_mention:util"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/util/time.rs",
+      "score": 2.333657757869457,
+      "evidence": [
+        "sibling_of_existing_target:src/util/hash.rs:",
+        "sibling_of_existing_target:src/util/id.rs:",
+        "unique_basename_mention:time.rs"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "tests/",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:tests/:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "tests/common/mod.rs",
+      "score": 11.356735564286232,
+      "evidence": [
+        "test_counterpart:src/cli/mod.rs:",
+        "test_counterpart:src/config/mod.rs:",
+        "test_counterpart:src/sync/mod.rs:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "tests/snapshots/mod.rs",
+      "score": 11.356735564286232,
+      "evidence": [
+        "test_counterpart:src/cli/mod.rs:",
+        "test_counterpart:src/config/mod.rs:",
+        "test_counterpart:src/sync/mod.rs:"
+      ],
+      "tier": "context"
+    }
+  ],
+  "already_linked_suggestions": [],
+  "duplicate_suggestions": [],
+  "invalid_suggestions": [],
+  "raw_suggestion_count": 32,
+  "unique_suggestion_count": 32,
+  "precision": 0.03125,
+  "recall": 0.3333333333333333
+}

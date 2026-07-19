@@ -1,0 +1,387 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-agent-orchestrator-v1",
+  "known_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/openapi.yaml"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/specgen/build.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/dto.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/STATUS.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/architecture.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/cli/README.md"
+    }
+  ],
+  "visible_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/openapi.yaml"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/dto.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/STATUS.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/architecture.md"
+    }
+  ],
+  "hidden_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/specgen/build.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/cli/README.md"
+    }
+  ],
+  "recovered_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/specgen/build.go"
+    }
+  ],
+  "recovered_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/specgen/build.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    }
+  ],
+  "missed_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/cli/README.md"
+    }
+  ],
+  "unmatched_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:.github/workflows/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "CONTEXT.md",
+      "score": 2.234388957907327,
+      "evidence": [
+        "exact_path_mention:CONTEXT.md",
+        "sibling_of_existing_target:README.md:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:backend/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/adapters/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:adapters:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/adapters/runtime/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:runtime"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/adapters/telemetry/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:telemetry"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:backend/internal/cli/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/dto_drift_e2e_test.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:daemon:x12"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/daemon.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/mobile_restore.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/supervisor/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:supervisor:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/domain/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:domain"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/api.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/parity_test.go",
+      "score": 1.9299649197406348,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/apispec/openapi.yaml:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/imports_test.go",
+      "score": 1.627077132004828,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/controllers/dto.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/notifications_test.go",
+      "score": 1.627077132004828,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/controllers/dto.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/mobile_routes_test.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/router.go",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/lifecycle/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:lifecycle"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/preview/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:preview"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/service/",
+      "score": 0.8724171679421262,
+      "evidence": [
+        "unique_basename_mention:service"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/gen/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:backend/internal/storage/sqlite/gen/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/queries/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:backend/internal/storage/sqlite/queries/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "score": 3.87163208055546,
+      "evidence": [
+        "exact_path_mention:docs/",
+        "sibling_of_existing_target:docs/README.md:",
+        "sibling_of_existing_target:docs/STATUS.md:",
+        "sibling_of_existing_target:docs/architecture.md:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/adr/0001-lan-listener-for-mobile.md",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:docs/adr/0001-lan-listener-for-mobile.md"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "frontend/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:frontend/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "test/",
+      "score": 1.734388957907327,
+      "evidence": [
+        "exact_path_mention:test/"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "test/cli/README.md",
+      "score": 12,
+      "evidence": [
+        "test_counterpart:README.md:",
+        "test_counterpart:docs/README.md:"
+      ],
+      "tier": "context"
+    }
+  ],
+  "already_linked_suggestions": [],
+  "duplicate_suggestions": [],
+  "invalid_suggestions": [],
+  "raw_suggestion_count": 30,
+  "unique_suggestion_count": 30,
+  "precision": 0.03333333333333333,
+  "recall": 0.3333333333333333
+}

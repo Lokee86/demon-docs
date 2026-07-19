@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 42874,
+      "sha256": "70387dafc648cf6f000cfbe22890be2b53f8c7b765df88800901abcc1923142f",
+      "entry_count": 14,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/cli/mod.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 334,
+          "column": 1,
+          "end_line": 334,
+          "end_column": 92
+        },
+        "raw_line": "| `cli` | `cli/mod.rs` | Clap argument parsing, output mode detection, 66KB dispatch logic |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cli/mod.rs",
+        "exists": true,
+        "size": 109029,
+        "sha256": "c1397df894653616c10fb1ad89d54e7fa43ba7f49ac8501b62d98ae74cf5a193"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/model/mod.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 336,
+          "column": 1,
+          "end_line": 336,
+          "end_column": 119
+        },
+        "raw_line": "| `model` | `model/mod.rs` | `Issue`, `Dependency`, `Comment`, `Event`, `Label` types, content hashing, serde derives |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/model/mod.rs",
+        "exists": true,
+        "size": 70405,
+        "sha256": "aa7bfbd63845c93e518fe5ff3169de545ad351ef5c48f29015db3ed5270d7223"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/storage/sqlite.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 337,
+          "column": 1,
+          "end_line": 337,
+          "end_column": 122
+        },
+        "raw_line": "| `storage` | `storage/sqlite.rs` | Core SQLite engine (181KB): CRUD, filtered queries, dependency graph, search, events |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/storage/sqlite.rs",
+        "exists": true,
+        "size": 959886,
+        "sha256": "8574eeb9be9ab38365fcabe16d3e6989b6edc86f4e5cf566268c27fa89d32d8b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/storage/schema.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 338,
+          "column": 1,
+          "end_line": 338,
+          "end_column": 86
+        },
+        "raw_line": "| `storage` | `storage/schema.rs` | DDL migrations, table creation, index management |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/storage/schema.rs",
+        "exists": true,
+        "size": 132676,
+        "sha256": "cfe5c118a69a4108533a0c42b843fe714ff6cde73c5dde9fa8a40a75b3079d10"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/storage/events.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 339,
+          "column": 1,
+          "end_line": 339,
+          "end_column": 83
+        },
+        "raw_line": "| `storage` | `storage/events.rs` | Append-only audit log for all issue mutations |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/storage/events.rs",
+        "exists": true,
+        "size": 31806,
+        "sha256": "387d01a01ed2bcb3d8a15799053be38f668b96ca5ee5d41c55ecdcb4b131c653"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/sync/mod.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 340,
+          "column": 1,
+          "end_line": 340,
+          "end_column": 98
+        },
+        "raw_line": "| `sync` | `sync/mod.rs` | JSONL import/export engine (176KB): merge, dedup, conflict resolution |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/sync/mod.rs",
+        "exists": true,
+        "size": 341783,
+        "sha256": "c33113021e0a05108b08616f66ce421800b720e95a8081a01a4e84a1a0c70229"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/sync/path.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 341,
+          "column": 1,
+          "end_line": 341,
+          "end_column": 79
+        },
+        "raw_line": "| `sync` | `sync/path.rs` | `.beads/` directory discovery and path resolution |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/sync/path.rs",
+        "exists": true,
+        "size": 59566,
+        "sha256": "c8f7b8ef1165540abde2b347bc6f7f933728a4bf0ebdab608f937de4a74e30fd"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/sync/history.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 342,
+          "column": 1,
+          "end_line": 342,
+          "end_column": 77
+        },
+        "raw_line": "| `sync` | `sync/history.rs` | Snapshot-based history: restore, prune, diff |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/sync/history.rs",
+        "exists": true,
+        "size": 50054,
+        "sha256": "1a4c295267855fe0cfb6207e8dc9a9a898cedceb492d5bdedd966284c8f97782"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/config/mod.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 343,
+          "column": 1,
+          "end_line": 343,
+          "end_column": 102
+        },
+        "raw_line": "| `config` | `config/mod.rs` | Layered config: file + env vars + CLI flags, project-aware resolution |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/config/mod.rs",
+        "exists": true,
+        "size": 302707,
+        "sha256": "14a81461d2b1165563e40aaf363b382d801ab9f7a649e6557d6c054ded51c700"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/error/structured.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 344,
+          "column": 1,
+          "end_line": 344,
+          "end_column": 106
+        },
+        "raw_line": "| `error` | `error/structured.rs` | `StructuredError` with `ErrorCode` enum and deterministic exit codes |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/error/structured.rs",
+        "exists": true,
+        "size": 45811,
+        "sha256": "5df4e7f30f25761a1e4218dc5cb808b55a9b112f8ef7475ab06c80dfafb8d37c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/validation/mod.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 345,
+          "column": 1,
+          "end_line": 345,
+          "end_column": 97
+        },
+        "raw_line": "| `validation` | `validation/mod.rs` | Input validation: titles, IDs, priorities, dates, labels |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/validation/mod.rs",
+        "exists": true,
+        "size": 40133,
+        "sha256": "81dc9d4bbc798943b1c86027cad9e5fb41e374ccd5785bae6405b5de8a7bcc5c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/util/id.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 346,
+          "column": 1,
+          "end_line": 346,
+          "end_column": 79
+        },
+        "raw_line": "| `util` | `util/id.rs` | Hash-based short ID generation (e.g., `proj-abc12`) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/util/id.rs",
+        "exists": true,
+        "size": 61939,
+        "sha256": "7118851140899c035b68b1e8c0db57c5e82217d1d83cc2d9eb16500198d64268"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/util/hash.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 347,
+          "column": 1,
+          "end_line": 347,
+          "end_column": 71
+        },
+        "raw_line": "| `util` | `util/hash.rs` | SHA-256 content hashing for deduplication |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/util/hash.rs",
+        "exists": true,
+        "size": 14692,
+        "sha256": "e5e3af1ad1e457837d662ded26eb55f375392a08a3a085407d927cef7c8cdb7e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files by Module",
+        "target": "src/format/rich.rs",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 348,
+          "column": 1,
+          "end_line": 348,
+          "end_column": 95
+        },
+        "raw_line": "| `format` | `format/rich.rs` | Rich terminal output via `rich_rust` (panels, tables, colors) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/format/rich.rs",
+        "exists": true,
+        "size": 17726,
+        "sha256": "1b47538e2799758a0b9a6d77750c01723eb961a2809e331ea0ed779d05d7c86b"
+      }
+    }
+  ],
+  "diagnostics": []
+}

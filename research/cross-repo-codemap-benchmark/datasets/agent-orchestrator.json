@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 8761,
+      "sha256": "9b41ad0cd4fe9f79fcb372217c9106aea80e3bbb075b7f733af0b6e33636468f",
+      "entry_count": 9,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 48,
+          "column": 1,
+          "end_line": 48,
+          "end_column": 53
+        },
+        "raw_line": "- `README.md` \u2014 current run/config/test quickstart."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "README.md",
+        "exists": true,
+        "size": 13544,
+        "sha256": "e8e4c82f521a62945b777f7baaf7a74ce12ce7e274432e6c4aa4057eca161d3c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "docs/README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 49,
+          "column": 1,
+          "end_line": 49,
+          "end_column": 34
+        },
+        "raw_line": "- `docs/README.md` \u2014 docs index."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/README.md",
+        "exists": true,
+        "size": 1986,
+        "sha256": "d2593db4881a4134fae633c54693080e0538939ba7ff7387ca057c2790fc6403"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "docs/architecture.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 50,
+          "column": 1,
+          "end_line": 50,
+          "end_column": 128
+        },
+        "raw_line": "- `docs/architecture.md` \u2014 backend mental model, package layout, lifecycle/session/service boundaries, and load-bearing rules."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/architecture.md",
+        "exists": true,
+        "size": 24150,
+        "sha256": "1749ea79a4ba092433b4806d1b45ae0a55a2778be8a44fa0c9858ce14acbdc26"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "docs/STATUS.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 51,
+          "column": 1,
+          "end_line": 51,
+          "end_column": 83
+        },
+        "raw_line": "- `docs/STATUS.md` \u2014 what is shipped on `main` today and what is still in flight."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/STATUS.md",
+        "exists": true,
+        "size": 5165,
+        "sha256": "1c122023a8209c30067b702b77bcf69e8ab217b3ed36aa43ab38d99d9cb83d8b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "docs/cli/README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 52,
+          "column": 1,
+          "end_line": 52,
+          "end_column": 119
+        },
+        "raw_line": "- `docs/cli/README.md` \u2014 intended CLI shape: thin Cobra client over daemon HTTP, never direct storage/runtime access."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/cli/README.md",
+        "exists": true,
+        "size": 7203,
+        "sha256": "2525602554762c1924b2073bff0547c6e80db8b2c38341d6b458049114b89e91"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Where to look first",
+        "target": "CLAUDE.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 53,
+          "column": 1,
+          "end_line": 53,
+          "end_column": 95
+        },
+        "raw_line": "- `CLAUDE.md` \u2014 compatibility pointer for Claude Code; it directs agents back to `AGENTS.md`."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "CLAUDE.md",
+        "exists": true,
+        "size": 1612,
+        "sha256": "468ed606539cd5dc4970423ebab4f6b53da88108dd70414fdb0f318ea7b157bb"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "API contract changes",
+        "target": "backend/internal/httpd/controllers/dto.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 104,
+          "column": 1,
+          "end_line": 104,
+          "end_column": 74
+        },
+        "raw_line": "- `backend/internal/httpd/controllers/dto.go` \u2014 request/response shapes."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "backend/internal/httpd/controllers/dto.go",
+        "exists": true,
+        "size": 27785,
+        "sha256": "0a147c919fbebdb948a895ce00c5f804730ce8183426792d7b09c572806276ec"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "API contract changes",
+        "target": "backend/internal/httpd/apispec/specgen/build.go",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 105,
+          "column": 1,
+          "end_line": 105,
+          "end_column": 125
+        },
+        "raw_line": "- `backend/internal/httpd/apispec/specgen/build.go` \u2014 operation registry; add a `schemaNames` entry for any new named type."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "backend/internal/httpd/apispec/specgen/build.go",
+        "exists": true,
+        "size": 38760,
+        "sha256": "5fe034692f444ebbd8f8168e90a3c1e9ebb2dd16ff728e85833133adedb90310"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "API contract changes",
+        "target": "backend/internal/httpd/apispec/openapi.yaml",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 126,
+          "column": 1,
+          "end_line": 126,
+          "end_column": 252
+        },
+        "raw_line": "Commit `openapi.yaml` and `frontend/src/api/schema.ts` together with the Go changes. CI will regenerate both files and fail if the committed versions are out of date. The CLI hand-mirrored DTOs remain a deliberate manual boundary and are not generated."
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "backend/internal/httpd/apispec/openapi.yaml",
+        "exists": true,
+        "size": 82307,
+        "sha256": "afa8f1f796c2e858f8bd9c4b8c8e8a88a17cc080ed4992c549278eca097fd290"
+      }
+    }
+  ],
+  "diagnostics": []
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": ".github/contributing/ARCHITECTURE.md",
+      "size": 4056,
+      "sha256": "b8b6dd8fe15b7f4404542540547d4c72fe2bbf9e405c5eb07b770e8e480e524d",
+      "entry_count": 5,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": ".github/contributing/ARCHITECTURE.md",
+        "heading": "Key Files Reference",
+        "target": "genesis/__init__.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 105,
+          "column": 1,
+          "end_line": 105,
+          "end_column": 68
+        },
+        "raw_line": "| `genesis/__init__.py` | Package entry, `gs.init()`, global state |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "genesis/__init__.py",
+        "exists": true,
+        "size": 18739,
+        "sha256": "3d1b8f717928e9db55006ef245f22a63e66bd6bd111c5d2f941ed187aa6acdd0"
+      }
+    },
+    {
+      "entry": {
+        "document_path": ".github/contributing/ARCHITECTURE.md",
+        "heading": "Key Files Reference",
+        "target": "genesis/engine/scene.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 106,
+          "column": 1,
+          "end_line": 106,
+          "end_column": 67
+        },
+        "raw_line": "| `genesis/engine/scene.py` | `Scene` class - main user interface |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "genesis/engine/scene.py",
+        "exists": true,
+        "size": 69036,
+        "sha256": "00505582d56d2d6be359d97fa2c6293d9d8423de073991deb6ff03dae1be5814"
+      }
+    },
+    {
+      "entry": {
+        "document_path": ".github/contributing/ARCHITECTURE.md",
+        "heading": "Key Files Reference",
+        "target": "genesis/engine/simulator.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 107,
+          "column": 1,
+          "end_line": 107,
+          "end_column": 69
+        },
+        "raw_line": "| `genesis/engine/simulator.py` | `Simulator` - manages all solvers |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "genesis/engine/simulator.py",
+        "exists": true,
+        "size": 19715,
+        "sha256": "b385b363dfb56512ae189d3ad86fd9bd75acc7209e2cf4b9c934ec76e98073da"
+      }
+    },
+    {
+      "entry": {
+        "document_path": ".github/contributing/ARCHITECTURE.md",
+        "heading": "Key Files Reference",
+        "target": "genesis/options/morphs.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 108,
+          "column": 1,
+          "end_line": 108,
+          "end_column": 60
+        },
+        "raw_line": "| `genesis/options/morphs.py` | Shape/geometry definitions |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "genesis/options/morphs.py",
+        "exists": true,
+        "size": 101029,
+        "sha256": "bedaf986729d70507eb724f8ba04c1f8ed15d95e695ad345bf3ccdb53513f4c7"
+      }
+    },
+    {
+      "entry": {
+        "document_path": ".github/contributing/ARCHITECTURE.md",
+        "heading": "Key Files Reference",
+        "target": "genesis/options/solvers.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 109,
+          "column": 1,
+          "end_line": 109,
+          "end_column": 56
+        },
+        "raw_line": "| `genesis/options/solvers.py` | Solver option classes |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "genesis/options/solvers.py",
+        "exists": true,
+        "size": 45308,
+        "sha256": "86ff02e2855686ab51c89dc17998a044cd302633feb14ca74fc43999c3200167"
+      }
+    }
+  ],
+  "diagnostics": []
+}
