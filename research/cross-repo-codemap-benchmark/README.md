@@ -27,7 +27,7 @@ The first command shallow-clones repositories into the ignored `checkouts/` dire
 
 The second command converts eligible normalized corpora into Demon Docs dataset schema without changing the source repositories. `benchmark-plan.json` pins the algorithm baseline, repository revisions, corpus sizes, and holdout counts.
 
-The third command runs the frozen algorithm from commit `aa6eb48c686b0423e104530418b4e9fd32e3aa78`. Per-repository reports are stored under `reports/`; `evaluation.json` and `results.md` summarize the run.
+The third command runs the frozen algorithm named by `benchmark-plan.json`. Per-repository reports are stored under `reports/`; `evaluation.json` and `results.md` summarize the run. `--checkout-root` can reuse an existing ignored checkout corpus from another worktree.
 
 ## Benchmark modes
 
@@ -49,6 +49,22 @@ The first run covers six repositories and TypeScript, Go, Rust, Python, TSX, and
 - Only one recovered link qualified as `hard_link`; the remaining recovered links were context-tier suggestions.
 
 These are recall checks, not cross-repository precision measurements. The reported positive-only precision treats every unmatched suggestion as false because the corpus only labels existing authored links. It cannot identify good new links. A real wider precision claim still requires manual review samples from multiple repositories.
+
+## Repeated-reference tuning pass
+
+The first cross-repository tuning pass excludes the monolithic `gbrain` index from all ordinary calculations and keeps it as a separate stress result. The calculation corpus therefore contains the primary and diagnostic modes only.
+
+The tuning promotes an already-mentioned target to `hard_link` only when the document references its exact path at least twice and dependency or declared-symbol evidence independently corroborates the relationship. A single path mention and filename-only counterpart evidence remain `context`.
+
+Against the frozen holdouts:
+
+- the calculation corpus remains 11/18 recovered, so overall discovery recall is unchanged;
+- hard-tier recoveries increase from 1 to 4;
+- the primary corpus remains 6/8 recovered, with hard-tier recovery increasing from 0 to 2;
+- diagnostic hard-tier recovery increases from 1 to 2; and
+- the separate index stress result remains 3/10, all in context.
+
+This is a tier-confidence improvement rather than a recall increase. It demonstrates that a narrow rule learned from multiple repositories can move known-good relationships into the direct-review surface without lowering held-out recovery.
 
 ## Acceptance requirements
 

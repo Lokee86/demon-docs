@@ -3,14 +3,64 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
+
+CALCULATION_MODES = {"primary", "diagnostic"}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--checkout-root",
+        type=Path,
+        help="reuse an external directory containing candidate checkout folders",
+    )
+    return parser.parse_args()
+
+
+def resolve_repository(benchmark_root: Path, configured: str, checkout_root: Path | None) -> Path:
+    relative = Path(configured)
+    if checkout_root is None:
+        return benchmark_root / relative
+    if relative.parts and relative.parts[0] == "checkouts":
+        relative = Path(*relative.parts[1:])
+    return checkout_root.resolve() / relative
+
+
+def aggregate(items: list[dict]) -> dict:
+    completed = [item for item in items if item.get("status") == "completed"]
+    hidden = sum(item["holdout_count"] for item in completed)
+    recovered = sum(item["recovered_link_count"] for item in completed)
+    suggestions = sum(item["unique_suggestion_count"] for item in completed)
+    hard = sum(item["hard_recovered_count"] for item in completed)
+    context = sum(item["context_recovered_count"] for item in completed)
+    return {
+        "repository_count": len(completed),
+        "hidden_link_count": hidden,
+        "recovered_link_count": recovered,
+        "hard_recovered_count": hard,
+        "context_recovered_count": context,
+        "unique_suggestion_count": suggestions,
+        "recall": recovered / hidden if hidden else 0,
+        "positive_only_precision": recovered / suggestions if suggestions else 0,
+    }
+
+
+def summary_row(label: str, item: dict) -> str:
+    return (
+        f"| {label} | {item['repository_count']} | {item['hidden_link_count']} | "
+        f"{item['recovered_link_count']} | {item['hard_recovered_count']} | "
+        f"{item['context_recovered_count']} | {item['recall']:.2%} | "
+        f"{item['positive_only_precision']:.2%} |"
+    )
 
 
 def main() -> int:
+    args = parse_args()
     benchmark_root = Path(__file__).resolve().parents[1]
     repository_root = benchmark_root.parents[1]
     plan = json.loads((benchmark_root / "benchmark-plan.json").read_text(encoding="utf-8"))
@@ -27,7 +77,7 @@ def main() -> int:
     failed = False
     for benchmark in plan["benchmarks"]:
         candidate_id = benchmark["id"]
-        repository = benchmark_root / benchmark["repository_checkout"]
+        repository = resolve_repository(benchmark_root, benchmark["repository_checkout"], args.checkout_root)
         dataset = benchmark_root / benchmark["dataset"]
         report_path = reports_dir / f"{candidate_id}.json"
         command = [
@@ -78,9 +128,29 @@ def main() -> int:
             "recall": report["recall"],
         })
 
+    aggregates = {
+        "calculation_corpus": aggregate([
+            item for item in summaries if item.get("benchmark_mode") in CALCULATION_MODES
+        ]),
+        "primary": aggregate([
+            item for item in summaries if item.get("benchmark_mode") == "primary"
+        ]),
+        "diagnostic": aggregate([
+            item for item in summaries if item.get("benchmark_mode") == "diagnostic"
+        ]),
+        "stress": aggregate([
+            item for item in summaries if item.get("benchmark_mode") == "stress"
+        ]),
+    }
     result = {
-        "schema_version": 1,
+        "schema_version": 2,
         "algorithm_baseline": plan["algorithm_baseline"],
+        "calculation_policy": {
+            "included_modes": sorted(CALCULATION_MODES),
+            "excluded_modes": ["stress"],
+            "reason": "monolithic per-file indexes test a different retrieval problem and are reported separately",
+        },
+        "aggregates": aggregates,
         "benchmarks": summaries,
     }
     summary_json = benchmark_root / "evaluation.json"
@@ -90,6 +160,24 @@ def main() -> int:
         "# Cross-repository benchmark results",
         "",
         f"Frozen algorithm baseline: `{plan['algorithm_baseline']}`.",
+        "",
+        "Monolithic per-file indexes are excluded from the calculation corpus. They remain visible as a separate stress result.",
+        "",
+        "## Calculation corpus",
+        "",
+        "| Scope | Repositories | Hidden | Recovered | Hard | Context | Recall | Positive-only precision |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        summary_row("Primary + diagnostic", aggregates["calculation_corpus"]),
+        summary_row("Primary", aggregates["primary"]),
+        summary_row("Diagnostic", aggregates["diagnostic"]),
+        "",
+        "## Index stress corpus",
+        "",
+        "| Scope | Repositories | Hidden | Recovered | Hard | Context | Recall | Positive-only precision |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        summary_row("Monolithic per-file index", aggregates["stress"]),
+        "",
+        "## Repository details",
         "",
         "| Repository | Mode | Language(s) | Known | Hidden | Recovered | Hard | Context | Recall | Positive-only precision |",
         "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
@@ -109,9 +197,9 @@ def main() -> int:
         )
     lines.extend([
         "",
-        "The precision column is positive-only holdout precision: unmatched suggestions are counted as false because this corpus has not yet been manually labeled for genuinely new links. It must not be compared with the manually reviewed Space Rocks precision benchmark.",
+        "The precision columns are positive-only holdout precision: unmatched suggestions are counted as false because this corpus has not yet been manually labeled for genuinely new links. They must not be compared with the manually reviewed Space Rocks precision benchmark.",
         "",
-        "The gbrain result is a stress test: one document owns hundreds of targets, and redacting the authored index removes nearly all topical prose. Primary, diagnostic, and stress results must remain separate.",
+        "The gbrain result is a stress test: one document owns hundreds of targets, and redacting the authored index removes nearly all topical prose. It is not used to tune or summarize ordinary document-to-code behavior.",
         "",
         "This run measures recovery only. Cross-repository precision still requires manual labeling of sampled unmatched suggestions.",
     ])

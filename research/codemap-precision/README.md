@@ -149,6 +149,33 @@ The positive-only ten-link holdout remains 10/10, with four recovered links in `
 
 These measurements remain calibrated on one repository and one manually reviewed sample. The third-pass thresholds should not be generalized as universal defaults until additional repositories are evaluated.
 
+## Fourth tuning pass: cross-repository repeated-reference confidence
+
+The fourth pass uses the separate cross-repository corpus rather than lowering a Space Rocks-calibrated score threshold. Monolithic per-file indexes are excluded from ordinary calculations and remain a separate stress benchmark.
+
+A target already named by an exact path now qualifies for `hard_link` only when:
+
+- the path appears at least twice in the document; and
+- dependency-neighbor or declared-symbol evidence independently corroborates the relationship.
+
+Single path mentions, repeated mentions without semantic corroboration, and filename-only counterpart evidence remain `context`.
+
+On the five-repository primary-plus-diagnostic calculation corpus, total recovery remains 11/18 while hard-tier recovery rises from 1 to 4. The primary repository remains 6/8 recovered, with hard-tier recovery rising from 0 to 2. The monolithic-index stress corpus remains separate at 3/10, all in context.
+
+The Space Rocks manually labeled sample is unchanged:
+
+| Tier/metric | Result |
+|---|---:|
+| Hard-link suggestions | 68 |
+| Hard-link strict precision | 75.00% (51/68) |
+| Hard-link relevance precision | 98.53% (67/68) |
+| Hard-link recovery within labeled valid links | 72.86% (51/70) |
+| Context suggestions | 82 |
+
+The complete pinned Space Rocks source pool also remains 621 `hard_link` and 3,872 `context` candidates across 4,493 suggestions. Two repeated, dependency-corroborated path references newly qualify as hard links, but the five-item per-document cap keeps the aggregate hard-link count unchanged.
+
+The canonical default-seed positive holdout remains 10/10 recovered, with four hard and six context suggestions. This pass therefore improves cross-repository hard-tier confidence without reducing measured Space Rocks precision or holdout recovery.
+
 ## Reproduction
 
 From the Demon Docs repository, with the pinned Space Rocks checkout available:
