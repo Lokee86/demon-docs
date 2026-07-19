@@ -32,14 +32,11 @@ Link-like text inside fenced code blocks and inline code spans is ignored. Headi
 
 ## Persistent State
 
-Link state lives under the repository-owned `.ddocs/` directory:
+`.ddocs/` is a private Demon Docs repository, independent of the project's `.git/`. It uses go-git object, tree, reference, and filesystem-storage plumbing internally, but exposes no staging, branch, merge, commit-history, or manual repository workflow.
 
-```text
-.ddocs/files.json
-.ddocs/links.json
-```
+State is stored as deterministic records for file identities, current paths, Markdown sources and outgoing links, incoming-link groups, fingerprints, and pending generated writes. Record names are distributed across 16 content-addressed shards. A state reference atomically publishes the new root tree after all affected shard objects exist.
 
-`files.json` assigns stable internal IDs to tracked files and records path history and content fingerprints. `links.json` records source locations, target paths, target file IDs when known, status, and ambiguous candidates.
+A single-file change rewrites only its affected shard or shards; unchanged objects and root entries are reused. The old `.ddocs/files.json` and `.ddocs/links.json` manifests are read only for migration and are removed after the first successful repository-backed publication.
 
 The state is implementation-owned and schema-versioned. Source files are not modified to embed Demon Docs IDs.
 
@@ -64,6 +61,20 @@ Demon Docs prefers deterministic evidence in this order:
 A unique candidate can be rewritten automatically. Multiple candidates are recorded and reported, and the source link remains unchanged for the user to resolve.
 
 Relative links remain relative. Absolute filesystem links remain absolute. Link labels, titles, query strings, fragments, angle wrapping, and the source file's newline style are preserved; only the filesystem path is replaced.
+
+## External Edits and Generated Rewrites
+
+User-authored Markdown changes and Demon Docs-generated repairs follow separate paths.
+
+For an external edit, Demon Docs fingerprints the changed source, parses its current Markdown, compares the resulting outgoing links with the stored source record, and replaces that source's graph edges.
+
+For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations.
+
+Before writing, every source must still match its expected old hash. Writes use a same-directory temporary file and atomic replacement. The known graph mutation is then published directly. Reparsing the rewritten source is limited to verifying the expected links and refreshing byte offsets, line numbers, and fingerprints.
+
+If a source changed concurrently, the generated rewrite aborts without overwriting the user's content. The next reconciliation processes that source through the external-edit path.
+
+Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing and a single-file incremental update so storage and scanning regressions remain visible.
 
 ## Commands and Feature Selection
 

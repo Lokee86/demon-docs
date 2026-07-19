@@ -475,14 +475,9 @@ In that setup:
 
 ## Link State
 
-Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored under the initialized repository's `.ddocs/` directory:
+Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing, but exposes no Git workflow for this state.
 
-```text
-.ddocs/files.json
-.ddocs/links.json
-```
-
-The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it.
+The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 
 ## Related Files
 

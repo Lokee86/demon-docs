@@ -20,9 +20,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
 			t.Fatalf("links-only run created an index: %v", err)
 		}
-		if _, err := os.Stat(filepath.Join(root, ".ddocs", "links.json")); err != nil {
-			t.Fatalf("links-only run did not write link state: %v", err)
-		}
+		assertDDocsState(t, root)
 	})
 
 	t.Run("indexes only", func(t *testing.T) {
@@ -35,7 +33,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {
 			t.Fatalf("indexes-only run did not create an index: %v", err)
 		}
-		if _, err := os.Stat(filepath.Join(root, ".ddocs", "links.json")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(root, ".ddocs", "objects")); !os.IsNotExist(err) {
 			t.Fatalf("indexes-only run wrote link state: %v", err)
 		}
 	})
@@ -51,9 +49,7 @@ func TestLinksOnlyDoesNotRequireDocsRoot(t *testing.T) {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 	})
-	if _, err := os.Stat(filepath.Join(repositoryRoot, ".ddocs", "links.json")); err != nil {
-		t.Fatalf("links-only run did not initialize state: %v", err)
-	}
+	assertDDocsState(t, repositoryRoot)
 }
 
 func TestWatchOnceHonorsLinksOnly(t *testing.T) {
@@ -67,7 +63,17 @@ func TestWatchOnceHonorsLinksOnly(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
 		t.Fatalf("links-only watch created an index: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(root, ".ddocs", "files.json")); err != nil {
-		t.Fatalf("links-only watch did not write file state: %v", err)
+	assertDDocsState(t, root)
+}
+
+func assertDDocsState(t *testing.T, root string) {
+	t.Helper()
+	for _, path := range []string{
+		filepath.Join(root, ".ddocs", "objects"),
+		filepath.Join(root, ".ddocs", "refs", "ddocs", "state"),
+	} {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("ddocs repository state is missing at %s: %v", path, err)
+		}
 	}
 }

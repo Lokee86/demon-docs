@@ -71,7 +71,7 @@ This preservation is intentionally narrow. Demon Docs matches by the current fil
 
 ## Markdown Link Behavior
 
-Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, and reference definitions in `.ddocs/links.json`, while `.ddocs/files.json` stores stable file IDs, fingerprints, and path history.
+Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, reference definitions, stable file IDs, fingerprints, path history, and reverse-link records in the private `.ddocs/` object repository.
 
 The first link-enabled fix or watch pass records a baseline and reports issues without repairing links. Later passes preserve direct valid targets and can repair a moved target when its recorded ID, exact fingerprint, case-only path, or unique filename candidate identifies one result. Multiple candidates remain unchanged and are reported for user resolution.
 

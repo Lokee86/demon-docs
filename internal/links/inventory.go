@@ -13,7 +13,7 @@ import (
 
 type inventoryNode struct {
 	abs, stored, kind, fingerprint string
-	size                           int64
+	size, modified                 int64
 }
 
 type inventory struct {
@@ -29,6 +29,12 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 	policy, err := ignorepolicy.Load(root)
 	if err != nil {
 		return nil, err
+	}
+	previousByPath := map[string]int{}
+	for index, record := range previous.Files {
+		if record.Scope == "repository" {
+			previousByPath[pathKey(record.Path)] = index
+		}
 	}
 	var nodes []inventoryNode
 	var dirs []string
@@ -66,11 +72,22 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		if !info.Mode().IsRegular() {
 			return nil
 		}
-		fingerprint, err := fileFingerprint(path)
-		if err != nil {
-			return err
+		stored := storePath(root, path)
+		modified := info.ModTime().UnixNano()
+		fingerprint := ""
+		if previousIndex, ok := previousByPath[pathKey(stored)]; ok {
+			previousRecord := previous.Files[previousIndex]
+			if previousRecord.Present && previousRecord.Kind == "file" && previousRecord.Size == info.Size() && previousRecord.ModifiedUnixNano == modified {
+				fingerprint = previousRecord.Fingerprint
+			}
 		}
-		nodes = append(nodes, inventoryNode{abs: filepath.Clean(path), stored: storePath(root, path), kind: "file", fingerprint: fingerprint, size: info.Size()})
+		if fingerprint == "" {
+			fingerprint, err = fileFingerprint(path)
+			if err != nil {
+				return err
+			}
+		}
+		nodes = append(nodes, inventoryNode{abs: filepath.Clean(path), stored: stored, kind: "file", fingerprint: fingerprint, size: info.Size(), modified: modified})
 		return nil
 	})
 	if err != nil {
@@ -83,7 +100,6 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 			currentCounts[node.fingerprint]++
 		}
 	}
-	previousByPath := map[string]int{}
 	previousByFingerprint := map[string][]int{}
 	for index, record := range previous.Files {
 		if record.Scope == "repository" {
@@ -145,6 +161,7 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		record.Present = true
 		record.Fingerprint = node.fingerprint
 		record.Size = node.size
+		record.ModifiedUnixNano = node.modified
 		manifest.Files = append(manifest.Files, record)
 	}
 	for index, record := range previous.Files {
@@ -157,6 +174,7 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 				record.Present = true
 				record.Kind = kindFromInfo(info)
 				record.Size = info.Size()
+				record.ModifiedUnixNano = info.ModTime().UnixNano()
 				if info.Mode().IsRegular() {
 					record.Fingerprint, _ = fileFingerprint(abs)
 				}

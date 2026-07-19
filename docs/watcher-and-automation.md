@@ -30,6 +30,9 @@ Watch mode reruns the same selected reconciliation operations used by `fix` when
 - Index events use the same include and exclude rules as index scanning.
 - Link events include Markdown source changes and changes to any non-ignored local target file type.
 - Explicit external targets add watches on their nearest existing parent directories so external rename and removal events can trigger reconciliation.
+- Generated Markdown rewrites persist their expected new content hash and affected link IDs before watcher feedback is handled.
+- A watcher event whose current content hash matches the pending generated-write record is consumed instead of being reparsed as a user edit.
+- A mismatched hash invalidates the pending suppression and the file is processed normally, preserving concurrent user edits.
 - The repository-root `.docignore` applies to repository traversal; explicitly linked external targets remain individually observable.
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories from its tracked set.
 - Observer errors are surfaced instead of silently terminating observation.

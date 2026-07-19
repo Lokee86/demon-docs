@@ -22,7 +22,7 @@ The result is a file tree that can be moved, split, expanded, or reorganized wit
 - direct child-folder entries
 - `Parent index` links in folder indexes by default, and in indexed files when configured
 - local Markdown links to files and directories inside or outside the repository
-- stable file identities and link history under `.ddocs/files.json` and `.ddocs/links.json`
+- stable file identities, link history, reverse indexes, and generated-write state in the private `.ddocs/` object repository
 
 It preserves hand-authored content outside managed index blocks and preserves link labels, titles, query strings, and fragments when updating a path.
 
@@ -67,7 +67,7 @@ ddocs check
 
 `init` creates `.ddocs/config.toml`, records `docs/` as the docs root, and makes the current directory the repository root.
 
-`fix` writes needed updates. The first link-enabled `fix` establishes `.ddocs/files.json` and `.ddocs/links.json` without repairing links; later passes can use that baseline to reconcile moves. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
+`fix` writes needed updates. The first link-enabled `fix` establishes the private `.ddocs/` object repository without repairing links; later passes can use that baseline to reconcile moves. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
 
 ## Development
 

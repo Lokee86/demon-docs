@@ -403,14 +403,11 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
-			count, err := reconcile.ApplyWithin(model.ReconcileResult{Updates: linkPlan.Updates}, scope.RepositoryRoot)
+			count, err := links.ApplyAndSave(&linkPlan)
 			if err != nil {
 				return fail(errOut, err)
 			}
 			changed += count
-			if err := links.Save(linkPlan); err != nil {
-				return fail(errOut, err)
-			}
 		}
 		fmt.Fprintf(out, "ddocs fix updated %d file(s)\n", changed)
 		writeMessages(out, indexResult.Messages)

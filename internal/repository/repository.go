@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Lokee86/demon-docs/internal/ddrepo"
 )
 
 const (
@@ -97,6 +99,10 @@ func Initialize(repoRoot, configText string) (string, error) {
 	if err := os.WriteFile(configPath, []byte(configText), 0o644); err != nil {
 		_ = os.Remove(marker)
 		return "", err
+	}
+	if _, err := ddrepo.Init(marker); err != nil {
+		_ = os.RemoveAll(marker)
+		return "", fmt.Errorf("initialize ddocs object storage: %w", err)
 	}
 	return configPath, nil
 }

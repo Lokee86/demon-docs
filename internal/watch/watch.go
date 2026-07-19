@@ -86,11 +86,8 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 			if err != nil {
 				return err
 			}
-			count, err := reconcile.ApplyWithin(modelResult(plan.Updates), repositoryRoot)
+			count, err := links.ApplyAndSave(&plan)
 			if err != nil {
-				return err
-			}
-			if err := links.Save(plan); err != nil {
 				return err
 			}
 			changed += count
@@ -164,6 +161,15 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 		case event, ok := <-w.Events():
 			if !ok {
 				return nil
+			}
+			if features.Links && repository.Contains(repositoryRoot, event.Name) {
+				suppressed, err := links.ConsumePendingSuppression(repositoryRoot, event.Name)
+				if err != nil {
+					return fmt.Errorf("consume generated link rewrite event: %w", err)
+				}
+				if suppressed {
+					continue
+				}
 			}
 			isExternal := features.Links && externalEvent(event.Name, externalWatched)
 			if policy.IsControlFile(event.Name) {
