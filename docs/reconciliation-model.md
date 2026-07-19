@@ -1,6 +1,6 @@
 # Reconciliation Model
 
-Demon Docs keeps the docs tree in a predictable shape by scanning folders, reading existing managed index blocks, and planning the smallest set of file updates needed to bring the tree back into sync.
+Demon Docs keeps indexes and local Markdown links in a predictable shape by scanning the filesystem, reading existing managed index blocks and link state, and planning the smallest set of repository-contained updates needed to bring them back into sync.
 
 ## Scan Model
 
@@ -69,13 +69,24 @@ Reconciliation prefers to preserve stable, existing index content when the targe
 
 This preservation is intentionally narrow. Demon Docs matches by the current filesystem model and existing managed entries; it does not try to guess every historical rename pattern.
 
+## Markdown Link Behavior
+
+Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, and reference definitions in `.ddocs/links.json`, while `.ddocs/files.json` stores stable file IDs, fingerprints, and path history.
+
+The first link-enabled fix or watch pass records a baseline and reports issues without repairing links. Later passes preserve direct valid targets and can repair a moved target when its recorded ID, exact fingerprint, case-only path, or unique filename candidate identifies one result. Multiple candidates remain unchanged and are reported for user resolution.
+
+Relative and absolute filesystem links are both checked. Targets may be non-Markdown files or may resolve outside the repository. Only Markdown source files inside the repository are rewritten, and only the destination path changes; labels, titles, queries, and fragments remain intact.
+
+Index and link reconciliation are separate operations selected with `-i` / `--indexes` and `-l` / `--links`. Neither selector means both.
+
 ## Safety Boundaries
 
 Demon Docs is a reconciliation tool, not a semantic documentation author.
 
 - It does not decide which folder should own a topic.
-- It does not rewrite arbitrary body links inside doc content.
-- It does not edit non-editable file types even if they are indexed.
+- It rewrites only the filesystem path portion of recognized local Markdown links.
+- It does not edit link targets, binary files, or files outside the repository.
+- It does not automatically choose among multiple plausible targets.
 - `check` reports pending reconciliation, but it does not inspect git status.
 
 Those boundaries keep the tool predictable and keep hand-authored prose under human control.
@@ -85,4 +96,5 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 - `internal/scan/scan.go`
 - `internal/markdown/markdown.go`
 - `internal/reconcile/reconcile.go`
+- `internal/links/`
 - `internal/model/model.go`

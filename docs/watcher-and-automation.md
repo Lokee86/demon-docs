@@ -8,24 +8,29 @@ Demon Docs has a watch mode for long-running docs maintenance, but it is still a
 - `ddocs check --root docs`
 - `ddocs watch --root docs`
 - `ddocs watch --root docs --once`
+- `ddocs watch -i`
+- `ddocs watch -l`
 
 `ddocs watch --help` shows the watch-specific flags and examples.
 
-`--once` runs a single reconciliation pass and exits. Regular watch mode runs one reconciliation pass immediately, then keeps observing the docs tree recursively.
+`--once` runs a single reconciliation pass and exits. Regular watch mode runs one reconciliation pass immediately, then keeps observing recursively. Index-only mode watches the docs root; link-enabled mode watches the repository root so moves of non-Markdown targets can trigger link repair.
 Watch mode runs in the foreground by default. `Demon Docs` does not daemonize or own background lifecycle.
 
 ## What Watch Mode Does
 
-Watch mode is built to rerun reconciliation when the docs tree changes.
+Watch mode reruns the same selected reconciliation operations used by `fix` when relevant repository content changes.
 
-- It starts with an initial fix so the tree is reconciled before observation begins.
-- It watches the configured root recursively.
+- It starts with an immediate reconciliation pass before observation begins.
+- It watches the docs root for `-i`, or the repository root when links are enabled.
 - It reacts to relevant file events and directory create, delete, and move events.
 - It debounces bursts of changes.
 - It runs one fix at a time.
 - If changes arrive during a fix, it schedules one more pass after the current run finishes.
 - It ignores configured ignored directories and ignored filename suffixes.
-- It applies the same include and exclude rules used by scanning when deciding whether a file event matters.
+- Index events use the same include and exclude rules as index scanning.
+- Link events include Markdown source changes and changes to any non-ignored local target file type.
+- Explicit external targets add watches on their nearest existing parent directories so external rename and removal events can trigger reconciliation.
+- The repository-root `.docignore` applies to repository traversal; explicitly linked external targets remain individually observable.
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories from its tracked set.
 - Observer errors are surfaced instead of silently terminating observation.
 
@@ -98,11 +103,12 @@ Watcher logs include timestamped status lines such as:
 
 Those timestamps make it easier to understand the order of events when a fix pass and a file change happen close together.
 
-Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence. The CI matrix runs the watcher package as part of the Linux and Windows Go suites.
+Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence. The CI matrix runs the watcher package as part of the Linux and Windows Go suites.
 
 ## Related Files
 
 - `internal/watch/watch.go`
+- `internal/links/`
 - `internal/app/app.go`
 - `cmd/ddocs/main.go`
 - `cmd/demon/main.go`

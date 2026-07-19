@@ -4,11 +4,11 @@
 ## Usage
 ## Contributing
 
-`Demon Docs` keeps folder index files in sync with a file tree.
+`Demon Docs` keeps folder indexes and local Markdown links synchronized with the filesystem.
 
-Point it at a root folder, and it scans the folders and files inside it. For each folder, it creates or updates a local index file that lists the folder’s direct files, draft/stub files, and child folders. It can also add parent-index links so readers can move back up the tree.
+It maintains folder indexes inside the configured docs root and a focused local-link graph across Markdown files in the repository. Link targets may be Markdown files, non-Markdown assets, directories, repository-external relative paths, or absolute filesystem paths.
 
-You keep owning the actual files and any hand-written index content. `Demon Docs` only owns clearly marked managed sections. `check` reports when the indexes no longer match the filesystem, and `fix` updates them. `watch` starts a persistent process that will watch a root folder and all its children and automatically updates indexes with any changes.
+You keep owning the actual files and hand-written content. Index reconciliation owns only clearly marked managed sections, while link reconciliation changes only the target path inside an existing Markdown link. `check` reports pending index or link work, `fix` applies it, and `watch` runs the same operations automatically after relevant filesystem changes.
 
 The result is a file tree that can be moved, split, expanded, or reorganized without leaving stale index pages behind.
 
@@ -21,8 +21,10 @@ The result is a file tree that can be moved, split, expanded, or reorganized wit
 - draft/stub file entries from a configured draft folder
 - direct child-folder entries
 - `Parent index` links in folder indexes by default, and in indexed files when configured
+- local Markdown links to files and directories inside or outside the repository
+- stable file identities and link history under `.ddocs/files.json` and `.ddocs/links.json`
 
-It preserves hand-authored content outside managed index blocks.
+It preserves hand-authored content outside managed index blocks and preserves link labels, titles, query strings, and fragments when updating a path.
 
 ## Installation
 
@@ -65,7 +67,7 @@ ddocs check
 
 `init` creates `.ddocs/config.toml`, records `docs/` as the docs root, and makes the current directory the repository root.
 
-`fix` writes needed updates. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
+`fix` writes needed updates. The first link-enabled `fix` establishes `.ddocs/files.json` and `.ddocs/links.json` without repairing links; later passes can use that baseline to reconcile moves. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
 
 ## Development
 
@@ -149,19 +151,32 @@ Shows the detected repository root, docs root, config path, and repository-owned
 ddocs fix
 ```
 
-Reconciles the docs tree and writes updates.
+Reconciles indexes and links, writes repository-contained updates, and persists link state.
 
 ```bash
 ddocs check
 ```
 
-Verifies that the docs tree is already reconciled. Returns non-zero if `fix` would change files.
+Verifies indexes and links without writing files. It returns non-zero for pending updates, broken or ambiguous links, or uninitialized link state.
 
 ```bash
 ddocs watch
 ```
 
-Runs one reconciliation immediately, then watches the docs tree for relevant filesystem changes.
+Runs one reconciliation immediately, then watches for relevant filesystem changes. Link-enabled watch mode observes the repository root and the parent directories of explicitly linked external targets so moved non-Markdown targets can trigger repairs.
+
+Select one subsystem explicitly when needed:
+
+```bash
+ddocs check -i      # indexes only
+ddocs check -l      # links only
+ddocs fix --indexes
+ddocs fix --links
+ddocs watch -i
+ddocs watch -l
+```
+
+Using both selectors, or neither selector, runs both systems.
 
 ```bash
 ddocs watch --root docs --once
@@ -463,7 +478,7 @@ parent_index_extensions = [".md", ".mdx"]
 
 ## Ignoring paths
 
-Place `.docignore` at the repository root, beside `.ddocs/`, to exclude files and directories from `fix`, `check`, and `watch`. It uses Git ignore syntax and is independent from `.gitignore`.
+Place `.docignore` at the repository root, beside `.ddocs/`, to exclude files and directories from index scanning, link scanning, and watch events. It uses Git ignore syntax and is independent from `.gitignore`.
 
 Patterns are relative to the repository root. Legacy standalone configurations continue treating the docs root as the ignore root.
 
@@ -495,7 +510,7 @@ Watch mode is for local convenience. It is not a replacement for `check`.
 The watcher:
 
 - runs one reconciliation immediately on startup
-- watches the configured root recursively
+- watches the docs root for index-only operation, or the repository root when links are enabled
 - reacts to relevant file and directory events
 - debounces noisy event bursts
 - runs one reconciliation at a time
@@ -595,12 +610,12 @@ That script generates a synthetic documentation tree for manual reconciliation t
 
 - validate semantic documentation quality
 - decide what a folder should own
-- rewrite arbitrary links inside document bodies
-- modify binary or non-editable files
+- validate heading-anchor existence yet
+- modify local link targets, binary files, or files outside the repository
 - inspect Git status
-- guarantee perfect rename detection
+- guess when more than one link target is plausible
 
-It only reconciles the configured docs root against the index model. Planned writes are rejected if they resolve outside that docs root, and symbolic-link entries are not traversed or edited.
+Index writes are confined to the configured docs root. Link rewrites are confined to Markdown source files inside the repository root. Symbolic-link entries are not traversed or edited.
 
 ## Using `!README.md`
 

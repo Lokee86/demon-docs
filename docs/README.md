@@ -10,7 +10,10 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 - [Code-Folder Reverse Indexes](reverse-indexes.md): Focused design for documentation coverage projected onto code targets.
 - [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Focused design for deterministic code facts and bounded entanglement projections.
 - [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Focused design for graph-based agent context retrieval and thin integrations.
+- [Context-Injection Benchmarking](context-injection-benchmarking.md): Future research plan for a four-quadrant OSS corpus, paired no-context controls, and an intentionally constructed harness control.
+- [Context-Injection Benchmarking](context-injection-benchmarking.md): Future research plan for evaluating agent context across code/documentation quality quadrants and matched control conditions.
 - [Configuration](configuration.md): Config file shape, defaults, and supported overrides.
+- [Markdown Link Reconciliation](markdown-links.md): Repository-scoped local link validation, persistent identity state, and path repair.
 - [Code-Symbol References](code-symbol-references.md): Focused Phase 4 design for deterministic declaration-level documentation references and language adapters.
 - [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, and applies index updates.
 - [Watcher and Automation](watcher-and-automation.md): Watch mode behavior, timestamps, PID output, and automation guidance.
@@ -25,6 +28,8 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 - [code-dependency-and-entanglement.md](code-dependency-and-entanglement.md) - Code Dependency And Entanglement documentation.
 - [code-symbol-references.md](code-symbol-references.md) - Code Symbol References documentation.
 - [configuration.md](configuration.md) - Configuration documentation.
+- [context-injection-benchmarking.md](context-injection-benchmarking.md) - Future context-injection benchmarking research plan.
+- [markdown-links.md](markdown-links.md) - Markdown Links documentation.
 - [reconciliation-model.md](reconciliation-model.md) - Reconciliation Model documentation.
 - [repository-graph.md](repository-graph.md) - Repository Graph documentation.
 - [reverse-indexes.md](reverse-indexes.md) - Reverse Indexes documentation.

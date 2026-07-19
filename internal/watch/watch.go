@@ -7,26 +7,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
+	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
 	"github.com/fsnotify/fsnotify"
 )
-
-type Scheduler struct {
-	mu       sync.Mutex
-	run      func() error
-	debounce time.Duration
-	pending  int
-	running  bool
-	last     time.Time
-	now      func() time.Time
-}
 
 type eventWatcher interface {
 	Add(string) error
@@ -48,51 +38,77 @@ var createWatcher = func() (eventWatcher, error) {
 	return fsnotifyWatcher{w}, nil
 }
 
-func NewScheduler(run func() error, debounce time.Duration) *Scheduler {
-	return &Scheduler{run: run, debounce: debounce, now: time.Now}
-}
-func (s *Scheduler) MarkChanged() { s.mu.Lock(); defer s.mu.Unlock(); s.pending++; s.last = s.now() }
-func (s *Scheduler) RunIfPending() (bool, error) {
-	s.mu.Lock()
-	if s.running || s.pending == 0 || (s.debounce > 0 && s.now().Sub(s.last) < s.debounce) {
-		s.mu.Unlock()
-		return false, nil
-	}
-	s.running = true
-	s.pending = 0
-	s.mu.Unlock()
-	err := s.run()
-	s.mu.Lock()
-	s.running = false
-	s.mu.Unlock()
-	return true, err
-}
-
 func Root(ctx context.Context, root string, c config.Config, debounce *float64, once bool, out io.Writer) error {
 	return RootWithIgnoreRoot(ctx, root, root, c, debounce, once, out)
 }
 
 func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.Config, debounce *float64, once bool, out io.Writer) error {
+	return RootSelected(ctx, root, ignoreRoot, c, Features{Indexes: true}, debounce, once, out)
+}
+
+func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer) error {
 	if out == nil {
 		out = io.Discard
+	}
+	if !features.Indexes && !features.Links {
+		features = Features{Indexes: true, Links: true}
 	}
 	seconds := c.Watch.DebounceSeconds
 	if debounce != nil {
 		seconds = *debounce
 	}
-	fmt.Fprintf(out, "%s ddocs watch watching %s pid=%d\n", timestamp(), root, os.Getpid())
+	watchRoot := docsRoot
+	if features.Links {
+		watchRoot = repositoryRoot
+	}
+	fmt.Fprintf(out, "%s ddocs watch watching %s pid=%d\n", timestamp(), watchRoot, os.Getpid())
+	var watcher eventWatcher
+	externalWatched := map[string]bool{}
+	var externalDirectories []string
 	run := func() error {
-		result, err := reconcile.TreeWithIgnoreRoot(root, ignoreRoot, c)
-		if err != nil {
-			return err
+		changed := 0
+		messages := 0
+		unresolved := 0
+		if features.Indexes {
+			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
+			if err != nil {
+				return err
+			}
+			count, err := reconcile.ApplyWithin(result, docsRoot)
+			if err != nil {
+				return err
+			}
+			changed += count
+			messages += len(result.Messages)
 		}
-		changed, err := reconcile.ApplyWithin(result, root)
-		if err != nil {
-			return err
+		if features.Links {
+			plan, err := links.Reconcile(repositoryRoot)
+			if err != nil {
+				return err
+			}
+			count, err := reconcile.ApplyWithin(modelResult(plan.Updates), repositoryRoot)
+			if err != nil {
+				return err
+			}
+			if err := links.Save(plan); err != nil {
+				return err
+			}
+			changed += count
+			messages += len(plan.Messages)
+			unresolved = plan.Unresolved
+			externalDirectories = externalWatchDirectories(plan.Files)
+			if watcher != nil {
+				if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
+					return fmt.Errorf("watch external link targets: %w", err)
+				}
+			}
 		}
 		fmt.Fprintf(out, "%s ddocs watch updated %d file(s)\n", timestamp(), changed)
-		if len(result.Messages) > 0 {
-			fmt.Fprintf(out, "%s ddocs watch reconciliation messages: %d\n", timestamp(), len(result.Messages))
+		if messages > 0 {
+			fmt.Fprintf(out, "%s ddocs watch reconciliation messages: %d\n", timestamp(), messages)
+		}
+		if unresolved > 0 {
+			fmt.Fprintf(out, "%s ddocs watch unresolved links: %d\n", timestamp(), unresolved)
 		}
 		return nil
 	}
@@ -102,23 +118,27 @@ func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.C
 	if once {
 		return nil
 	}
-	policy, err := ignorepolicy.Load(ignoreRoot)
+	policy, err := ignorepolicy.Load(repositoryRoot)
 	if err != nil {
 		return err
 	}
 	w, err := createWatcher()
 	if err != nil {
-		return fmt.Errorf("create watcher for %s: %w", root, err)
+		return fmt.Errorf("create watcher for %s: %w", watchRoot, err)
 	}
+	watcher = w
 	defer w.Close()
 	watchedDirs := map[string]bool{}
-	if filepath.Clean(ignoreRoot) != filepath.Clean(root) {
-		if err := w.Add(ignoreRoot); err != nil {
-			return fmt.Errorf("watch repository root %s: %w", ignoreRoot, err)
+	if filepath.Clean(repositoryRoot) != filepath.Clean(watchRoot) {
+		if err := w.Add(repositoryRoot); err != nil {
+			return fmt.Errorf("watch repository root %s: %w", repositoryRoot, err)
 		}
 	}
-	if err := addTree(w, root, root, c, policy, watchedDirs); err != nil {
+	if err := addTree(w, watchRoot, watchRoot, c, policy, watchedDirs); err != nil {
 		return err
+	}
+	if err := addExternalWatches(w, externalDirectories, externalWatched); err != nil {
+		return fmt.Errorf("watch external link targets: %w", err)
 	}
 	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
 	interval := 100 * time.Millisecond
@@ -139,51 +159,48 @@ func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.C
 				return nil
 			}
 			if err != nil {
-				return fmt.Errorf("watch %s: %w", root, err)
+				return fmt.Errorf("watch %s: %w", watchRoot, err)
 			}
 		case event, ok := <-w.Events():
 			if !ok {
 				return nil
 			}
+			isExternal := features.Links && externalEvent(event.Name, externalWatched)
 			if policy.IsControlFile(event.Name) {
-				updated, err := ignorepolicy.Load(ignoreRoot)
+				updated, err := ignorepolicy.Load(repositoryRoot)
 				if err != nil {
 					return err
 				}
 				policy = updated
-				if err := addTree(w, root, root, c, policy, watchedDirs); err != nil {
+				if err := addTree(w, watchRoot, watchRoot, c, policy, watchedDirs); err != nil {
 					return err
 				}
 				scheduler.MarkChanged()
 				continue
 			}
-			if event.Op&fsnotify.Create != 0 && repository.Contains(root, event.Name) {
+			if event.Op&fsnotify.Create != 0 && repository.Contains(watchRoot, event.Name) {
 				if st, err := os.Stat(event.Name); err == nil && st.IsDir() {
 					ignored, err := policy.Ignored(event.Name, true)
 					if err != nil {
 						return err
 					}
 					if !ignored && !watchIgnored(event.Name, c) {
-						if err := addTree(w, root, event.Name, c, policy, watchedDirs); err != nil {
+						if err := addTree(w, watchRoot, event.Name, c, policy, watchedDirs); err != nil {
 							return err
 						}
 					}
 				}
 			}
 			wasDirectory := watchedDirs[event.Name]
-			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 && wasDirectory {
-				delete(watchedDirs, event.Name)
-			}
-			relevant := false
-			if wasDirectory {
-				ignored, err := policy.Ignored(event.Name, true)
-				if err != nil {
-					return err
+			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 {
+				if wasDirectory {
+					delete(watchedDirs, event.Name)
 				}
-				relevant = !ignored && !watchIgnored(event.Name, c)
-			} else {
-				relevant = relevantWithPolicy(event.Name, c, policy, root)
+				if externalWatched[event.Name] {
+					delete(externalWatched, event.Name)
+				}
 			}
+			relevant := isExternal || relevantSelectedWithPolicy(event.Name, c, policy, docsRoot, repositoryRoot, features, wasDirectory)
 			if relevant {
 				scheduler.MarkChanged()
 			}

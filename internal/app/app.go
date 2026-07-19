@@ -14,6 +14,8 @@ import (
 	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/links"
+	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/watch"
@@ -54,6 +56,7 @@ func (b *optionalBool) IsBoolFlag() bool { return true }
 type commonFlags struct {
 	root, config, index, draft, prefix, marker, parent optionalString
 	noLocal, noGlobal                                  bool
+	indexesOnly, linksOnly                             bool
 	includes, excludes                                 stringsFlag
 	folderLinks, fileLinks                             optionalBool
 }
@@ -63,6 +66,10 @@ func addCommon(fs *flag.FlagSet, c *commonFlags) {
 	fs.Var(&c.config, "config", "explicit ddocs config file")
 	fs.BoolVar(&c.noLocal, "no-local-config", false, "skip current-directory local config")
 	fs.BoolVar(&c.noGlobal, "no-global-config", false, "skip the global user config")
+	fs.BoolVar(&c.indexesOnly, "i", false, "reconcile indexes")
+	fs.BoolVar(&c.indexesOnly, "indexes", false, "reconcile indexes")
+	fs.BoolVar(&c.linksOnly, "l", false, "reconcile links")
+	fs.BoolVar(&c.linksOnly, "links", false, "reconcile links")
 	fs.Var(&c.index, "index-file", "override the folder index filename")
 	fs.Var(&c.draft, "draft-folder", "override the draft folder name")
 	fs.Var(&c.prefix, "draft-description-prefix", "override the draft file description prefix")
@@ -128,7 +135,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...\n\nddocs reconciles local index files with a file tree.\n\npositional arguments:\n  {init,status,fix,check,watch,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
+	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
 }
 
 func initHelp(w io.Writer) {
@@ -240,14 +247,14 @@ func writeInitParseError(w io.Writer, err error) {
 
 func treeUsage(command string) string {
 	return map[string]string{
-		"fix": "usage: ddocs fix [-h] [--root PATH] [--config PATH] [--no-local-config]\n" +
+		"fix": "usage: ddocs fix [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
 			"                      [--no-global-config] [--index-file NAME]\n" +
 			"                      [--draft-folder NAME] [--draft-description-prefix TEXT]\n" +
 			"                      [--include PATTERN] [--exclude PATTERN]\n" +
 			"                      [--marker-prefix TEXT] [--parent-label TEXT]\n" +
 			"                      [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
 			"                      [--parent-link-indexed-files | --no-parent-link-indexed-files]",
-		"check": "usage: ddocs check [-h] [--root PATH] [--config PATH] [--no-local-config]\n" +
+		"check": "usage: ddocs check [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
 			"                        [--no-global-config] [--index-file NAME]\n" +
 			"                        [--draft-folder NAME]\n" +
 			"                        [--draft-description-prefix TEXT] [--include PATTERN]\n" +
@@ -255,7 +262,7 @@ func treeUsage(command string) string {
 			"                        [--parent-label TEXT]\n" +
 			"                        [--parent-link-folder-indexes | --no-parent-link-folder-indexes]\n" +
 			"                        [--parent-link-indexed-files | --no-parent-link-indexed-files]",
-		"watch": "usage: ddocs watch [-h] [--root PATH] [--config PATH] [--no-local-config]\n" +
+		"watch": "usage: ddocs watch [-h] [-i] [-l] [--root PATH] [--config PATH] [--no-local-config]\n" +
 			"                        [--no-global-config] [--index-file NAME]\n" +
 			"                        [--draft-folder NAME]\n" +
 			"                        [--draft-description-prefix TEXT] [--include PATTERN]\n" +
@@ -270,15 +277,15 @@ func treeUsage(command string) string {
 func treeHelp(w io.Writer, command string) {
 	usage := treeUsage(command)
 	description := map[string]string{
-		"fix":   "Reconcile the docs tree and write any needed updates.",
-		"check": "Verify that the docs tree is already reconciled.",
+		"fix":   "Reconcile selected indexes and links and write needed updates.",
+		"check": "Verify that selected indexes and links are already reconciled.",
 		"watch": "Watch runs in the foreground by default, runs one reconciliation immediately, and then watches for relevant filesystem changes.",
 	}[command]
 	watchOptions := ""
 	if command == "watch" {
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 	}
-	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  --root PATH           docs root directory to reconcile\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions)
+	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -i, --indexes         reconcile indexes only when used without -l\n  -l, --links           reconcile links only when used without -i\n  --root PATH           docs root directory to reconcile\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions)
 }
 
 var (
@@ -358,7 +365,8 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 	if err != nil {
 		return fail(errOut, err)
 	}
-	if !repository.DocsRootExists(scope) {
+	features := selectedFeatures(flags)
+	if features.Indexes && !repository.DocsRootExists(scope) {
 		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", scope.DocsRoot)
 		return 2
 	}
@@ -367,38 +375,87 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		if debounce >= 0 {
 			d = &debounce
 		}
-		if err := watch.RootWithIgnoreRoot(ctx, scope.DocsRoot, scope.RepositoryRoot, c, d, once, out); err != nil {
+		if err := watch.RootSelected(ctx, scope.DocsRoot, scope.RepositoryRoot, c, features, d, once, out); err != nil {
 			return fail(errOut, err)
 		}
 		return 0
 	}
-	result, err := reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
-	if err != nil {
-		return fail(errOut, err)
-	}
-	if command == "fix" {
-		changed, err := reconcile.ApplyWithin(result, scope.DocsRoot)
+
+	indexResult := model.ReconcileResult{}
+	if features.Indexes {
+		indexResult, err = reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
 		if err != nil {
 			return fail(errOut, err)
 		}
+	}
+	linkPlan := links.Plan{}
+	if command == "fix" {
+		changed := 0
+		if features.Indexes {
+			count, err := reconcile.ApplyWithin(indexResult, scope.DocsRoot)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			changed += count
+		}
+		if features.Links {
+			linkPlan, err = links.Reconcile(scope.RepositoryRoot)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			count, err := reconcile.ApplyWithin(model.ReconcileResult{Updates: linkPlan.Updates}, scope.RepositoryRoot)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			changed += count
+			if err := links.Save(linkPlan); err != nil {
+				return fail(errOut, err)
+			}
+		}
 		fmt.Fprintf(out, "ddocs fix updated %d file(s)\n", changed)
-		for _, m := range result.Messages {
-			fmt.Fprintf(out, "message: %s\n", m)
+		writeMessages(out, indexResult.Messages)
+		writeMessages(out, linkPlan.Messages)
+		if linkPlan.Unresolved > 0 {
+			fmt.Fprintf(out, "ddocs fix unresolved %d link(s)\n", linkPlan.Unresolved)
+			return 1
 		}
 		return 0
 	}
-	if len(result.Updates) > 0 {
+
+	if features.Links {
+		linkPlan, err = links.Reconcile(scope.RepositoryRoot)
+		if err != nil {
+			return fail(errOut, err)
+		}
+	}
+	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed()
+	if failed {
 		fmt.Fprintln(out, "ddocs check failed")
-		for _, u := range result.Updates {
-			fmt.Fprintln(out, u.Path)
+		for _, update := range indexResult.Updates {
+			fmt.Fprintln(out, update.Path)
 		}
-		for _, m := range result.Messages {
-			fmt.Fprintf(out, "message: %s\n", m)
+		for _, update := range linkPlan.Updates {
+			fmt.Fprintln(out, update.Path)
 		}
+		writeMessages(out, indexResult.Messages)
+		writeMessages(out, linkPlan.Messages)
 		return 1
 	}
 	fmt.Fprintln(out, "ddocs check passed")
 	return 0
+}
+
+func selectedFeatures(flags commonFlags) watch.Features {
+	if !flags.indexesOnly && !flags.linksOnly {
+		return watch.Features{Indexes: true, Links: true}
+	}
+	return watch.Features{Indexes: flags.indexesOnly, Links: flags.linksOnly}
+}
+
+func writeMessages(out io.Writer, messages []string) {
+	for _, message := range messages {
+		fmt.Fprintf(out, "message: %s\n", message)
+	}
 }
 func load(f commonFlags, errOut io.Writer) (config.Config, string, int) {
 	cwd, _ := os.Getwd()

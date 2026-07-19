@@ -81,9 +81,22 @@ Compatibility fallbacks remain supported at lower priority:
 `ddocs config init --local` writes `.demon-docs.toml` in the current directory.
 `ddocs config init --global` writes the global config file and creates parent directories as needed.
 
-CLI flags override the selected base config. Examples include:
+CLI flags override the selected base config. The reconciliation selectors are operational flags rather than persistent configuration:
+
+- `-i` / `--indexes` runs index reconciliation only when used without the link selector.
+- `-l` / `--links` runs link reconciliation only when used without the index selector.
+- Supplying both selectors, or neither selector, runs both systems.
+- The selectors apply to `check`, `fix`, and `watch`.
+
+Examples include:
 
 ```bash
+ddocs check -i
+ddocs check -l
+ddocs fix --indexes
+ddocs fix --links
+ddocs watch -i
+ddocs watch -l
 ddocs fix --root docs --index-file "!README.md"
 ddocs fix --root docs --draft-folder "_drafts"
 ddocs fix --root docs --include "**/*.png"
@@ -257,11 +270,12 @@ description_prefix = "Draft: "
 
 ## `[files].include_patterns` and `[files].exclude_patterns`
 
-`[files].include_patterns` controls which files are indexed.
+`[files].include_patterns` controls which files appear in generated folder indexes.
 
 - Default: `["**/*.md"]`
-- Patterns are matched relative to the managed root
+- Patterns are matched relative to the managed docs root
 - The index file itself is excluded even if it matches the include patterns
+- These patterns do not limit link targets: link reconciliation tracks every non-ignored local target type referenced by repository Markdown
 
 `[files].exclude_patterns` removes files from indexing.
 
@@ -278,7 +292,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository owns one `.docignore` file at its repository root, beside `.ddocs/`. It excludes paths from all Demon Docs filesystem traversal, including `fix`, `check`, and `watch`.
+An initialized repository owns one `.docignore` file at its repository root, beside `.ddocs/`. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -303,7 +317,7 @@ The following directory names are permanently excluded at any depth and cannot b
 - `.obsidian/`
 - `logseq/`
 
-Watch mode watches the repository root for `.docignore` changes, reloads the rules, and adds watches for directories that become visible.
+Watch mode watches the repository root for `.docignore` changes, reloads the rules, and adds watches for directories that become visible. Index-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
 
 ## `[editable].parent_index_extensions`
 
@@ -459,7 +473,19 @@ In that setup:
 - `diagram.png`, `manual.pdf`, and `openapi.yaml` are indexed
 - non-editable files are left untouched by parent-link editing
 
+## Link State
+
+Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored under the initialized repository's `.ddocs/` directory:
+
+```text
+.ddocs/files.json
+.ddocs/links.json
+```
+
+The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it.
+
 ## Related Files
 
 - `internal/config/config.go`
+- `internal/links/`
 - `internal/config/config_test.go`
