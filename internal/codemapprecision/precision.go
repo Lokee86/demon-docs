@@ -105,7 +105,7 @@ func BuildBenchmark(report codemapbench.Report, config SampleConfig) (Benchmark,
 			SourceReport:         config.SourceReport,
 			CandidateCount:       len(candidates),
 			RequestedSampleCount: config.RequestedCount,
-			Method:               "top-five-per-document-then-least-represented-stratified-sha256",
+			Method:               "balanced-documents-top-5-plus-lower-rank-fill-sha256",
 		},
 		Suggestions: suggestions,
 	}, nil
@@ -152,76 +152,47 @@ func Sample(candidates []Candidate, config SampleConfig) ([]LabeledSuggestion, e
 	if config.RequestedCount > len(unique) {
 		return nil, fmt.Errorf("precision sample count %d exceeds %d candidates", config.RequestedCount, len(unique))
 	}
-	selected := map[string]Candidate{}
-	byDocument := map[string][]Candidate{}
+
+	byDocument := make(map[string][]Candidate)
 	for _, candidate := range unique {
 		byDocument[candidate.Document] = append(byDocument[candidate.Document], candidate)
 	}
-	// Preserve every document's top five whenever the requested size permits it.
-	documents := make([]string, 0, len(byDocument))
 	for document := range byDocument {
-		documents = append(documents, document)
+		sort.Slice(byDocument[document], func(i, j int) bool {
+			if byDocument[document][i].Rank != byDocument[document][j].Rank {
+				return byDocument[document][i].Rank < byDocument[document][j].Rank
+			}
+			return byDocument[document][i].Target < byDocument[document][j].Target
+		})
 	}
-	sort.Strings(documents)
-	for _, document := range documents {
-		values := byDocument[document]
-		sort.Slice(values, func(i, j int) bool { return values[i].Rank < values[j].Rank })
-		limit := 5
-		if len(values) < limit {
-			limit = len(values)
-		}
-		for _, candidate := range values[:limit] {
-			if len(selected) == config.RequestedCount {
+
+	documentLimit := config.RequestedCount / 6
+	if documentLimit < 1 {
+		documentLimit = 1
+	}
+	if documentLimit > len(byDocument) {
+		documentLimit = len(byDocument)
+	}
+	selectedDocuments := selectBalancedDocuments(byDocument, documentLimit, seed+":documents")
+	selected := map[string]Candidate{}
+	for _, document := range selectedDocuments {
+		for _, candidate := range byDocument[document] {
+			if candidate.Rank > 5 || len(selected) == config.RequestedCount {
 				break
 			}
 			selected[candidateKey(candidate)] = candidate
 		}
-		byDocument[document] = values
 	}
 
-	remaining := make([]Candidate, 0, len(unique)-len(selected))
-	for _, candidate := range unique {
-		if _, ok := selected[candidateKey(candidate)]; !ok {
-			remaining = append(remaining, candidate)
-		}
+	selectedPool := make([]Candidate, 0)
+	for _, document := range selectedDocuments {
+		selectedPool = append(selectedPool, byDocument[document]...)
 	}
-	sort.Slice(remaining, func(i, j int) bool {
-		left := sampleHash(seed, remaining[i])
-		right := sampleHash(seed, remaining[j])
-		if left != right {
-			return left < right
-		}
-		return candidateKey(remaining[i]) < candidateKey(remaining[j])
-	})
-	// Fill by the least represented composite stratum, then by each component
-	// dimension. The hash is the final tie-breaker, so map iteration order never
-	// affects the sample.
-	for len(selected) < config.RequestedCount {
-		bestIndex := -1
-		var bestKey sampleSelectionKey
-		counts := sampleCounts(selected)
-		for index, candidate := range remaining {
-			if _, ok := selected[candidateKey(candidate)]; ok {
-				continue
-			}
-			key := sampleSelectionKey{
-				Composite: counts["stratum:"+stratum(candidate)],
-				Area:      counts["area:"+candidate.Area],
-				Score:     counts["score:"+candidate.ScoreBucket],
-				Evidence:  counts["evidence:"+candidate.PrimaryEvidenceKind],
-				Rank:      counts["rank:"+candidate.RankBucket],
-				Hash:      sampleHash(seed+"\x00fill", candidate),
-			}
-			if bestIndex < 0 || key.less(bestKey) {
-				bestIndex, bestKey = index, key
-			}
-		}
-		if bestIndex < 0 {
-			break
-		}
-		candidate := remaining[bestIndex]
-		selected[candidateKey(candidate)] = candidate
+	fillBalanced(selected, selectedPool, config.RequestedCount, seed+":selected-documents")
+	if len(selected) < config.RequestedCount {
+		fillBalanced(selected, unique, config.RequestedCount, seed+":all-documents")
 	}
+
 	result := make([]LabeledSuggestion, 0, len(selected))
 	for _, candidate := range selected {
 		result = append(result, LabeledSuggestion{
@@ -235,14 +206,134 @@ func Sample(candidates []Candidate, config SampleConfig) ([]LabeledSuggestion, e
 		if result[i].Document != result[j].Document {
 			return result[i].Document < result[j].Document
 		}
-		return result[i].Rank < result[j].Rank
+		if result[i].Rank != result[j].Rank {
+			return result[i].Rank < result[j].Rank
+		}
+		return result[i].Target < result[j].Target
 	})
 	return result, nil
 }
 
+func selectBalancedDocuments(byDocument map[string][]Candidate, limit int, seed string) []string {
+	preferred := make([]string, 0, len(byDocument))
+	fallback := make([]string, 0, len(byDocument))
+	for document, values := range byDocument {
+		if len(values) >= 5 {
+			preferred = append(preferred, document)
+		} else {
+			fallback = append(fallback, document)
+		}
+	}
+	sort.Strings(preferred)
+	sort.Strings(fallback)
+	pool := append([]string(nil), preferred...)
+	if len(pool) < limit {
+		pool = append(pool, fallback...)
+	}
+	selected := make([]string, 0, limit)
+	selectedSet := map[string]struct{}{}
+	for len(selected) < limit {
+		counts := documentCounts(selected, byDocument)
+		best := ""
+		var bestKey documentSelectionKey
+		for _, document := range pool {
+			if _, ok := selectedSet[document]; ok {
+				continue
+			}
+			representative := byDocument[document][0]
+			key := documentSelectionKey{
+				Area:      counts["area:"+representative.Area],
+				Subsystem: counts["subsystem:"+representative.Subsystem],
+				Score:     counts["score:"+representative.ScoreBucket],
+				Evidence:  counts["evidence:"+representative.PrimaryEvidenceKind],
+				Hash:      sampleHash(seed, representative),
+			}
+			if best == "" || key.less(bestKey) {
+				best, bestKey = document, key
+			}
+		}
+		if best == "" {
+			break
+		}
+		selected = append(selected, best)
+		selectedSet[best] = struct{}{}
+	}
+	sort.Strings(selected)
+	return selected
+}
+
+type documentSelectionKey struct {
+	Area      int
+	Subsystem int
+	Score     int
+	Evidence  int
+	Hash      string
+}
+
+func (key documentSelectionKey) less(other documentSelectionKey) bool {
+	if key.Area != other.Area {
+		return key.Area < other.Area
+	}
+	if key.Subsystem != other.Subsystem {
+		return key.Subsystem < other.Subsystem
+	}
+	if key.Score != other.Score {
+		return key.Score < other.Score
+	}
+	if key.Evidence != other.Evidence {
+		return key.Evidence < other.Evidence
+	}
+	return key.Hash < other.Hash
+}
+
+func documentCounts(documents []string, byDocument map[string][]Candidate) map[string]int {
+	counts := map[string]int{}
+	for _, document := range documents {
+		representative := byDocument[document][0]
+		counts["area:"+representative.Area]++
+		counts["subsystem:"+representative.Subsystem]++
+		counts["score:"+representative.ScoreBucket]++
+		counts["evidence:"+representative.PrimaryEvidenceKind]++
+	}
+	return counts
+}
+
+func fillBalanced(selected map[string]Candidate, pool []Candidate, requested int, seed string) {
+	for len(selected) < requested {
+		counts := sampleCounts(selected)
+		bestIndex := -1
+		var bestKey sampleSelectionKey
+		for index, candidate := range pool {
+			if _, ok := selected[candidateKey(candidate)]; ok {
+				continue
+			}
+			key := sampleSelectionKey{
+				Document:  counts["document:"+candidate.Document],
+				Composite: counts["stratum:"+stratum(candidate)],
+				Area:      counts["area:"+candidate.Area],
+				Subsystem: counts["subsystem:"+candidate.Subsystem],
+				Score:     counts["score:"+candidate.ScoreBucket],
+				Evidence:  counts["evidence:"+candidate.PrimaryEvidenceKind],
+				Rank:      counts["rank:"+candidate.RankBucket],
+				Hash:      sampleHash(seed, candidate),
+			}
+			if bestIndex < 0 || key.less(bestKey) {
+				bestIndex, bestKey = index, key
+			}
+		}
+		if bestIndex < 0 {
+			return
+		}
+		candidate := pool[bestIndex]
+		selected[candidateKey(candidate)] = candidate
+	}
+}
+
 type sampleSelectionKey struct {
+	Document  int
 	Composite int
 	Area      int
+	Subsystem int
 	Score     int
 	Evidence  int
 	Rank      int
@@ -250,11 +341,17 @@ type sampleSelectionKey struct {
 }
 
 func (key sampleSelectionKey) less(other sampleSelectionKey) bool {
+	if key.Document != other.Document {
+		return key.Document < other.Document
+	}
 	if key.Composite != other.Composite {
 		return key.Composite < other.Composite
 	}
 	if key.Area != other.Area {
 		return key.Area < other.Area
+	}
+	if key.Subsystem != other.Subsystem {
+		return key.Subsystem < other.Subsystem
 	}
 	if key.Score != other.Score {
 		return key.Score < other.Score
@@ -269,10 +366,12 @@ func (key sampleSelectionKey) less(other sampleSelectionKey) bool {
 }
 
 func sampleCounts(selected map[string]Candidate) map[string]int {
-	counts := make(map[string]int, len(selected)*5)
+	counts := make(map[string]int, len(selected)*8)
 	for _, candidate := range selected {
+		counts["document:"+candidate.Document]++
 		counts["stratum:"+stratum(candidate)]++
 		counts["area:"+candidate.Area]++
+		counts["subsystem:"+candidate.Subsystem]++
 		counts["score:"+candidate.ScoreBucket]++
 		counts["evidence:"+candidate.PrimaryEvidenceKind]++
 		counts["rank:"+candidate.RankBucket]++

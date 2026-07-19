@@ -42,6 +42,9 @@ func TestCodemapPrecisionSamplesUnlabeledTemplate(t *testing.T) {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 		var sample struct {
+			Sampling struct {
+				SourceReport string `json:"source_report"`
+			} `json:"sampling"`
 			Suggestions []struct {
 				Label     string `json:"label"`
 				Rationale string `json:"rationale"`
@@ -49,6 +52,9 @@ func TestCodemapPrecisionSamplesUnlabeledTemplate(t *testing.T) {
 		}
 		if err := json.Unmarshal(stdout.Bytes(), &sample); err != nil {
 			t.Fatal(err)
+		}
+		if sample.Sampling.SourceReport != "report.json" {
+			t.Fatalf("source report = %q, want report.json", sample.Sampling.SourceReport)
 		}
 		if len(sample.Suggestions) != 1 || sample.Suggestions[0].Label != "" || sample.Suggestions[0].Rationale != "" {
 			t.Fatalf("unexpected sample: %#v", sample)

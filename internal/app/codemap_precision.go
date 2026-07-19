@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/codemapprecision"
 )
@@ -16,7 +17,7 @@ import (
 const precisionSampleSeed = "demon-docs-codemap-precision-sample-v1"
 
 func codemapPrecisionHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap precision [-h] {sample,evaluate} ...\n\nCreate a deterministic unlabeled codemap precision sample or evaluate a fully labeled benchmark.\n\nsubcommands:\n  sample              create an unlabeled precision benchmark template\n  evaluate            evaluate a fully labeled precision benchmark\n\nThe legacy flag-only form is equivalent to evaluate.")
+	fmt.Fprintln(w, "usage: ddocs codemap precision [-h] {source,sample,evaluate} ...\n\nGenerate a current suggestion report, create a deterministic unlabeled sample, or evaluate a fully labeled benchmark.\n\nsubcommands:\n  source              generate current suggestions with authored links visible\n  sample              create an unlabeled precision benchmark template\n  evaluate            evaluate a fully labeled precision benchmark\n\nThe legacy flag-only form is equivalent to evaluate.")
 }
 
 func runCodemapPrecision(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -26,6 +27,9 @@ func runCodemapPrecision(ctx context.Context, args []string, out, errOut io.Writ
 	if helpRequested(args) {
 		codemapPrecisionHelp(out)
 		return 0
+	}
+	if len(args) > 0 && args[0] == "source" {
+		return runCodemapPrecisionSource(ctx, args[1:], out, errOut)
 	}
 	if len(args) > 0 && args[0] == "sample" {
 		return runCodemapPrecisionSample(args[1:], out, errOut)
@@ -85,8 +89,12 @@ func runCodemapPrecisionSample(args []string, out, errOut io.Writer) int {
 	if closeErr != nil {
 		return fail(errOut, closeErr)
 	}
+	sourceReport := suggestionsFile
+	if relative, relErr := filepath.Rel(cwd, suggestionsFile); relErr == nil && relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		sourceReport = filepath.ToSlash(relative)
+	}
 	benchmark, err := codemapprecision.BuildBenchmark(report, codemapprecision.SampleConfig{
-		Seed: seed, RequestedCount: count, SourceReport: suggestionsFile,
+		Seed: seed, RequestedCount: count, SourceReport: sourceReport,
 		Repository: repository, Revision: revision,
 	})
 	if err != nil {

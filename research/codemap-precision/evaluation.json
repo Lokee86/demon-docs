@@ -1,0 +1,787 @@
+{
+  "schema_version": 1,
+  "benchmark_size": 150,
+  "label_counts": {
+    "valid_missing_link": 70,
+    "plausible_but_unnecessary": 62,
+    "incorrect": 18,
+    "total": 150
+  },
+  "overall": {
+    "total": 150,
+    "valid_missing_link": 70,
+    "accepted_non_junk": 132,
+    "overall_precision": 0.4666666666666667,
+    "acceptance_precision": 0.88
+  },
+  "precision_at_1": 0.6,
+  "precision_at_3": 0.5466666666666666,
+  "precision_at_5": 0.528,
+  "per_document": {
+    "docs/data/collision-shape-data.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 4,
+        "overall_precision": 0.4,
+        "acceptance_precision": 0.8
+      }
+    },
+    "docs/data/constants.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 0,
+        "overall_precision": 0,
+        "acceptance_precision": 0
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 0,
+        "overall_precision": 0,
+        "acceptance_precision": 0
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 0.2,
+        "acceptance_precision": 0.2
+      }
+    },
+    "docs/data/data-sync-and-ssot-pipeline.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 3,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 5,
+        "accepted_non_junk": 5,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/data/drop-tables.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/data/observability-contract.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/data/player-data-schema.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 3,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 5,
+        "accepted_non_junk": 5,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/api-server/local-auth-smoke-flow.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/client/hitbox-overlays.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.6,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/client/target-and-placement-debugging.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 3,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 5,
+        "accepted_non_junk": 5,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/design/devtools-packet-protocol.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 4,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.8,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/server/hitbox-and-shape-debugging.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.2,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/devtools/server/player-targeting-and-scopes.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 3,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 5,
+        "accepted_non_junk": 5,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/protocol/asteroid-variant-contract.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 2,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 0.6666666666666666
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 4,
+        "overall_precision": 0.4,
+        "acceptance_precision": 0.8
+      }
+    },
+    "docs/protocol/gameplay-packets.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 3,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 4,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.8,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/protocol/http-contract-enforcement.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 2,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 0.6666666666666666
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 4,
+        "accepted_non_junk": 4,
+        "overall_precision": 0.8,
+        "acceptance_precision": 0.8
+      }
+    },
+    "docs/protocol/lobby-packets.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.2,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/protocol/player-data-http-api.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 0,
+        "overall_precision": 0,
+        "acceptance_precision": 0
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 2,
+        "overall_precision": 0.3333333333333333,
+        "acceptance_precision": 0.6666666666666666
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 4,
+        "overall_precision": 0.6,
+        "acceptance_precision": 0.8
+      }
+    },
+    "docs/protocol/realtime-websocket-protocol.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 3,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.6,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/services/client/networking-flow/websocket-connection-lifecycle.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 3,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.2,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/services/diagnostic-aggregator/runtime-and-report-flow.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 0,
+        "overall_precision": 0,
+        "acceptance_precision": 0
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 2,
+        "overall_precision": 0,
+        "acceptance_precision": 0.6666666666666666
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 4,
+        "overall_precision": 0.4,
+        "acceptance_precision": 0.8
+      }
+    },
+    "docs/services/game-server/integrations/diagnostic-aggregator-hosting.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 0,
+        "accepted_non_junk": 1,
+        "overall_precision": 0,
+        "acceptance_precision": 0.3333333333333333
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.2,
+        "acceptance_precision": 0.6
+      }
+    },
+    "docs/services/game-server/rooms/room-membership-and-identity.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    },
+    "docs/services/web/cloudflare-pages-deployment.md": {
+      "precision_at_1": {
+        "total": 1,
+        "valid_missing_link": 1,
+        "accepted_non_junk": 1,
+        "overall_precision": 1,
+        "acceptance_precision": 1
+      },
+      "precision_at_3": {
+        "total": 3,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 3,
+        "overall_precision": 0.6666666666666666,
+        "acceptance_precision": 1
+      },
+      "precision_at_5": {
+        "total": 5,
+        "valid_missing_link": 2,
+        "accepted_non_junk": 5,
+        "overall_precision": 0.4,
+        "acceptance_precision": 1
+      }
+    }
+  },
+  "by_evidence_kind": {
+    "declared_symbol_mention": {
+      "total": 10,
+      "valid_missing_link": 8,
+      "accepted_non_junk": 10,
+      "overall_precision": 0.8,
+      "acceptance_precision": 1
+    },
+    "dependency_neighbor": {
+      "total": 41,
+      "valid_missing_link": 24,
+      "accepted_non_junk": 37,
+      "overall_precision": 0.5853658536585366,
+      "acceptance_precision": 0.9024390243902439
+    },
+    "exact_path_mention": {
+      "total": 24,
+      "valid_missing_link": 4,
+      "accepted_non_junk": 23,
+      "overall_precision": 0.16666666666666666,
+      "acceptance_precision": 0.9583333333333334
+    },
+    "git_cochange_with_existing_target": {
+      "total": 2,
+      "valid_missing_link": 0,
+      "accepted_non_junk": 2,
+      "overall_precision": 0,
+      "acceptance_precision": 1
+    },
+    "related_document_target": {
+      "total": 27,
+      "valid_missing_link": 11,
+      "accepted_non_junk": 19,
+      "overall_precision": 0.4074074074074074,
+      "acceptance_precision": 0.7037037037037037
+    },
+    "sibling_of_existing_target": {
+      "total": 12,
+      "valid_missing_link": 3,
+      "accepted_non_junk": 10,
+      "overall_precision": 0.25,
+      "acceptance_precision": 0.8333333333333334
+    },
+    "test_counterpart": {
+      "total": 31,
+      "valid_missing_link": 20,
+      "accepted_non_junk": 28,
+      "overall_precision": 0.6451612903225806,
+      "acceptance_precision": 0.9032258064516129
+    },
+    "unique_basename_mention": {
+      "total": 3,
+      "valid_missing_link": 0,
+      "accepted_non_junk": 3,
+      "overall_precision": 0,
+      "acceptance_precision": 1
+    }
+  },
+  "by_score_bucket": {
+    "1-\u003c2": {
+      "total": 4,
+      "valid_missing_link": 2,
+      "accepted_non_junk": 3,
+      "overall_precision": 0.5,
+      "acceptance_precision": 0.75
+    },
+    "2-\u003c8": {
+      "total": 30,
+      "valid_missing_link": 4,
+      "accepted_non_junk": 24,
+      "overall_precision": 0.13333333333333333,
+      "acceptance_precision": 0.8
+    },
+    "8+": {
+      "total": 114,
+      "valid_missing_link": 63,
+      "accepted_non_junk": 104,
+      "overall_precision": 0.5526315789473685,
+      "acceptance_precision": 0.9122807017543859
+    },
+    "\u003c1": {
+      "total": 2,
+      "valid_missing_link": 1,
+      "accepted_non_junk": 1,
+      "overall_precision": 0.5,
+      "acceptance_precision": 0.5
+    }
+  },
+  "by_rank_bucket": {
+    "1-5": {
+      "total": 125,
+      "valid_missing_link": 66,
+      "accepted_non_junk": 114,
+      "overall_precision": 0.528,
+      "acceptance_precision": 0.912
+    },
+    "11-20": {
+      "total": 5,
+      "valid_missing_link": 0,
+      "accepted_non_junk": 3,
+      "overall_precision": 0,
+      "acceptance_precision": 0.6
+    },
+    "21+": {
+      "total": 15,
+      "valid_missing_link": 2,
+      "accepted_non_junk": 10,
+      "overall_precision": 0.13333333333333333,
+      "acceptance_precision": 0.6666666666666666
+    },
+    "6-10": {
+      "total": 5,
+      "valid_missing_link": 2,
+      "accepted_non_junk": 5,
+      "overall_precision": 0.4,
+      "acceptance_precision": 1
+    }
+  },
+  "sampling_coverage": {
+    "area": {
+      "data": 36,
+      "devtools": 36,
+      "protocol": 36,
+      "services": 42
+    },
+    "document": {
+      "docs/data/collision-shape-data.md": 6,
+      "docs/data/constants.md": 6,
+      "docs/data/data-sync-and-ssot-pipeline.md": 6,
+      "docs/data/drop-tables.md": 6,
+      "docs/data/observability-contract.md": 6,
+      "docs/data/player-data-schema.md": 6,
+      "docs/devtools/api-server/local-auth-smoke-flow.md": 6,
+      "docs/devtools/client/hitbox-overlays.md": 6,
+      "docs/devtools/client/target-and-placement-debugging.md": 6,
+      "docs/devtools/design/devtools-packet-protocol.md": 6,
+      "docs/devtools/server/hitbox-and-shape-debugging.md": 6,
+      "docs/devtools/server/player-targeting-and-scopes.md": 6,
+      "docs/protocol/asteroid-variant-contract.md": 6,
+      "docs/protocol/gameplay-packets.md": 6,
+      "docs/protocol/http-contract-enforcement.md": 6,
+      "docs/protocol/lobby-packets.md": 6,
+      "docs/protocol/player-data-http-api.md": 6,
+      "docs/protocol/realtime-websocket-protocol.md": 6,
+      "docs/services/client/networking-flow/websocket-connection-lifecycle.md": 6,
+      "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md": 6,
+      "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md": 6,
+      "docs/services/diagnostic-aggregator/runtime-and-report-flow.md": 6,
+      "docs/services/game-server/integrations/diagnostic-aggregator-hosting.md": 6,
+      "docs/services/game-server/rooms/room-membership-and-identity.md": 6,
+      "docs/services/web/cloudflare-pages-deployment.md": 6
+    },
+    "evidence_kind": {
+      "declared_symbol_mention": 10,
+      "dependency_neighbor": 41,
+      "exact_path_mention": 24,
+      "git_cochange_with_existing_target": 2,
+      "related_document_target": 27,
+      "sibling_of_existing_target": 12,
+      "test_counterpart": 31,
+      "unique_basename_mention": 3
+    },
+    "rank_bucket": {
+      "1-5": 125,
+      "11-20": 5,
+      "21+": 15,
+      "6-10": 5
+    },
+    "score_bucket": {
+      "1-\u003c2": 4,
+      "2-\u003c8": 30,
+      "8+": 114,
+      "\u003c1": 2
+    },
+    "subsystem": {
+      "api-server": 6,
+      "client": 12,
+      "client/networking-flow": 6,
+      "client/pregame-menu-flow": 6,
+      "client/spectate-flow": 6,
+      "data": 36,
+      "design": 6,
+      "diagnostic-aggregator": 6,
+      "game-server/integrations": 6,
+      "game-server/rooms": 6,
+      "protocol": 36,
+      "server": 12,
+      "web": 6
+    }
+  }
+}

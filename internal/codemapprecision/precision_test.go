@@ -22,7 +22,7 @@ func TestCandidatesFromReportRanksByScoreAndTarget(t *testing.T) {
 	}
 }
 
-func TestSampleIsDeterministicDeduplicatedAndKeepsTopFive(t *testing.T) {
+func TestSampleIsDeterministicDeduplicatedAndKeepsCompleteTopFive(t *testing.T) {
 	report := codemapbench.Report{}
 	for document := range map[string]struct{}{"docs/a.md": {}, "docs/b.md": {}} {
 		for index := 0; index < 8; index++ {
@@ -33,11 +33,12 @@ func TestSampleIsDeterministicDeduplicatedAndKeepsTopFive(t *testing.T) {
 		}
 	}
 	candidates := CandidatesFromReport(report)
-	first, err := Sample(candidates, SampleConfig{Seed: "sample-seed", RequestedCount: 10})
+	config := SampleConfig{Seed: "sample-seed", RequestedCount: 12}
+	first, err := Sample(candidates, config)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := Sample(candidates, SampleConfig{Seed: "sample-seed", RequestedCount: 10})
+	second, err := Sample(candidates, config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,15 +46,31 @@ func TestSampleIsDeterministicDeduplicatedAndKeepsTopFive(t *testing.T) {
 		t.Fatalf("sample changed between runs:\n%#v\n%#v", first, second)
 	}
 	seen := map[string]struct{}{}
+	ranksByDocument := map[string]map[int]bool{}
+	lowerRankCount := 0
 	for _, item := range first {
 		key := item.Document + "\x00" + item.Target
 		if _, ok := seen[key]; ok {
 			t.Fatalf("duplicate sample item %s", key)
 		}
 		seen[key] = struct{}{}
-		if item.Rank > 5 {
-			t.Fatalf("top-five requirement was not preserved: %#v", first)
+		if ranksByDocument[item.Document] == nil {
+			ranksByDocument[item.Document] = map[int]bool{}
 		}
+		ranksByDocument[item.Document][item.Rank] = true
+		if item.Rank > 5 {
+			lowerRankCount++
+		}
+	}
+	for document, ranks := range ranksByDocument {
+		for rank := 1; rank <= 5; rank++ {
+			if !ranks[rank] {
+				t.Fatalf("%s is missing top-%d coverage: %#v", document, rank, ranks)
+			}
+		}
+	}
+	if lowerRankCount == 0 {
+		t.Fatal("sample did not reserve any lower-ranked suggestions")
 	}
 }
 

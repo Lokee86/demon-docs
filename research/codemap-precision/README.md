@@ -1,90 +1,114 @@
 # Space Rocks codemap precision benchmark
 
-This benchmark measures the quality of ordinary missing-link suggestions from the current Demon Docs pipeline. It complements, and does not modify, the positive-only recall benchmark in [`research/codemap-review/space-rocks-trusted-links.json`](../codemap-review/space-rocks-trusted-links.json).
+This benchmark measures whether Demon Docs' current missing-link suggestions are useful, not whether they rediscover links deliberately hidden from the system.
 
-## Corpus and sampling
+## Why this benchmark exists
 
-- Corpus: Space Rocks revision `3387c94d10fdb94008f27b404098f3e0c32d911c` (10 reviewed documents, 51 trusted links).
-- Source run: all 51 trusted links were hidden with seed `space-rocks-precision-v1`; the run produced 267 unique suggestions, including 24 recovered trusted links and 243 ordinary unmatched suggestions.
-- Sample: 150 unique document-target pairs in [`space-rocks-precision-benchmark.json`](space-rocks-precision-benchmark.json).
-- Sampling: every document’s top five was retained where available; the remainder was selected deterministically with SHA-256 least-represented fill across document area, score bucket, primary evidence kind, and rank bucket.
-- Labels were assigned after inspecting the referenced document section and target file or directory. Each row records document and target references, excerpts, target kind, a target fingerprint, evidence, and a concise rationale.
+The original holdout benchmark is a recall benchmark. It hides known-good links and measures whether Demon Docs can recover them. Unknown suggestions are counted as false, so its apparent precision is not a trustworthy user-facing precision measurement.
 
-The three labels are mutually exclusive: `valid_missing_link` is correct for strict precision, `plausible_but_unnecessary` is accepted only for acceptance precision, and `incorrect` is junk.
+This benchmark labels ordinary current-state suggestions as:
 
-## Reproduction
+- `valid_missing_link`: a clear omitted semantic edge that belongs in the document's code map.
+- `plausible_but_unnecessary`: genuinely related, but indirect, redundant, broad, contextual, or optional.
+- `incorrect`: incidental or misleading evidence; the target does not materially support the documented subject.
 
-Generate the source suggestion report without changing Space Rocks:
+Strict precision counts only `valid_missing_link`. Acceptance precision counts both valid and plausible suggestions as non-junk.
 
-```text
-go run ./cmd/ddocs codemap benchmark --repo D:\!bin\space-rocks --trusted-links research\codemap-review\space-rocks-trusted-links.json --holdout-count 51 --seed space-rocks-precision-v1 --format json --output tmp\codemap-precision\full-hidden.json
-```
+## Source corpus
 
-Evaluate the labeled sample:
+- Repository: Space Rocks
+- Revision: `3387c94d10fdb94008f27b404098f3e0c32d911c`
+- Existing authored codemap links remain visible during suggestion generation.
+- In-repository `.worktrees/` documents are excluded.
+- Current-state source pool: 4,493 unlinked suggestions across 149 mapped documents.
 
-```text
-go run ./cmd/ddocs codemap precision --benchmark research\codemap-precision\space-rocks-precision-benchmark.json --suggestions tmp\codemap-precision\full-hidden.json
-```
+Keeping every authored link visible is essential: a target already present in a document's codemap cannot be labeled as a missing link.
 
-The evaluator verifies that every sampled pair, score/evidence payload, and rank still exists in the source report before calculating metrics.
+## Sampling
+
+The committed benchmark contains 150 deterministic suggestions selected from the current-state source pool.
+
+- 25 documents
+- six suggestions per document
+- complete ranks 1–5 for every sampled document
+- one additional lower-ranked suggestion per document
+- coverage across data, devtools, protocol, and service documentation
+- balancing across subsystem, score bucket, evidence kind, and rank
+
+Seed: `space-rocks-current-precision-v1`
+
+Sampling method: `balanced-documents-top-5-plus-lower-rank-fill-sha256`
+
+## Review method
+
+Each suggestion is reviewed against both the full document and the actual target in Space Rocks. Each benchmark row records:
+
+- the label and an evidence-specific rationale
+- document section and excerpt/paraphrase
+- target symbol or location and excerpt/paraphrase
+- target kind
+- target content hash
+
+Curation shards are validated before merge. Validation rejects changed suggestion fields, duplicate or missing document-target pairs, invalid labels, empty audit fields, and stale target hashes.
+
+Codex use for this work was run in `danger-full-access` with hackathon session logging enabled under `.codex-hackathon/sessions/`. Some review shards were completed by Hermes subagents after the Codex connector repeatedly exceeded its response window. The final merged artifact is validated by local tooling regardless of reviewer.
 
 ## Results
 
-Evaluation date: 2026-07-19.
+Results are generated from the committed labeled benchmark with:
 
-| metric | result |
-| --- | ---: |
-| sample size | 150 |
-| valid missing link | 98 |
-| plausible but unnecessary | 26 |
-| incorrect | 26 |
-| overall precision | 65.33% |
-| acceptance precision | 82.67% |
-| precision@1 | 80.00% |
-| precision@3 | 73.33% |
-| precision@5 | 74.00% |
+```text
+ddocs codemap precision evaluate \
+  --benchmark research/codemap-precision/space-rocks-precision-benchmark.json \
+  --suggestions research/codemap-precision/current-source-report.json
+```
 
-### Precision@k by document
+The reproducible source report is intentionally not committed because it is large and can be regenerated with:
 
-| document | @1 | @3 | @5 |
-| --- | ---: | ---: | ---: |
-| data-sync-and-ssot-pipeline | 0.00% | 0.00% | 0.00% |
-| observability-contract | 100.00% | 66.67% | 80.00% |
-| devtools-window | 100.00% | 100.00% | 100.00% |
-| spawn-tools | 100.00% | 100.00% | 100.00% |
-| player-data-http-api | 100.00% | 100.00% | 80.00% |
-| realtime-websocket-protocol | 100.00% | 100.00% | 100.00% |
-| websocket-connection-lifecycle | 100.00% | 100.00% | 100.00% |
-| diagnostic-aggregator runtime-and-report-flow | 0.00% | 0.00% | 0.00% |
-| player-respawn | 100.00% | 66.67% | 80.00% |
-| profile-stats-flow | 100.00% | 100.00% | 100.00% |
+```text
+ddocs codemap precision source \
+  --repo D:\!bin\space-rocks \
+  --exclude-prefix .worktrees \
+  --output research/codemap-precision/current-source-report.json
+```
 
-### Breakdowns
+### Measured results
 
-| primary evidence kind | n | valid | accepted | precision | acceptance |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| declared_symbol_mention | 58 | 55 | 58 | 94.83% | 100.00% |
-| exact_path_mention | 52 | 42 | 49 | 80.77% | 94.23% |
-| unique_basename_mention | 40 | 1 | 17 | 2.50% | 42.50% |
+| Metric | Result |
+|---|---:|
+| Strict precision | 46.67% |
+| Acceptance precision | 88.00% |
+| Precision@1 | 60.00% |
+| Precision@3 | 54.67% |
+| Precision@5 | 52.80% |
 
-| score bucket | n | valid | accepted | precision | acceptance |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `<1` | 13 | 1 | 2 | 7.69% | 15.38% |
-| `1-<2` | 69 | 35 | 55 | 50.72% | 79.71% |
-| `2-<8` | 39 | 34 | 38 | 87.18% | 97.44% |
-| `8+` | 29 | 28 | 29 | 96.55% | 100.00% |
+Label distribution:
 
-| rank bucket | n | valid | accepted | precision | acceptance |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 1-5 | 50 | 37 | 46 | 74.00% | 92.00% |
-| 6-10 | 33 | 22 | 30 | 66.67% | 90.91% |
-| 11-20 | 34 | 20 | 26 | 58.82% | 76.47% |
-| 21+ | 33 | 19 | 22 | 57.58% | 66.67% |
+- 70 `valid_missing_link`
+- 62 `plausible_but_unnecessary`
+- 18 `incorrect`
 
-### Sampling coverage
+The previous 3.45% figure was therefore not user-facing precision. It was a positive-only holdout score that treated every unknown suggestion as false. The labeled benchmark shows that most suggestions are genuinely related, but only about half are strong enough to be clear missing codemap entries.
 
-The sample covers all 10 documents, all four score buckets, all four rank buckets, all three observed primary evidence kinds, and four document areas: data (26), devtools (41), protocol (33), and services (50). Subsystem counts are recorded in the evaluator’s JSON output and the row-level artifact.
+### Evidence findings
+
+| Primary evidence | Strict precision | Acceptance precision |
+|---|---:|---:|
+| Declared symbol mention | 80.00% | 100.00% |
+| Test counterpart | 64.52% | 90.32% |
+| Dependency neighbor | 58.54% | 90.24% |
+| Related-document target | 40.74% | 70.37% |
+| Sibling of existing target | 25.00% | 83.33% |
+| Exact path mention | 16.67% | 95.83% |
+| Unique basename mention | 0.00% | 100.00% |
+
+Exact path and basename mentions are often real contextual relationships, but can appear in non-ownership or boundary statements. They should not be treated as automatic missing links without semantic qualification. Declared symbols, focused test counterparts, and strong dependency relationships are substantially better strict-link evidence.
+
+Rank quality drops sharply after the first five suggestions. Ranks 1–5 measured 52.80% strict precision; ranks 11–20 measured 0%, and ranks 21+ measured 13.33%. The current product surface should therefore remain heavily capped rather than exposing the long tail.
 
 ## Limitations
 
-This is a curated sample, not an unbiased estimate over every repository path. It is drawn from a full-hidden run of the 51-link trusted corpus, so it evaluates the current evidence pipeline under that benchmark setup and does not measure recall or unseen-document behavior. Directory suggestions are retained as ordinary candidates but are judged conservatively. Labels are auditable and source-pinned, but this artifact has one review pass rather than independent inter-rater agreement. The existing recall benchmark remains the appropriate measure for recovery of known links.
+- Space Rocks is one repository with unusually detailed LLM-assisted documentation.
+- Labels are reviewer judgments, even with source excerpts and hashes.
+- This benchmark measures the current algorithm and repository revision; candidate membership can change after evidence or ranking changes.
+- Precision and recall remain separate benchmarks. Improvements should be checked against both.

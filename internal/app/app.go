@@ -526,7 +526,7 @@ func resolveScope(arg optionalString, configured, configPath string) (repository
 func fail(w io.Writer, err error) int { fmt.Fprintf(w, "ddocs error: %v\n", err); return 2 }
 
 func codemapHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark,precision} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark,precision}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           evaluate a labeled precision benchmark\n\noptions:\n  -h, --help            show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark,precision} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark,precision}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           generate, sample, or evaluate precision suggestions\n\noptions:\n  -h, --help            show this help message and exit")
 }
 
 func codemapExportHelp(w io.Writer) {
