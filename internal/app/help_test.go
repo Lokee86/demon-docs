@@ -14,11 +14,11 @@ func TestCommandHelpContract(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"--help"}, []string{"ddocs reconciles documentation indexes, reverse indexes, and local Markdown links with the filesystem.", "ddocs init --root docs", "ddocs check -r", "ddocs config paths", "ddocs --version"}},
+		{[]string{"--help"}, []string{"ddocs reconciles documentation indexes, reverse indexes, and local Markdown links with the filesystem.", "reconciliation selectors:", "-d, --docs", "-l, --links", "-r, --reverse", "ddocs check --help", "ddocs check -r", "ddocs config paths", "ddocs --version"}},
 		{[]string{"init", "--help"}, []string{"Initialize a Demon Docs repository", "--root PATH", ".ddocs/config.toml", "must already exist"}},
 		{[]string{"status", "--help"}, []string{"Show the Demon Docs repository", "usage: ddocs status"}},
-		{[]string{"fix", "-h"}, []string{"Reconcile selected documentation indexes, links, and reverse indexes and write needed updates.", "-d, --docs", "-l, --links", "-r, --reverse", "-i, --indexes", "--reverse-root PATH", "--codemap-heading TEXT", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", ".ddocs/config.toml", "./.demon-docs.toml", "./.doc-ledger.toml", "repository config is discovered by searching upward"}},
-		{[]string{"check", "--help"}, []string{"Verify that selected documentation indexes, links, and reverse indexes are already reconciled.", "-d, --docs", "-l, --links", "-r, --reverse", "--root PATH", "--no-parent-link-indexed-files", "CLI flags override the selected config"}},
+		{[]string{"fix", "-h"}, []string{"Reconcile selected documentation indexes, links, and reverse indexes and write needed updates.", "-d, --docs", "-l, --links", "-r, --reverse", "-i, --indexes", "replace [reverse_index].roots for this run", "replace [codemap].headings for this run", "when any selector is supplied, only selected systems run", "-r/--reverse requires [reverse_index].roots", "relative --reverse-root paths resolve from the current working directory", "reverse reconciliation errors when no matching codemap section exists", "matching codemap section with no code targets", "ddocs fix -r --reverse-root services/game-server", "--root PATH", "--config PATH", "--index-file NAME", "--draft-description-prefix TEXT", "--include PATTERN", "--exclude PATTERN", "--marker-prefix TEXT", "--parent-label TEXT", "--no-parent-link-folder-indexes", "1. --config PATH", ".ddocs/config.toml", "./.demon-docs.toml", "./.doc-ledger.toml", "repository config is discovered by searching upward"}},
+		{[]string{"check", "--help"}, []string{"Verify that selected documentation indexes, links, and reverse indexes are already reconciled.", "-d, --docs", "-l, --links", "-r, --reverse", "--root PATH", "--no-parent-link-indexed-files", "Reverse-index rules:", "--codemap-heading matching is case-insensitive", "ddocs check -d -r", "CLI flags override the selected config"}},
 		{[]string{"watch", "-h"}, []string{"Watch runs in the foreground by default", "--once", "--debounce-seconds FLOAT", "run one reconciliation pass and exit"}},
 		{[]string{"config", "-h"}, []string{"paths", "show", "init", ".ddocs/config.toml", "Legacy local config lookup remains current-directory only."}},
 		{[]string{"config", "paths", "-h"}, []string{"repository", ".ddocs/config.toml", ".demon-docs.toml", "demon-docs.toml", ".doc-ledger.toml", "doc-ledger.toml", "Global config candidates"}},
@@ -40,6 +40,27 @@ func TestCommandHelpContract(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUsageErrorsDoNotAdvertiseRemovedReverseIndexCommand(t *testing.T) {
+	tests := [][]string{
+		{},
+		{"unknown-command"},
+		{"check", "unexpected-positional"},
+		{"config", "paths", "unexpected-positional"},
+	}
+	for _, args := range tests {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), args, &stdout, &stderr); code != 2 {
+			t.Fatalf("args=%v code=%d stdout=%q stderr=%q", args, code, stdout.String(), stderr.String())
+		}
+		if !strings.Contains(stderr.String(), topUsageLine) {
+			t.Fatalf("args=%v missing current top usage line:\n%s", args, stderr.String())
+		}
+		if strings.Contains(stderr.String(), "watch,reverse-index,codemap") {
+			t.Fatalf("args=%v advertised removed reverse-index subcommand:\n%s", args, stderr.String())
+		}
 	}
 }
 

@@ -112,7 +112,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -138,7 +138,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "demon":
 		return runDemon(ctx, args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		choices := "init, status, fix, check, watch, codemap, config, demon"
 		if runtime.GOOS == "windows" {
 			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config', 'demon'"
@@ -148,7 +148,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...\n\nddocs reconciles documentation indexes, reverse indexes, and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -r\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version")
+	fmt.Fprintf(w, "%s\n\nddocs reconciles documentation indexes, reverse indexes, and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation-folder indexes\n  -l, --links           local Markdown links\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -284,7 +284,7 @@ func treeHelp(w io.Writer, command string) {
 	if command == "watch" {
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 	}
-	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -d, --docs            reconcile documentation indexes\n  -l, --links           reconcile links\n  -r, --reverse         reconcile code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n  --root PATH           docs root directory to reconcile\n  --reverse-root PATH   override configured reverse-index roots; repeat as needed\n  --codemap-heading TEXT\n                        override configured codemap headings; repeat as needed\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nSelector rules:\n  - without selectors, docs and links run; reverse also runs when roots are configured or supplied\n  - with selectors, only the selected subsystems run\n\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions)
+	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -d, --docs            reconcile documentation-folder indexes\n  -l, --links           reconcile local Markdown links\n  -r, --reverse         reconcile code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n  --root PATH           docs root directory to reconcile\n  --reverse-root PATH   replace [reverse_index].roots for this run; repeat as needed\n  --codemap-heading TEXT\n                        replace [codemap].headings for this run; repeat as needed\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nSelector rules:\n  - when any selector is supplied, only selected systems run\n  - without selectors, docs and links run\n  - without selectors, reverse also runs when reverse roots are configured or supplied\n\nReverse-index rules:\n  - -r/--reverse requires [reverse_index].roots or at least one --reverse-root\n  - relative --reverse-root paths resolve from the current working directory\n  - absolute --reverse-root paths must remain inside the repository\n  - --codemap-heading matching is case-insensitive and replaces configured headings\n  - reverse reconciliation errors when no matching codemap section exists\n  - a matching codemap section with no code targets is reported separately\n\nExamples:\n  ddocs %s -d\n  ddocs %s -l\n  ddocs %s -r --reverse-root services/game-server\n  ddocs %s -d -r\n  ddocs %s -r --codemap-heading \"Implementation map\"\n\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions, command, command, command, command, command)
 }
 
 var (
@@ -297,7 +297,7 @@ var (
 func writeTreeParseError(w io.Writer, command string, err error) {
 	message := err.Error()
 	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
-		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(w, topUsageLine)
 		fmt.Fprintf(w, "ddocs: error: unrecognized arguments: --%s\n", match[1])
 		return
 	}
@@ -351,7 +351,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ...")
+		fmt.Fprintln(errOut, topUsageLine)
 		fmt.Fprintf(errOut, "ddocs: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
@@ -666,7 +666,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,reverse-index,codemap,config,demon} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config,demon} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"
