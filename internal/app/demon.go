@@ -17,7 +17,19 @@ import (
 )
 
 func demonHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs demon [-h] {run,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher.\n\ncommands:\n  run [--true|--false] [PATH]  enable/check and feed the repository demon\n  --status [PATH]              show demon ownership and feeder status\n  --logs [PATH]                print repository-specific demon logs")
+	fmt.Fprintln(w, "usage: ddocs demon [-h] {run,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership.")
+}
+
+func demonRunHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs demon run [--true|--false] [PATH]\n\nCheck configured enablement and, when enabled, register the current shell as a feeder and start the detached watcher when no fresh owner exists. Repeated calls from the same parent shell reuse its feeder.\n\noptions:\n  --true   persist [demon].run = true, clear a shutdown request, and continue startup\n  --false  persist [demon].run = false, remove all feeders, request shutdown, and exit\n\nPATH defaults to the current directory and may point anywhere inside the repository. A linked worktree is bootstrapped on its first mutating demon entry.")
+}
+
+func demonStatusHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs demon --status [PATH]\n\nRead repository demon status without creating runtime state, cleaning expired feeder files, or bootstrapping a linked worktree.\n\nThe report includes repository root, configured enablement, running/stale/stopped ownership state, detached PID, active shell and agent counts, last owner heartbeat, and watched docs root.")
+}
+
+func demonLogsHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs demon --logs [PATH]\n\nPrint retained repository-local demon logs from oldest to newest. Logs are stored under .ddocs/runtime/logs and rotate across five files of approximately 1 MiB each.")
 }
 
 func runDemon(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -100,7 +112,7 @@ func demonRun(ctx context.Context, args []string, out, errOut io.Writer) int {
 	trueFlag := fs.Bool("true", false, "enable the repository demon")
 	falseFlag := fs.Bool("false", false, "disable the repository demon")
 	if helpRequested(args) {
-		fmt.Fprintln(out, "usage: ddocs demon run [--true|--false] [PATH]\n\nEnsure the repository demon is active and feed it from this shell. --false persists disablement; --true persists enablement.")
+		demonRunHelp(out)
 		return 0
 	}
 	path, code := parseDemonPath(args, fs)
@@ -187,7 +199,7 @@ func demonRun(ctx context.Context, args []string, out, errOut io.Writer) int {
 func demonStatus(args []string, out, errOut io.Writer) int {
 	if len(args) > 1 || helpRequested(args) {
 		if helpRequested(args) {
-			fmt.Fprintln(out, "usage: ddocs demon --status [PATH]")
+			demonStatusHelp(out)
 			return 0
 		}
 		fmt.Fprintln(errOut, "usage: ddocs demon --status [PATH]")
@@ -234,7 +246,7 @@ func demonStatus(args []string, out, errOut io.Writer) int {
 func demonLogs(args []string, out, errOut io.Writer) int {
 	if len(args) > 1 || helpRequested(args) {
 		if helpRequested(args) {
-			fmt.Fprintln(out, "usage: ddocs demon --logs [PATH]")
+			demonLogsHelp(out)
 			return 0
 		}
 		fmt.Fprintln(errOut, "usage: ddocs demon --logs [PATH]")
@@ -463,6 +475,10 @@ func demonLeave(args []string, out, errOut io.Writer) int {
 }
 
 func demonShellHook(args []string, out, errOut io.Writer) int {
+	if helpRequested(args) {
+		fmt.Fprintln(out, "usage: ddocs demon __shell-hook {bash|powershell}\n\nPrint shell integration code that registers a shell feeder when entering a Demon Docs repository and removes only that feeder when leaving.\n\nInstall Bash integration with:\n  eval \"$(ddocs demon __shell-hook bash)\"\n\nInstall PowerShell integration with:\n  Invoke-Expression (& ddocs demon __shell-hook powershell)")
+		return 0
+	}
 	if len(args) != 1 || (args[0] != "bash" && args[0] != "powershell") {
 		fmt.Fprintln(errOut, "usage: ddocs demon __shell-hook {bash|powershell}")
 		return 2
