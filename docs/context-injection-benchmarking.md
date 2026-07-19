@@ -1,6 +1,6 @@
 # Context-Injection Benchmarking
 
-Demon Docs eventually needs evidence that deterministic context bundles improve real agent work. This is a future research plan, not a current release requirement. The project should develop the benchmark design now, preserve useful discovery artifacts, and defer paid or large-scale model trials until they are affordable.
+Demon Docs eventually needs evidence that deterministic context bundles improve real agent work. Context delivery is not implemented, but corpus preparation is underway: discovery artifacts, three pinned historical task fixtures, validation manifests, and fixture-preparation tools are retained in the repository. Paid or large-scale paired model trials remain deferred.
 
 ## Research Question
 
@@ -155,7 +155,9 @@ When affordable, run multiple independent repetitions per condition, randomize c
 
 ## Current Research Artifacts
 
-Initial GitHub discovery work is preserved under `research/context-benchmarking/`. It includes current star-neutral corpus-preparation helpers, the original scanner retained for provenance, candidate reports, and three historical `wifitui` task manifests with baseline validation and evaluator-only oracle data.
+GitHub discovery work is preserved under `research/context-benchmarking/`. It includes current star-neutral corpus-preparation helpers, the original scanner retained for provenance, candidate reports, and three historical `wifitui` task manifests with baseline validation and evaluator-only oracle data.
+
+The prepared fixtures are `wifitui` pull requests 163, 167, and 178. Each fixture separates the agent-visible task and metadata from evaluator-only oracle data and records baseline validation. `validate_fixture.py` and the committed validation summary check the retained fixture contract. These fixtures establish harness inputs; they do not yet constitute a paired context experiment.
 
 The first scan was biased toward active, moderately sized Go projects and included star bands as a candidate-pool heuristic. Its rankings must not be treated as the final benchmark design. In particular:
 
@@ -185,3 +187,12 @@ The scanner should be revised before another broad search so code quality, docum
 - Manufacturing all benchmark tasks in synthetic fixtures.
 - Requiring expensive benchmark runs before the context feature can be designed.
 - Using benchmark-specific summaries as production context rules.
+
+## Code map
+
+- `research/context-benchmarking/tools/discover_candidates.py` — star-neutral repository and task candidate discovery.
+- `research/context-benchmarking/tools/prepare_historical_fixture.py` — pinned historical-task fixture construction.
+- `research/context-benchmarking/tools/validate_fixture.py` — fixture separation and integrity checks.
+- `research/context-benchmarking/tools/initial-scan/` — original discovery scripts retained for provenance.
+- `research/context-benchmarking/discovery-results/` — candidate inventories, findings, and recommendations.
+- `research/context-benchmarking/fixtures/` — agent-visible tasks, metadata, baseline validation, and evaluator-only oracle records.

@@ -1,10 +1,14 @@
 # Deterministic Code, Dependency, and Entanglement Facts
 
-This document describes the planned extension from deterministic symbol discovery to bounded code and dependency facts, plus projections over those facts. It is optional analysis layered on the typed repository graph. It is not required for baseline documentation-folder reconciliation, file/path references, or reverse documentation indexes.
+This document describes the back-burnered polyglot code-graph track: bounded code and dependency facts plus projections over those facts. It is optional analysis layered beside the existing documentation/link graph. It is not required for current documentation-folder reconciliation, link repair, codemap extraction, or the initial file/folder reverse-index implementation.
+
+The adapter seam comes before any language implementation. Demon Docs normalizes deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, language servers, or external code-intelligence providers instead of rebuilding those systems inside the project.
 
 ## Scope and Deterministic Basis
 
-The extension consumes normalized symbols and containment facts when an enabled language adapter can provide them. It may add further parser, compiler, build, or bounded static-analysis facts, but it must never treat model inference, prose similarity, or an LLM interpretation as a parser fact.
+The extension consumes normalized symbols and containment facts when an enabled provider can supply them. It may add further parser, compiler, build, or bounded static-analysis facts, but it must never treat model inference, prose similarity, or an LLM interpretation as a parser fact.
+
+A provider is language- or tool-specific; the normalized graph contract is not. Provider output must include capabilities, provenance, tool versions, repository-relative identities, and explicit unresolved or unsupported states. Consumers such as codemap ranking and context projection operate on the normalized contract rather than importing provider-specific types.
 
 A fact is emitted only when its source tool or adapter can describe the relationship reproducibly for the configured repository snapshot. The fact records its source file or symbol, target file or symbol where known, relation kind, source span or analysis location, adapter and tool metadata, and any limitations needed to interpret it. The typed graph owns these observed facts; entanglement and impact views consume them as projections.
 
@@ -106,8 +110,10 @@ A daemon may watch repository and Git changes, coalesce events, trigger the same
 
 ## Initial Acceptance Criteria
 
-The design is ready for implementation planning when focused fixtures and repeatable static checks can demonstrate that:
+The code-graph track is ready to resume implementation when focused fixtures and repeatable static checks can demonstrate that:
 
+- the provider adapter boundary is implemented before a production language adapter;
+- two fixture providers can normalize contrasting language/tool outputs into the same consumer contract;
 - symbol discovery can remain enabled without requiring dependency analysis, and baseline documentation reconciliation works with all optional code/dependency capabilities disabled;
 - adapters report per-language capabilities, versions, limits, and required inputs;
 - supported imports, calls, references, implementations, containment, reads/writes, shared-state, and bounded control-flow facts are emitted only when reproducible, with provenance;
@@ -120,6 +126,7 @@ The design is ready for implementation planning when focused fixtures and repeat
 
 ## Open Decisions
 
+- Which existing code-intelligence source should be adapted first and how optional external binaries are discovered.
 - The language-neutral relation taxonomy and normalization rules for each fact family.
 - Which adapter inputs are required for each capability and how build, type, generated-code, and environment boundaries are declared.
 - The representation and retention policy for unresolved, dynamic, reflection, runtime-only, and unsupported fact records.

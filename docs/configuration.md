@@ -77,6 +77,17 @@ when it is disabled. Shell hooks use `shell` feeders; MCP and native host
 adapters can use the host-neutral `agent` feeder lifecycle without moving host
 logic into Demon Docs core. See [Repository Demon](repository-demon.md).
 
+## Codemap Configuration
+
+The current `codemap export` command uses CLI options for format-specific overrides:
+
+- repeated `--heading TEXT` replaces the default accepted heading aliases;
+- `--target-base repository|document` selects path resolution origin;
+- repeated `--target-root PATH` supplies repository-relative component roots; and
+- `--output PATH` writes the deterministic dataset to a file.
+
+The main branch does not yet persist codemap headings or target roots in the general TOML config. The reverse-index feature branch introduces dedicated codemap-heading and reverse-root settings; document those as released configuration only after that branch merges.
+
 ## Selection
 
 Demon Docs selects one base config before applying command-specific CLI overrides.
@@ -553,8 +564,12 @@ Markdown link reconciliation has no required TOML keys. Its persistent, schema-v
 
 The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 
-## Related Files
+## Code map
 
-- `internal/config/config.go`
-- `internal/links/`
-- `internal/config/config_test.go`
+- `internal/config/config.go` — TOML model, defaults, compatibility aliases, and selection loading.
+- `internal/config/config_test.go` — config parsing, precedence, and compatibility coverage.
+- `internal/config/behavior_test.go` — user-visible configuration behavior.
+- `internal/app/app.go` — config commands and one-shot CLI overrides.
+- `internal/repository/scope.go` — repository-root and docs-root resolution boundaries.
+- `internal/repository/repository.go` — repository discovery and initialization.
+- `internal/links/` — schema-versioned link state governed by repository scope rather than TOML keys.

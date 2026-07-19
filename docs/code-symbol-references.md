@@ -1,8 +1,8 @@
 # Code-Symbol References
 
-This document defines the Phase 4 design for deterministic references from authored documentation to specific declarations in source code. It extends file- and path-level references without replacing them.
+This document defines the planned deterministic references from authored documentation to specific declarations in source code. Symbol references are not implemented and belong to the back-burnered polyglot code-graph track. They extend file- and path-level references without replacing them.
 
-It builds on the typed model in [Deterministic Typed Repository Graph](repository-graph.md), feeds the distinct projections described in [Code-Folder Reverse Indexes](reverse-indexes.md), and provides symbol facts for the later [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md) work.
+The language-neutral provider seam must be implemented before any production language adapter. Symbol facts will feed the projections described in [Code-Folder Reverse Indexes](reverse-indexes.md) and the broader [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md) work.
 
 ## Purpose
 
@@ -31,13 +31,13 @@ A declaration is a parser-observable region with a precise source span. Arbitrar
 
 Adapters consume language-parser facts: AST nodes, declaration kinds, names, containment, and exact source spans. The adapter does not ask an LLM to decide what a symbol means or where it begins and ends.
 
-The first adapter is Go. It uses `go/parser`, `go/ast`, and `go/token` for syntax and source positions. `go/types` or `go/packages` may be used only when semantic qualification is needed, such as disambiguating package-qualified declarations or resolving type information. Their use must remain bounded and reproducible for the configured repository state.
+No first production adapter is selected yet. The architecture must accept multiple languages from the outset and may normalize output from compiler tooling, Tree-sitter analysis, SCIP-style indexes, language servers, or external code-intelligence providers. A Go provider may use `go/parser`, `go/ast`, `go/token`, `go/types`, or `go/packages`, but those implementation choices must not define the core contract.
 
-The normalized graph is derived from the adapter output and repository paths, not from formatting conventions or guessed prose.
+The normalized graph is derived from provider output and repository paths, not from formatting conventions or guessed prose.
 
 ## Adapter Contract
 
-Every language adapter implements the same language-neutral contract:
+Every language or tool provider implements the same language-neutral contract:
 
 1. Accept a repository root, a set of candidate source files, and adapter configuration.
 2. Parse supported files without modifying them.
@@ -113,7 +113,9 @@ name: Reconcile
 ---
 ```
 
+```markdown
 [Reconcile](src/ledger/index.go)
+```
 
 These examples are illustrative only and are not a compatibility commitment. Any final syntax must be:
 
@@ -171,15 +173,15 @@ A file change invalidates its declarations and any edges or projections derived 
 - No network service, daemon, or LLM is required for resolution or correctness.
 - Authored prose and explicit selectors remain the source of intent.
 
-## Adapter Rollout Strategy
+## Provider Rollout Strategy
 
-Adapters roll out one language at a time behind explicit capability and configuration checks. The Go adapter establishes the contract and fixtures. Later adapters must provide equivalent normalized nodes, diagnostics, deterministic ordering, and focused move/rename behavior before being enabled by default.
+The language-neutral provider contract and fixture providers come first. Production providers may then roll out independently behind explicit capability and configuration checks. No language implementation establishes or privately extends the core contract; each provider must emit equivalent normalized nodes, diagnostics, provenance, and deterministic ordering.
 
-Unsupported languages remain valid repository files and may still participate in file-level links and folder indexes. Adapter-specific extensions must not change the language-neutral graph contract.
+Unsupported languages remain valid repository files and may still participate in file-level links, folder indexes, and file-level reverse references. Provider-specific extensions must not change the language-neutral graph contract.
 
-## Go Adapter Acceptance Criteria
+## Illustrative Go Provider Acceptance Criteria
 
-The Go adapter is acceptable for Phase 4 when it can, deterministically and with focused tests:
+A later Go provider would be acceptable when it can, deterministically and with focused tests:
 
 - discover package declarations and supported declarations for types, interfaces, functions, methods, fields, and supported constants/variables;
 - emit repository-relative paths, qualified names, containment, and exact source spans;
@@ -199,5 +201,6 @@ The acceptance suite must include legacy-style files with multiple declarations,
 - Whether fingerprints are persisted in graph exports or retained only in diagnostics and repair candidates.
 - The supported line-range syntax and freshness policy for fragile references.
 - The format and limits of deterministic context bundles.
-- Which Go qualification cases require `go/types` or `go/packages`, and how failures are surfaced.
-- The configuration boundary between enabled adapters and automatic file-type discovery.
+- Which code-intelligence provider should be adapted first after the language-neutral seam is stable.
+- Which Go qualification cases require `go/types` or `go/packages`, and how failures are surfaced in a later Go provider.
+- The configuration boundary between enabled providers and automatic file-type discovery.

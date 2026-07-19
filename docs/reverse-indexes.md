@@ -1,6 +1,6 @@
 # Code-Folder Reverse Indexes
 
-This document describes the code-folder reverse-index boundary and the current initial implementation. File- and folder-level codemap projection is implemented; symbol adapters, richer coverage reports, and move-aware repair remain later work.
+This document describes the code-folder reverse-index boundary and the current implementation on `main`. File- and folder-level codemap projection, configured recursive code roots, nested `.docignore`, configurable codemap headings, and `-r` / `--reverse` selection are implemented. Symbol adapters, richer coverage reports, and move-aware repair remain later work.
 
 ## Purpose and Index Type
 
@@ -14,6 +14,20 @@ The two directions reconcile differently:
 - reverse indexes start at authored documentation references, resolve their code targets, and group the resolved references by code target.
 
 A reverse index must not be used as input to rebuild the forward documentation tree. Its output locations are nevertheless selected by explicit recursive traversal roots: the roots decide where indexes may exist, while authored codemap references decide which documentation backlinks appear.
+
+## Current Implementation Scope
+
+Reverse indexing is a third reconciliation feature alongside documentation indexes and links:
+
+```bash
+ddocs check -r --reverse-root services/game-server
+ddocs fix -r --reverse-root client
+ddocs watch -r --once --reverse-root client
+```
+
+Configured roots are repository-relative, traversed recursively, and may be overridden by repeated relative or absolute `--reverse-root` values that remain inside the repository. Nested `.docignore` files apply relative to the directory containing them. Configured codemap headings are supported, and reconciliation fails explicitly when a selected document has no matching codemap section or has a matching section with no targets.
+
+This implemented slice does not yet include symbol adapters, move-aware authored-reference repair, rich coverage reports, or the future polyglot code graph.
 
 ## Inputs
 

@@ -1,10 +1,10 @@
 # Testing and Fixtures
 
-Demon Docs is covered by focused Go package tests, watcher integration coverage, and Go CLI fixture regression gates. Go is the sole implementation and supported runtime.
+Demon Docs is covered by focused Go package tests, filesystem integration tests, CLI fixture regressions, codemap benchmark artifacts, and cross-platform CI. Go is the sole implementation and supported runtime.
 
 ## Test Commands
 
-For an install smoke check, run:
+For an install smoke check:
 
 ```bash
 go install ./cmd/ddocs
@@ -15,7 +15,7 @@ demon --help
 demon --version
 ```
 
-From the repo root, run the complete local release gate:
+Run the complete local release gate from the repository root:
 
 ```bash
 make release-check
@@ -31,26 +31,73 @@ make build
 make smoke
 ```
 
-`make regression` runs the Go CLI fixture regression matrix. It builds the binary once, then runs the ten retained fixture scenarios through `fix`, verifies that `check` succeeds on the clean result, runs `fix` again, and requires the complete fixture tree to be byte-identical after the first and second fixes.
+A direct full-suite run is:
 
-The ten scenarios cover defaults; custom index headings, markers, drafts, and non-Markdown editable files; direct-to-stub transition; stub graduation; unique and ambiguous file moves; unique and ambiguous folder moves; stale entry removal; and malformed managed blocks. Focused Go specification tests cover Goldmark ignoring fenced headings and exact final-newline preservation.
+```bash
+go test ./... -count=1
+```
 
-## What the Tests Cover
+## Fixture Regression Matrix
 
-The Demon Docs tests are split across small, focused areas:
+`make regression` runs the Go CLI fixture matrix. It builds the binary once, then runs each retained scenario through `fix`, verifies a clean successful `check`, runs `fix` again, and requires the complete fixture tree to be byte-identical after the first and second fixes.
 
-- CLI behavior
-- config loading and selection
-- scan model construction
-- README IO and managed section handling
-- parent index behavior
-- reconciliation planning and file updates
-- watcher scheduling and filtering
-- repository-demon ownership, feeders, shutdown, logs, hooks, and linked worktrees
-- end-to-end flows
-- public config examples
+The scenarios cover defaults; custom headings, markers, drafts, and editable extensions; direct-to-stub transitions; stub graduation; unique and ambiguous file or folder moves; stale entry removal; and malformed managed blocks. Focused byte-level tests also verify that fenced Markdown examples are not treated as real managed structure and that the original final-newline state is preserved.
 
-Those tests keep the implementation honest without depending on a larger application runtime.
+## Link-Reconciliation Coverage
+
+Focused link tests cover:
+
+- ordinary Markdown links and images;
+- angle-wrapped destinations and titles;
+- reference definitions plus explicit and collapsed label uses;
+- undefined reference-label diagnostics;
+- path-based wiki links, aliases, embeds, extensionless targets, and ambiguity;
+- supported local HTML `href`, `src`, and `poster` attributes;
+- ignored fenced code and inline code spans;
+- file identity, fingerprints, case-only changes, moves, and ambiguous candidates;
+- external relative and absolute filesystem targets;
+- atomic generated rewrites and concurrent source changes;
+- bounded rewrite-worker behavior and deterministic plans;
+- initial baseline and incremental storage timing; and
+- watch-event suppression for expected generated writes.
+
+## Repository-Demon Coverage
+
+Daemon tests cover:
+
+- exactly-one fresh owner claims and stale-owner recovery;
+- feeder registration, reuse, expiry, counting, and removal;
+- shutdown requests and grace periods;
+- read-only status behavior;
+- bounded log rotation;
+- Bash and PowerShell hook contracts;
+- linked-worktree discovery and first-mutating-entry bootstrap; and
+- persistent enable and disable behavior.
+
+`TestClaimAllowsExactlyOneOwner` has now failed intermittently in more than one full-suite run by allowing a second owner after the first lease aged during the concurrent test. The same test passed 50 focused repetitions. Treat this as an unresolved suite-context reliability issue: retain focused stress coverage, reproduce the timing interaction, and do not call daemon ownership fully settled until the cause is fixed or the test contract is corrected.
+
+## Codemap Tests and Benchmarks
+
+Codemap package tests cover syntax extraction, target normalization, target-root handling, deterministic datasets, evidence signals, holdout orchestration, report formats, ranking, tier assignment, precision sampling, and curated-label evaluation.
+
+The committed Space Rocks precision sample contains 150 labels. Its recorded evaluation is used as a tuning regression baseline:
+
+- precision at rank 1: **60.0%**;
+- precision at rank 3: **54.7%**;
+- precision at rank 5: **52.8%**;
+- `hard_link` strict precision: **64.2%**;
+- `hard_link` non-junk acceptance: **95.1%**; and
+- `hard_link` sample recall of valid links: **74.3%**.
+
+Run repository holdouts with:
+
+```bash
+ddocs codemap benchmark --repo /path/to/repository --format json
+```
+
+Use `ddocs codemap precision --help` for generation, sampling, and evaluation commands. Benchmark reports must retain the repository, revision or dataset, seed, holdout rules, labels, and command inputs needed to reproduce them.
+
+Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, and deterministic holdout tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
 
 ## Continuous Integration
 
@@ -58,49 +105,32 @@ Those tests keep the implementation honest without depending on a larger applica
 
 - the complete Go suite, including `./tests`, on Linux and Windows;
 - `go vet ./...`;
-- both executable builds and basic CLI smoke tests for `ddocs` and `demon`.
+- both executable builds; and
+- basic CLI smoke tests for `ddocs` and `demon`.
 
 ## Release Requirements
 
 A release is eligible only when all CI jobs pass. In particular:
 
 - Linux and Windows Go tests are green;
-- the ten-fixture Go CLI regression matrix is green;
-- focused specification tests cover the intentional compatibility corrections;
-- `go vet`, both executable builds, and CLI smoke checks for `ddocs` and `demon` are green;
-- repeated reconciliation is byte-identical and check mode remains non-mutating;
-- repeated daemon ownership and feeder tests are free of timing-dependent failures.
+- the CLI fixture matrix is green;
+- `go vet`, both executable builds, and CLI smoke checks pass;
+- repeated reconciliation is byte-identical;
+- `check` remains non-mutating;
+- link and codemap reports remain deterministic for pinned fixtures; and
+- repeated daemon ownership and feeder tests are free of reproducible timing failures.
 
 ## Dummy Docs Fixture Generator
 
-`docs/make-dummy-docs.sh` is a manual stress and fixture generator. It builds a nested docs tree with randomly shaped folders and files so you can exercise reconciliation against a larger input.
-
-Run it with:
+`docs/make-dummy-docs.sh` creates a disposable nested documentation tree for manual stress testing.
 
 ```bash
 ./docs/make-dummy-docs.sh
 ```
 
-Useful knobs exposed by the script:
+Useful environment knobs include `ROOT_DIR`, `RECREATE`, `EXTENSIONS`, and the `MIN_*` / `MAX_*` folder and file counts. The default output directory is `dummy-docs/`, which is ignored by the repository.
 
-- `ROOT_DIR` sets the output directory name
-- `RECREATE=1` deletes the output directory before generating
-- `RECREATE=0` adds into an existing tree
-- `EXTENSIONS` controls the generated file extensions
-- `MIN_AREAS` and `MAX_AREAS` control top-level area folders
-- `MIN_SUBAREAS_PER_AREA` and `MAX_SUBAREAS_PER_AREA` control subarea nesting
-- `MIN_TOPICS_PER_SUBAREA` and `MAX_TOPICS_PER_SUBAREA` control topic nesting
-- `MIN_ROOT_FILES` and `MAX_ROOT_FILES` control files at the root
-- `MIN_AREA_FILES` and `MAX_AREA_FILES` control files in area folders
-- `MIN_SUBAREA_FILES` and `MAX_SUBAREA_FILES` control files in subarea folders
-- `MIN_TOPIC_FILES` and `MAX_TOPIC_FILES` control files in topic folders
-
-The default output directory is `dummy-docs/` in the current working directory.
-The repo’s `.gitignore` already ignores that output directory.
-
-## Manual Smoke Workflow
-
-A simple end-to-end smoke test uses the Go CLI:
+A simple smoke flow is:
 
 ```bash
 ./docs/make-dummy-docs.sh
@@ -108,33 +138,23 @@ ddocs fix --root dummy-docs
 ddocs check --root dummy-docs
 ```
 
-If you are working from the repo checkout, `go run ./cmd/ddocs` is the primary fallback. The equivalent alias is `go run ./cmd/demon`. After that, try a move or rename inside `dummy-docs/`, run `fix` and `check` again, and inspect the diff.
+## Context-Benchmark Research
 
-## Fixture Guidance
+Agent-context claims require a separate empirical harness beyond package tests and codemap holdouts. The retained research uses authentic historical OSS tasks, paired no-context and context-injected conditions, independent code/documentation quality assessment, leakage controls, and an intentionally constructed harness control.
 
-- Dummy docs are manual stress fixtures, not canonical docs.
-- Keep them disposable.
-- Use them when you want a noisy tree that exercises nesting, stubs, and cross-folder reconciliation.
+Corpus preparation and deterministic harness validation can proceed without paid repeated model runs. See [Context-Injection Benchmarking](context-injection-benchmarking.md) and `research/context-benchmarking/`.
 
-## Future Agent-Context Benchmarking
+## Code map
 
-The deterministic context feature requires a separate research benchmark beyond package and reconciliation tests. The planned protocol uses authentic historical OSS tasks across independent code-quality and documentation-quality quadrants, matched no-context and context-injected conditions, and an intentionally constructed harness control.
-
-This work is deliberately staged so corpus preparation and harness design can proceed without paying for repeated model trials. See [Context-Injection Benchmarking](context-injection-benchmarking.md).
-
-## Future Context-Benchmark Research
-
-The deterministic context feature will eventually need a separate research corpus and harness. That work is documented in [Context-Injection Benchmarking](context-injection-benchmarking.md) and retained under `research/context-benchmarking/`.
-
-It is deliberately outside the current Go release gate. Repository classification, historical-task preparation, deterministic context generation, and harness dry runs can advance without paid model trials; paired and repeated agent runs remain future work.
-
-## Related Files
-
-- `docs/make-dummy-docs.sh`
-- `tests/regression_test.go`
-- `tests/regression_fixtures_test.go`
-- `internal/reconcile/reconcile_test.go`
-- `internal/watch/watch_test.go`
-- `internal/demon/runtime_test.go`
-- `internal/app/demon_test.go`
-- `internal/repository/worktree_test.go`
+- `.github/workflows/ci.yml` — Linux and Windows CI.
+- `tests/regression_test.go` — CLI fixture regression orchestration.
+- `tests/regression_fixtures_test.go` — fixture-tree assertions.
+- `internal/links/*_test.go` — link syntax, state, rewrite, concurrency, and timing coverage.
+- `internal/watch/*_test.go` — watcher filters, scheduling, and filesystem events.
+- `internal/demon/runtime_test.go` — owner and feeder lifecycle coverage.
+- `internal/app/demon_test.go` — daemon CLI and shell integration coverage.
+- `internal/codemap/*_test.go` — codemap extraction and deterministic dataset coverage.
+- `internal/codemapbench/*_test.go` — benchmark, ranking, report, and tier coverage.
+- `internal/codemapprecision/*_test.go` — curated precision evaluation coverage.
+- `research/codemap-precision/` — pinned labels and evaluation artifacts.
+- `research/context-benchmarking/` — historical-task and harness research artifacts.

@@ -1,23 +1,24 @@
 # Demon Docs Documentation
 
 The repo root [README.md](../README.md) is the starting point for Demon Docs.
-This `docs/` folder holds deeper design, operational, and maintenance references for the tool.
+This `docs/` folder holds deeper design, operational, research, and maintenance references for the tool.
 
 ## References
 
-- [Roadmap](roadmap.md): Planned implementation order from the deterministic repository graph through self-managed watcher operations and optional LLM assistance.
-- [Deterministic Typed Repository Graph](repository-graph.md): Focused design for the language-neutral deterministic repository graph.
-- [Code-Folder Reverse Indexes](reverse-indexes.md): Focused design for documentation coverage projected onto code targets.
-- [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Focused design for deterministic code facts and bounded entanglement projections.
-- [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Focused design for graph-based agent context retrieval and thin integrations.
-- [Context-Injection Benchmarking](context-injection-benchmarking.md): Future research plan for a four-quadrant OSS corpus, paired no-context controls, and an intentionally constructed harness control.
-- [Configuration](configuration.md): Config file shape, defaults, and supported overrides.
+- [Roadmap](roadmap.md): Current shipped behavior, active branches, near-term work, and the back-burnered polyglot code-graph track.
+- [Codemap Missing-Link Evidence](codemap-evidence.md): Implemented codemap export, evidence, holdout benchmarking, precision evaluation, current metrics, and decision-safety rules.
+- [Markdown Link Reconciliation](markdown-links.md): Repository-scoped link validation, persistent identity state, supported syntax, and deterministic path repair.
 - [Repository Demon](repository-demon.md): Self-managed watcher ownership, shell and agent feeders, worktrees, shutdown, recovery, and logs.
-- [Markdown Link Reconciliation](markdown-links.md): Repository-scoped local link validation, persistent identity state, and path repair.
-- [Code-Symbol References](code-symbol-references.md): Focused Phase 4 design for deterministic declaration-level documentation references and language adapters.
-- [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, and applies index updates.
-- [Watcher and Automation](watcher-and-automation.md): Watch mode behavior, timestamps, PID output, and automation guidance.
-- [Testing and Fixtures](testing-and-fixtures.md): Test layout, fixture strategy, and regression coverage for Demon Docs.
+- [Configuration](configuration.md): Config selection, repository settings, defaults, and supported CLI overrides.
+- [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, applies, and verifies deterministic index and link updates.
+- [Watcher and Automation](watcher-and-automation.md): Foreground watch behavior and its relationship to the repository demon.
+- [Testing and Fixtures](testing-and-fixtures.md): Release gates, fixture strategy, link/codemap regression coverage, and research benchmarks.
+- [Code-Folder Reverse Indexes](reverse-indexes.md): Reverse documentation projection design plus the current feature-branch implementation boundary.
+- [Deterministic Typed Repository Graph](repository-graph.md): Back-burnered architecture for joining the existing documentation/link graph with normalized polyglot code facts.
+- [Code-Symbol References](code-symbol-references.md): Planned declaration-level references behind the same polyglot adapter seam as the future code graph.
+- [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Planned polyglot code-graph provider contract and bounded graph projections.
+- [Deterministic Agent Context and Integrations](agent-context-and-integrations.md): Planned graph-based context retrieval and thin host integrations.
+- [Context-Injection Benchmarking](context-injection-benchmarking.md): Research corpus, paired no-context controls, leakage rules, and historical-task fixtures.
 - [Dummy Docs Fixture Generator](make-dummy-docs.sh): Manual fixture and stress generator for recursive docs-tree testing.
 
 ## Direct Files
@@ -53,3 +54,5 @@ This `docs/` folder holds deeper design, operational, and maintenance references
 ## Notes
 
 - `docs/README.md` is the default docs-tree index file.
+- Implemented architecture documents include `## Code map` sections so Demon Docs can export and hold out its own authored relationships as a development corpus.
+- Self-authored Demon Docs links are useful for extraction and regression testing but are not an independent precision benchmark.

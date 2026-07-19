@@ -38,6 +38,8 @@ Each feeder has an opaque token and its own heartbeat record. Leaving one shell 
 
 The generic agent feeder boundary is deliberately host-neutral. Demon Docs does not need to know whether an agent feeder came from Codex, Hermes, an MCP server, Claude Code, or another plugin. Each adapter is responsible for registering before work begins and unregistering on every terminal path, including success, failure, cancellation, timeout, and spawn failure.
 
+The generic feeder protocol exists in Demon Docs core. Thin MCP, Codex, Hermes, and other host adapters remain integration work; the daemon does not invoke those hosts itself.
+
 Agent registration is operational only. It keeps the watcher alive while an adapter is active; it does not make the demon an MCP server, context service, or host integration.
 
 ## Public Commands
@@ -146,3 +148,13 @@ run = true
 This setting permits self-managed operation; it does not make the demon a correctness dependency. Disabling it leaves `check`, `fix`, and foreground `watch` available.
 
 See [Configuration](configuration.md) for the complete configuration model and [Watcher and Automation](watcher-and-automation.md) for foreground watcher behavior.
+
+## Code map
+
+- `internal/demon/runtime.go` — owner claims, heartbeats, feeders, shutdown requests, stale recovery, and runtime paths.
+- `internal/demon/log.go` — bounded repository-local log rotation.
+- `internal/app/demon.go` — public and hidden daemon commands plus Bash and PowerShell hook generation.
+- `internal/repository/worktree.go` — linked-worktree discovery and first-mutating-entry bootstrap.
+- `internal/watch/` — the foreground reconciliation watcher reused by the daemon owner.
+- `internal/app/demon_test.go` — command, feeder, worktree, lifecycle, and status coverage.
+- `internal/demon/runtime_test.go` — owner and feeder state coverage, including single-owner behavior.

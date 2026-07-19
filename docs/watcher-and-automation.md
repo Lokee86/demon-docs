@@ -37,6 +37,7 @@ The watcher reruns the same selected operations used by `fix` when relevant repo
 - Explicit external targets add watches on their nearest existing parent directories.
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories.
 - Observer errors are surfaced rather than silently terminating observation.
+- Each reconciliation diagnostic is printed as its own watcher message instead of being collapsed into an opaque count.
 
 Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
 
@@ -77,11 +78,12 @@ Watcher unit and temporary-filesystem integration tests cover source and destina
 
 Repository-demon tests separately cover ownership exclusion and stale recovery, feeder expiry and counting, read-only status snapshots, shell-feeder reuse, bounded logs, shutdown grace, linked-worktree discovery, persistent enablement, and generated shell-hook contracts.
 
-## Related Files
+## Code map
 
-- `internal/watch/watch.go`
-- `internal/watch/scheduler.go`
-- `internal/demon/runtime.go`
-- `internal/demon/log.go`
-- `internal/app/demon.go`
-- `internal/repository/worktree.go`
+- `internal/watch/watch.go` — observer setup, watched scopes, event filtering, and reconciliation execution.
+- `internal/watch/scheduler.go` — debounce, single-run ownership, and queued follow-up scheduling.
+- `internal/watch/features.go` — selected reconciliation feature contract.
+- `internal/demon/runtime.go` — detached owner and feeder lifecycle around the same watcher.
+- `internal/demon/log.go` — bounded detached watcher logs.
+- `internal/app/demon.go` — daemon CLI and generated shell hooks.
+- `internal/repository/worktree.go` — linked-worktree runtime isolation.

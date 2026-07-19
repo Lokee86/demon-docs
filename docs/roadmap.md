@@ -1,148 +1,172 @@
 # Demon Docs Roadmap
 
-This roadmap describes the planned product evolution in implementation order. The focused filesystem and Markdown-link reconciliation core comes first; broader repository, code, projection, and agent-context graphs build on it later.
+This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active branches, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
 
-## Current Foundation: Implemented
+## Current Product: Implemented on `main`
 
-The current foundation is the stable, repository-native reconciliation layer:
+### Documentation-tree reconciliation
 
 - Go is the sole implementation and supported runtime.
 - Recursive folder indexes describe direct files, draft/stub files, and child folders.
 - Managed Markdown sections are the only generated regions; authored content outside them is preserved.
 - Parent navigation links keep folder indexes and configured indexed documents connected to their owning index.
-- `check`, `fix`, and foreground `watch` provide reconciliation, verification, and explicit continuous local maintenance.
+- `check`, `fix`, and foreground `watch` expose the same deterministic reconciliation core.
 - The repository demon provides single-owner detached watcher lifecycle while shell or agent feeders remain active, without becoming a correctness dependency.
 - `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `-i` / `--indexes` remains a compatibility alias for `--docs`.
-- A focused repository-root Markdown link graph tracks local links to Markdown, assets, directories, absolute filesystem paths, and accessible external targets.
-- Stable internal file IDs, path history, and fingerprints support deterministic move reconciliation without modifying source files to embed IDs.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
 
-This foundation establishes predictable filesystem synchronization without attempting to author semantic documentation or requiring the later repository/context graph.
+### Repository-local link reconciliation
 
-## Phase 1: Markdown Links, Moves, and Static Reconciliation
-
-Complete and harden the focused Markdown-link subsystem independently of the broader repository graph:
-
-- validate local inline links, images, and reference definitions;
-- track Markdown and non-Markdown targets;
-- detect broken links, case mismatches, moves, and ambiguous candidates;
-- preserve relative or absolute link style, labels, titles, queries, and fragments;
-- use stable file IDs and fingerprints when exact path evidence disappears;
-- keep first-scan baseline creation separate from later repair passes; and
-- expose identical behavior through `check`, `fix`, and `watch`.
-
-A unique deterministic candidate may be repaired automatically. Multiple plausible candidates remain unchanged and are reported for user resolution. The static CLI remains sufficient for rebuilding and reconciliation; `watch` provides continuous observation of the same core operations.
+- Repository Markdown is scanned subject to `.docignore` and permanent traversal exclusions.
+- Supported local forms include inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links, wiki embeds, and common local HTML `href`, `src`, and `poster` targets.
+- Stable internal file identities, path history, fingerprints, and incoming-link groups support deterministic move reconciliation without embedding IDs in source files.
+- Link labels, titles, aliases, angle wrapping, query strings, fragments, source newline style, and surrounding prose are preserved.
+- Undefined explicit or collapsed reference labels are reported.
+- Generated rewrites use bounded concurrency while retaining deterministic planning, source-hash checks, and atomic per-file replacement.
 
 See [Markdown Link Reconciliation](markdown-links.md).
 
-## Phase 2: Repository Inventory and Typed Graph
+### Reverse code-folder indexes
 
-Build the broader repository-wide typed graph needed for advanced reverse indexing, code analysis, projections, and agent context. It may cover:
+- Reverse indexes project authored codemap references back onto configured code folders and files.
+- Recursive repository-relative roots, repeated `--reverse-root` overrides, nested `.docignore`, and configurable codemap headings are implemented.
+- `check`, `fix`, and `watch` support `-r` / `--reverse` independently or alongside documentation indexes and links.
+- Missing codemap sections, empty matching sections, unresolved targets, and coverage gaps remain explicit diagnostics.
+- Symbol-level projection, move-aware authored-reference repair, and richer coverage reports remain later work.
 
-- folders and files beyond the focused link-state requirements;
-- Markdown documents, headings, anchors, concepts, and aliases;
-- indexes, ordinary link edges, and explicit code-path references; and
-- provenance required by later projections and queries.
+See [Code-Folder Reverse Indexes](reverse-indexes.md).
 
-This graph is a deterministic representation of observed repository structure and explicit references, not an inferred model of what the repository ought to mean. It is deliberately sequenced after reliable static link updating rather than being required to implement it.
+### Repository demon
 
-See the focused design document: [Deterministic Typed Repository Graph](repository-graph.md).
+- One fresh owner serves each initialized repository-local `.ddocs/` state directory.
+- Shell and generic agent feeders keep the watcher active while work is in progress.
+- Detached startup, stale-owner recovery, shutdown grace, status, linked-worktree bootstrap, and bounded logs are implemented.
+- Bash and PowerShell hooks translate shell entry and exit into feeder registration.
+- The daemon remains optional; `check`, `fix`, and foreground `watch` remain authoritative recovery and CI surfaces.
 
-## Phase 3: Reverse Documentation Mapping and Code-Folder Indexes
+See [Repository Demon](repository-demon.md).
 
-Make documentation coverage navigable in both directions. Explicit codemap or code-path references produce code-to-documentation backlinks and local navigation.
+### Codemap extraction and deterministic missing-link research
 
-Introduce code-folder indexes as a distinct reverse-index type, separate from ordinary forward documentation-folder indexes. These indexes are derived from documentation references into code folders, files, and (when available) symbols; they project which documentation covers each code target. They reconcile from those documentation references and their current targets, rather than being maintained as ordinary forward folder indexes or as an extension of the every-folder index model. Keep folder-level coverage distinct from file-level coverage: documenting a code folder does not imply that every file within it is documented, and a file reference does not automatically establish folder coverage.
+- Authored codemap sections can be exported as a deterministic JSON dataset.
+- The repository corpus adapter collects paths, dependency neighbours, declared symbols, source/test relationships, related-document targets, and bounded Git co-change evidence.
+- Holdout benchmarking measures whether known authored targets are recovered.
+- Precision tooling generates, samples, and evaluates ranked candidate links.
+- Suggestions are divided into `hard_link` and `context` tiers.
+- Existing links are never returned as missing-link candidates, and there is no removal or irrelevance signal.
 
-See the focused design document: [Code-Folder Reverse Indexes](reverse-indexes.md).
+The current curated Space Rocks sample contains 150 labeled suggestions. The recorded baseline has 60% precision at rank 1, 64.2% valid-link precision for the `hard_link` tier, 95.1% non-junk acceptance for that tier, and 74.3% sample recall of valid links. These numbers describe the pinned labeled sample, not a universal quality claim.
 
-## Phase 4: Deterministic Code-Symbol References
+See [Codemap Missing-Link Evidence](codemap-evidence.md).
 
-Add optional language adapters for deterministic code-symbol references. Adapters turn declarations into symbol nodes with source spans and connect explicit documentation references to those nodes.
+## Active Work
 
-Go is the first adapter. Each adapter must expose bounded, reproducible facts from the language parser or analysis tool; arbitrary semantic inference is out of scope. Repositories without an enabled adapter remain fully usable with file- and path-level references.
+### Codemap tuning and broader corpus validation
 
-See the focused design document: [Code-Symbol References](code-symbol-references.md).
+The current tuning work is isolated from `main`. Near-term goals are:
 
-## Phase 5: Deterministic Code and Dependency Graph
+- compare each scoring change against the pinned precision sample;
+- preserve deterministic output and evidence fingerprints;
+- expand evaluation beyond one repository without treating unlabeled output as ground truth;
+- use Demon Docs' own refreshed code maps as a development corpus, not as an independent benchmark; and
+- merge only changes that demonstrate a measured improvement or a clearly safer candidate surface.
 
-Build a deterministic code and dependency graph from bounded parser, build, import, module, and package facts, together with explicit repository references. Track code folders, files, symbols, containment, and dependency edges where an enabled adapter can expose reproducible facts. The graph must remain inspectable and reproducible; semantic dependency inference is out of scope. This graph becomes the later source for dependency impact and entanglement projections.
+### User-facing suggestion decisions
 
-See the focused design document: [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md).
+The evidence and ranking machinery exists, but the complete review lifecycle remains unfinished. Planned bounded work includes:
 
-## Phase 6: Graph Projections, Entanglement, and Queries
+- list strong missing-link candidates with their evidence;
+- persist accepted and declined decisions by document, target, and evidence fingerprint;
+- suppress an unchanged declined suggestion;
+- reconsider it only when the underlying evidence materially changes; and
+- keep accepted changes reviewable rather than silently rewriting authored codemaps.
 
-Expose useful projections and queries over the deterministic graph:
+### Daemon host adapters
 
-- backlinks and reverse references;
-- orphaned documents and navigation gaps;
-- impact reports for changed code or documentation;
-- deterministic code/dependency graph views;
-- bounded entanglement projections across documentation, code targets, and dependencies;
-- freshness warnings based on explicit, inspectable signals;
-- repository maps;
-- machine-readable graph export; and
-- bounded context bundles for agents.
+The generic `agent` feeder protocol is implemented inside Demon Docs. Thin MCP, Codex, Hermes, or other host adapters still need to register before a job and unregister on success, failure, cancellation, timeout, and spawn failure. These adapters are lifecycle plumbing only; they do not require the future code graph or context builder.
 
-These are generated views over repository state. They must remain reproducible from the same inputs and must not silently overwrite authored intent.
+## Near-Term Hardening
 
-## Phase 7: Agent Context and Thin Integrations
+The following work is independent of the larger code-graph track:
 
-Expose the same deterministic core and bounded projections through agent context bundles and thin adapters for the CLI, MCP, Hermes, Claude Code, and other clients. Adapters translate requests, responses, and host-specific concerns around the same core; they do not maintain a competing repository model or invent separate correctness rules.
+- stress the single-owner lease path and retain race-focused coverage;
+- complete actionable watcher and reconciliation diagnostics;
+- expand heading-fragment validation when a deterministic Markdown anchor model is selected;
+- verify Windows, Bash, PowerShell, and linked-worktree lifecycle behavior;
+- expand reverse-index diagnostics and coverage reporting;
+- expose the codemap accept/decline workflow; and
+- keep CLI help, README examples, and focused design documents synchronized with shipped behavior.
 
-Free-form concept resolution is deterministic only when a request matches explicit repository vocabulary, aliases, paths, symbols, headings, active files, or Git changes. Ambiguous prompts return candidates or wait for a concrete target rather than silently choosing one. Agent-facing context must identify its deterministic inputs and preserve the distinction between facts, projections, and authored intent.
+## Back-Burnered Major Track: Polyglot Code Graph
 
-See the focused design document: [Deterministic Agent Context and Integrations](agent-context-and-integrations.md).
+The planned code graph is larger than a single short implementation stream and is intentionally not the immediate critical path.
 
-Future evidence should compare paired historical tasks with and without Demon Docs context across repositories representing good/poor code and good/poor documentation. An intentionally constructed repository should validate the harness separately. This research is documented in [Context-Injection Benchmarking](context-injection-benchmarking.md) and is not a prerequisite for designing the deterministic core.
+The important architectural decisions are:
 
-### Phase 7 research gate
+- the existing Markdown/link graph remains the link-reconciliation model;
+- the future code graph exists to add definitions, references, calls, imports, implementations, containment, and other bounded code relationships;
+- the code graph must be polyglot at the adapter boundary from its first implementation step;
+- Demon Docs should normalize facts from existing parsers, compiler tooling, SCIP-style indexes, or external code-intelligence providers rather than rebuilding every language analyzer; and
+- graph-derived evidence may improve the codemap algorithm and later context selection, but inferred suggestions do not become authored graph truth.
 
-Before claiming that agent context improves implementation work, develop the benchmark corpus and harness described in [Context-Injection Benchmarking](context-injection-benchmarking.md). This research is not required to begin deterministic context implementation and does not require immediate paid model trials. Corpus preparation, pinned historical tasks, control fixtures, and deterministic bundle inspection can proceed first.
+The first implementation step, when this track resumes, is the language-neutral provider and normalized fact contract. A Go-only graph embedded directly into the core is not an acceptable architectural starting point.
 
-## Phase 8: Repository Demon and Operational Expansion
+See [Deterministic Typed Repository Graph](repository-graph.md), [Code-Symbol References](code-symbol-references.md), and [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md).
 
-The self-managing repository demon now wraps the same watcher used by foreground `ddocs watch`. It provides one fresh owner per local `.ddocs/` repository, shell and agent feeder heartbeats, detached startup, stale-owner recovery, shutdown grace, status, bounded logs, and independent linked-worktree runtime state.
+## Later Track: Context Bundles and Agent Integrations
 
-Foreground `ddocs watch` remains available for explicit terminal-controlled operation. The static CLI remains authoritative for CI, rebuilds, recovery, and debugging, and deleting runtime state or disposable caches must never remove repository truth.
+Bounded deterministic context remains planned, but it follows a stable repository/code evidence contract. The same graph and explicit repository facts may support two separate consumers:
 
-Further operational work may add MCP and native-plugin feeder adapters, packaging and installation improvements, broader cross-platform lifecycle tests, incremental scheduling, or graph-cache reuse. Those integrations remain outside Demon Docs core and must translate host lifecycle into the generic agent-feeder protocol rather than creating a competing repository model or daemon implementation.
+- codemap inference, which asks what permanent authored links may be missing; and
+- context projection, which asks what existing information should be shown for a temporary task.
 
-## Phase 9: Optional LLM Assistance
+Those scoring paths must remain distinct. A useful context item is not automatically a valid permanent codemap link.
 
-Add optional LLM assistance for proposing documentation changes from code diffs. It must consume deterministic graph and change data rather than independently discovering repository truth.
+Later work includes:
 
-LLM output remains a proposal: it must be reviewable, attributable to its inputs, and safe to reject or edit. LLM assistance is last and outside correctness: it must never be required for core inventory, reconciliation, validation, graph correctness, generated-index operation, concept resolution, or agent integrations.
+- deterministic context-request and response contracts;
+- bounded ordering and token or byte budgets;
+- provenance and truncation reporting;
+- CLI and MCP delivery;
+- thin Codex, Hermes, Claude Code, and other host adapters; and
+- paired historical-task benchmarking with leakage controls.
+
+See [Deterministic Agent Context and Integrations](agent-context-and-integrations.md) and [Context-Injection Benchmarking](context-injection-benchmarking.md).
+
+## Optional LLM Assistance
+
+Optional LLM assistance may eventually propose documentation changes from deterministic diffs, codemap evidence, and graph facts. It remains outside correctness and cannot be required for indexing, link repair, codemap extraction, graph construction, validation, or context delivery.
 
 ## Principles
 
-- **Deterministic first:** repository facts, references, reconciliation, and queries have stable inputs and reproducible outputs.
-- **Repository-native output:** generated results live in ordinary Markdown, source-controlled files, and explicit machine-readable exports.
-- **Authored intent remains the source of truth:** generated projections do not replace or silently reinterpret hand-authored prose.
-- **Projections are generated:** indexes, backlinks, maps, reports, and bundles are views of the underlying repository model.
-- **Explicit resolution only:** concept resolution is deterministic only against explicit repository vocabulary, aliases, paths, symbols, headings, active files, or Git changes; ambiguity yields candidates or waits for a concrete target.
-- **One core, two watcher surfaces:** foreground `ddocs watch` and the self-managing repository demon run the same static core; neither adds exclusive product capability, and the static CLI remains authoritative.
-- **Thin integrations:** CLI, MCP, Hermes, Claude Code, plugins, and other adapters use the same deterministic core rather than creating parallel repository models.
-- **Optional adapters:** language-specific analysis is enabled deliberately and does not reduce baseline usability.
-- **No semantic prose generation in core:** core Demon Docs behavior maintains structure and explicit references, not guessed explanations.
-
-## Dependency and Order
-
-The current foundation and Phase 1 establish trustworthy static Markdown-link updating, file identity, and continuous watch operation without waiting for the advanced repository graph. Phase 2 then expands those bounded filesystem facts into the typed repository model required by later reverse mappings, code-folder indexes, symbols, dependencies, projections, and agent context.
-
-Phase 3 adds the distinct reverse documentation mappings and code-folder indexes. Phase 4 adds optional deterministic symbol nodes, and Phase 5 adds bounded code and dependency facts. Phase 6 consumes the broader deterministic graph for reproducible projections, including entanglement views and context bundles. Phase 7 exposes those capabilities through thin adapters without creating a competing core.
-
-Phase 8 establishes and expands the self-managing lifecycle around the existing watcher, including generic shell and agent feeders, while keeping host adapters separate. Phase 9 comes last because proposals must be constrained by deterministic graph and diff data; it remains optional and outside the correctness path.
+- **Deterministic first:** identical repository inputs and configuration produce stable facts, plans, diagnostics, and ordering.
+- **Authored intent remains authoritative:** generated indexes, reverse indexes, candidates, and projections do not silently replace hand-authored meaning.
+- **Only suggest missing relationships:** the codemap system never recommends that an existing link is irrelevant or should be removed.
+- **Remember declines:** unchanged declined suggestions remain suppressed; materially changed evidence may be reconsidered.
+- **Polyglot seams before language implementations:** future code-intelligence providers normalize into one contract rather than becoming core-specific special cases.
+- **Reuse existing analysis:** Demon Docs should not rebuild a general parser, compiler, call-graph platform, or graph database when an adapter can consume an existing deterministic source.
+- **Static core remains authoritative:** watchers, daemons, MCP, and plugins automate or expose the same rebuildable core.
+- **Thin integrations:** hosts translate lifecycle and request/response concerns without creating competing repository models.
+- **No semantic prose generation in core:** deterministic behavior maintains structure, paths, references, evidence, and bounded projections.
 
 ## Explicit Non-Goals
 
-- Replacing Git, Markdown, or the repository filesystem with a proprietary storage model.
-- Treating inferred semantic relationships as equivalent to explicit authored references.
-- Generating or rewriting semantic prose as part of deterministic core operations.
-- Requiring the repository demon for one-shot CLI recovery, CI, rebuilds, or correctness verification.
-- Making the repository demon or foreground watcher the source of repository truth, or giving either capabilities unavailable through the static core.
-- Requiring MCP or plugins to be hosted by the daemon rather than exposing them as separate interfaces.
-- Requiring an LLM, a network connection, or a language adapter for baseline reconciliation.
-- Deterministically resolving an unconstrained free-form concept without an explicit vocabulary, alias, path, symbol, heading, active-file, or Git-change match.
-- Claiming folder-level coverage when only individual files are referenced, or vice versa.
-- Applying broad, ambiguous, or non-reviewable link and documentation changes.
+- Replacing Git, Markdown, or the repository filesystem with a proprietary authoring model.
+- Treating inferred semantic relationships as equivalent to authored references.
+- Building another Sourcegraph, Codebase Memory, or general multi-language analysis platform inside Demon Docs.
+- Requiring a daemon, network connection, LLM, language adapter, or external indexer for baseline reconciliation.
+- Applying ambiguous, non-reviewable, or broad semantic documentation changes automatically.
+- Claiming that one repository's curated codemaps provide universal algorithm quality.
+
+## Code map
+
+- `internal/reconcile/` — forward documentation index planning and application.
+- `internal/links/` — repository-local link graph, identity state, diagnostics, and rewrites.
+- `internal/demon/` — repository-local owner, feeder, heartbeat, shutdown, and log state.
+- `internal/app/demon.go` — daemon CLI and shell integration.
+- `internal/codemap/` — authored codemap extraction and deterministic datasets.
+- `internal/evidence/` — missing-link evidence collection.
+- `internal/codemapbench/` — holdout orchestration, ranking, tiers, and reports.
+- `internal/codemapcorpus/` — repository fact adapters used by codemap analysis.
+- `internal/codemapprecision/` — curated precision evaluation.
+- `research/codemap-precision/` — pinned labels, reports, and evaluation artifacts.

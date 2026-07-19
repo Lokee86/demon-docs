@@ -4,13 +4,13 @@
 ## Usage
 ## Contributing
 
-`Demon Docs` keeps folder indexes and local Markdown links synchronized with the filesystem.
+`Demon Docs` keeps documentation indexes, repository-local links, and authored code maps synchronized with the repository.
 
-It maintains folder indexes inside the configured docs root and a focused local-link graph across Markdown files in the repository. Link targets may be Markdown files, non-Markdown assets, directories, repository-external relative paths, or absolute filesystem paths.
+It maintains folder indexes inside the configured docs root, a focused local-link graph across repository Markdown, and deterministic codemap datasets used to evaluate possible missing documentation-to-code links. Supported local-link forms include ordinary Markdown links and images, reference definitions and uses, path-based wiki links, and common local HTML targets.
 
-You keep owning the actual files and hand-written content. Index reconciliation owns only clearly marked managed sections, while link reconciliation changes only the target path inside an existing Markdown link. `check` reports pending index or link work, `fix` applies it, and `watch` runs the same operations automatically after relevant filesystem changes.
+You keep owning the actual files and hand-written content. Index reconciliation owns only clearly marked managed sections. Link reconciliation changes only a resolved destination path while preserving authored labels, titles, aliases, queries, fragments, and surrounding prose. Codemap analysis exports and ranks evidence but does not silently add or remove authored code-map links.
 
-The result is a file tree that can be moved, split, expanded, or reorganized without leaving stale index pages behind.
+`check` reports pending or unresolved work, `fix` applies safe deterministic updates, `watch` runs the same reconciliation core after relevant filesystem changes, and `demon` provides optional repository-local background lifecycle around that watcher.
 
 ## What it manages
 
@@ -21,8 +21,11 @@ The result is a file tree that can be moved, split, expanded, or reorganized wit
 - draft/stub file entries from a configured draft folder
 - direct child-folder entries
 - `Parent index` links in folder indexes by default, and in indexed files when configured
-- local Markdown links to files and directories inside or outside the repository
+- local Markdown links, images, reference definitions, wiki links, and common HTML file targets
+- undefined explicit and collapsed Markdown reference labels
 - stable file identities, link history, reverse indexes, and generated-write state in the private `.ddocs/` object repository
+- deterministic codemap extraction, evidence collection, holdout benchmarking, precision sampling, and tiered missing-link candidates
+- optional repository-local watcher ownership, feeder heartbeats, linked-worktree state, and bounded logs
 
 It preserves hand-authored content outside managed index blocks and preserves link labels, titles, query strings, and fragments when updating a path.
 
@@ -119,6 +122,11 @@ ddocs config paths
 ddocs config show
 ddocs config init --local
 ddocs config init --global
+ddocs codemap --help
+ddocs codemap export --help
+ddocs codemap benchmark --help
+ddocs codemap precision --help
+ddocs demon --help
 ```
 
 `-v` and `--version` are top-level version flags.
@@ -202,6 +210,18 @@ ddocs config show
 ddocs config init --local
 ddocs config init --global
 ```
+
+Codemap analysis commands:
+
+```bash
+ddocs codemap export --output .ddocs/codemap.json
+ddocs codemap benchmark --help
+ddocs codemap precision --help
+```
+
+`codemap export` scans configured codemap headings and writes a deterministic dataset containing documents, normalized targets, resolution diagnostics, and content hashes. `benchmark` removes known authored targets in controlled holdouts and measures whether the deterministic evidence system recovers them. `precision` generates, samples, and evaluates ranked suggestions against curated labels. Candidates are divided into `hard_link` and `context` tiers; neither tier authorizes automatic documentation edits.
+
+See [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for evidence signals, current benchmark results, safety rules, and research artifacts.
 
 ## Config Selection
 
@@ -561,7 +581,7 @@ Example:
 ddocs watch --root docs
 ```
 
-If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log.
+If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log. Generated link rewrites use a bounded worker pool while preserving deterministic planning and per-source atomic replacement.
 
 ## Watcher automation
 
@@ -610,14 +630,14 @@ That script generates a synthetic documentation tree for manual reconciliation t
 
 `Demon Docs` does not:
 
-- validate semantic documentation quality
-- decide what a folder should own
+- decide semantic documentation quality or ownership
 - validate heading-anchor existence yet
-- modify local link targets, binary files, or files outside the repository
-- inspect Git status
-- guess when more than one link target is plausible
+- rewrite link labels, titles, aliases, surrounding prose, binary files, or external target files
+- treat a codemap suggestion as an authored relationship
+- recommend removing an existing codemap link as irrelevant
+- guess when more than one link or code target is plausible
 
-Index writes are confined to the configured docs root. Link rewrites are confined to Markdown source files inside the repository root. Symbolic-link entries are not traversed or edited.
+Index writes are confined to the configured docs root. Link rewrites are confined to repository Markdown source files and require one deterministic target. Codemap commands remain export, benchmark, and review tooling; they do not silently modify authored codemap sections. Symbolic-link entries are not traversed or edited.
 
 ## Using `!README.md`
 

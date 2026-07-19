@@ -1,6 +1,8 @@
 # Deterministic Agent Context and Integrations
 
-This document describes the planned graph-based context retrieval layer and its host integrations. One static core assembles context from the deterministic repository graph; CLI, MCP, native plugins, and editor or agent adapters are different delivery surfaces around that core. This is not conventional embedding/vector RAG and does not create a second repository model.
+This document describes the planned graph-based context retrieval layer and its host integrations. Context assembly is not implemented and follows the back-burnered polyglot code-graph provider contract. The repository demon already exposes a generic operational `agent` feeder, but feeder lifecycle is separate from context delivery.
+
+When implemented, one static core will assemble context from deterministic documentation/link facts plus normalized polyglot code facts. CLI, MCP, native plugins, and editor or agent adapters will remain different delivery surfaces around that core. This is not conventional embedding/vector RAG and does not create a second repository model.
 
 ## One Core, Thin Adapters
 

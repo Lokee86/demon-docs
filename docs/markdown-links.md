@@ -84,6 +84,8 @@ If a source changed concurrently, the generated rewrite aborts without overwriti
 
 Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing and a single-file incremental update so storage and scanning regressions remain visible.
 
+Generated source rewrites are planned deterministically first, then applied through a bounded worker pool. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change the planned output, stored identities, or diagnostic ordering.
+
 ## Commands and Feature Selection
 
 With no selector flags, index and link reconciliation both run:
@@ -119,9 +121,12 @@ Supplying selectors runs only those systems. Without selectors, documentation in
 
 When links are enabled, watch mode observes the repository root because moves of non-Markdown targets can require Markdown updates. It also watches the nearest existing parent directories of explicitly linked external targets, so an external rename or removal can trigger the same bounded reconciliation attempt. Documentation-only watch mode remains scoped to the configured docs root. Reverse-only watch mode remains scoped to configured or supplied reverse roots.
 
-## Related Files
+## Code map
 
-- `internal/links/`
-- `internal/app/app.go`
-- `internal/watch/watch.go`
-- `internal/reconcile/reconcile.go`
+- `internal/links/` — parsing, target resolution, identity state, diagnostics, generated rewrites, and bounded workers.
+- `internal/links/wiki_links.go` — path-based wiki links, aliases, embeds, and extensionless Markdown resolution.
+- `internal/links/html_links.go` — supported local HTML `href`, `src`, and `poster` targets.
+- `internal/links/reference_labels.go` — explicit and collapsed reference-label validation.
+- `internal/app/app.go` — `check`, `fix`, and foreground `watch` CLI integration.
+- `internal/watch/watch.go` — filesystem event scheduling and reconciliation diagnostics.
+- `internal/reconcile/reconcile.go` — shared index reconciliation boundary.

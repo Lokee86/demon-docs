@@ -1,6 +1,8 @@
-# Deterministic Typed Repository Graph
+# Planned Polyglot Repository and Code Graph
 
-This document describes the planned language-neutral graph that represents observed repository structure, authored documentation intent, and bounded parsed code facts. It is the static core model for reconciliation and generated projections, not a semantic model of what the repository ought to mean.
+This document describes the back-burnered language-neutral graph that will join Demon Docs' existing documentation/link facts with bounded code facts from polyglot providers. It is not required for current folder-index reconciliation, link repair, codemap extraction, or the initial reverse-index implementation.
+
+Demon Docs already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
 
 ## Observed Layers
 
@@ -11,6 +13,18 @@ The graph keeps three observed layers distinct:
 3. **Parsed code structure:** code files and language-adapter facts such as declarations, symbols, source spans, and containment.
 
 A fact from one layer may be connected to a fact in another layer by an explicit or parser-observable relationship. The graph does not fill gaps between layers with semantic guesses. In particular, authored prose is not converted into a concept or code relationship merely because it sounds similar to a path, symbol, or heading.
+
+The documentation/link layer remains owned by existing Demon Docs scanners and state. Code facts arrive through a separate provider seam and are normalized before codemap inference or context projection consumes them.
+
+## Polyglot Provider Boundary
+
+The provider adapter seam is the first required implementation step when this track resumes. A provider may wrap Tree-sitter analysis, compiler tooling, SCIP-style indexes, language servers, or an external code-intelligence product. The Demon Docs core must not depend on one provider's storage format or language-specific identities.
+
+Each provider reports a capability manifest and a deterministic snapshot containing normalized nodes, edges, diagnostics, provenance, language identity, tool version, repository-relative paths, and source locations. Unsupported or unresolved relationship families remain explicit rather than being treated as negative facts.
+
+The seam must exist before the first language implementation. A Go-only graph wired directly into core packages would make later Ruby, GDScript, Python, TypeScript, or other support unnecessarily expensive and would not satisfy the intended product scope.
+
+Demon Docs should reuse existing deterministic analyzers where practical. It should not implement another parser platform, compiler front end, general call-graph service, or graph database merely to obtain provider facts.
 
 ## Node Types
 
@@ -43,7 +57,7 @@ The initial edge vocabulary includes:
 - **symbol declaration:** a code symbol is declared in a code file; and
 - **symbol containment:** a symbol is contained by its reported package, type, module, or other symbol container.
 
-Later dependency edges may connect code nodes when bounded, reproducible facts are available. Their language-specific vocabulary, including call or data-dependency details, is outside this document and remains a later graph capability. No dependency edge is required for the initial repository graph or documentation reconciliation.
+Provider facts may connect code nodes through imports, references, calls, implementations, reads/writes, or other bounded relation families when the provider declares that capability. Their normalized vocabulary and limits are defined in [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md). No code edge is required for current documentation reconciliation.
 
 Edge direction and names are part of the graph schema. A reverse documentation edge points from code target to documentation for projection and query purposes, while its provenance points back to the authored explicit reference that produced it.
 
@@ -122,8 +136,10 @@ Interfaces such as MCP, Hermes, Claude Code, plugins, or other adapters may requ
 
 ## Initial Acceptance Criteria
 
-The initial graph design is ready for implementation planning when focused fixtures and repeatable static checks can demonstrate that:
+The graph track is ready to resume implementation when focused fixtures and repeatable static checks can demonstrate that:
 
+- a language-neutral provider contract exists before any language-specific adapter is wired into the core;
+- at least two contrasting fixture providers can emit the same normalized identities and relations without changing consumer code;
 - all three observed layers are represented without collapsing authored intent into parsed or physical facts;
 - the node and edge vocabulary distinguishes forward membership, ordinary links, explicit code references, derived reverse documentation edges, symbols, and diagnostics;
 - canonical identities and normalized repository-relative paths produce stable ordering and exports across repeated builds;
@@ -136,6 +152,8 @@ The initial graph design is ready for implementation planning when focused fixtu
 
 ## Open Decisions
 
+- The first provider integration and whether it consumes SCIP, Tree-sitter output, a language-server index, or another existing graph product.
+- The canonical provider capability manifest and normalized relation taxonomy.
 - The canonical serialized schema, field names, compatibility policy, and versioning rules.
 - The exact repository identity metadata and how worktrees or nested repositories are represented.
 - Path normalization and case-sensitivity rules across host filesystems.

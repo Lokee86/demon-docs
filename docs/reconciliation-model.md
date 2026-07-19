@@ -71,11 +71,13 @@ This preservation is intentionally narrow. Demon Docs matches by the current fil
 
 ## Markdown Link Behavior
 
-Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, reference definitions, stable file IDs, fingerprints, path history, and reverse-link records in the private `.ddocs/` object repository.
+Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links and embeds, supported local HTML targets, stable file IDs, fingerprints, path history, and reverse-link records in the private `.ddocs/` object repository.
 
-The first link-enabled fix or watch pass records a baseline and reports issues without repairing links. Later passes preserve direct valid targets and can repair a moved target when its recorded ID, exact fingerprint, case-only path, or unique filename candidate identifies one result. Multiple candidates remain unchanged and are reported for user resolution.
+The first link-enabled fix or watch pass records a baseline and reports issues without repairing links. Later passes preserve direct valid targets and can repair a moved target when its recorded ID, exact fingerprint, case-only path, or unique filename candidate identifies one result. Multiple candidates remain unchanged and are reported for user resolution. Undefined explicit or collapsed reference labels are reported without interpreting shortcut bracket syntax as a link.
 
-Relative and absolute filesystem links are both checked. Targets may be non-Markdown files or may resolve outside the repository. Only Markdown source files inside the repository are rewritten, and only the destination path changes; labels, titles, queries, and fragments remain intact.
+Relative and absolute filesystem links are both checked. Targets may be non-Markdown files or may resolve outside the repository. Only Markdown source files inside the repository are rewritten, and only the resolved destination path changes; labels, titles, wiki aliases, queries, fragments, angle wrapping, and surrounding prose remain intact.
+
+Generated rewrites are planned deterministically and then applied through a bounded worker pool. Each source still uses an expected-content hash and same-directory atomic replacement, so concurrency changes throughput rather than ownership or output semantics.
 
 Documentation indexes, Markdown links, and code-folder reverse indexes are selected independently with `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse`. `-i` / `--indexes` remains a compatibility alias for `--docs`. When any selector is supplied, only selected systems run.
 
@@ -84,17 +86,19 @@ Documentation indexes, Markdown links, and code-folder reverse indexes are selec
 Demon Docs is a reconciliation tool, not a semantic documentation author.
 
 - It does not decide which folder should own a topic.
-- It rewrites only the filesystem path portion of recognized local Markdown links.
-- It does not edit link targets, binary files, or files outside the repository.
+- It rewrites only the resolved filesystem path portion of recognized local links.
+- It does not edit target files, binary files, link labels, aliases, or authored prose.
 - It does not automatically choose among multiple plausible targets.
+- Codemap evidence produces review candidates rather than authored links or removal recommendations.
 - `check` reports pending reconciliation, but it does not inspect git status.
 
 Those boundaries keep the tool predictable and keep hand-authored prose under human control.
 
-## Related Files
+## Code map
 
-- `internal/scan/scan.go`
-- `internal/markdown/markdown.go`
-- `internal/reconcile/reconcile.go`
-- `internal/links/`
-- `internal/model/model.go`
+- `internal/scan/scan.go` — recursive documentation-tree inventory.
+- `internal/markdown/markdown.go` — managed-section parsing and source-preserving Markdown edits.
+- `internal/reconcile/reconcile.go` — forward-index planning and application.
+- `internal/links/` — repository-local link inventory, resolution, state, diagnostics, and rewrites.
+- `internal/model/model.go` — shared reconciliation structures.
+- `internal/app/app.go` — `check`, `fix`, and `watch` orchestration.
