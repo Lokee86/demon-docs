@@ -12,6 +12,13 @@ An orphan is a managed Markdown document in the configured documentation tree th
 
 The health check runs whenever links are selected, including the default `ddocs check` behavior and explicit `ddocs check --links`.
 
+## Prerequisites
+
+- The repository has a configured documentation root.
+- Link reconciliation is initialized when using stateful repository checks.
+- Canonical documents are distinguishable from configured folder indexes and draft/stub documents.
+- The current working tree is suitable for reviewing reported navigation gaps.
+
 ## Run the health check
 
 ```bash

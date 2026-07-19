@@ -53,7 +53,16 @@ The codemap pipeline owns:
 - sampling and evaluating manually labeled precision data; and
 - exposing export, benchmark, precision, and review-time current-suggestion flows through `internal/app`.
 
-The pipeline does not own general semantic code-graph truth, the meaning or necessity of authored documentation, persisted review decisions, or arbitrary prose interpretation.
+## Does not own
+
+The codemap pipeline does not own:
+
+- general semantic code-graph truth;
+- the meaning, completeness, or necessity of authored documentation;
+- persisted review decisions, declines, blocks, or undo policy;
+- automatic authorship of ranked relationships;
+- removal or irrelevance judgments for existing codemap links; or
+- arbitrary prose interpretation beyond the implemented deterministic extractors.
 
 ## Flow and lifecycle
 

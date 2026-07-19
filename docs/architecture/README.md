@@ -9,8 +9,11 @@ Implemented ownership boundaries, state models, reconciliation pipelines, and in
 <!-- doc-ledger:files:start -->
 
 - [application-orchestration.md](application-orchestration.md) - CLI application coordination, subsystem selection, planning, application, and command boundaries.
+- [codemap-pipeline.md](codemap-pipeline.md) - Authored codemap extraction, repository corpus facts, deterministic evidence, ranking, holdouts, precision evaluation, and review integration.
+- [ignore-and-traversal.md](ignore-and-traversal.md) - Repository-root and nested `.docignore` domains, permanent exclusions, traversal pruning, and consumer boundaries.
 - [markdown-link-reconciliation.md](markdown-link-reconciliation.md) - Repository-local link inventory, identity evidence, deterministic repair, and source-preserving writes.
 - [reconciliation-pipeline.md](reconciliation-pipeline.md) - Documentation-tree scan, managed index planning, parent links, and shared reconciliation flow.
+- [repository-scope-and-worktrees.md](repository-scope-and-worktrees.md) - Initialized discovery, scope containment, standalone operation, and linked-worktree state isolation.
 - [repository-state-and-transactions.md](repository-state-and-transactions.md) - Private object repository, identity/history state, transaction boundaries, and rebuildability.
 - [reverse-indexes.md](reverse-indexes.md) - Authored codemap projection into configured code-folder reverse indexes.
 - [review-ledger.md](review-ledger.md) - Review Ledger documentation.
