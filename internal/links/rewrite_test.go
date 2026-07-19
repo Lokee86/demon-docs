@@ -73,6 +73,50 @@ func TestInternalMoveRewritePersistsGraphAndSuppressesWatcherEvent(t *testing.T)
 	}
 }
 
+func TestInternalMoveRewriteReportsUnresolvedLinksInTheSameSource(t *testing.T) {
+	root := t.TempDir()
+	sourcePath := filepath.Join(root, "README.md")
+	oldTarget := filepath.Join(root, "old", "asset.bin")
+	writeTestFile(t, sourcePath, "[asset](old/asset.bin)\n[missing](missing/nowhere.bin)\n")
+	writeTestFile(t, oldTarget, "asset")
+
+	baseline, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ApplyAndSave(&baseline); err != nil {
+		t.Fatal(err)
+	}
+	newTarget := filepath.Join(root, "new", "asset.bin")
+	if err := os.MkdirAll(filepath.Dir(newTarget), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(oldTarget, newTarget); err != nil {
+		t.Fatal(err)
+	}
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Rewrites) != 1 {
+		t.Fatalf("generated rewrites = %d, want 1", len(plan.Rewrites))
+	}
+	if plan.Unresolved != 1 {
+		t.Fatalf("unresolved = %d, want 1; messages=%v", plan.Unresolved, plan.Messages)
+	}
+	foundBroken := false
+	for _, message := range plan.Messages {
+		if strings.Contains(message, "Broken link") && strings.Contains(message, "missing/nowhere.bin") {
+			foundBroken = true
+			break
+		}
+	}
+	if !foundBroken {
+		t.Fatalf("missing unresolved diagnostic: %v", plan.Messages)
+	}
+}
+
 func TestInternalMoveRewriteRejectsConcurrentUserEdit(t *testing.T) {
 	root := t.TempDir()
 	sourcePath := filepath.Join(root, "README.md")

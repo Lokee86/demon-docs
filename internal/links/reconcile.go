@@ -98,7 +98,7 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 	for sourceID, previousRecords := range previousBySource {
 		previousSource := previousByID[sourceID]
 		currentSource := currentByID[sourceID]
-		if !sourceUnchanged(previousSource, currentSource) || !recordsHaveRewriteMetadata(previousRecords) {
+		if !sourceUnchanged(previousSource, currentSource) || !recordsReusable(previousRecords) {
 			continue
 		}
 		hasMovedTarget := false
