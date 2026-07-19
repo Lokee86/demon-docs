@@ -5,7 +5,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 
 ## References
 
-- [Roadmap](roadmap.md): Current shipped behavior, active branches, near-term work, and the back-burnered polyglot code-graph track.
+- [Roadmap](roadmap.md): Current shipped behavior, active tuning work, near-term work, and the back-burnered polyglot code-graph track.
 - [Codemap Missing-Link Evidence](codemap-evidence.md): Implemented codemap export, evidence, holdout benchmarking, precision evaluation, current metrics, and decision-safety rules.
 - [Markdown Link Reconciliation](markdown-links.md): Repository-scoped link validation, persistent identity state, supported syntax, and deterministic path repair.
 - [Repository Demon](repository-demon.md): Self-managed watcher ownership, shell and agent feeders, worktrees, shutdown, recovery, and logs.
@@ -13,7 +13,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, applies, and verifies deterministic index and link updates.
 - [Watcher and Automation](watcher-and-automation.md): Foreground watch behavior and its relationship to the repository demon.
 - [Testing and Fixtures](testing-and-fixtures.md): Release gates, fixture strategy, link/codemap regression coverage, and research benchmarks.
-- [Code-Folder Reverse Indexes](reverse-indexes.md): Reverse documentation projection design plus the current feature-branch implementation boundary.
+- [Code-Folder Reverse Indexes](reverse-indexes.md): Implemented file/folder reverse documentation projections and the remaining symbol, repair, and reporting boundaries.
 - [Deterministic Typed Repository Graph](repository-graph.md): Back-burnered architecture for joining the existing documentation/link graph with normalized polyglot code facts.
 - [Code-Symbol References](code-symbol-references.md): Planned declaration-level references behind the same polyglot adapter seam as the future code graph.
 - [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md): Planned polyglot code-graph provider contract and bounded graph projections.

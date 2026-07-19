@@ -1,6 +1,6 @@
 # Demon Docs Roadmap
 
-This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active branches, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
+This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active tuning work, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
 
 ## Current Product: Implemented on `main`
 

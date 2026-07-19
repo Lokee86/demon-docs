@@ -86,7 +86,7 @@ The current `codemap export` command uses CLI options for format-specific overri
 - repeated `--target-root PATH` supplies repository-relative component roots; and
 - `--output PATH` writes the deterministic dataset to a file.
 
-The main branch does not yet persist codemap headings or target roots in the general TOML config. The reverse-index feature branch introduces dedicated codemap-heading and reverse-root settings; document those as released configuration only after that branch merges.
+`[codemap].headings` persists the headings used by reverse reconciliation. `[reverse_index].roots` persists repository-relative recursive code roots. `--codemap-heading` and `--reverse-root` replace those configured values for one `check`, `fix`, or `watch` invocation.
 
 ## Selection
 
