@@ -530,11 +530,13 @@ the documentation coverage map points only to planning or research for implement
 
 ## Implementation coverage policy
 
-`docs/development/documentation-coverage.md` maps every production package and public command family to canonical current documentation.
+`docs/development/documentation-coverage.md` maps every production package, public command family, and independent stateful flow to canonical current documentation.
 
-Update that map when a production package, command group, or durable ownership boundary is added, removed, renamed, or materially reassigned. Small utility packages may share the current architecture owner of the subsystem they serve. Major independent boundaries require a dedicated current owner.
+Update that map when a production package, command group, durable ownership boundary, persistent model, mutation sequence, lifecycle, concurrency boundary, or recovery seam is added, removed, renamed, or materially reassigned. Small utility packages may share the current architecture owner of the subsystem they serve. Major independent boundaries require a dedicated current owner.
 
-A map entry is not sufficient by itself. The linked document must actually explain the package responsibility, flow, non-ownership boundary, and relevant tests or public contract.
+Package-level coverage alone is insufficient. A broad package may contain several independently important flows, such as planning, generated source mutation, review publication, state publication, rollback, and watcher suppression. Those flows require focused owners when one umbrella page cannot explain their state transitions and failure boundaries clearly.
+
+A map entry is not sufficient by itself. The linked document must actually explain responsibility, flow, state ownership, non-ownership boundaries, invariants, failure and recovery behavior, extension seams, and relevant tests or public contracts.
 
 ## Related docs
 

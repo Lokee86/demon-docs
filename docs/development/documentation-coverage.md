@@ -4,13 +4,15 @@ Parent index: [Development](./README.md)
 
 ## Purpose
 
-This document maps every current production package and public command family to canonical documentation owners so implemented behavior does not exist only in code, tests, the root README, research notes, or the roadmap.
+This document maps every current production package, public command family, and independent stateful flow to canonical documentation owners so implemented behavior does not exist only in code, tests, the root README, research notes, or the roadmap.
 
 ## Overview
 
 Coverage is ownership-based rather than one-file-per-package. A focused utility package may be documented inside the architecture page for the subsystem it serves. A major independent boundary requires its own current architecture or operations owner.
 
-The map covers current production code under `cmd/` and `internal/`. Planning packages do not exist in code and therefore are not counted as current implementation coverage.
+Coverage also tracks independent stateful flows. One package pointer does not cover several distinct mutation, publication, rollback, lifecycle, or concurrency boundaries merely because they share a directory.
+
+The map covers current production code under `cmd/` and `internal/` plus the stateful flows those packages implement. Planning packages do not exist in code and therefore are not counted as current implementation coverage.
 
 ## Coverage rules
 
@@ -20,6 +22,7 @@ A production boundary is covered when:
 - the document identifies important non-ownership boundaries;
 - public commands and mutation scope are represented in reference documentation;
 - implementation-facing pages provide useful code maps and tests;
+- independent state transitions, mutation sequences, publication boundaries, rollback behavior, and recovery paths have canonical owners;
 - known incomplete surfaces appear in limits or planning; and
 - research pages are not the sole authority for shipped behavior.
 
@@ -31,10 +34,10 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 | --- | --- | --- |
 | `cmd/ddocs/` | Canonical executable entry | [Application Orchestration](../architecture/application-orchestration.md), [CLI Reference](../reference/cli.md) |
 | `cmd/demon/` | Repository-demon alias entry and argument normalization | [Application Orchestration](../architecture/application-orchestration.md), [Repository Demon](../operations/repository-demon.md), [CLI Reference](../reference/cli.md) |
-| `internal/app/` | Command parsing, selection, orchestration, output, aggregate result | [Application Orchestration](../architecture/application-orchestration.md), [CLI Reference](../reference/cli.md), command-specific guides |
+| `internal/app/` | Command parsing, selection, orchestration, output, aggregate result | [Application Orchestration](../architecture/application-orchestration.md), [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md), [CLI Reference](../reference/cli.md), command-specific guides |
 | `internal/app/move.go` | Stateless move command integration | [Stateless Document Refactoring](../guides/document-refactoring.md), [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md) |
 | `internal/app/orphans.go` | Orphan health projection | [Document Health Checks](../guides/document-health-checks.md), [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
-| `internal/app/review_*.go` | Suggestion, change, undo, and block commands | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md), [Review Ledger](../architecture/review-ledger.md) |
+| `internal/app/review_*.go` | Suggestion, change, undo, and block commands | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md), [Review Ledger](../architecture/review-ledger.md), [Review Lifecycles](../architecture/review-lifecycles.md) |
 | `internal/app/codemap_*.go` | Codemap export, benchmark, and precision commands | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md) |
 | `internal/app/demon*.go` | Demon commands, shell hooks, feeder integration, detached startup | [Repository Demon](../operations/repository-demon.md), [Host Adapter Feeder Integration](../operations/host-adapters.md) |
 | `internal/app/reverse_index.go` | Reverse option resolution and mixed watch coordination | [Reverse Index Architecture](../architecture/reverse-indexes.md), [Adopting Reverse Indexes](../guides/reverse-indexes.md) |
@@ -63,8 +66,19 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 
 | Package | Responsibility | Canonical current docs |
 | --- | --- | --- |
-| `internal/links/` | Syntax parsing, inventory, identities, evidence, repair, moves, application | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md), [Supported Link Syntax](../reference/supported-link-syntax.md), [Stateless Document Refactoring](../guides/document-refactoring.md) |
-| `internal/review/` | Append-only review events, fingerprints, policy replay, undo | [Review Ledger](../architecture/review-ledger.md), [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) |
+| `internal/links/` | Syntax parsing, inventory, identities, evidence, repair, moves, application | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md), [Link Reconciliation State Machine](../architecture/link-reconciliation-state-machine.md), [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md), [Supported Link Syntax](../reference/supported-link-syntax.md), [Stateless Document Refactoring](../guides/document-refactoring.md) |
+| `internal/review/` | Append-only review events, fingerprints, policy replay, undo | [Review Ledger](../architecture/review-ledger.md), [Review Lifecycles](../architecture/review-lifecycles.md), [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md), [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) |
+
+## Stateful flow coverage
+
+| Stateful flow | Current owner | Covered contracts |
+| --- | --- | --- |
+| Link occurrence and target lifecycle | [Link Reconciliation State Machine](../architecture/link-reconciliation-state-machine.md) | Identity reuse, parser invalidation, exact resolution, candidate discovery, statuses, generated-rewrite planning, refresh, and convergence. |
+| Generated source and private-state publication | [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md) | Batch preflight, atomic file replacement, rollback, review publication, source refresh, state publication, suppression durability, and partial-completion recovery. |
+| Suggestion, decision, change, block, and undo lifecycle | [Review Lifecycles](../architecture/review-lifecycles.md) | Stable fingerprints, decline scope, staleness, selection, change/run grouping, undo eligibility, repair blocks, replay, and compare-and-swap history publication. |
+| `check`, `fix`, and `watch` command lifecycle | [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md) | Configuration and scope, feature selection, planner/apply ordering, diagnostics, exit codes, orphan integration, and cross-subsystem partial completion. |
+
+New stateful behavior must be added here when its ownership cannot be explained completely by an existing row. A package row is not evidence that all flows inside that package are documented.
 
 ## Reverse-index coverage
 
@@ -96,13 +110,13 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 | Install, version, and scoped help discovery | [Getting Started](../guides/getting-started.md) | [CLI Reference](../reference/cli.md), [Testing and Fixtures](testing-and-fixtures.md) |
 | Initialize and first baseline | [Getting Started](../guides/getting-started.md) | [CLI Reference](../reference/cli.md), [Configuration Reference](../reference/configuration.md) |
 | `status`, `config paths`, `config show` | [Getting Started](../guides/getting-started.md) | [Configuration Reference](../reference/configuration.md) |
-| `check`, `fix`, selectors | [Getting Started](../guides/getting-started.md), [CI and Automation](../guides/ci-and-automation.md) | [CLI Reference](../reference/cli.md), [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
+| `check`, `fix`, selectors | [Getting Started](../guides/getting-started.md), [CI and Automation](../guides/ci-and-automation.md) | [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md), [CLI Reference](../reference/cli.md), [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
 | Managed folder indexes and parent links | [Getting Started](../guides/getting-started.md) | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Managed Files and State](../reference/managed-files-and-state.md) |
 | Local links | [Getting Started](../guides/getting-started.md) | [Supported Link Syntax](../reference/supported-link-syntax.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) |
 | Orphan health | [Document Health Checks](../guides/document-health-checks.md) | [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
 | `mv` | [Stateless Document Refactoring](../guides/document-refactoring.md) | [CLI Reference](../reference/cli.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) |
 | Reverse indexes | [Adopting Reverse Indexes](../guides/reverse-indexes.md) | [Reverse Index Architecture](../architecture/reverse-indexes.md) |
-| Suggestions and changes | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) | [Review Ledger](../architecture/review-ledger.md) |
+| Suggestions and changes | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) | [Review Ledger](../architecture/review-ledger.md), [Review Lifecycles](../architecture/review-lifecycles.md), [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md) |
 | Codemap export/benchmark/precision | [Evaluating Codemap Suggestions](../guides/evaluating-codemap-suggestions.md) | [Codemap Pipeline](../architecture/codemap-pipeline.md), [Codemap Evidence](../research/codemap-evidence.md), [CLI Reference](../reference/cli.md) |
 | Foreground `watch` | [CI and Automation](../guides/ci-and-automation.md) | [Watcher and Automation](../operations/watcher-and-automation.md) |
 | Repository demon | [CI and Automation](../guides/ci-and-automation.md) | [Repository Demon](../operations/repository-demon.md) |

@@ -159,6 +159,8 @@ make release-check
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
 - [Review Ledger](review-ledger.md)
+- [Review Lifecycles](review-lifecycles.md)
+- [Generated Rewrite Publication](generated-rewrite-publication.md)
 - [Repository Demon](../operations/repository-demon.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 

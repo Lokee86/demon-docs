@@ -12,6 +12,8 @@ The review ledger is stored in the private `.ddocs/` Git object repository under
 
 A suggestion is an unresolved choice. A repair is a concrete transformation ready to apply. An applied repair becomes a change event.
 
+This page owns the ledger overview and durable concepts. Exact suggestion, decision, applied-change, undo, repair-block, stale-decision, and stale-block transitions are owned by [Review Lifecycles](review-lifecycles.md).
+
 ## Code root
 
 ```text
@@ -150,6 +152,8 @@ go test ./internal/review ./internal/links ./internal/app ./internal/codemap -co
 ## Related docs
 
 - [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)
+- [Review Lifecycles](review-lifecycles.md)
+- [Generated Rewrite Publication](generated-rewrite-publication.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)

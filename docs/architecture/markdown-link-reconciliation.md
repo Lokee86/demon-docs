@@ -10,6 +10,8 @@ This document describes the implemented repository-local link graph, supported s
 
 Demon Docs maintains a repository-scoped graph of local Markdown links. This is a focused link graph for validation and path repair; it is not the later repository, code, symbol, or agent-context graph.
 
+This page owns the subsystem overview and supported behavior. The detailed record transitions are owned by [Link Reconciliation State Machine](link-reconciliation-state-machine.md), while filesystem writes and multi-store publication are owned by [Generated Rewrite Publication](generated-rewrite-publication.md).
+
 ## Code root
 
 ```text
@@ -177,6 +179,9 @@ go test ./internal/links -count=1
 ## Related docs
 
 - [Architecture](README.md)
+- [Link Reconciliation State Machine](link-reconciliation-state-machine.md)
+- [Generated Rewrite Publication](generated-rewrite-publication.md)
+- [Review Lifecycles](review-lifecycles.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md)
 - [Repository State and Transactions](repository-state-and-transactions.md)
