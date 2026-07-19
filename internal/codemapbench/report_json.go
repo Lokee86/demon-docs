@@ -7,6 +7,8 @@ import (
 )
 
 // ReportSchemaVersion identifies the stable JSON benchmark report shape.
+// Schema 1 permits additive optional suggestion metadata such as tier; a bump
+// is required for removals, renamed fields, or changed meanings.
 const ReportSchemaVersion = 1
 
 type jsonReportEnvelope struct {

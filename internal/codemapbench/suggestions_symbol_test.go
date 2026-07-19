@@ -17,7 +17,7 @@ func TestSuggestionsFromEvidenceAdmitsDeclaredSymbolMentions(t *testing.T) {
 	}
 
 	suggestions := SuggestionsFromEvidence("docs/profile.md", []evidence.Candidate{candidate})
-	if len(suggestions) != 1 || suggestions[0].Target != candidate.Path || suggestions[0].Score <= 7 {
+	if len(suggestions) != 1 || suggestions[0].Target != candidate.Path || suggestions[0].Score <= 7 || suggestions[0].Tier != SuggestionTierHardLink {
 		t.Fatalf("unexpected symbol suggestion: %#v", suggestions)
 	}
 }

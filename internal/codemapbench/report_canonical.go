@@ -64,5 +64,6 @@ func canonicalSuggestion(suggestion Suggestion) Suggestion {
 func suggestionSortKey(suggestion Suggestion) string {
 	return linkKey(suggestion.Link) + "\x00" +
 		strconv.FormatFloat(suggestion.Score, 'g', -1, 64) + "\x00" +
-		strings.Join(suggestion.Evidence, "\x00")
+		strings.Join(suggestion.Evidence, "\x00") + "\x00" +
+		string(suggestion.Tier)
 }

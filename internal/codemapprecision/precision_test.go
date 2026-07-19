@@ -81,7 +81,12 @@ func TestEvaluateCalculatesOverallAcceptanceAndPerDocumentAtK(t *testing.T) {
 	}}
 	report := codemapbench.Report{}
 	for _, item := range benchmark.Suggestions {
-		report.UnmatchedSuggestions = append(report.UnmatchedSuggestions, item.Suggestion)
+		suggestion := item.Suggestion
+		suggestion.Tier = codemapbench.SuggestionTierContext
+		if item.Document+"/"+item.Target == "docs/a.md/a.go" || item.Document+"/"+item.Target == "docs/a.md/b.go" || item.Document+"/"+item.Target == "docs/b.md/a.go" {
+			suggestion.Tier = codemapbench.SuggestionTierHardLink
+		}
+		report.UnmatchedSuggestions = append(report.UnmatchedSuggestions, suggestion)
 	}
 	evaluation, err := Evaluate(benchmark, report)
 	if err != nil {
@@ -95,6 +100,12 @@ func TestEvaluateCalculatesOverallAcceptanceAndPerDocumentAtK(t *testing.T) {
 	}
 	if evaluation.PrecisionAt1 != 0.5 || evaluation.PrecisionAt3 != 0.5 {
 		t.Fatalf("unexpected aggregate @k: %#v", evaluation)
+	}
+	if got := evaluation.ByTier[string(codemapbench.SuggestionTierHardLink)]; got.Total != 3 || got.Valid != 1 || got.Accepted != 2 || got.OverallPrecision != 1.0/3.0 || got.AcceptancePrecision != 2.0/3.0 {
+		t.Fatalf("unexpected hard-link metrics: %#v", got)
+	}
+	if evaluation.HardLinkSampleValidRecall != 1.0/3.0 || evaluation.HardLinkSuggestionsPerDocument != 1.5 {
+		t.Fatalf("unexpected hard-link coverage: %#v", evaluation)
 	}
 }
 
@@ -123,12 +134,15 @@ func TestLoadBenchmarkAllowsUnlabeledTemplateAndRejectsInvalidShape(t *testing.T
 	}
 }
 
-func TestLoadersRejectWrongSchemaAndTrailingJSON(t *testing.T) {
+func TestLoadersRejectWrongSchemaTrailingJSONAndUnknownTier(t *testing.T) {
 	if _, err := LoadBenchmark(strings.NewReader(`{"schema_version":99}`)); err == nil {
 		t.Fatal("expected benchmark schema error")
 	}
 	if _, err := LoadSuggestionReport(strings.NewReader(`{"schema_version":1,"unmatched_suggestions":[]} {}`)); err == nil {
 		t.Fatal("expected trailing report JSON error")
+	}
+	if _, err := LoadSuggestionReport(strings.NewReader(`{"schema_version":1,"unmatched_suggestions":[{"document":"docs/a.md","target":"src/a.go","tier":"unknown"}]}`)); err == nil || !strings.Contains(err.Error(), "invalid tier") {
+		t.Fatalf("expected invalid tier error, got %v", err)
 	}
 }
 

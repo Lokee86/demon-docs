@@ -84,16 +84,19 @@ type DocumentMetrics struct {
 }
 
 type Evaluation struct {
-	SchemaVersion    int                         `json:"schema_version"`
-	BenchmarkSize    int                         `json:"benchmark_size"`
-	LabelCounts      Counts                      `json:"label_counts"`
-	Overall          PrecisionMetrics            `json:"overall"`
-	PrecisionAt1     float64                     `json:"precision_at_1"`
-	PrecisionAt3     float64                     `json:"precision_at_3"`
-	PrecisionAt5     float64                     `json:"precision_at_5"`
-	PerDocument      map[string]DocumentMetrics  `json:"per_document"`
-	ByEvidenceKind   map[string]PrecisionMetrics `json:"by_evidence_kind"`
-	ByScoreBucket    map[string]PrecisionMetrics `json:"by_score_bucket"`
-	ByRankBucket     map[string]PrecisionMetrics `json:"by_rank_bucket"`
-	SamplingCoverage map[string]map[string]int   `json:"sampling_coverage"`
+	SchemaVersion                  int                         `json:"schema_version"`
+	BenchmarkSize                  int                         `json:"benchmark_size"`
+	LabelCounts                    Counts                      `json:"label_counts"`
+	Overall                        PrecisionMetrics            `json:"overall"`
+	PrecisionAt1                   float64                     `json:"precision_at_1"`
+	PrecisionAt3                   float64                     `json:"precision_at_3"`
+	PrecisionAt5                   float64                     `json:"precision_at_5"`
+	HardLinkSampleValidRecall      float64                     `json:"hard_link_sample_valid_recall"`
+	HardLinkSuggestionsPerDocument float64                     `json:"hard_link_suggestions_per_document"`
+	PerDocument                    map[string]DocumentMetrics  `json:"per_document"`
+	ByEvidenceKind                 map[string]PrecisionMetrics `json:"by_evidence_kind"`
+	ByScoreBucket                  map[string]PrecisionMetrics `json:"by_score_bucket"`
+	ByRankBucket                   map[string]PrecisionMetrics `json:"by_rank_bucket"`
+	ByTier                         map[string]PrecisionMetrics `json:"by_tier"`
+	SamplingCoverage               map[string]map[string]int   `json:"sampling_coverage"`
 }

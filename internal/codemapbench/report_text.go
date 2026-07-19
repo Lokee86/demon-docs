@@ -59,7 +59,11 @@ func writeSuggestionSection(output *strings.Builder, title string, suggestions [
 	}
 	fmt.Fprintf(output, "\n%s:\n", title)
 	for _, suggestion := range suggestions {
-		fmt.Fprintf(output, "- %s -> %s (score %.4f)\n", suggestion.Document, suggestion.Target, suggestion.Score)
+		fmt.Fprintf(output, "- %s -> %s (score %.4f", suggestion.Document, suggestion.Target, suggestion.Score)
+		if suggestion.Tier != "" {
+			fmt.Fprintf(output, ", tier %s", suggestion.Tier)
+		}
+		fmt.Fprintln(output, ")")
 		for _, evidence := range suggestion.Evidence {
 			fmt.Fprintf(output, "  evidence: %s\n", evidence)
 		}

@@ -65,6 +65,30 @@ Breakdowns are also recorded in [evaluation.json](evaluation.json). Selected exa
 
 By rank bucket: ranks 1–5 are 52.80% strict / 91.20% acceptance (66/125 and 114/125); ranks 6–10 are 40.00% / 100.00% (2/5 and 5/5); ranks 11–20 are 0.00% / 60.00% (0/5 and 3/5); ranks 21+ are 13.33% / 66.67% (2/15 and 10/15). By score bucket: `<1` is 50.00% / 50.00% (1/2 and 1/2), `1-<2` is 50.00% / 75.00% (2/4 and 3/4), `2-<8` is 13.33% / 80.00% (4/30 and 24/30), and `8+` is 55.26% / 91.23% (63/114 and 104/114).
 
+## First tuning pass: hard links and context
+
+The first tuning pass preserves the complete suggestion pool but assigns each candidate one of two product tiers:
+
+- `hard_link`: a bounded direct-link review surface, limited to the top five candidates per document and requiring a declared-symbol mention, a source/test counterpart, or dependency-neighbor evidence with score at least 16.
+- `context`: a weaker or indirect relationship retained for bounded agent-context assembly rather than proposed as a permanent codemap link.
+
+Measured against the same 150 labels:
+
+| Tier/metric | Result |
+|---|---:|
+| Hard-link suggestions | 81 |
+| Hard-link strict precision | 64.20% (52/81) |
+| Hard-link relevance precision | 95.06% (77/81) |
+| Hard-link recovery of labeled valid links | 74.29% (52/70) |
+| Hard-link suggestions per sampled document | 3.24 |
+| Context suggestions | 69 |
+| Context strict precision | 26.09% (18/69) |
+| Context relevance precision | 79.71% (55/69) |
+
+On the complete current Space Rocks source pool, 602 of 4,493 candidates are `hard_link` and 3,891 are `context`, averaging 4.04 hard-link candidates per mapped document. Nine of 149 documents have no hard-link candidate.
+
+The positive-only ten-link holdout still recovers 10/10 links because context candidates are not discarded. Four recovered links are in the hard-link tier and six remain context. Therefore the tuning improves the direct recommendation surface without pretending that the broader relevant context has no value. Hard-link-only recall remains deliberately lower and must continue to be measured alongside precision.
+
 ## Reproduction
 
 From the Demon Docs repository, with the pinned Space Rocks checkout available:

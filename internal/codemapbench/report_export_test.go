@@ -42,8 +42,31 @@ func TestMarshalJSONReportIsCanonicalAndVersioned(t *testing.T) {
 	if decoded["seed"] != "report-seed" {
 		t.Fatalf("report fields were not emitted at top level: %#v", decoded)
 	}
+	recovered := decoded["recovered_suggestions"].([]any)
+	if tier := recovered[0].(map[string]any)["tier"]; tier != string(SuggestionTierHardLink) {
+		t.Fatalf("suggestion tier was not emitted: %#v", recovered[0])
+	}
 	if !strings.HasSuffix(string(firstJSON), "\n") {
 		t.Fatal("JSON report must end with a newline")
+	}
+}
+
+func TestMarshalJSONReportUsesTierAsCanonicalTieBreaker(t *testing.T) {
+	report := Report{UnmatchedSuggestions: []Suggestion{
+		{Link: Link{Document: "docs/a.md", Target: "src/a.go"}, Score: 1, Evidence: []string{"same"}, Tier: SuggestionTierContext},
+		{Link: Link{Document: "docs/a.md", Target: "src/a.go"}, Score: 1, Evidence: []string{"same"}, Tier: SuggestionTierHardLink},
+	}}
+	first, err := MarshalJSONReport(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reverseSuggestions(report.UnmatchedSuggestions)
+	second, err := MarshalJSONReport(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(first) != string(second) {
+		t.Fatalf("canonical JSON changed when tier-only ties were reversed:\n%s\n%s", first, second)
 	}
 }
 
@@ -68,7 +91,7 @@ Precision: 33.33%
 Recall: 50.00%
 
 Recovered:
-- docs/a.md -> src/a.go (score 0.9000)
+- docs/a.md -> src/a.go (score 0.9000, tier hard_link)
   evidence: direct mention
   evidence: git co-change
 
@@ -76,7 +99,7 @@ Missed:
 - docs/b.md -> src/b.go
 
 Unmatched:
-- docs/a.md -> src/extra.go (score 0.4000)
+- docs/a.md -> src/extra.go (score 0.4000, tier context)
   evidence: sibling file
 
 Already linked:
@@ -111,12 +134,14 @@ func exportFixtureReport() Report {
 			Link:     Link{Document: "docs/a.md", Target: "src/a.go"},
 			Score:    0.9,
 			Evidence: []string{"git co-change", "direct mention"},
+			Tier:     SuggestionTierHardLink,
 		}},
 		MissedLinks: []Link{{Document: "docs/b.md", Target: "src/b.go"}},
 		UnmatchedSuggestions: []Suggestion{{
 			Link:     Link{Document: "docs/a.md", Target: "src/extra.go"},
 			Score:    0.4,
 			Evidence: []string{"sibling file"},
+			Tier:     SuggestionTierContext,
 		}},
 		AlreadyLinked: []Suggestion{{
 			Link:  Link{Document: "docs/c.md", Target: "src/c.go"},

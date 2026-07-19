@@ -33,8 +33,64 @@ func TestSuggestionsFromEvidenceWeightsAndCapsOccurrences(t *testing.T) {
 		},
 	}}
 	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
-	if len(suggestions) != 1 || suggestions[0].Score != 12 || suggestions[0].Document != "docs/runtime.md" || len(suggestions[0].Evidence) != 2 {
+	if len(suggestions) != 1 || suggestions[0].Score != 12 || suggestions[0].Document != "docs/runtime.md" || len(suggestions[0].Evidence) != 2 || suggestions[0].Tier != SuggestionTierHardLink {
 		t.Fatalf("unexpected suggestions: %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
+	dependencyEvidence := func(prefix string, count int) []evidence.Evidence {
+		items := make([]evidence.Evidence, 0, count)
+		for index := 0; index < count; index++ {
+			items = append(items, evidence.Evidence{
+				Kind:   evidence.KindDependencyNeighbor,
+				Source: fmt.Sprintf("src/%s_source_%d.go", prefix, index),
+				Detail: "outbound:go_import",
+				Count:  1,
+			})
+		}
+		return items
+	}
+	candidates := []evidence.Candidate{
+		{Path: "src/dependency_hard.go", Evidence: dependencyEvidence("hard", 4)},
+		{Path: "src/dependency_context.go", Evidence: dependencyEvidence("context", 3)},
+		{Path: "src/explicit_context.go", Evidence: []evidence.Evidence{{Kind: evidence.KindExactPathMention, Count: 1}}},
+	}
+
+	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
+	if len(suggestions) != 3 {
+		t.Fatalf("unexpected suggestions: %#v", suggestions)
+	}
+	if suggestions[0].Target != "src/dependency_hard.go" || suggestions[0].Score != HardLinkDependencyMinimumScore || suggestions[0].Tier != SuggestionTierHardLink {
+		t.Fatalf("dependency-backed hard link = %#v", suggestions[0])
+	}
+	if suggestions[1].Tier != SuggestionTierContext || suggestions[2].Tier != SuggestionTierContext {
+		t.Fatalf("context tiers = %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidenceCapsHardLinkSurface(t *testing.T) {
+	candidates := make([]evidence.Candidate, 0, HardLinkSuggestionLimitPerDocument+1)
+	for index := 0; index <= HardLinkSuggestionLimitPerDocument; index++ {
+		candidates = append(candidates, evidence.Candidate{
+			Path: fmt.Sprintf("src/symbol_%02d.go", index),
+			Evidence: []evidence.Evidence{{
+				Kind:   evidence.KindDeclaredSymbolMention,
+				Detail: fmt.Sprintf("Symbol%d", index),
+				Count:  1,
+			}},
+		})
+	}
+
+	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
+	for index, suggestion := range suggestions {
+		want := SuggestionTierContext
+		if index < HardLinkSuggestionLimitPerDocument {
+			want = SuggestionTierHardLink
+		}
+		if suggestion.Tier != want {
+			t.Fatalf("suggestion %d tier = %q, want %q: %#v", index, suggestion.Tier, want, suggestions)
+		}
 	}
 }
 

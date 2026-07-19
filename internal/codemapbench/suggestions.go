@@ -12,9 +12,11 @@ import (
 // The benchmark is intended to measure useful surfaced suggestions, not every
 // weak relationship that can be inferred from repository history.
 const (
-	DefaultSuggestionLimitPerDocument = 30
-	RepeatedMentionReservePerDocument = 2
-	RepeatedMentionMinimumCount       = 2
+	DefaultSuggestionLimitPerDocument  = 30
+	HardLinkSuggestionLimitPerDocument = 5
+	HardLinkDependencyMinimumScore     = 16
+	RepeatedMentionReservePerDocument  = 2
+	RepeatedMentionMinimumCount        = 2
 )
 
 type evidenceAtom struct {
@@ -24,8 +26,11 @@ type evidenceAtom struct {
 }
 
 type rankedSuggestion struct {
-	suggestion           Suggestion
-	repeatedMentionCount int
+	suggestion               Suggestion
+	repeatedMentionCount     int
+	hasDeclaredSymbolMention bool
+	hasTestCounterpart       bool
+	hasDependencyNeighbor    bool
 }
 
 // SuggestionsFromEvidence ranks deterministic evidence candidates. Repeated
@@ -76,6 +81,14 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 			if item.Kind == evidence.KindExactPathMention && item.Count >= RepeatedMentionMinimumCount {
 				itemResult.repeatedMentionCount = item.Count
 			}
+			switch item.Kind {
+			case evidence.KindDeclaredSymbolMention:
+				itemResult.hasDeclaredSymbolMention = true
+			case evidence.KindTestCounterpart:
+				itemResult.hasTestCounterpart = true
+			case evidence.KindDependencyNeighbor:
+				itemResult.hasDependencyNeighbor = true
+			}
 		}
 		sort.Strings(itemResult.suggestion.Evidence)
 		ranked = append(ranked, itemResult)
@@ -120,17 +133,34 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 		reserved++
 	}
 
-	result := make([]Suggestion, 0, len(selected))
+	ordered := make([]rankedSuggestion, 0, len(selected))
 	for _, item := range selected {
-		result = append(result, item.suggestion)
+		ordered = append(ordered, item)
 	}
-	sort.Slice(result, func(i, j int) bool {
-		if result[i].Score != result[j].Score {
-			return result[i].Score > result[j].Score
+	sort.Slice(ordered, func(i, j int) bool {
+		if ordered[i].suggestion.Score != ordered[j].suggestion.Score {
+			return ordered[i].suggestion.Score > ordered[j].suggestion.Score
 		}
-		return result[i].Target < result[j].Target
+		return ordered[i].suggestion.Target < ordered[j].suggestion.Target
 	})
+
+	result := make([]Suggestion, 0, len(ordered))
+	for index, item := range ordered {
+		suggestion := item.suggestion
+		suggestion.Tier = SuggestionTierContext
+		if index < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
+			suggestion.Tier = SuggestionTierHardLink
+		}
+		result = append(result, suggestion)
+	}
 	return result
+}
+
+func (item rankedSuggestion) isHardLinkCandidate() bool {
+	if item.hasDeclaredSymbolMention || item.hasTestCounterpart {
+		return true
+	}
+	return item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore
 }
 
 func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {

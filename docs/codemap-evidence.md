@@ -29,6 +29,15 @@ The initial deterministic signals are:
 
 Each candidate retains its evidence kind, source, detail, count, and a deterministic evidence fingerprint. Scoring and acceptance are separate layers.
 
+## Suggestion Tiers
+
+Ranked candidates are separated without discarding the broader relationship set:
+
+- `hard_link` identifies a bounded, high-confidence surface for direct codemap review. It is limited to the top five candidates per document and currently requires a declared-symbol mention, a source/test counterpart, or sufficiently strong dependency-neighbor evidence.
+- `context` identifies weaker or indirect relationships that can still improve bounded agent context. These candidates remain available even when they are not strong enough to recommend as permanent documentation links.
+
+A tier is not an automatic write decision. It does not declare an existing link irrelevant, and it does not bypass persisted declines or human review. Schema-1 reports created before tiers existed may omit the field; evaluation treats that legacy empty value as `context` and rejects unknown non-empty tier values.
+
 ## Safety Contract
 
 - Existing codemap targets are never returned as missing-link candidates.

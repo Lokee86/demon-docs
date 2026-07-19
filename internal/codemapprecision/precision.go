@@ -72,7 +72,32 @@ func LoadSuggestionReport(reader io.Reader) (codemapbench.Report, error) {
 	if envelope.SchemaVersion != codemapbench.ReportSchemaVersion {
 		return codemapbench.Report{}, fmt.Errorf("unsupported suggestion report schema %d", envelope.SchemaVersion)
 	}
+	if err := validateSuggestionReportTiers(envelope.Report); err != nil {
+		return codemapbench.Report{}, err
+	}
 	return envelope.Report, nil
+}
+
+func validateSuggestionReportTiers(report codemapbench.Report) error {
+	groups := [][]codemapbench.Suggestion{
+		report.RecoveredSuggestions,
+		report.UnmatchedSuggestions,
+		report.AlreadyLinked,
+		report.DuplicateSuggestions,
+	}
+	for _, suggestions := range groups {
+		for _, suggestion := range suggestions {
+			if !suggestion.Tier.Valid() {
+				return fmt.Errorf("suggestion %s -> %s has invalid tier %q", suggestion.Document, suggestion.Target, suggestion.Tier)
+			}
+		}
+	}
+	for _, invalid := range report.InvalidSuggestions {
+		if !invalid.Suggestion.Tier.Valid() {
+			return fmt.Errorf("invalid suggestion %d has invalid tier %q", invalid.Index, invalid.Suggestion.Tier)
+		}
+	}
+	return nil
 }
 
 func requireEOF(decoder *json.Decoder) error {
@@ -422,6 +447,9 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 	if err := ValidateLabeledBenchmark(benchmark); err != nil {
 		return Evaluation{}, err
 	}
+	if err := validateSuggestionReportTiers(report); err != nil {
+		return Evaluation{}, err
+	}
 	source := map[string]codemapbench.Suggestion{}
 	for _, suggestion := range report.UnmatchedSuggestions {
 		source[suggestion.Document+"\x00"+suggestion.Target] = suggestion
@@ -447,7 +475,7 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 		SchemaVersion: SchemaVersion, BenchmarkSize: len(benchmark.Suggestions),
 		PerDocument: map[string]DocumentMetrics{}, ByEvidenceKind: map[string]PrecisionMetrics{},
 		ByScoreBucket: map[string]PrecisionMetrics{}, ByRankBucket: map[string]PrecisionMetrics{},
-		SamplingCoverage: map[string]map[string]int{},
+		ByTier: map[string]PrecisionMetrics{}, SamplingCoverage: map[string]map[string]int{},
 	}
 	evaluation.LabelCounts.Total = len(benchmark.Suggestions)
 	for _, item := range benchmark.Suggestions {
@@ -473,6 +501,11 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 		addMetrics(evaluation.ByEvidenceKind, item.PrimaryEvidenceKind)
 		addMetrics(evaluation.ByScoreBucket, item.ScoreBucket)
 		addMetrics(evaluation.ByRankBucket, item.RankBucket)
+		tier := source[item.Document+"\x00"+item.Target].Tier
+		if tier == "" {
+			tier = codemapbench.SuggestionTierContext
+		}
+		addMetrics(evaluation.ByTier, string(tier))
 		for _, key := range []string{"area", "subsystem"} {
 			value := item.Area
 			if key == "subsystem" {
@@ -523,6 +556,17 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 	}
 	for key, metrics := range evaluation.ByRankBucket {
 		evaluation.ByRankBucket[key] = finalize(metrics)
+	}
+	for key, metrics := range evaluation.ByTier {
+		evaluation.ByTier[key] = finalize(metrics)
+	}
+	if hardLinks, ok := evaluation.ByTier[string(codemapbench.SuggestionTierHardLink)]; ok {
+		if evaluation.LabelCounts.Valid > 0 {
+			evaluation.HardLinkSampleValidRecall = float64(hardLinks.Valid) / float64(evaluation.LabelCounts.Valid)
+		}
+		if documents := len(evaluation.SamplingCoverage["document"]); documents > 0 {
+			evaluation.HardLinkSuggestionsPerDocument = float64(hardLinks.Total) / float64(documents)
+		}
 	}
 	for document, metrics := range evaluation.PerDocument {
 		metrics.PrecisionAt1 = finalize(metrics.PrecisionAt1)
@@ -730,6 +774,9 @@ func FormatEvaluation(evaluation Evaluation) string {
 	fmt.Fprintf(&output, "Labels: valid=%d plausible=%d incorrect=%d\n", evaluation.LabelCounts.Valid, evaluation.LabelCounts.Plausible, evaluation.LabelCounts.Incorrect)
 	fmt.Fprintf(&output, "Overall precision: %.2f%%\nAcceptance precision: %.2f%%\n", evaluation.Overall.OverallPrecision*100, evaluation.Overall.AcceptancePrecision*100)
 	fmt.Fprintf(&output, "Precision@1: %.2f%%\nPrecision@3: %.2f%%\nPrecision@5: %.2f%%\n", evaluation.PrecisionAt1*100, evaluation.PrecisionAt3*100, evaluation.PrecisionAt5*100)
+	if hardLinks, ok := evaluation.ByTier[string(codemapbench.SuggestionTierHardLink)]; ok {
+		fmt.Fprintf(&output, "Hard-link precision: %.2f%%\nHard-link acceptance: %.2f%%\nHard-link sample valid recall: %.2f%%\nHard-link suggestions/document: %.2f\n", hardLinks.OverallPrecision*100, hardLinks.AcceptancePrecision*100, evaluation.HardLinkSampleValidRecall*100, evaluation.HardLinkSuggestionsPerDocument)
+	}
 	output.WriteString("\nPer document:\n")
 	for _, document := range sortedDocumentKeys(evaluation.PerDocument) {
 		metrics := evaluation.PerDocument[document]
