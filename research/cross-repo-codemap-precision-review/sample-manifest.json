@@ -1,0 +1,2331 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-precision-review-v1",
+  "algorithm_baseline": "6ea39964a77919c3a6228b475904e9c530a16a4d",
+  "selection_policy": {
+    "included_modes": [
+      "diagnostic",
+      "primary"
+    ],
+    "excluded_modes": [
+      "stress"
+    ],
+    "per_repository_per_tier_cap": 25,
+    "stratification": [
+      "tier",
+      "score_bucket",
+      "evidence_families"
+    ]
+  },
+  "evaluation_split": {
+    "tuning_repositories": [
+      "agent-orchestrator",
+      "beads-rust",
+      "genesis",
+      "render-claude-context"
+    ],
+    "validation_repositories": [
+      "bifrost"
+    ],
+    "rationale": "Bifrost is the only sampled repository with unmatched hard-tier suggestions, so it is reserved for repository-level validation."
+  },
+  "inventory": [
+    {
+      "repository": "agent-orchestrator",
+      "tier": "hard_link",
+      "available": 0,
+      "selected": 0
+    },
+    {
+      "repository": "agent-orchestrator",
+      "tier": "context",
+      "available": 29,
+      "selected": 25
+    },
+    {
+      "repository": "beads-rust",
+      "tier": "hard_link",
+      "available": 0,
+      "selected": 0
+    },
+    {
+      "repository": "beads-rust",
+      "tier": "context",
+      "available": 31,
+      "selected": 25
+    },
+    {
+      "repository": "bifrost",
+      "tier": "hard_link",
+      "available": 3,
+      "selected": 3
+    },
+    {
+      "repository": "bifrost",
+      "tier": "context",
+      "available": 27,
+      "selected": 25
+    },
+    {
+      "repository": "genesis",
+      "tier": "hard_link",
+      "available": 0,
+      "selected": 0
+    },
+    {
+      "repository": "genesis",
+      "tier": "context",
+      "available": 29,
+      "selected": 25
+    },
+    {
+      "repository": "render-claude-context",
+      "tier": "hard_link",
+      "available": 0,
+      "selected": 0
+    },
+    {
+      "repository": "render-claude-context",
+      "tier": "context",
+      "available": 18,
+      "selected": 18
+    }
+  ],
+  "sample_count": 121,
+  "suggestions": [
+    {
+      "id": "CRP-001",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/parity_test.go",
+      "tier": "context",
+      "score": 1.9299649197406348,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/apispec/openapi.yaml:"
+      ]
+    },
+    {
+      "id": "CRP-002",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:.github/workflows/"
+      ]
+    },
+    {
+      "id": "CRP-003",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "tier": "context",
+      "score": 3.87163208055546,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/",
+        "sibling_of_existing_target:docs/README.md:",
+        "sibling_of_existing_target:docs/STATUS.md:",
+        "sibling_of_existing_target:docs/architecture.md:"
+      ]
+    },
+    {
+      "id": "CRP-004",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "test/cli/README.md",
+      "tier": "context",
+      "score": 12,
+      "score_bucket": "high",
+      "evidence_families": [
+        "test_counterpart"
+      ],
+      "evidence": [
+        "test_counterpart:README.md:",
+        "test_counterpart:docs/README.md:"
+      ]
+    },
+    {
+      "id": "CRP-005",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/dto_drift_e2e_test.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-006",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/service/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:service"
+      ]
+    },
+    {
+      "id": "CRP-007",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/imports_test.go",
+      "tier": "context",
+      "score": 1.627077132004828,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/controllers/dto.go:"
+      ]
+    },
+    {
+      "id": "CRP-008",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/queries/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:backend/internal/storage/sqlite/queries/"
+      ]
+    },
+    {
+      "id": "CRP-009",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "CONTEXT.md",
+      "tier": "context",
+      "score": 2.234388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "exact_path_mention:CONTEXT.md",
+        "sibling_of_existing_target:README.md:"
+      ]
+    },
+    {
+      "id": "CRP-010",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/mobile_restore.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-011",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/lifecycle/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:lifecycle"
+      ]
+    },
+    {
+      "id": "CRP-012",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/notifications_test.go",
+      "tier": "context",
+      "score": 1.627077132004828,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import",
+        "sibling_of_existing_target:backend/internal/httpd/controllers/dto.go:"
+      ]
+    },
+    {
+      "id": "CRP-013",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/adr/0001-lan-listener-for-mobile.md",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/adr/0001-lan-listener-for-mobile.md"
+      ]
+    },
+    {
+      "id": "CRP-014",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/api.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-015",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:daemon:x12"
+      ]
+    },
+    {
+      "id": "CRP-016",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:backend/"
+      ]
+    },
+    {
+      "id": "CRP-017",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/daemon.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-018",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/adapters/telemetry/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:telemetry"
+      ]
+    },
+    {
+      "id": "CRP-019",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/gen/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:backend/internal/storage/sqlite/gen/"
+      ]
+    },
+    {
+      "id": "CRP-020",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/router.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-021",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/domain/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:domain"
+      ]
+    },
+    {
+      "id": "CRP-022",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "frontend/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:frontend/"
+      ]
+    },
+    {
+      "id": "CRP-023",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/mobile_routes_test.go",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:backend/internal/httpd/controllers/dto.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-024",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/preview/",
+      "tier": "context",
+      "score": 0.8724171679421262,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:preview"
+      ]
+    },
+    {
+      "id": "CRP-025",
+      "repository": "agent-orchestrator",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/",
+      "tier": "context",
+      "score": 1.734388957907327,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:backend/internal/cli/"
+      ]
+    },
+    {
+      "id": "CRP-026",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/sync/",
+      "tier": "context",
+      "score": 3.2920296742201796,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "exact_path_mention:src/sync/:x2",
+        "sibling_of_existing_target:src/sync/history.rs:",
+        "sibling_of_existing_target:src/sync/mod.rs:"
+      ]
+    },
+    {
+      "id": "CRP-027",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/config/",
+      "tier": "context",
+      "score": 2.048106036074205,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/config/mod.rs:",
+        "unique_basename_mention:config:x5"
+      ]
+    },
+    {
+      "id": "CRP-028",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "tests/snapshots/mod.rs",
+      "tier": "context",
+      "score": 11.356735564286232,
+      "score_bucket": "high",
+      "evidence_families": [
+        "test_counterpart"
+      ],
+      "evidence": [
+        "test_counterpart:src/cli/mod.rs:",
+        "test_counterpart:src/config/mod.rs:",
+        "test_counterpart:src/sync/mod.rs:"
+      ]
+    },
+    {
+      "id": "CRP-029",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "benches/storage_perf.rs",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:benches/storage_perf.rs"
+      ]
+    },
+    {
+      "id": "CRP-030",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/config/routing.rs",
+      "tier": "context",
+      "score": 2.048106036074205,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/config/mod.rs:",
+        "unique_basename_mention:routing.rs"
+      ]
+    },
+    {
+      "id": "CRP-031",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "tests/common/mod.rs",
+      "tier": "context",
+      "score": 11.356735564286232,
+      "score_bucket": "high",
+      "evidence_families": [
+        "test_counterpart"
+      ],
+      "evidence": [
+        "test_counterpart:src/cli/mod.rs:",
+        "test_counterpart:src/config/mod.rs:",
+        "test_counterpart:src/sync/mod.rs:"
+      ]
+    },
+    {
+      "id": "CRP-032",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:.github/workflows/"
+      ]
+    },
+    {
+      "id": "CRP-033",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/cli/",
+      "tier": "context",
+      "score": 2.7862465289312905,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/cli/mod.rs:",
+        "unique_basename_mention:cli"
+      ]
+    },
+    {
+      "id": "CRP-034",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "tests/",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:tests/:x2"
+      ]
+    },
+    {
+      "id": "CRP-035",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/format/syntax.rs",
+      "tier": "context",
+      "score": 1.4171762825027479,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:syntax.rs"
+      ]
+    },
+    {
+      "id": "CRP-036",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/"
+      ]
+    },
+    {
+      "id": "CRP-037",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/error/",
+      "tier": "context",
+      "score": 1.7862465289312905,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/error/structured.rs:",
+        "unique_basename_mention:error:x4"
+      ]
+    },
+    {
+      "id": "CRP-038",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/AGENT_INTEGRATION.md",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/AGENT_INTEGRATION.md:x2"
+      ]
+    },
+    {
+      "id": "CRP-039",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/format/text.rs",
+      "tier": "context",
+      "score": 1.4171762825027479,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:text.rs"
+      ]
+    },
+    {
+      "id": "CRP-040",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/SYNC_MAINTENANCE_CHECKLIST.md",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/SYNC_MAINTENANCE_CHECKLIST.md:x2"
+      ]
+    },
+    {
+      "id": "CRP-041",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/util/time.rs",
+      "tier": "context",
+      "score": 2.333657757869457,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/util/hash.rs:",
+        "sibling_of_existing_target:src/util/id.rs:",
+        "unique_basename_mention:time.rs"
+      ]
+    },
+    {
+      "id": "CRP-042",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:src/:x5"
+      ]
+    },
+    {
+      "id": "CRP-043",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/format/output.rs",
+      "tier": "context",
+      "score": 1.4171762825027479,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:output.rs"
+      ]
+    },
+    {
+      "id": "CRP-044",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/CI_SUPPLY_CHAIN.md",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/CI_SUPPLY_CHAIN.md:x2"
+      ]
+    },
+    {
+      "id": "CRP-045",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/format/",
+      "tier": "context",
+      "score": 1.4171762825027479,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:format:x5"
+      ]
+    },
+    {
+      "id": "CRP-046",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "docs/E2E_SYNC_TESTS.md",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:docs/E2E_SYNC_TESTS.md"
+      ]
+    },
+    {
+      "id": "CRP-047",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/storage/",
+      "tier": "context",
+      "score": 4.571825050360035,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/storage/events.rs:",
+        "sibling_of_existing_target:src/storage/schema.rs:",
+        "sibling_of_existing_target:src/storage/sqlite.rs:",
+        "unique_basename_mention:storage:x4"
+      ]
+    },
+    {
+      "id": "CRP-048",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "benches/",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:benches/"
+      ]
+    },
+    {
+      "id": "CRP-049",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "src/format/markdown.rs",
+      "tier": "context",
+      "score": 1.4171762825027479,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:src/format/rich.rs:",
+        "unique_basename_mention:markdown.rs"
+      ]
+    },
+    {
+      "id": "CRP-050",
+      "repository": "beads-rust",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "Cargo.lock",
+      "tier": "context",
+      "score": 1.2920296742201793,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:Cargo.lock:x2"
+      ]
+    },
+    {
+      "id": "CRP-051",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/validation_presets.go",
+      "tier": "hard_link",
+      "score": 16.07154365435456,
+      "score_bucket": "low",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:BasicChatExpectations",
+        "declared_symbol_mention:ToolCallExpectations",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-052",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/account.go",
+      "tier": "hard_link",
+      "score": 16.07154365435456,
+      "score_bucket": "low",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:ComprehensiveTestConfig:x2",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-053",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/agent_test_helpers.go",
+      "tier": "hard_link",
+      "score": 16.07154365435456,
+      "score_bucket": "low",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:AgentTestConfig",
+        "declared_symbol_mention:SetupAgentTest",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-054",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/fixtures.go",
+      "tier": "context",
+      "score": 9.07154365435456,
+      "score_bucket": "high",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:DynamicLLMMocker",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-055",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/main.go",
+      "tier": "context",
+      "score": 8.071543654354558,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-056",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance_test.go",
+      "tier": "context",
+      "score": 9.01530313845184,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/devpprof.go:",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/governance.go:",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/inference.go:",
+        "test_counterpart:transports/bifrost-http/handlers/governance.go:"
+      ]
+    },
+    {
+      "id": "CRP-057",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/count_tokens.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-058",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "config.json",
+      "tier": "context",
+      "score": 1.1697541313627178,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:config.json:x4"
+      ]
+    },
+    {
+      "id": "CRP-059",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "framework/streaming/responses_test.go",
+      "tier": "context",
+      "score": 5.612019963209198,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:framework/streaming/accumulator.go:",
+        "test_counterpart:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-060",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/trace.go",
+      "tier": "context",
+      "score": 5.477053995484869,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:",
+        "unique_basename_mention:trace.go"
+      ]
+    },
+    {
+      "id": "CRP-061",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/providers/openai/responses_test.go",
+      "tier": "context",
+      "score": 5.071543654354558,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "test_counterpart:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-062",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_test.go",
+      "tier": "context",
+      "score": 7.581795909397822,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:",
+        "test_counterpart:core/schemas/context.go:"
+      ]
+    },
+    {
+      "id": "CRP-063",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "framework/mcp_headers/main.go",
+      "tier": "context",
+      "score": 9.07154365435456,
+      "score_bucket": "high",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:NewProvider",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-064",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/server.go",
+      "tier": "context",
+      "score": 8.071543654354558,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-065",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator_test.go",
+      "tier": "context",
+      "score": 8.612019963209198,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:framework/streaming/accumulator.go:",
+        "test_counterpart:framework/streaming/accumulator.go:"
+      ]
+    },
+    {
+      "id": "CRP-066",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/duration.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-067",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/providers/",
+      "tier": "context",
+      "score": 1.1697541313627178,
+      "score_bucket": "low",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:core/providers/:x5"
+      ]
+    },
+    {
+      "id": "CRP-068",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/bifrost_test.go",
+      "tier": "context",
+      "score": 5.857122175783302,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "test_counterpart"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "test_counterpart:core/schemas/bifrost.go:"
+      ]
+    },
+    {
+      "id": "CRP-069",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/lib/middleware.go",
+      "tier": "context",
+      "score": 10.903312124830025,
+      "score_bucket": "high",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:ChainMiddlewares",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-070",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/plugins.go",
+      "tier": "context",
+      "score": 8.071543654354558,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-071",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/account.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-072",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "examples/plugins/hello-world/main.go",
+      "tier": "context",
+      "score": 16.07154365435456,
+      "score_bucket": "high",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:HTTPTransportStreamChunkHook:x2",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-073",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/containers.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-074",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/providers/gemini/types.go",
+      "tier": "context",
+      "score": 9.616513919200296,
+      "score_bucket": "high",
+      "evidence_families": [
+        "declared_symbol_mention",
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "declared_symbol_mention:GeminiEmbeddingResponse",
+        "dependency_neighbor:core/providers/utils/utils.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ]
+    },
+    {
+      "id": "CRP-075",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_wasm.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-076",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/batch.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-077",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/embedding.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-078",
+      "repository": "bifrost",
+      "benchmark_mode": "diagnostic",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_native.go",
+      "tier": "context",
+      "score": 4.785175233704561,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ]
+    },
+    {
+      "id": "CRP-079",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/__init__.py",
+      "tier": "context",
+      "score": 5.156259305271551,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/options/solvers.py:inbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ]
+    },
+    {
+      "id": "CRP-080",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:genesis/assets/"
+      ]
+    },
+    {
+      "id": "CRP-081",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/",
+      "tier": "context",
+      "score": 2.3840786147046145,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:genesis/engine/scene.py:",
+        "sibling_of_existing_target:genesis/engine/simulator.py:",
+        "unique_basename_mention:engine"
+      ]
+    },
+    {
+      "id": "CRP-082",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/__init__.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-083",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/chopping-board/source/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:source"
+      ]
+    },
+    {
+      "id": "CRP-084",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/options.py",
+      "tier": "context",
+      "score": 7.67997831955738,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/options/morphs.py:outbound:python_relative_import",
+        "dependency_neighbor:genesis/options/solvers.py:outbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ]
+    },
+    {
+      "id": "CRP-085",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:genesis/engine/materials/"
+      ]
+    },
+    {
+      "id": "CRP-086",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/",
+      "tier": "context",
+      "score": 2.1155091715440775,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:",
+        "unique_basename_mention:options"
+      ]
+    },
+    {
+      "id": "CRP-087",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/sensors/__init__.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-088",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/camera/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:camera"
+      ]
+    },
+    {
+      "id": "CRP-089",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/misc.py",
+      "tier": "context",
+      "score": 3.679978319557381,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/options/morphs.py:outbound:python_relative_import",
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:"
+      ]
+    },
+    {
+      "id": "CRP-090",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:genesis/engine/entities/"
+      ]
+    },
+    {
+      "id": "CRP-091",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/surfaces.py",
+      "tier": "context",
+      "score": 2.1155091715440775,
+      "score_bucket": "high",
+      "evidence_families": [
+        "sibling_of_existing_target",
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "sibling_of_existing_target:genesis/options/morphs.py:",
+        "sibling_of_existing_target:genesis/options/solvers.py:",
+        "unique_basename_mention:surfaces.py"
+      ]
+    },
+    {
+      "id": "CRP-092",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/couplers/__init__.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-093",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/FEM/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:FEM:x2"
+      ]
+    },
+    {
+      "id": "CRP-094",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "examples/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:examples/"
+      ]
+    },
+    {
+      "id": "CRP-095",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/states/solvers.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-096",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": ".github/workflows/scripts/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:scripts"
+      ]
+    },
+    {
+      "id": "CRP-097",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:genesis/engine/solvers/"
+      ]
+    },
+    {
+      "id": "CRP-098",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/base_solver.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-099",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/MPM/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:MPM:x2"
+      ]
+    },
+    {
+      "id": "CRP-100",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:genesis/"
+      ]
+    },
+    {
+      "id": "CRP-101",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/__init__.py",
+      "tier": "context",
+      "score": 1.3333333333333333,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:genesis/engine/simulator.py:outbound:python_relative_import"
+      ]
+    },
+    {
+      "id": "CRP-102",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/SPH/",
+      "tier": "context",
+      "score": 0.9592498662725258,
+      "score_bucket": "low",
+      "evidence_families": [
+        "unique_basename_mention"
+      ],
+      "evidence": [
+        "unique_basename_mention:SPH:x2"
+      ]
+    },
+    {
+      "id": "CRP-103",
+      "repository": "genesis",
+      "benchmark_mode": "diagnostic",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "tests/",
+      "tier": "context",
+      "score": 2,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention"
+      ],
+      "evidence": [
+        "exact_path_mention:tests/"
+      ]
+    },
+    {
+      "id": "CRP-104",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/architecture.md",
+      "target": "src/commands/create.js",
+      "tier": "context",
+      "score": 2.5840593484403582,
+      "score_bucket": "mid",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/teardown.js:"
+      ]
+    },
+    {
+      "id": "CRP-105",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/utils/validation.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-106",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/architecture.md",
+      "target": "index.js",
+      "tier": "context",
+      "score": 9.722706232293572,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:src/commands/teardown.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targetValidator.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-107",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/fileCollector.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-108",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/commands/cleanup.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-109",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/fileProcessor.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-110",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/utils/targetValidator.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-111",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/setup.js",
+      "tier": "context",
+      "score": 4.408764345084952,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ]
+    },
+    {
+      "id": "CRP-112",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/commands/teardown.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-113",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/project-overview.md",
+      "target": "CLAUDE.md",
+      "tier": "context",
+      "score": 3.6309297535714573,
+      "score_bucket": "high",
+      "evidence_families": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "exact_path_mention:CLAUDE.md:x2",
+        "sibling_of_existing_target:index.js:"
+      ]
+    },
+    {
+      "id": "CRP-114",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/teardown.js",
+      "tier": "context",
+      "score": 4.408764345084952,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ]
+    },
+    {
+      "id": "CRP-115",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/cleanup.js",
+      "tier": "context",
+      "score": 8.408764345084952,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/fileProcessor.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ]
+    },
+    {
+      "id": "CRP-116",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/importResolver.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-117",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/architecture.md",
+      "target": "src/utils/nestedProperties.js",
+      "tier": "context",
+      "score": 6,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:src/commands/teardown.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/utils/targetValidator.js:",
+        "sibling_of_existing_target:src/utils/targets.js:"
+      ]
+    },
+    {
+      "id": "CRP-118",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/utils/targets.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-119",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/commands/create.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-120",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "CLAUDE.md",
+      "target": "src/commands/setup.js",
+      "tier": "context",
+      "score": 1.1562593052715515,
+      "score_bucket": "low",
+      "evidence_families": [
+        "dependency_neighbor"
+      ],
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ]
+    },
+    {
+      "id": "CRP-121",
+      "repository": "render-claude-context",
+      "benchmark_mode": "primary",
+      "document": "docs/files.md",
+      "target": "src/utils/nestedProperties.js",
+      "tier": "context",
+      "score": 10,
+      "score_bucket": "high",
+      "evidence_families": [
+        "dependency_neighbor",
+        "sibling_of_existing_target"
+      ],
+      "evidence": [
+        "dependency_neighbor:src/commands/setup.js:outbound:javascript_import",
+        "dependency_neighbor:src/commands/teardown.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/utils/targetValidator.js:",
+        "sibling_of_existing_target:src/utils/targets.js:"
+      ]
+    }
+  ]
+}
