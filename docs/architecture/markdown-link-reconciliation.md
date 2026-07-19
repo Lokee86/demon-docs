@@ -96,7 +96,7 @@ Demon Docs prefers deterministic evidence in this order:
 4. a unique filename candidate exists inside the repository; or
 5. a bounded search near a missing external target finds a unique candidate.
 
-A unique candidate can be rewritten automatically. Multiple candidates are recorded and reported, and the source link remains unchanged for the user to resolve.
+A unique candidate can be rewritten automatically and recorded as an applied change. Multiple candidates are recorded as `link_repair` suggestions, and the source link remains unchanged until the user selects a candidate.
 
 Relative links remain relative. Absolute filesystem links remain absolute. Link labels, titles, query strings, fragments, angle wrapping, and the source file's newline style are preserved; only the filesystem path is replaced.
 
@@ -106,7 +106,7 @@ User-authored Markdown changes and Demon Docs-generated repairs follow separate 
 
 For an external edit, Demon Docs fingerprints the changed source, parses its current Markdown, compares the resulting outgoing links with the stored source record, and replaces that source's graph edges.
 
-For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations.
+For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
 
 Before writing, every source must still match its expected old hash. Writes use a same-directory temporary file and atomic replacement. The known graph mutation is then published directly. Reparsing the rewritten source is limited to verifying the expected links and refreshing byte offsets, line numbers, and fingerprints.
 
@@ -159,6 +159,9 @@ When links are enabled, watch mode observes the repository root because moves of
 - `internal/links/wiki_links.go` — path-based wiki links, aliases, embeds, and extensionless Markdown resolution.
 - `internal/links/html_links.go` — supported local HTML `href`, `src`, and `poster` targets.
 - `internal/links/reference_labels.go` — explicit and collapsed reference-label validation.
+- `internal/links/review_suggestions.go` — ambiguous-target suggestion construction.
+- `internal/links/review_record.go` — applied repair event recording.
+- `internal/links/move.go` and `move_apply.go` — explicit stateless move planning and application.
 - `internal/app/app.go` — `check`, `fix`, and foreground `watch` CLI integration.
 - `internal/watch/watch.go` — filesystem event scheduling and reconciliation diagnostics.
 - `internal/reconcile/reconcile.go` — shared index reconciliation boundary.
@@ -177,6 +180,8 @@ go test ./internal/links -count=1
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md)
 - [Repository State and Transactions](repository-state-and-transactions.md)
+- [Review Ledger](review-ledger.md)
+- [Stateless Document Refactoring](../guides/document-refactoring.md)
 - [Watcher and Automation](../operations/watcher-and-automation.md)
 - [Markdown Link Performance](../research/link-performance.md)
 

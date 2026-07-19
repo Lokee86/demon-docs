@@ -13,6 +13,7 @@ Implemented ownership boundaries, state models, reconciliation pipelines, and in
 - [reconciliation-pipeline.md](reconciliation-pipeline.md) - Documentation-tree scan, managed index planning, parent links, and shared reconciliation flow.
 - [repository-state-and-transactions.md](repository-state-and-transactions.md) - Private object repository, identity/history state, transaction boundaries, and rebuildability.
 - [reverse-indexes.md](reverse-indexes.md) - Authored codemap projection into configured code-folder reverse indexes.
+- [review-ledger.md](review-ledger.md) - Review Ledger documentation.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders

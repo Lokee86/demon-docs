@@ -31,9 +31,15 @@ Displays selected repository root, documentation root, config path, and reposito
 
 Mutation scope: none.
 
+### `ddocs mv [--root PATH] [--dry-run] SOURCE DESTINATION`
+
+Moves one repository-contained file or directory and rewrites affected incoming links and relative links inside moved Markdown sources. It does not require, create, or update `.ddocs/` state.
+
+Mutation scope: the requested filesystem source and affected repository Markdown files inside the selected boundary. `--dry-run` is read-only.
+
 ### `ddocs check`
 
-Computes reconciliation without writing authored repository files. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean.
+Computes reconciliation without writing authored repository files. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
 
 Mutation scope: no authored-file writes. Internal read/cache behavior remains implementation-owned.
 
@@ -61,6 +67,35 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
 When any selector is supplied, only selected systems run. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
 
 Selectors apply to `check`, `fix`, and `watch` where supported.
+
+## Suggestion commands
+
+```bash
+ddocs suggestions [FILE]
+ddocs suggestions declined [FILE]
+ddocs suggestions log [FILE]
+ddocs suggestions show SUGGESTION
+ddocs suggestions select SUGGESTION [CANDIDATE]
+ddocs suggestions decline SUGGESTION [CANDIDATE] --reason "..."
+ddocs suggestions reconsider SUGGESTION
+```
+
+These commands inspect current ambiguous link repairs and codemap missing-link candidates, join them with persisted decisions, and convert a selected candidate into the normal hash-guarded repair path. Declines persist by stable relationship and evidence fingerprint.
+
+## Applied-change commands
+
+```bash
+ddocs changes [FILE]
+ddocs changes related FILE
+ddocs changes show CHANGE
+ddocs changes log [FILE]
+ddocs changes undo CHANGE [--repair REPAIR] [--block] [--reason "..."]
+ddocs changes undo-run RUN [--block] [--reason "..."]
+ddocs changes block CHANGE [--repair REPAIR] [--reason "..."]
+ddocs changes unblock CHANGE [--repair REPAIR]
+```
+
+These commands inspect the private applied-change ledger, perform bounded hash-guarded undo, and control exact repair fingerprints. They do not perform arbitrary historical selective reverts through later user edits.
 
 ## Configuration commands
 
@@ -130,9 +165,13 @@ Configuration can override these conventions.
 
 ## Diagnostics and failure behavior
 
-`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including broken or ambiguous links and uninitialized link state where applicable.
+`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including broken or ambiguous links, uninitialized link state, and orphan managed Markdown documents when links are selected.
 
-`fix` does not guess among multiple plausible targets. Ambiguous sources remain unchanged and are reported.
+`fix` does not guess among multiple plausible targets. Ambiguous sources remain unchanged and are exposed through `ddocs suggestions`.
+
+`mv` refuses paths outside its selected boundary, affected ambiguous wiki targets, source-content changes after planning, symbolic-link sources, and existing non-directory destinations.
+
+Undo refuses to overwrite a file whose current content no longer matches the recorded after hash.
 
 Use [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md) for the behavioral contract and the command's own `--help` output for exact flag syntax.
 
@@ -144,8 +183,16 @@ ddocs init --root docs/
 ddocs fix
 ddocs check
 
-# Verify only local links.
+# Preview and apply an explicit link-aware move.
+ddocs mv --dry-run docs/old.md docs/new.md
+ddocs mv docs/old.md docs/new.md
+
+# Verify links and orphan-document health.
 ddocs check --links
+
+# Review unresolved suggestions and recorded changes.
+ddocs suggestions
+ddocs changes
 
 # Reconcile only documentation indexes.
 ddocs fix --docs
@@ -161,6 +208,9 @@ ddocs config show
 ## Related docs
 
 - [Getting Started](../guides/getting-started.md)
+- [Stateless Document Refactoring](../guides/document-refactoring.md)
+- [Document Health Checks](../guides/document-health-checks.md)
+- [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)
 - [Configuration Reference](configuration.md)
 - [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md)
 - [Managed Files and State](managed-files-and-state.md)

@@ -69,7 +69,28 @@ Focused link tests cover:
 - atomic generated rewrites and concurrent source changes;
 - bounded rewrite-worker behavior and deterministic plans;
 - initial baseline and incremental storage timing; and
-- watch-event suppression for expected generated writes.
+- watch-event suppression for expected generated writes;
+- stateless file/directory move planning, case-only renames, ambiguity refusal, and rollback; and
+- review-ledger recording for deterministic and selected repairs.
+
+## Document-Health Coverage
+
+Orphan health tests verify that link-enabled `check`:
+
+- reports normal managed Markdown documents without inbound links;
+- excludes configured folder indexes and draft documents;
+- ignores self-links;
+- does not count inbound links originating from indexes or drafts;
+- accepts meaningful inbound links from normal repository Markdown sources; and
+- emits deterministic path-sorted diagnostics.
+
+Focused coverage lives in `internal/app/orphans_test.go` and `internal/app/orphans_integration_test.go`.
+
+## Review-Ledger Coverage
+
+Review tests cover persisted decline decisions, stale evidence fingerprints, ambiguous link suggestions, codemap selection, applied-change events, Git-object append behavior, undo depth and age, whole-run preflight, repair-level undo, blocks, unblocks, and refusal to overwrite later edits.
+
+Focused coverage lives in `internal/review/`, `internal/links/review_integration_test.go`, `internal/app/review_cli_test.go`, and `internal/codemap/insert_test.go`.
 
 ## Link Performance Benchmarks
 
@@ -172,7 +193,12 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `.github/workflows/ci.yml` — Linux and Windows CI.
 - `tests/regression_test.go` — CLI fixture regression orchestration.
 - `tests/regression_fixtures_test.go` — fixture-tree assertions.
-- `internal/links/*_test.go` — link syntax, state, rewrite, concurrency, and timing coverage.
+- `internal/links/*_test.go` — link syntax, state, move, review integration, rewrite, concurrency, and timing coverage.
+- `internal/review/*_test.go` — review history, policy replay, and undo coverage.
+- `internal/app/move_test.go` — stateless move CLI coverage.
+- `internal/app/orphans_test.go` and `orphans_integration_test.go` — document-health rules and command behavior.
+- `internal/app/review_cli_test.go` — suggestion and applied-change CLI coverage.
+- `internal/codemap/insert_test.go` — selected codemap insertion coverage.
 - `internal/watch/*_test.go` — watcher filters, scheduling, and filesystem events.
 - `internal/demon/runtime_test.go` — owner and feeder lifecycle coverage.
 - `internal/app/demon_test.go` — daemon CLI and shell integration coverage.
@@ -194,6 +220,9 @@ Repository-wide tests must exclude nested `.worktrees/` and local generated outp
 - [Development](README.md)
 - [Repository Layout](repository-layout.md)
 - [Documentation Procedure](../documentation-procedure.md)
+- [Document Health Checks](../guides/document-health-checks.md)
+- [Stateless Document Refactoring](../guides/document-refactoring.md)
+- [Review Ledger](../architecture/review-ledger.md)
 - [Link Performance](../research/link-performance.md)
 - [Codemap Evidence](../research/codemap-evidence.md)
 - [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)

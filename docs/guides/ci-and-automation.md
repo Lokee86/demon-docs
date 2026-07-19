@@ -8,7 +8,7 @@ This guide adds Demon Docs verification to CI and explains when to use foregroun
 
 ## Overview
 
-`ddocs check` is the authoritative automation surface because it computes the normal reconciliation plan without writing repository files. Watchers and the repository demon improve local feedback but are not correctness dependencies.
+`ddocs check` is the authoritative automation surface because it computes the normal reconciliation plan without writing repository files. Link-enabled checks also fail for orphan managed Markdown documents. Watchers and the repository demon improve local feedback but are not correctness dependencies.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ checkout the repository
 install the supported Go toolchain
 build or install ddocs
 run ddocs check from the repository
-fail the job when check returns non-zero
+fail the job for pending reconciliation, unresolved links, reverse-index failures, or orphan documents
 ```
 
 Do not run `ddocs fix` as an unreviewed CI mutation. CI should report required changes; developers should apply and review them locally.
@@ -105,6 +105,7 @@ Use `demon --status` and `demon --logs`. The repository demon has single-owner c
 - [CLI Reference](../reference/cli.md)
 - [Watcher and Automation](../operations/watcher-and-automation.md)
 - [Repository Demon](../operations/repository-demon.md)
+- [Document Health Checks](document-health-checks.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 
 ## Notes

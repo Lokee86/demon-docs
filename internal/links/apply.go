@@ -30,6 +30,9 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 		return 0, err
 	}
 	plan.Suppressions = suppressions
+	if err := recordGeneratedChanges(plan); err != nil {
+		return 0, err
+	}
 
 	refreshStarted := time.Now()
 	if err := refreshGeneratedSources(plan); err != nil {

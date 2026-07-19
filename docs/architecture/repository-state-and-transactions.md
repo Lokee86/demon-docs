@@ -8,7 +8,7 @@ This document describes the private `.ddocs/` object repository, durable identit
 
 ## Overview
 
-Demon Docs keeps authored files in the ordinary repository filesystem. Private `.ddocs/` state supplements those files with stable identities, path history, fingerprints, incoming-link groups, reverse-index state, generated-write metadata, and repository-demon runtime data.
+Demon Docs keeps authored files in the ordinary repository filesystem. Private `.ddocs/` state supplements those files with stable identities, path history, fingerprints, incoming-link groups, reverse-index state, generated-write metadata, review decisions, applied-change history, and repository-demon runtime data.
 
 The private repository exists to make later reconciliation deterministic. It is not an alternate authoring model and does not replace Git.
 
@@ -18,6 +18,7 @@ The private repository exists to make later reconciliation deterministic. It is 
 internal/ddrepo/
 internal/links/
 internal/reverseindex/
+internal/review/
 internal/demon/
 ```
 
@@ -31,6 +32,7 @@ The private repository and transaction boundary own:
 - persisted path history and fingerprints;
 - durable link inventory and incoming-reference groups;
 - generated-write records used to distinguish owned updates;
+- suggestion decisions, applied-change events, undo eligibility, and repair controls;
 - reverse-index state needed for deterministic checks;
 - isolation of runtime demon state under `.ddocs/runtime/`; and
 - failure behavior when expected state cannot be read or committed safely.
@@ -122,6 +124,9 @@ Primary implementation:
 - `internal/links/filemeta.go` - file identity and metadata.
 - `internal/links/inventory.go` - repository link inventory.
 - `internal/links/apply.go` - generated write application.
+- `internal/review/store.go` - append-only review events under `refs/ddocs/review`.
+- `internal/review/policy.go` - decision and block replay.
+- `internal/review/undo.go` - bounded undo construction.
 - `internal/repository/repository.go` - repository discovery.
 - `internal/repository/worktree.go` - linked-worktree behavior.
 - `internal/demon/` - runtime ownership state under `.ddocs/runtime/`.
@@ -139,7 +144,7 @@ Related tests:
 Run focused coverage:
 
 ```bash
-go test ./internal/ddrepo ./internal/links ./internal/repository ./internal/demon -count=1
+go test ./internal/ddrepo ./internal/links ./internal/review ./internal/repository ./internal/demon -count=1
 ```
 
 The complete gate remains:
@@ -153,6 +158,7 @@ make release-check
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
+- [Review Ledger](review-ledger.md)
 - [Repository Demon](../operations/repository-demon.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 

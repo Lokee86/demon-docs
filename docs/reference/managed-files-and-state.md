@@ -87,18 +87,24 @@ object and identity records
 path history and fingerprints
 incoming-link and reverse-index state
 transaction and generated-write metadata
+review decisions and repair controls under `refs/ddocs/review`
+applied-change events with before/after blobs and hashes
 repository demon runtime ownership
 feeder leases and heartbeats
 bounded logs
 ```
 
-Private state is implementation-owned and should not be hand-edited while commands or watchers are active.
+Private state is implementation-owned and should not be hand-edited while commands or watchers are active. Link identity state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither creates commits on the user's normal Git branch.
 
 ## Rebuildability
 
 The filesystem and authored repository remain the primary rebuild source. Much of `.ddocs/` can be reconstructed, but deleting it loses historical evidence used for move reconciliation and resets daemon/runtime ownership.
 
 Delete or reset `.ddocs/` only as a deliberate recovery action after stopping active processes and preserving any diagnostics needed to understand the failure.
+
+## Stateless moves
+
+`ddocs mv` does not require, create, or update `.ddocs/`. It performs one explicit repository-contained move and rewrites affected Markdown directly. In an initialized repository, a later watcher or link reconciliation pass refreshes persistent identity state.
 
 ## Mutation boundaries
 
@@ -148,6 +154,7 @@ The label and fragment remain unchanged.
 - [Configuration Reference](configuration.md)
 - [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
+- [Review Ledger](../architecture/review-ledger.md)
 - [Repository State and Transactions](../architecture/repository-state-and-transactions.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 

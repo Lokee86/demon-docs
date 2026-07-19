@@ -1,6 +1,9 @@
 package links
 
-import "github.com/Lokee86/demon-docs/internal/model"
+import (
+	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/review"
+)
 
 const schemaVersion = 2
 
@@ -59,6 +62,7 @@ type Plan struct {
 	Initialized         bool
 	NeedsInitialization bool
 	Unresolved          int
+	AppliedChanges      []review.Change
 }
 
 func (p Plan) Failed() bool {

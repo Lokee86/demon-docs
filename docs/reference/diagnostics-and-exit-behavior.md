@@ -36,6 +36,16 @@ A stateful subsystem lacks the baseline needed to infer history safely.
 
 The first link-enabled mutating pass records current state rather than pretending to know earlier moves.
 
+### Orphan document
+
+A normal managed Markdown document has no meaningful inbound link. Index files, draft documents, self-links, and inbound links originating from indexes or drafts do not satisfy the health check.
+
+`check` reports `message: Orphan document: PATH` and returns non-zero. No automatic fix is attempted because Demon Docs does not decide which canonical document should own the relationship.
+
+### Stale review decision or repair block
+
+A persisted decline or block refers to an older evidence fingerprint. The old decision remains auditable, but changed evidence is surfaced for review rather than silently suppressed or applied.
+
 ### Invalid configuration or scope
 
 A selected root, path, pattern, or setting is invalid, escapes the permitted boundary, or cannot be resolved consistently.
@@ -64,11 +74,19 @@ These commands should succeed when repository and configuration selection can be
 
 Returns success only when every selected subsystem is clean and sufficiently initialized for verification.
 
-Returns non-zero for pending work or unresolved selected-system conditions.
+Returns non-zero for pending work, unresolved selected-system conditions, or orphan documents when links are selected.
+
+### `mv`
+
+Returns success after the explicit move and every planned rewrite complete. Dry-run success means the complete plan was valid. Boundary violations, affected ambiguity, source-hash changes, unsupported sources, destination conflicts, or failed rollback produce failure.
 
 ### `fix`
 
 Returns success when safe planned mutations are applied and no fatal command error prevents completion. Unresolved ambiguous items may remain reported and may still require a later non-zero `check`.
+
+### `suggestions` and `changes`
+
+Inspection commands fail when requested identifiers cannot be resolved. Selection and undo operations fail rather than bypassing source-hash checks, undo eligibility, or later authored edits.
 
 ### `watch`
 
@@ -133,6 +151,9 @@ ddocs config show
 - [CLI Reference](cli.md)
 - [Managed Files and State](managed-files-and-state.md)
 - [Configuration Reference](configuration.md)
+- [Document Health Checks](../guides/document-health-checks.md)
+- [Stateless Document Refactoring](../guides/document-refactoring.md)
+- [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
 

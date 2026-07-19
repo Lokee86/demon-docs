@@ -33,6 +33,10 @@ type Watch struct {
 	IgnoredDirs, IgnoredSuffixes []string
 }
 type Demon struct{ Run bool }
+type Review struct {
+	UndoDepth      int
+	UndoMaxAgeDays int
+}
 type ReverseIndex struct{ Roots []string }
 type Codemap struct{ Headings []string }
 type Template struct {
@@ -50,6 +54,7 @@ type Config struct {
 	Watch           Watch
 	Template        Template
 	Demon           Demon
+	Review          Review
 	ReverseIndex    ReverseIndex
 	Codemap         Codemap
 }
@@ -64,6 +69,7 @@ func Default() Config {
 		Watch:        Watch{0.75, []string{".cache", "__pycache__"}, []string{"~", ".swp", ".tmp", ".bak"}},
 		Template:     Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
 		Demon:        Demon{Run: true},
+		Review:       Review{UndoDepth: 100, UndoMaxAgeDays: 30},
 		ReverseIndex: ReverseIndex{Roots: []string{}},
 		Codemap: Codemap{Headings: []string{
 			"Code map",
@@ -83,7 +89,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "index_file = \"README.md\"\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
@@ -124,6 +130,10 @@ type rawConfig struct {
 	Demon *struct {
 		Run *bool `toml:"run"`
 	} `toml:"demon"`
+	Review *struct {
+		UndoDepth      *int `toml:"undo_depth"`
+		UndoMaxAgeDays *int `toml:"undo_max_age_days"`
+	} `toml:"review"`
 	ReverseIndex *struct {
 		Roots   *[]string `toml:"roots"`
 		Folders *[]string `toml:"folders"`
@@ -236,6 +246,14 @@ func Load(path string) (Config, error) {
 	}
 	if d := raw.Demon; d != nil && d.Run != nil {
 		c.Demon.Run = *d.Run
+	}
+	if review := raw.Review; review != nil {
+		if review.UndoDepth != nil {
+			c.Review.UndoDepth = *review.UndoDepth
+		}
+		if review.UndoMaxAgeDays != nil {
+			c.Review.UndoMaxAgeDays = *review.UndoMaxAgeDays
+		}
 	}
 	if r := raw.ReverseIndex; r != nil {
 		if r.Roots != nil {

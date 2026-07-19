@@ -8,7 +8,7 @@ This document records the deterministic evidence system for potentially missing 
 
 ## Overview
 
-Demon Docs can extract authored code maps, build a deterministic repository corpus, rank possible missing targets, and evaluate the result against controlled holdouts or curated labels. This subsystem is implemented on `main`; the end-user accept/decline workflow remains planned.
+Demon Docs can extract authored code maps, build a deterministic repository corpus, rank possible missing targets, evaluate the result against controlled holdouts or curated labels, and expose current candidates through the repository review ledger.
 
 The system only suggests potentially missing relationships. It never recommends that an existing codemap link is irrelevant or should be removed.
 
@@ -132,16 +132,17 @@ Broader cross-repository work should preserve repository identity, pinned revisi
 
 ## Decision Persistence
 
-The intended review lifecycle is:
+The public review lifecycle is:
 
 1. generate a candidate and evidence fingerprint;
-2. show the document, target, tier, score, and evidence;
-3. allow a human to accept or decline it;
-4. persist the decision by document, target, and evidence fingerprint;
-5. suppress the same declined fingerprint on later runs; and
-6. allow reconsideration only when the underlying evidence materially changes and therefore produces a new fingerprint.
+2. show the document, target, tier, score, and evidence with `ddocs suggestions`;
+3. allow a human to select or decline it;
+4. convert a selection into a normal hash-guarded repair;
+5. persist declines by document relationship, target, and evidence fingerprint;
+6. suppress the same declined fingerprint on later runs; and
+7. show a stale decision when materially changed evidence produces a new fingerprint.
 
-This lifecycle is not yet exposed as a complete public command workflow.
+Use `ddocs suggestions declined`, `ddocs suggestions log`, and `ddocs suggestions reconsider` to inspect or change persisted decisions. Applied codemap insertions appear in `ddocs changes` and support the same bounded undo history as link repairs. See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md).
 
 ## Safety Contract
 
@@ -168,6 +169,8 @@ This lifecycle is not yet exposed as a complete public command workflow.
 - `internal/evidence/` — deterministic evidence collection and fingerprints.
 - `internal/codemapbench/` — holdout orchestration, ranking, tier assignment, and report export.
 - `internal/codemapprecision/` — curated-label evaluation and metric aggregation.
+- `internal/review/` — persisted suggestion decisions, applied changes, fingerprints, and history.
+- `internal/codemap/insert.go` — selected codemap-candidate insertion.
 - `internal/app/codemap_benchmark.go` — benchmark CLI contract.
 - `internal/app/codemap_precision.go` — precision CLI contract.
 - `research/codemap-precision/` — pinned precision benchmark artifacts.

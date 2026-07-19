@@ -12,7 +12,7 @@ The roadmap is a sequencing and status document. Current product summaries link 
 
 ## Current status
 
-Active roadmap. Several bounded feature streams are in progress on separate worktrees, while the polyglot code-intelligence and context-delivery tracks remain back-burnered or later work.
+Active roadmap. Stateless refactoring, orphan health checks, and the review ledger are implemented on `main`. Codemap tuning and broader corpus validation continue in isolated worktrees, while polyglot code intelligence and context delivery remain back-burnered or later work.
 
 ## Ownership boundary
 
@@ -33,7 +33,16 @@ This roadmap describes the current product state and the next implementation tra
 - `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `-i` / `--indexes` remains a compatibility alias for `--docs`.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
 
-### Repository-local link reconciliation
+### Document health checks
+
+- Link-enabled `check` reports normal managed Markdown documents without a meaningful inbound link.
+- Folder indexes, draft documents, self-links, and inbound links originating from indexes or drafts do not mask an orphan.
+- Results are deterministic and path-sorted.
+- Health checks are diagnostic only; Demon Docs does not guess where an orphan should be linked or remove it.
+
+See [Document Health Checks](../guides/document-health-checks.md).
+
+### Repository-local link reconciliation and refactoring
 
 - Repository Markdown is scanned subject to `.docignore` and permanent traversal exclusions.
 - Supported local forms include inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links, wiki embeds, and common local HTML `href`, `src`, and `poster` targets.
@@ -41,8 +50,10 @@ This roadmap describes the current product state and the next implementation tra
 - Link labels, titles, aliases, angle wrapping, query strings, fragments, source newline style, and surrounding prose are preserved.
 - Undefined explicit or collapsed reference labels are reported.
 - Generated rewrites use bounded concurrency while retaining deterministic planning, source-hash checks, and atomic per-file replacement.
+- `ddocs mv` explicitly moves a file or directory and rewrites affected incoming and moved-source links without requiring or creating `.ddocs/` state.
+- Move planning supports dry runs, repository boundaries, case-only renames, affected ambiguity refusal, source-hash preflight, and best-effort rollback.
 
-See [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md).
+See [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) and [Stateless Document Refactoring](../guides/document-refactoring.md).
 
 ### Reverse code-folder indexes
 
@@ -77,6 +88,18 @@ The current curated Space Rocks sample contains 150 labeled suggestions. The rec
 
 See [Codemap Missing-Link Evidence](../research/codemap-evidence.md).
 
+### Suggestions, applied changes, and undo history
+
+- Ambiguous link repairs and codemap missing-link candidates are exposed through `ddocs suggestions`.
+- Selecting a candidate converts it into the same hash-guarded repair path used by deterministic link updates.
+- Declined issues and candidates persist by stable relationship and evidence fingerprint; materially changed evidence becomes stale rather than silently reappearing or remaining permanently hidden.
+- Every generated rewrite records a Git-backed applied-change event under `.ddocs`, including before/after blobs, per-repair transformations, source identity, related targets, and reconciliation run.
+- `ddocs changes` supports inspection, related-target queries, file-level undo, individual-repair undo, and whole-run undo.
+- Undo refuses to overwrite later edits and may block the exact repair from being reapplied. Changed repair evidence produces a stale block that remains reviewable.
+- Undo eligibility is configurable by depth and age while audit history remains inspectable.
+
+See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md).
+
 ## Active Work
 
 ### Codemap tuning and broader corpus validation
@@ -88,16 +111,6 @@ The current tuning work is isolated from `main`. Near-term goals are:
 - expand evaluation beyond one repository without treating unlabeled output as ground truth;
 - use Demon Docs' own refreshed code maps as a development corpus, not as an independent benchmark; and
 - merge only changes that demonstrate a measured improvement or a clearly safer candidate surface.
-
-### User-facing suggestion decisions
-
-The evidence and ranking machinery exists, but the complete review lifecycle remains unfinished. Planned bounded work includes:
-
-- list strong missing-link candidates with their evidence;
-- persist accepted and declined decisions by document, target, and evidence fingerprint;
-- suppress an unchanged declined suggestion;
-- reconsider it only when the underlying evidence materially changes; and
-- keep accepted changes reviewable rather than silently rewriting authored codemaps.
 
 ### Daemon host adapters
 
@@ -112,7 +125,7 @@ The following work is independent of the larger code-graph track:
 - expand heading-fragment validation when a deterministic Markdown anchor model is selected;
 - verify Windows, Bash, PowerShell, and linked-worktree lifecycle behavior;
 - expand reverse-index diagnostics and coverage reporting;
-- expose the codemap accept/decline workflow; and
+- stress review-ledger history, undo depth, and concurrent append behavior on larger repositories; and
 - keep CLI help, README examples, and focused design documents synchronized with shipped behavior.
 
 ## Back-Burnered Major Track: Polyglot Code Graph
@@ -179,7 +192,8 @@ Optional LLM assistance may eventually propose documentation changes from determ
 ## Code map
 
 - `internal/reconcile/` — forward documentation index planning and application.
-- `internal/links/` — repository-local link graph, identity state, diagnostics, and rewrites.
+- `internal/links/` — repository-local link graph, identity state, diagnostics, rewrites, and stateless move planning.
+- `internal/app/move.go` — explicit repository-bounded document refactoring CLI.
 - `internal/demon/` — repository-local owner, feeder, heartbeat, shutdown, and log state.
 - `internal/app/demon.go` — daemon CLI and shell integration.
 - `internal/codemap/` — authored codemap extraction and deterministic datasets.
@@ -187,6 +201,8 @@ Optional LLM assistance may eventually propose documentation changes from determ
 - `internal/codemapbench/` — holdout orchestration, ranking, tiers, and reports.
 - `internal/codemapcorpus/` — repository fact adapters used by codemap analysis.
 - `internal/codemapprecision/` — curated precision evaluation.
+- `internal/review/` — suggestion decisions, repair controls, applied-change history, and undo data.
+- `internal/app/review_*.go` — suggestion, change, undo, and block CLI contracts.
 - `research/codemap-precision/` — pinned labels, reports, and evaluation artifacts.
 
 ## Implementation sequence

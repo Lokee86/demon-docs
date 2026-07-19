@@ -48,6 +48,7 @@ internal/ddrepo/          private object repository and transactions
 internal/reverseindex/    code-folder reverse-index projection
 internal/watch/           filesystem watcher filtering and scheduling
 internal/demon/           repository-local owner, feeders, runtime, and logs
+internal/review/          suggestion decisions, applied history, undo, and blocks
 internal/codemap/         authored codemap extraction and datasets
 internal/evidence/        deterministic missing-link evidence collection
 internal/codemapbench/    holdout, ranking, tiering, and reports
@@ -65,7 +66,7 @@ Most package tests live beside implementation. Repository-level fixture and CLI 
 tests/
 ```
 
-Focused behavioral tests protect source preservation, deterministic ordering, configuration precedence, worktree boundaries, daemon ownership, link syntax, concurrency, codemap evidence, and benchmark reporting.
+Focused behavioral tests protect source preservation, deterministic ordering, configuration precedence, worktree boundaries, daemon ownership, link syntax, stateless moves, orphan health rules, review-history safety, concurrency, codemap evidence, and benchmark reporting.
 
 ## Research layout
 
@@ -139,6 +140,7 @@ Do not treat research reports as production fixtures unless a test explicitly pi
 - `internal/reverseindex/`
 - `internal/watch/`
 - `internal/demon/`
+- `internal/review/`
 - `internal/codemap/`
 - `internal/evidence/`
 - `internal/codemapbench/`
@@ -152,6 +154,7 @@ Do not treat research reports as production fixtures unless a test explicitly pi
 - [Documentation Policy](../documentation-policy.md)
 - [Application Orchestration](../architecture/application-orchestration.md)
 - [Repository State and Transactions](../architecture/repository-state-and-transactions.md)
+- [Review Ledger](../architecture/review-ledger.md)
 - [Testing and Fixtures](testing-and-fixtures.md)
 - [Roadmap](../planning/roadmap.md)
 

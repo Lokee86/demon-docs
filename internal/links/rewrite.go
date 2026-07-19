@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/Lokee86/demon-docs/internal/review"
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
@@ -21,17 +22,22 @@ type LinkTransformation struct {
 	End            int    `json:"end"`
 	OldDestination string `json:"old_destination"`
 	NewDestination string `json:"new_destination"`
+	TargetFileID   string `json:"target_file_id,omitempty"`
+	TargetPath     string `json:"target_path,omitempty"`
 }
 
 // GeneratedRewrite is a complete, content-addressed rewrite for one source
 // Markdown file. Its unexported data is populated by NewGeneratedRewrite so
 // callers cannot accidentally apply text with a different line-ending style.
 type GeneratedRewrite struct {
-	SourceFileID      string               `json:"source_file_id"`
-	Path              string               `json:"path"`
-	ExpectedOldSHA256 string               `json:"expected_old_sha256"`
-	ExpectedNewSHA256 string               `json:"expected_new_sha256"`
-	Transformations   []LinkTransformation `json:"transformations"`
+	SourceFileID       string                `json:"source_file_id"`
+	Path               string                `json:"path"`
+	ExpectedOldSHA256  string                `json:"expected_old_sha256"`
+	ExpectedNewSHA256  string                `json:"expected_new_sha256"`
+	Transformations    []LinkTransformation  `json:"transformations"`
+	Kind               review.SuggestionKind `json:"kind,omitempty"`
+	Selection          review.SelectionMode  `json:"selection,omitempty"`
+	OriginSuggestionID string                `json:"origin_suggestion_id,omitempty"`
 
 	oldData []byte
 	newData []byte
@@ -67,16 +73,38 @@ func NewGeneratedRewrite(sourceFileID, path string, document textio.Document, tr
 		return GeneratedRewrite{}, fmt.Errorf("build generated rewrite for %s: %w", path, err)
 	}
 	newData := document.Encode(newText)
+	return newGeneratedRewriteBytes(sourceFileID, path, oldData, newData, transformations), nil
+}
+
+// NewGeneratedRewriteBytes constructs a content-addressed rewrite from exact
+// before and after bytes. It is used by review-driven repairs and undo while
+// retaining the same hash guards and atomic replacement path as link repair.
+func NewGeneratedRewriteBytes(sourceFileID, path string, oldData, newData []byte, transformations []LinkTransformation) (GeneratedRewrite, error) {
+	if sourceFileID == "" {
+		return GeneratedRewrite{}, errors.New("generated rewrite source file ID is empty")
+	}
+	if path == "" {
+		return GeneratedRewrite{}, errors.New("generated rewrite path is empty")
+	}
+	return newGeneratedRewriteBytes(sourceFileID, path, oldData, newData, transformations), nil
+}
+
+func newGeneratedRewriteBytes(sourceFileID, path string, oldData, newData []byte, transformations []LinkTransformation) GeneratedRewrite {
 	return GeneratedRewrite{
 		SourceFileID:      sourceFileID,
 		Path:              filepath.Clean(path),
 		ExpectedOldSHA256: sha256Digest(oldData),
 		ExpectedNewSHA256: sha256Digest(newData),
 		Transformations:   append([]LinkTransformation(nil), transformations...),
-		oldData:           oldData,
-		newData:           newData,
-	}, nil
+		Kind:              review.SuggestionLinkRepair,
+		Selection:         review.SelectionAutomatic,
+		oldData:           append([]byte(nil), oldData...),
+		newData:           append([]byte(nil), newData...),
+	}
 }
+
+func (r GeneratedRewrite) OldData() []byte { return append([]byte(nil), r.oldData...) }
+func (r GeneratedRewrite) NewData() []byte { return append([]byte(nil), r.newData...) }
 
 // ApplyGenerated applies a batch only after every source file's expected old
 // hash has been verified. Each write uses a same-directory temporary file and

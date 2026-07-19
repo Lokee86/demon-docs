@@ -4,11 +4,11 @@ Parent index: [Architecture](./README.md)
 
 ## Purpose
 
-This document describes the implemented application boundary that resolves configuration, selects subsystems, coordinates `check`, `fix`, and `watch`, and exposes codemap and repository-demon command groups.
+This document describes the implemented application boundary that resolves configuration, selects subsystems, coordinates `check`, `fix`, and `watch`, and exposes stateless move, suggestion, change-history, codemap, and repository-demon command groups.
 
 ## Overview
 
-Both `ddocs` and `demon` enter the same internal application package. The executable wrappers supply process arguments and version metadata; `internal/app` owns command parsing and coordination across repository discovery, configuration, documentation reconciliation, local links, reverse indexes, codemap analysis, watch mode, and demon lifecycle.
+Both `ddocs` and `demon` enter the same internal application package. The executable wrappers supply process arguments and version metadata; `internal/app` owns command parsing and coordination across repository discovery, configuration, documentation reconciliation, local links, orphan health checks, stateless moves, review commands, reverse indexes, codemap analysis, watch mode, and demon lifecycle.
 
 The application layer coordinates ownership. It does not reimplement scanner, link, reverse-index, repository-state, or daemon mechanics.
 
@@ -31,6 +31,9 @@ The application boundary owns:
 - `--docs`, `--links`, and `--reverse` selection semantics;
 - ordering selected reconciliation systems;
 - command output and aggregate success/failure decisions;
+- orphan-document health-check integration for link-enabled checks;
+- explicit stateless move command integration;
+- suggestion selection/decline and applied-change inspection/undo command integration;
 - foreground watch startup;
 - codemap export, benchmark, and precision command integration;
 - repository-demon public and hidden commands; and
@@ -97,6 +100,9 @@ Primary files and packages:
 - `internal/app/help_test.go` - help and public command coverage.
 - `internal/app/cli_contract_test.go` - CLI contract coverage.
 - `internal/app/demon.go` - repository-demon and shell-hook command integration.
+- `internal/app/move.go` - stateless refactoring command integration.
+- `internal/app/orphans.go` - orphan-document health computation.
+- `internal/app/review_*.go` - suggestion, change, undo, and repair-control command integration.
 - `internal/app/codemap_benchmark.go` - benchmark command contract.
 - `internal/app/codemap_precision.go` - precision command contract.
 - `internal/repository/` - repository and worktree discovery used by the application.
@@ -109,6 +115,7 @@ Important non-ownership boundaries:
 - `internal/reverseindex/` owns reverse-index planning and rendering.
 - `internal/watch/` owns watcher scheduling.
 - `internal/demon/` owns runtime leases and lifecycle.
+- `internal/review/` owns review history, decision replay, undo construction, and repair controls.
 - `internal/codemap*` and `internal/evidence/` own codemap analysis.
 
 ## Tests
@@ -123,6 +130,10 @@ Relevant coverage includes:
 - `internal/app/codemap_export_test.go`
 - `internal/app/codemap_benchmark_test.go`
 - `internal/app/codemap_precision_test.go`
+- `internal/app/move_test.go`
+- `internal/app/orphans_test.go`
+- `internal/app/orphans_integration_test.go`
+- `internal/app/review_cli_test.go`
 
 Run:
 
@@ -136,6 +147,9 @@ go test ./internal/app -count=1
 - [Configuration Reference](../reference/configuration.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
+- [Review Ledger](review-ledger.md)
+- [Stateless Document Refactoring](../guides/document-refactoring.md)
+- [Document Health Checks](../guides/document-health-checks.md)
 - [Reverse Indexes](reverse-indexes.md)
 - [Repository Demon](../operations/repository-demon.md)
 

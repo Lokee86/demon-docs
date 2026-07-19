@@ -60,7 +60,7 @@ ddocs config show
 
 Create or update `.docignore` at the repository root when generated, private, vendor, or scratch paths should be excluded.
 
-Demon Docs always prunes `.git/`, `.ddocs/`, and `.obsidian/`. Additional repository-specific exclusions belong in `.docignore`, not in global assumptions.
+Demon Docs always prunes `.git/`, `.ddocs/`, `.obsidian/`, and `logseq/`. Additional repository-specific exclusions belong in `.docignore`, not in global assumptions.
 
 See [Configuration Reference](../reference/configuration.md) for syntax and precedence.
 

@@ -9,7 +9,10 @@ Task-oriented workflows for installing, adopting, and using Demon Docs. Exact op
 <!-- doc-ledger:files:start -->
 
 - [ci-and-automation.md](ci-and-automation.md) - Add deterministic checks and optional automation to local and CI workflows.
+- [document-health-checks.md](document-health-checks.md) - Document Health Checks documentation.
+- [document-refactoring.md](document-refactoring.md) - Document Refactoring documentation.
 - [getting-started.md](getting-started.md) - Install Demon Docs, initialize a repository, establish link state, and run the first clean check.
+- [reviewing-suggestions-and-changes.md](reviewing-suggestions-and-changes.md) - Reviewing Suggestions And Changes documentation.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders
