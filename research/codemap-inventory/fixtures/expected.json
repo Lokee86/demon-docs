@@ -1,0 +1,194 @@
+{
+  "schema": "demon-docs.codemap-fixtures.v1",
+  "fixtures": [
+    {
+      "file": "fenced-grouped-paths.md",
+      "entries": [
+        {
+          "group": "Primary files",
+          "target": "services/example/runtime.go",
+          "kind": "file",
+          "syntax": "fenced",
+          "description": ""
+        },
+        {
+          "group": "Primary files",
+          "target": "services/example/config/",
+          "kind": "directory",
+          "syntax": "fenced",
+          "description": ""
+        },
+        {
+          "group": "Tests",
+          "target": "services/example/runtime_test.go",
+          "kind": "file",
+          "syntax": "fenced",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "file": "bulleted-described-targets.md",
+      "entries": [
+        {
+          "group": "Primary implementation",
+          "target": "client/scripts/session/controller.gd",
+          "kind": "file",
+          "syntax": "bullet",
+          "description": "Creates `SessionState` and owns session transitions."
+        },
+        {
+          "group": "Primary implementation",
+          "target": "client/scripts/session/state.gd",
+          "kind": "file",
+          "syntax": "bullet",
+          "description": "Stores durable session state."
+        },
+        {
+          "group": "Symbol boundary",
+          "target": "SessionController",
+          "kind": "symbol",
+          "syntax": "bullet",
+          "description": "Owns orchestration, not transport."
+        }
+      ]
+    },
+    {
+      "file": "fenced-arrow-descriptions.md",
+      "entries": [
+        {
+          "group": "Content",
+          "target": "web/src/content.ts",
+          "kind": "file",
+          "syntax": "fenced-arrow",
+          "description": "owns the content schema"
+        },
+        {
+          "group": "Content",
+          "target": "web/src/content/",
+          "kind": "directory",
+          "syntax": "fenced-arrow",
+          "description": "contains authored content entries"
+        }
+      ]
+    },
+    {
+      "file": "fenced-indented-descriptions.md",
+      "entries": [
+        {
+          "group": "",
+          "target": "internal/spatial/index.go",
+          "kind": "file",
+          "syntax": "fenced-indented",
+          "description": "Defines the spatial index contract.",
+          "resolution": "configured-root-required"
+        },
+        {
+          "group": "",
+          "target": "internal/spatial/grid/",
+          "kind": "directory",
+          "syntax": "fenced-indented",
+          "description": "Owns the grid implementation.",
+          "resolution": "configured-root-required"
+        }
+      ]
+    },
+    {
+      "file": "legacy-indented-map.md",
+      "entries": [
+        {
+          "group": "Primary implementation files",
+          "target": "services/example/session.go",
+          "kind": "file",
+          "syntax": "legacy-indented",
+          "description": "Defines `SessionState`.\nOwns the session cooldown."
+        },
+        {
+          "group": "Primary implementation files",
+          "target": "services/example/input.go",
+          "kind": "file",
+          "syntax": "legacy-inline",
+          "description": "routes `PacketTypeResume` into the session owner."
+        }
+      ]
+    },
+    {
+      "file": "mixed-paths-and-boundaries.md",
+      "entries": [
+        {
+          "group": "Primary files",
+          "target": "client/scripts/devtools/window.gd",
+          "kind": "file",
+          "syntax": "fenced",
+          "description": ""
+        },
+        {
+          "group": "Primary files",
+          "target": "client/scripts/devtools/window_controller.gd",
+          "kind": "file",
+          "syntax": "fenced",
+          "description": ""
+        },
+        {
+          "group": "Important non-ownership boundaries",
+          "target": "client/scripts/devtools/window.gd",
+          "kind": "file",
+          "syntax": "bullet",
+          "description": "Owns presentation, not gameplay mutation."
+        },
+        {
+          "group": "Important non-ownership boundaries",
+          "target": "WindowController",
+          "kind": "symbol",
+          "syntax": "bullet",
+          "description": "Owns window lifecycle."
+        }
+      ]
+    },
+    {
+      "file": "component-relative-and-glob.md",
+      "entries": [
+        {
+          "group": "",
+          "target": "internal/game/spatial/index.go",
+          "kind": "file",
+          "syntax": "fenced",
+          "description": "",
+          "resolution": "configured-root-required"
+        },
+        {
+          "group": "",
+          "target": "internal/game/spatial/*_test.go",
+          "kind": "glob",
+          "syntax": "fenced",
+          "description": "",
+          "resolution": "configured-root-required"
+        }
+      ]
+    },
+    {
+      "file": "leading-path-boundaries.md",
+      "entries": [
+        {
+          "group": "Important boundaries",
+          "target": "services/example/runtime/",
+          "kind": "directory",
+          "syntax": "fenced-leading-path",
+          "description": "owns runtime state."
+        },
+        {
+          "group": "Important boundaries",
+          "target": "shared/contracts/schema.yaml",
+          "kind": "file",
+          "syntax": "fenced-leading-path",
+          "description": "owns the wire contract."
+        }
+      ]
+    },
+    {
+      "file": "placeholder-map.md",
+      "placeholder": true,
+      "entries": []
+    }
+  ]
+}
