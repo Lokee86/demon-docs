@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -34,13 +33,7 @@ type codemapBenchmarkRunner interface {
 	Run(context.Context, codemapBenchmarkOptions) (codemapBenchmarkResult, error)
 }
 
-type unavailableCodemapBenchmarkRunner struct{}
-
-func (unavailableCodemapBenchmarkRunner) Run(context.Context, codemapBenchmarkOptions) (codemapBenchmarkResult, error) {
-	return codemapBenchmarkResult{}, errors.New("codemap benchmark engine is not available")
-}
-
-var codemapBenchmarkCommandRunner codemapBenchmarkRunner = unavailableCodemapBenchmarkRunner{}
+var codemapBenchmarkCommandRunner codemapBenchmarkRunner = benchmarkEngine{}
 
 type optionalFloat struct {
 	set   bool
