@@ -1,0 +1,425 @@
+{
+  "sandbox": "C:\\tmp\\demon-docs-space-rocks-mass-rename-rdsm5fqt",
+  "source_files": 346,
+  "first_markdown_renamed": 341,
+  "second_markdown_renamed": 341,
+  "final_markdown_files_present": 341,
+  "old_files_remaining_after_first": [],
+  "old_files_remaining_after_second": [],
+  "steps": [
+    {
+      "name": "01-init",
+      "exit_code": 0,
+      "updated": null,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 0,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "02-baseline-initialize",
+      "exit_code": 1,
+      "updated": 0,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 34,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": 34,
+      "errors": []
+    },
+    {
+      "name": "03-baseline-repair",
+      "exit_code": 1,
+      "updated": 10,
+      "reported_update_paths": 0,
+      "repairs": 29,
+      "broken": 1,
+      "ambiguous": 4,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    },
+    {
+      "name": "04-baseline-idempotent",
+      "exit_code": 1,
+      "updated": 0,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 1,
+      "ambiguous": 4,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    },
+    {
+      "name": "05-baseline-check",
+      "exit_code": 1,
+      "updated": null,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 1,
+      "ambiguous": 4,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "06-first-rename-prefixed-check",
+      "exit_code": 1,
+      "updated": null,
+      "reported_update_paths": 340,
+      "repairs": 3717,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "07-first-rename-fix",
+      "exit_code": 1,
+      "updated": 340,
+      "reported_update_paths": 0,
+      "repairs": 3717,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    },
+    {
+      "name": "08-first-rename-post-check",
+      "exit_code": 1,
+      "updated": null,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "09-first-rename-idempotent",
+      "exit_code": 1,
+      "updated": 0,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    },
+    {
+      "name": "10-second-rename-prefixed-check",
+      "exit_code": 1,
+      "updated": null,
+      "reported_update_paths": 340,
+      "repairs": 3717,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "11-second-rename-fix",
+      "exit_code": 1,
+      "updated": 340,
+      "reported_update_paths": 0,
+      "repairs": 3717,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    },
+    {
+      "name": "12-second-rename-post-check",
+      "exit_code": 1,
+      "updated": null,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": null,
+      "errors": []
+    },
+    {
+      "name": "13-second-rename-idempotent",
+      "exit_code": 1,
+      "updated": 0,
+      "reported_update_paths": 0,
+      "repairs": 0,
+      "broken": 5,
+      "ambiguous": 0,
+      "undefined_reference": 0,
+      "unresolved_summary": 5,
+      "errors": []
+    }
+  ],
+  "unresolved_comparison": {
+    "baseline": {
+      "broken": 1,
+      "ambiguous": 4
+    },
+    "first_post": {
+      "broken": 5,
+      "ambiguous": 0
+    },
+    "second_post": {
+      "broken": 5,
+      "ambiguous": 0
+    }
+  },
+  "remaining_first_pass_names": [
+    {
+      "basename": "!INDEX.md",
+      "count": 76,
+      "files": [
+        "!INDEX-mass-renamed-again.md",
+        "!INDEX-mass-renamed-again.md",
+        "!INDEX-mass-renamed-again.md",
+        "!INDEX-mass-renamed-again.md",
+        "developer-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "realtime-wire-reference.md",
+      "count": 12,
+      "files": [
+        "data/data-sync-and-ssot-pipeline-mass-renamed-again.md",
+        "data/source-of-truth-map-mass-renamed-again.md",
+        "data/source-of-truth-map-mass-renamed-again.md",
+        "data/source-of-truth-map-mass-renamed-again.md",
+        "protocol/gameplay-packets-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "notes.md",
+      "count": 10,
+      "files": [
+        "!INDEX-mass-renamed-again.md",
+        "documentation-policy-mass-renamed-again.md",
+        "documentation-policy-mass-renamed-again.md",
+        "documentation-policy-mass-renamed-again.md",
+        "documentation-policy-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "progression-and-rewards.md",
+      "count": 5,
+      "files": [
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domains/gameplay/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "bruno-smoke-tests.md",
+      "count": 4,
+      "files": [
+        "developer-mass-renamed-again.md",
+        "developer-mass-renamed-again.md",
+        "devtools/api-server/!INDEX-mass-renamed-again.md",
+        "devtools/diagnostic-aggregator/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "current-context.md",
+      "count": 4,
+      "files": [
+        "documentation-policy-mass-renamed-again.md",
+        "notes-mass-renamed-again.md",
+        "agent/!INDEX-mass-renamed-again.md",
+        "agent/repo-hygiene-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "data-sync-and-ssot-pipeline.md",
+      "count": 4,
+      "files": [
+        "notes-mass-renamed-again.md",
+        "notes-mass-renamed-again.md",
+        "data/!INDEX-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "contract-reference.md",
+      "count": 4,
+      "files": [
+        "data/data-sync-and-ssot-pipeline-mass-renamed-again.md",
+        "data/observability-contract-mass-renamed-again.md",
+        "data/source-of-truth-map-mass-renamed-again.md",
+        "observability/generated/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "realtime-protocol-architecture.md",
+      "count": 4,
+      "files": [
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/protocol/!INDEX-mass-renamed-again.md",
+        "protocol/realtime-websocket-protocol-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "devlog-static-site.md",
+      "count": 4,
+      "files": [
+        "planning/domains/web/website-and-web-presence-mass-renamed-again.md",
+        "planning/web/!INDEX-mass-renamed-again.md",
+        "planning/web/devlog-static-site-mass-renamed-again.md",
+        "services/web/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "api-product-surface.md",
+      "count": 4,
+      "files": [
+        "planning/protocol/!INDEX-mass-renamed-again.md",
+        "planning/protocol/api-product-surface-mass-renamed-again.md",
+        "planning/protocol/api-product-surface-mass-renamed-again.md",
+        "protocol/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "local-pilot-flow.md",
+      "count": 4,
+      "files": [
+        "services/client/client-http-api-flow-mass-renamed-again.md",
+        "services/client/pregame-menu-flow/!INDEX-mass-renamed-again.md",
+        "services/client/pregame-menu-flow/profile-flow-mass-renamed-again.md",
+        "services/client/pregame-menu-flow/profile-flow-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "developer.md",
+      "count": 3,
+      "files": [
+        "!INDEX-mass-renamed-again.md",
+        "notes-mass-renamed-again.md",
+        "notes-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "mcp-servers.md",
+      "count": 3,
+      "files": [
+        "developer-mass-renamed-again.md",
+        "agent/!INDEX-mass-renamed-again.md",
+        "agent/mcp-servers-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "testing.md",
+      "count": 3,
+      "files": [
+        "developer-mass-renamed-again.md",
+        "notes-mass-renamed-again.md",
+        "agent/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "realtime-websocket-protocol.md",
+      "count": 3,
+      "files": [
+        "documentation-policy-mass-renamed-again.md",
+        "protocol/!INDEX-mass-renamed-again.md",
+        "protocol/gameplay-packets-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "toggles.md",
+      "count": 3,
+      "files": [
+        "notes-mass-renamed-again.md",
+        "notes-mass-renamed-again.md",
+        "devtools/server/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "client-logging.md",
+      "count": 3,
+      "files": [
+        "notes-mass-renamed-again.md",
+        "planning/domains/technical/network-observability-and-packet-budget-mass-renamed-again.md",
+        "services/client/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "logging-and-diagnostics.md",
+      "count": 3,
+      "files": [
+        "notes-mass-renamed-again.md",
+        "planning/domains/technical/network-observability-and-packet-budget-mass-renamed-again.md",
+        "services/game-server/observability/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "packet-schemas.md",
+      "count": 3,
+      "files": [
+        "data/!INDEX-mass-renamed-again.md",
+        "protocol/gameplay-packets-mass-renamed-again.md",
+        "protocol/realtime-websocket-protocol-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "player-build-and-loadouts.md",
+      "count": 3,
+      "files": [
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domains/gameplay/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "account-and-identity-systems.md",
+      "count": 3,
+      "files": [
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domains/platform/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "inventory-and-hangar.md",
+      "count": 3,
+      "files": [
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domain-backlog-mass-renamed-again.md",
+        "planning/domains/gameplay/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "plasmic-astro-workflow.md",
+      "count": 3,
+      "files": [
+        "planning/domains/web/website-and-web-presence-mass-renamed-again.md",
+        "planning/web/devlog-static-site-mass-renamed-again.md",
+        "services/web/!INDEX-mass-renamed-again.md"
+      ]
+    },
+    {
+      "basename": "crt-media-frame.md",
+      "count": 3,
+      "files": [
+        "planning/domains/web/website-and-web-presence-mass-renamed-again.md",
+        "planning/web/devlog-static-site-mass-renamed-again.md",
+        "services/web/!INDEX-mass-renamed-again.md"
+      ]
+    }
+  ],
+  "remaining_second_pass_names": []
+}

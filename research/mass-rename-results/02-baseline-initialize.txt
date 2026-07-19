@@ -1,0 +1,37 @@
+ddocs fix updated 0 file(s)
+message: Link state is not initialized; this pass records a baseline and does not repair links.
+message: Broken link in agent/architecture-rules.md:62:22: ../../skills/seam-first/SKILL.md
+message: Broken link in data/collision-shape-data.md:192:148: ../../devtools/server/collision-body-telemetry.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:490:14: domains/platform/!INDEX.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:491:40: account-and-identity-current-state.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:492:33: account-backed-profile-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:493:30: player-data-routing-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:494:27: gameplay-session-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:495:32: match-end-and-results-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:496:30: local-pilot-profile-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:497:33: realtime-client-server-flow.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:498:36: match-result-sinks.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:499:43: runtime-and-store-routing.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:500:47: player-stats-and-match-results.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:501:40: match-result-reporting.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:502:27: current-system-limits.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy.md:503:43: account-and-identity-systems.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:522:409: ../../../../limits/current-system-limits.md#architecture--networking
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:530:30: ../../../client/auth-session-flow.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:531:31: ../../../api-server/auth-and-oauth.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:532:37: ../../../api-server/internal-api-surface.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:533:17: ../../../player-data/!INDEX.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration.md:537:27: ../../../../limits/current-system-limits.md
+message: Broken link in services/game-server/integrations/match-result-reporting.md:329:17: ../../../player-data/!INDEX.md
+message: Broken link in services/game-server/integrations/match-result-reporting.md:330:36: ../../../api-server/player-stats-and-match-results.md
+message: Broken link in services/game-server/integrations/player-data-http-hosting.md:295:17: ../../../player-data/!INDEX.md
+message: Broken link in services/game-server/simulation/pickups/pickup-effects.md:170:406: ../../../services/game-server/networking/realtime-compact-wire-mapping.md
+message: Broken link in services/game-server/simulation/players/player-camera-view-state.md:13:34: ../../../devtools/server/game-control-devtools-adapter.md
+message: Broken link in services/game-server/simulation/players/player-counters.md:13:43: ../../../devtools/server/game-control-devtools-adapter.md
+message: Broken link in services/game-server/simulation/players/player-counters.md:339:282: ../../../services/game-server/networking/realtime-compact-wire-mapping.md
+message: Broken link in services/game-server/simulation/players/player-death-and-despawn.md:13:43: ../../../devtools/server/game-control-devtools-adapter.md
+message: Broken link in services/game-server/simulation/players/player-death-and-despawn.md:392:672: ../../../services/game-server/networking/realtime-compact-wire-mapping.md
+message: Broken link in services/game-server/simulation/players/player-pause-and-suspension.md:13:43: ../../../devtools/server/game-control-devtools-adapter.md
+message: Broken link in services/game-server/simulation/players/player-respawn.md:13:34: ../../../devtools/server/game-control-devtools-adapter.md
+message: Broken link in services/game-server/simulation/players/player-respawn.md:129:255: ../../../services/game-server/networking/realtime-compact-wire-mapping.md
+ddocs fix unresolved 34 link(s)

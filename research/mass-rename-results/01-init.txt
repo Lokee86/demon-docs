@@ -1,0 +1,3 @@
+initialized demon-docs repository at C:\tmp\demon-docs-space-rocks-mass-rename-rdsm5fqt
+config: C:\tmp\demon-docs-space-rocks-mass-rename-rdsm5fqt\.ddocs\config.toml
+docs root: .

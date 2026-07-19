@@ -1,0 +1,6 @@
+ddocs check failed
+message: Broken link in agent/architecture-rules-mass-renamed-again.md:62:22: ../../skills/seam-first/SKILL.md
+message: Broken link in domains/platform/security-and-admin/trust-and-eligibility-policy-mass-renamed-again.md:490:14: domains/platform/!INDEX.md
+message: Broken link in services/game-server/integrations/auth-verifier-integration-mass-renamed-again.md:533:17: ../../../player-data/!INDEX.md
+message: Broken link in services/game-server/integrations/match-result-reporting-mass-renamed-again.md:329:17: ../../../player-data/!INDEX.md
+message: Broken link in services/game-server/integrations/player-data-http-hosting-mass-renamed-again.md:295:17: ../../../player-data/!INDEX.md
