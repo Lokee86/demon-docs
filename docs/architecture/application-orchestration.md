@@ -10,7 +10,7 @@ This document describes the implemented application boundary that resolves confi
 
 Both `ddocs` and `demon` enter the same internal application package. The `demon` wrapper normalizes bare and help invocations into the repository-demon command family while preserving shared version handling. `internal/app` owns scoped command parsing and coordination across repository discovery, configuration, documentation reconciliation, local links, orphan health checks, stateless moves, review commands, reverse indexes, codemap analysis, watch mode, and demon lifecycle.
 
-The application layer coordinates ownership. It does not reimplement scanner, link, reverse-index, repository-state, or daemon mechanics.
+The application layer coordinates ownership. It does not reimplement scanner, link, reverse-index, repository-state, or daemon mechanics. The exact `check`, `fix`, and `watch` selection, planning, application, partial-completion, diagnostic, and exit lifecycle is owned by [Reconciliation Command Lifecycle](reconciliation-command-lifecycle.md).
 
 ## Code root
 
@@ -151,6 +151,7 @@ go test ./internal/app -count=1
 
 - [CLI Reference](../reference/cli.md)
 - [Configuration Reference](../reference/configuration.md)
+- [Reconciliation Command Lifecycle](reconciliation-command-lifecycle.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
 - [Markdown Link Reconciliation](markdown-link-reconciliation.md)
 - [Review Ledger](review-ledger.md)
