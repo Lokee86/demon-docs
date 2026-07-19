@@ -1,5 +1,23 @@
 # Demon Docs Roadmap
 
+Parent index: [Planning](./README.md)
+
+## Purpose
+
+This document summarizes shipped product areas, active work, near-term hardening, back-burnered architecture, and later product tracks without acting as the canonical reference for implemented behavior.
+
+## Overview
+
+The roadmap is a sequencing and status document. Current product summaries link to canonical architecture, operations, reference, and research pages; detailed shipped behavior belongs in those documents.
+
+## Current status
+
+Active roadmap. Several bounded feature streams are in progress on separate worktrees, while the polyglot code-intelligence and context-delivery tracks remain back-burnered or later work.
+
+## Ownership boundary
+
+This roadmap owns project sequencing and status summaries. It does not own exact CLI contracts, current implementation mechanics, benchmark methodology, or operational recovery procedures.
+
 This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active tuning work, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
 
 ## Current Product: Implemented on `main`
@@ -24,7 +42,7 @@ This roadmap describes the current product state and the next implementation tra
 - Undefined explicit or collapsed reference labels are reported.
 - Generated rewrites use bounded concurrency while retaining deterministic planning, source-hash checks, and atomic per-file replacement.
 
-See [Markdown Link Reconciliation](markdown-links.md).
+See [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md).
 
 ### Reverse code-folder indexes
 
@@ -34,7 +52,7 @@ See [Markdown Link Reconciliation](markdown-links.md).
 - Missing codemap sections, empty matching sections, unresolved targets, and coverage gaps remain explicit diagnostics.
 - Symbol-level projection, move-aware authored-reference repair, and richer coverage reports remain later work.
 
-See [Code-Folder Reverse Indexes](reverse-indexes.md).
+See [Code-Folder Reverse Indexes](../architecture/reverse-indexes.md).
 
 ### Repository demon
 
@@ -44,7 +62,7 @@ See [Code-Folder Reverse Indexes](reverse-indexes.md).
 - Bash and PowerShell hooks translate shell entry and exit into feeder registration.
 - The daemon remains optional; `check`, `fix`, and foreground `watch` remain authoritative recovery and CI surfaces.
 
-See [Repository Demon](repository-demon.md).
+See [Repository Demon](../operations/repository-demon.md).
 
 ### Codemap extraction and deterministic missing-link research
 
@@ -57,7 +75,7 @@ See [Repository Demon](repository-demon.md).
 
 The current curated Space Rocks sample contains 150 labeled suggestions. The recorded baseline has 60% precision at rank 1, 64.2% valid-link precision for the `hard_link` tier, 95.1% non-junk acceptance for that tier, and 74.3% sample recall of valid links. These numbers describe the pinned labeled sample, not a universal quality claim.
 
-See [Codemap Missing-Link Evidence](codemap-evidence.md).
+See [Codemap Missing-Link Evidence](../research/codemap-evidence.md).
 
 ## Active Work
 
@@ -111,7 +129,7 @@ The important architectural decisions are:
 
 The first implementation step, when this track resumes, is the language-neutral provider and normalized fact contract. A Go-only graph embedded directly into the core is not an acceptable architectural starting point.
 
-See [Deterministic Typed Repository Graph](repository-graph.md), [Code-Symbol References](code-symbol-references.md), and [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md).
+See [Deterministic Typed Repository Graph](./code-intelligence/repository-graph.md), [Code-Symbol References](./code-intelligence/code-symbol-references.md), and [Code, Dependency, and Entanglement Facts](./code-intelligence/code-dependency-and-entanglement.md).
 
 ## Later Track: Context Bundles and Agent Integrations
 
@@ -131,7 +149,7 @@ Later work includes:
 - thin Codex, Hermes, Claude Code, and other host adapters; and
 - paired historical-task benchmarking with leakage controls.
 
-See [Deterministic Agent Context and Integrations](agent-context-and-integrations.md) and [Context-Injection Benchmarking](context-injection-benchmarking.md).
+See [Deterministic Agent Context and Integrations](./agent-context-and-integrations.md) and [Context-Injection Benchmarking](../research/context-injection-benchmarking.md).
 
 ## Optional LLM Assistance
 
@@ -170,3 +188,21 @@ Optional LLM assistance may eventually propose documentation changes from determ
 - `internal/codemapcorpus/` — repository fact adapters used by codemap analysis.
 - `internal/codemapprecision/` — curated precision evaluation.
 - `research/codemap-precision/` — pinned labels, reports, and evaluation artifacts.
+
+## Implementation sequence
+
+Near-term work should prioritize bounded document-engine capabilities, reviewable suggestion decisions, diagnostics, and hardening that do not depend on the future polyglot graph. The provider seam is the first step when code-intelligence work resumes.
+
+## Related docs
+
+- [Planning](README.md)
+- [CLI Reference](../reference/cli.md)
+- [Architecture](../architecture/README.md)
+- [Operations](../operations/README.md)
+- [Codemap Evidence](../research/codemap-evidence.md)
+- [Planned Code Intelligence](code-intelligence/README.md)
+- [Planned Agent Context and Integrations](agent-context-and-integrations.md)
+
+## Notes
+
+Worktree-local feature status should be reconciled into this roadmap when branches merge; the roadmap should not speculate that unmerged behavior is already on `main`.

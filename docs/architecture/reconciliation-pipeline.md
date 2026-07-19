@@ -1,6 +1,41 @@
 # Reconciliation Model
 
+Parent index: [Architecture](./README.md)
+
+## Purpose
+
+This document describes the implemented documentation-tree scan, managed-index parsing, parent navigation, preservation rules, planning, application, and shared reconciliation safety boundary.
+
+## Overview
+
 Demon Docs keeps indexes and local Markdown links in a predictable shape by scanning the filesystem, reading existing managed index blocks and link state, and planning the smallest set of repository-contained updates needed to bring them back into sync.
+
+## Code root
+
+```text
+internal/scan/
+internal/markdown/
+internal/reconcile/
+```
+
+## Responsibilities
+
+The forward reconciliation boundary owns documentation-tree inventory, index creation, managed-section planning, parent-link planning, description preservation, deterministic ordering, and application of documentation-index updates.
+
+## Does not own
+
+It does not own semantic topic placement, authored prose outside managed blocks, repository-local link identity, reverse-index projection, daemon lifecycle, or codemap inference.
+
+## Flow
+
+```text
+resolve repository and configuration
+-> scan documentation tree
+-> parse existing managed sections
+-> plan index and parent-link changes
+-> report or apply the plan
+-> verify deterministic state on the next pass
+```
 
 ## Scan Model
 
@@ -102,3 +137,24 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 - `internal/links/` — repository-local link inventory, resolution, state, diagnostics, and rewrites.
 - `internal/model/model.go` — shared reconciliation structures.
 - `internal/app/app.go` — `check`, `fix`, and `watch` orchestration.
+
+## Tests
+
+Focused coverage includes scan scope, managed Markdown behavior, source preservation, move transitions, configuration, determinism, line endings, and reconciliation scope.
+
+```bash
+go test ./internal/scan ./internal/markdown ./internal/reconcile -count=1
+```
+
+## Related docs
+
+- [Architecture](README.md)
+- [Getting Started](../guides/getting-started.md)
+- [Configuration Reference](../reference/configuration.md)
+- [Managed Files and State](../reference/managed-files-and-state.md)
+- [Application Orchestration](application-orchestration.md)
+- [Markdown Link Reconciliation](markdown-link-reconciliation.md)
+
+## Notes
+
+The documentation scanner describes current filesystem structure; it does not decide whether the repository selected the right documentation taxonomy.

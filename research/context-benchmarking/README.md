@@ -1,6 +1,6 @@
 # Context Benchmarking Research
 
-This directory preserves exploratory work for the future Demon Docs context-injection benchmark described in [Context-Injection Benchmarking](../../docs/context-injection-benchmarking.md).
+This directory preserves exploratory work for the future Demon Docs context-injection benchmark described in [Context-Injection Benchmarking](../../docs/research/context-injection-benchmarking.md).
 
 This is research material, not a current product subsystem, release requirement, or commitment to fund model trials now. The immediate purpose is to develop a credible experimental design, retain reproducible discovery evidence, and avoid losing useful historical-task work.
 

@@ -1,6 +1,6 @@
 # Link Performance Records
 
-This directory records the historical Markdown-link performance results referenced by `docs/link-performance.md`.
+This directory records the historical Markdown-link performance results referenced by `docs/research/link-performance.md`.
 
 ## Measurement Environment
 

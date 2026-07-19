@@ -1,5 +1,23 @@
 # Deterministic Agent Context and Integrations
 
+Parent index: [Planning](./README.md)
+
+## Purpose
+
+This document plans bounded deterministic context bundles and thin host integrations for agents without making an LLM, daemon, or host plugin part of reconciliation correctness.
+
+## Overview
+
+The planned context system would project existing repository facts for a temporary task. It is distinct from codemap inference, which asks whether a permanent authored relationship may be missing.
+
+## Current status
+
+Back-burnered planning and research. Host-neutral demon feeder lifecycle exists, but graph-based context resolution and delivery are not implemented product behavior.
+
+## Expected ownership
+
+A static core should own context requests, deterministic resolution, ordering, bounds, provenance, and truncation reporting. Thin host adapters should translate lifecycle and transport concerns only.
+
 This document describes the planned graph-based context retrieval layer and its host integrations. Context assembly is not implemented and follows the back-burnered polyglot code-graph provider contract. The repository demon already exposes a generic operational `agent` feeder, but feeder lifecycle is separate from context delivery.
 
 When implemented, one static core will assemble context from deterministic documentation/link facts plus normalized polyglot code facts. CLI, MCP, native plugins, and editor or agent adapters will remain different delivery surfaces around that core. This is not conventional embedding/vector RAG and does not create a second repository model.
@@ -149,13 +167,13 @@ The daemon may watch repository and Git changes, coalesce events, trigger the sa
 
 Context assembly correctness can be tested deterministically with fixtures, but claims that injected context improves agent implementation require a separate empirical benchmark. The future benchmark should compare matched no-context and context-injected runs across repositories with independently assessed code and documentation quality. Benchmark-specific oracle data must remain outside context generation and agent-visible inputs.
 
-See [Context-Injection Benchmarking](context-injection-benchmarking.md).
+See [Context-Injection Benchmarking](../research/context-injection-benchmarking.md).
 
 ## Benchmark and Validation Direction
 
 The context system should eventually be tested against authentic historical OSS tasks across independently assessed code-quality and documentation-quality quadrants. Each treatment run should be paired with the same repository snapshot and task without Demon Docs context, while a deliberately constructed repository validates the harness itself.
 
-The benchmark is future research rather than a current implementation gate. Corpus preparation, pinned task manifests, deterministic bundle inspection, leakage checks, and harness dry runs can proceed before repeated paid model trials. See [Context-Injection Benchmarking](context-injection-benchmarking.md).
+The benchmark is future research rather than a current implementation gate. Corpus preparation, pinned task manifests, deterministic bundle inspection, leakage checks, and harness dry runs can proceed before repeated paid model trials. See [Context-Injection Benchmarking](../research/context-injection-benchmarking.md).
 
 ## Initial Acceptance Criteria
 
@@ -184,3 +202,26 @@ The design is ready for implementation planning when focused fixtures and adapte
 - Plugin status schema and the optional daemon connection protocol.
 - The minimum common adapter surface versus host-specific hooks for Hermes, Claude Code, Codex, Cursor, Gemini, and other hosts.
 - LLM provider configuration and the provenance format for summaries or proposals derived from deterministic context.
+
+## Implementation sequence
+
+```text
+stabilize repository/code fact provider contracts
+-> define context request/response schema
+-> implement deterministic bounded selection
+-> expose CLI/MCP delivery
+-> add thin host adapters
+-> evaluate with paired historical tasks
+```
+
+## Related docs
+
+- [Planning](README.md)
+- [Roadmap](roadmap.md)
+- [Planned Code Intelligence](code-intelligence/README.md)
+- [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)
+- [Repository Demon](../operations/repository-demon.md)
+
+## Notes
+
+A useful temporary context item is not automatically a valid permanent codemap link. The two consumers must not share one undifferentiated score.

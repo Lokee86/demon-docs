@@ -1,6 +1,22 @@
 # Context-Injection Benchmarking
 
+Parent index: [Research](./README.md)
+
+## Purpose
+
+This document defines the historical-task research design for evaluating deterministic context injection against no-context controls without benchmark leakage.
+
+## Overview
+
 Demon Docs eventually needs evidence that deterministic context bundles improve real agent work. Context delivery is not implemented, but corpus preparation is underway: discovery artifacts, three pinned historical task fixtures, validation manifests, and fixture-preparation tools are retained in the repository. Paid or large-scale paired model trials remain deferred.
+
+## Research status
+
+Active research design with retained discovery artifacts and validated historical-task fixtures. It does not describe a shipped context-delivery product.
+
+## Benchmark framing
+
+The benchmark asks whether bounded deterministic repository context improves task performance, not whether an agent can solve a task after seeing its historical solution. Authentic pre-change snapshots, independent oracles, paired conditions, and leakage controls are therefore central to the design.
 
 ## Research Question
 
@@ -196,3 +212,18 @@ The scanner should be revised before another broad search so code quality, docum
 - `research/context-benchmarking/tools/initial-scan/` — original discovery scripts retained for provenance.
 - `research/context-benchmarking/discovery-results/` — candidate inventories, findings, and recommendations.
 - `research/context-benchmarking/fixtures/` — agent-visible tasks, metadata, baseline validation, and evaluator-only oracle records.
+
+## Limitations
+
+The available fixture set is intentionally small and cost-conscious. Results must be stratified by task and repository characteristics, and no-context controls must use the same model, prompt, tools, and stopping rules.
+
+## Related docs
+
+- [Research](README.md)
+- [Planned Agent Context and Integrations](../planning/agent-context-and-integrations.md)
+- [Roadmap](../planning/roadmap.md)
+- [Testing and Fixtures](../development/testing-and-fixtures.md)
+
+## Notes
+
+Context usefulness and permanent codemap-link validity are separate questions and require separate scoring and evaluation paths.

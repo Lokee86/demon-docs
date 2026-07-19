@@ -1,5 +1,27 @@
 # Repository Demon
 
+Parent index: [Operations](./README.md)
+
+## Purpose
+
+This document describes the implemented single-owner repository demon, feeder lease protocol, shell integration, linked-worktree behavior, runtime state, shutdown, recovery, and logs.
+
+## Overview
+
+The repository demon is an optional lifecycle owner around the normal watcher. It keeps one fresh repository-local watcher active while shell or agent feeders remain registered. It does not replace static `check` or `fix` correctness.
+
+## Operating model
+
+```text
+host enters repository work
+-> acquire feeder token
+-> demon owner starts or is reused
+-> host refreshes heartbeat
+-> watcher reconciles filesystem changes
+-> host releases token
+-> demon exits after grace when no feeders remain
+```
+
 The repository demon is the self-managing background lifecycle around the existing Demon Docs watcher. It runs the same deterministic reconciliation operations as `ddocs watch`; it does not introduce a second indexing, link-repair, or repository-truth system.
 
 The static commands remain authoritative:
@@ -163,7 +185,7 @@ run = true
 
 This setting permits self-managed operation; it does not make the demon a correctness dependency. Disabling it leaves `check`, `fix`, and foreground `watch` available.
 
-See [Configuration](configuration.md) for the complete configuration model and [Watcher and Automation](watcher-and-automation.md) for foreground watcher behavior.
+See [Configuration](../reference/configuration.md) for the complete configuration model and [Watcher and Automation](./watcher-and-automation.md) for foreground watcher behavior.
 
 ## Code map
 
@@ -174,3 +196,33 @@ See [Configuration](configuration.md) for the complete configuration model and [
 - `internal/watch/` — the foreground reconciliation watcher reused by the daemon owner.
 - `internal/app/demon_test.go` — command, feeder, worktree, lifecycle, and status coverage.
 - `internal/demon/runtime_test.go` — owner and feeder state coverage, including single-owner behavior.
+
+## Verification
+
+Use:
+
+```bash
+demon --status
+demon --logs
+ddocs check
+```
+
+Focused tests cover ownership, feeder leases, runtime state, stale recovery, worktrees, CLI integration, and logs:
+
+```bash
+go test ./internal/demon ./internal/app -count=1
+```
+
+## Related docs
+
+- [Operations](README.md)
+- [CI and Automation](../guides/ci-and-automation.md)
+- [CLI Reference](../reference/cli.md)
+- [Managed Files and State](../reference/managed-files-and-state.md)
+- [Repository State and Transactions](../architecture/repository-state-and-transactions.md)
+- [Watcher and Automation](watcher-and-automation.md)
+- [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
+
+## Notes
+
+Host adapters must release feeder tokens on success, failure, cancellation, timeout, and spawn failure. The demon does not deliver agent context.

@@ -62,4 +62,4 @@ All three pre-change snapshots passed `go test ./...` in WSL during the explorat
 - Code quality, documentation quality, task quality, and operational feasibility need separate evidence and separate classifications.
 - A repository can be an excellent benchmark candidate without being bad code.
 
-The next discovery pass should use the matrix and protocol in `docs/context-injection-benchmarking.md` rather than extending the original single-score ranking.
+The next discovery pass should use the matrix and protocol in `docs/research/context-injection-benchmarking.md` rather than extending the original single-score ranking.

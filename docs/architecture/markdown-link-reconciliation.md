@@ -1,6 +1,36 @@
 # Markdown Link Reconciliation
 
+Parent index: [Architecture](./README.md)
+
+## Purpose
+
+This document describes the implemented repository-local link graph, supported source forms, persistent identity evidence, deterministic move repair, and source-preserving write boundary.
+
+## Overview
+
 Demon Docs maintains a repository-scoped graph of local Markdown links. This is a focused link graph for validation and path repair; it is not the later repository, code, symbol, or agent-context graph.
+
+## Code root
+
+```text
+internal/links/
+```
+
+## Responsibilities
+
+This boundary owns link parsing, local target resolution, file identity and path history, incoming-link groups, deterministic repair evidence, source-hash validation, atomic replacement, and link diagnostics.
+
+## Does not own
+
+It does not own authored link labels or prose, external target contents, semantic documentation relationships, codemap inference, heading-anchor validation, or selection among ambiguous destinations.
+
+## Invariants and safety boundaries
+
+- Only repository Markdown sources are rewritten.
+- Only the resolved destination path changes.
+- One deterministic destination is required.
+- Expected source content must still match before replacement.
+- Worker concurrency must not change planned output or diagnostic order.
 
 ## Scope
 
@@ -86,7 +116,7 @@ Unchanged files reuse stored fingerprints when path, size, and modification time
 
 Generated source rewrites are planned deterministically first, then applied through a bounded worker pool. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change the planned output, stored identities, or diagnostic ordering.
 
-Recorded Windows measurements show the 16-worker implementation applying a synthetic 250-source high-fanout move in 322–358 ms, compared with 885–954 ms before bounded parallel writes. A copied Space Rocks stress test repaired 3,717 links across 340 Markdown sources in a median 1.93–1.98 seconds per mass-rename pass. See [Markdown Link Performance](link-performance.md) for methodology, phase timings, throughput, and retained artifacts.
+Recorded Windows measurements show the 16-worker implementation applying a synthetic 250-source high-fanout move in 322–358 ms, compared with 885–954 ms before bounded parallel writes. A copied Space Rocks stress test repaired 3,717 links across 340 Markdown sources in a median 1.93–1.98 seconds per mass-rename pass. See [Markdown Link Performance](../research/link-performance.md) for methodology, phase timings, throughput, and retained artifacts.
 
 ## Commands and Feature Selection
 
@@ -132,3 +162,24 @@ When links are enabled, watch mode observes the repository root because moves of
 - `internal/app/app.go` — `check`, `fix`, and foreground `watch` CLI integration.
 - `internal/watch/watch.go` — filesystem event scheduling and reconciliation diagnostics.
 - `internal/reconcile/reconcile.go` — shared index reconciliation boundary.
+
+## Tests
+
+Focused coverage lives throughout `internal/links/`, including parser, wiki, HTML, reference-label, rewrite, reconciliation, timing, concurrency, and external-fixture tests.
+
+```bash
+go test ./internal/links -count=1
+```
+
+## Related docs
+
+- [Architecture](README.md)
+- [Managed Files and State](../reference/managed-files-and-state.md)
+- [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md)
+- [Repository State and Transactions](repository-state-and-transactions.md)
+- [Watcher and Automation](../operations/watcher-and-automation.md)
+- [Markdown Link Performance](../research/link-performance.md)
+
+## Notes
+
+Heading fragments are preserved during path repair, but heading-anchor existence is not yet part of the implemented validation contract.

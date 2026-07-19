@@ -1,0 +1,13 @@
+docs_root = "docs"
+index_file = "README.md"
+
+[parent_link]
+folder_indexes = true
+indexed_files = true
+
+[files]
+include_patterns = ["**/*.md", "**/*.sh"]
+exclude_patterns = []
+
+[editable]
+parent_index_extensions = [".md"]

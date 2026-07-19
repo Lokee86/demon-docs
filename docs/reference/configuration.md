@@ -1,5 +1,13 @@
 # Demon Docs Configuration
 
+Parent index: [Reference](./README.md)
+
+## Purpose
+
+This document defines Demon Docs configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
+
+## Overview
+
 Demon Docs is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Go CLI fixture regression matrix.
 
 CLI help is available with `ddocs --help`, and each subcommand also supports `--help`.
@@ -75,7 +83,7 @@ The demon is an operational convenience around the existing watcher, not a
 correctness dependency. `check`, `fix`, and foreground `watch` remain available
 when it is disabled. Shell hooks use `shell` feeders; MCP and native host
 adapters can use the host-neutral `agent` feeder lifecycle without moving host
-logic into Demon Docs core. See [Repository Demon](repository-demon.md).
+logic into Demon Docs core. See [Repository Demon](../operations/repository-demon.md).
 
 ## Codemap Configuration
 
@@ -573,3 +581,20 @@ The first link-enabled `fix` or `watch` pass establishes this baseline without r
 - `internal/repository/scope.go` — repository-root and docs-root resolution boundaries.
 - `internal/repository/repository.go` — repository discovery and initialization.
 - `internal/links/` — schema-versioned link state governed by repository scope rather than TOML keys.
+
+## Diagnostics and failure behavior
+
+Use `ddocs config paths` to inspect selection and `ddocs config show` to inspect resolved values. Invalid roots, escaping paths, unsupported values, or unreadable configuration fail before broad repository mutation.
+
+## Related docs
+
+- [Reference](README.md)
+- [Getting Started](../guides/getting-started.md)
+- [CLI Reference](cli.md)
+- [Managed Files and State](managed-files-and-state.md)
+- [Application Orchestration](../architecture/application-orchestration.md)
+- [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
+
+## Notes
+
+Repository-local `.ddocs/config.toml` is preferred for initialized repositories. Legacy local and global names remain compatibility inputs at lower precedence.

@@ -1,10 +1,28 @@
 # Code-Symbol References
 
-This document defines the planned deterministic references from authored documentation to specific declarations in source code. Symbol references are not implemented and belong to the back-burnered polyglot code-graph track. They extend file- and path-level references without replacing them.
-
-The language-neutral provider seam must be implemented before any production language adapter. Symbol facts will feed the projections described in [Code-Folder Reverse Indexes](reverse-indexes.md) and the broader [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md) work.
+Parent index: [Planned Code Intelligence](./README.md)
 
 ## Purpose
+
+This document plans declaration-level code-symbol references, provider resolution states, graph edges, user-facing syntax direction, and move/rename behavior.
+
+## Overview
+
+Symbol references would let documentation identify code declarations more precisely than file or folder paths while preserving deterministic unresolved and ambiguous states.
+
+## Current status
+
+Back-burnered architecture plan. Current reverse indexes and codemap evidence operate at existing file/folder and extracted-symbol evidence boundaries; authored declaration references are not yet a supported product contract.
+
+## Expected ownership
+
+The normalized provider seam should own declaration identities and resolution. Markdown syntax and generated projections should consume those facts without becoming language-specific parsers.
+
+This document defines the planned deterministic references from authored documentation to specific declarations in source code. Symbol references are not implemented and belong to the back-burnered polyglot code-graph track. They extend file- and path-level references without replacing them.
+
+The language-neutral provider seam must be implemented before any production language adapter. Symbol facts will feed the projections described in [Code-Folder Reverse Indexes](../../architecture/reverse-indexes.md) and the broader [Code, Dependency, and Entanglement Facts](./code-dependency-and-entanglement.md) work.
+
+## Goals
 
 A documentation page or codemap should be able to target a declaration rather than an entire source file. Precise symbol targets enable:
 
@@ -72,7 +90,7 @@ The Phase 4 graph adds these edges:
 - `symbol member of container`; and
 - `file contained by folder`.
 
-Declaration and symbol extraction are Phase 4 groundwork. Calls, general references, imports, later dependency/data edges, and entanglement projections are optional capabilities after this phase; they are not required for code-symbol references, reverse documentation links, or the initial Go adapter. Their separate planning boundary is described in [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md).
+Declaration and symbol extraction are Phase 4 groundwork. Calls, general references, imports, later dependency/data edges, and entanglement projections are optional capabilities after this phase; they are not required for code-symbol references, reverse documentation links, or the initial Go adapter. Their separate planning boundary is described in [Code, Dependency, and Entanglement Facts](./code-dependency-and-entanglement.md).
 
 ## Resolution Flow and Diagnostics
 
@@ -138,7 +156,7 @@ A symbol rename cannot be safely auto-repaired from parsing alone. A changed nam
 
 Symbol references feed generated projections without replacing authored documentation:
 
-- resolved symbol references feed distinct code-folder reverse indexes, separate from ordinary forward documentation-folder indexes, and symbol-level reverse documentation projections; reverse-index scope and reconciliation are defined in [Code-Folder Reverse Indexes](reverse-indexes.md);
+- resolved symbol references feed distinct code-folder reverse indexes, separate from ordinary forward documentation-folder indexes, and symbol-level reverse documentation projections; reverse-index scope and reconciliation are defined in [Code-Folder Reverse Indexes](../../architecture/reverse-indexes.md);
 - symbol-level documentation lists show the documents that explicitly target each declaration;
 - impact reports identify affected symbol references and governing documents for a changed declaration; and
 - deterministic context bundles contain only the selected declarations plus the governing documents and indexes needed to interpret them.
@@ -204,3 +222,26 @@ The acceptance suite must include legacy-style files with multiple declarations,
 - Which code-intelligence provider should be adapted first after the language-neutral seam is stable.
 - Which Go qualification cases require `go/types` or `go/packages`, and how failures are surfaced in a later Go provider.
 - The configuration boundary between enabled providers and automatic file-type discovery.
+
+## Implementation sequence
+
+```text
+finalize provider and symbol identity contract
+-> select non-binding author syntax
+-> implement deterministic resolution diagnostics
+-> add rename/move behavior
+-> add generated projections
+-> validate with at least one real provider
+```
+
+## Related docs
+
+- [Planned Code Intelligence](README.md)
+- [Repository Graph](repository-graph.md)
+- [Code Dependency and Entanglement](code-dependency-and-entanglement.md)
+- [Reverse Indexes](../../architecture/reverse-indexes.md)
+- [Roadmap](../roadmap.md)
+
+## Notes
+
+Illustrative syntax in this plan is non-binding until the provider identity and resolution contract is stable.

@@ -9,6 +9,7 @@ bin/
 # Local runtime/cache files
 .cache/
 /.ddocs/
+**/.ddocs/
 /.worktrees/
 .codex-hackathon/
 *.log

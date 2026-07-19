@@ -1,6 +1,35 @@
 # Code-Folder Reverse Indexes
 
+Parent index: [Architecture](./README.md)
+
+## Purpose
+
+This document describes the implemented reverse-index projection from authored documentation codemap targets into configured code folders and files.
+
+## Overview
+
 This document describes the code-folder reverse-index boundary and the current implementation on `main`. File- and folder-level codemap projection, configured recursive code roots, nested `.docignore`, configurable codemap headings, and `-r` / `--reverse` selection are implemented. Symbol adapters, richer coverage reports, and move-aware repair remain later work.
+
+## Code root
+
+```text
+internal/reverseindex/
+```
+
+## Responsibilities
+
+Reverse-index reconciliation owns codemap target inventory, configured root traversal, coverage projection, deterministic rendering, generated-section checks and writes, and reverse-index diagnostics.
+
+## Does not own
+
+It does not author codemap relationships, infer that existing links are irrelevant, provide symbol-level code intelligence, repair ambiguous authored semantic references, or replace the future polyglot provider seam.
+
+## Invariants and safety boundaries
+
+- Authored codemap sections remain the input authority.
+- Generated reverse indexes are projections, not new semantic truth.
+- Missing, empty, unresolved, and out-of-scope inputs remain explicit diagnostics.
+- Scope is limited to configured or explicitly supplied reverse roots.
 
 ## Purpose and Index Type
 
@@ -173,3 +202,23 @@ The initial design is acceptable for implementation planning when focused fixtur
 - How much historical Git evidence is required before presenting a move or rename candidate.
 - Whether symbol-level reverse entries are colocated with file entries or exposed as a separate managed projection.
 - The machine-readable export shape and limits for reverse-index diagnostics and coverage facts.
+
+## Tests
+
+Focused tests cover inventory, rendering, root scope, traversal, target resolution, watch integration, and reconciliation behavior.
+
+```bash
+go test ./internal/reverseindex -count=1
+```
+
+## Related docs
+
+- [Architecture](README.md)
+- [CLI Reference](../reference/cli.md)
+- [Configuration Reference](../reference/configuration.md)
+- [Codemap Evidence](../research/codemap-evidence.md)
+- [Planned Code Intelligence](../planning/code-intelligence/README.md)
+
+## Notes
+
+Symbol-level projection and move-aware authored-reference repair remain later work and must not be inferred from current folder/file reverse-index behavior.

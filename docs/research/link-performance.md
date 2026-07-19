@@ -1,5 +1,19 @@
 # Markdown Link Performance
 
+Parent index: [Research](./README.md)
+
+## Purpose
+
+This document records retained performance measurements for high-fanout target moves, real Space Rocks moves, and repeated full-corpus mass renames.
+
+## Overview
+
+The measurements expose scanning, planning, storage, and generated-write regressions under realistic and synthetic link volumes. They are engineering evidence for the tested hardware, corpus, and implementation revision rather than universal latency guarantees.
+
+## Research status
+
+Recorded benchmark evidence. New performance changes should preserve the original artifacts and add comparable runs rather than overwriting historical results.
+
 Demon Docs records link-reconciliation benchmarks separately from correctness tests. These results are host-specific engineering measurements, not guaranteed performance limits. Unless noted otherwise, the measurements below were taken on the Windows development host on July 19, 2026.
 
 ## High-Fanout Target Move
@@ -120,3 +134,18 @@ The benchmarks exercise different workloads and should not be collapsed into one
 - the mass rename exercises repository-wide target identity recovery and thousands of link rewrites.
 
 Correctness remains the release gate. Timing measurements are retained to reveal regressions in scanning, planning, filesystem writes, verification, and `.ddocs` publication.
+
+## Limitations
+
+Timing varies with filesystem, antivirus, hardware, repository size, link distribution, cache state, and operating system. Comparisons are most useful when the corpus and environment remain controlled.
+
+## Related docs
+
+- [Research](README.md)
+- [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
+- [Testing and Fixtures](../development/testing-and-fixtures.md)
+- [Roadmap](../planning/roadmap.md)
+
+## Notes
+
+The benchmark suite should continue reporting phase timings, not only total duration, so regressions can be assigned to scanning, planning, storage, or writes.

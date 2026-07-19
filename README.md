@@ -1,37 +1,27 @@
 # Demon Docs
 
-## Motivation
-## Usage
-## Contributing
+Demon Docs is a deterministic documentation maintenance engine for repository-owned Markdown.
 
-`Demon Docs` keeps documentation indexes, repository-local links, and authored code maps synchronized with the repository.
+It keeps folder indexes, local links, reverse code-folder indexes, and optional repository-local automation synchronized without taking ownership of authored prose.
 
-It maintains folder indexes inside the configured docs root, a focused local-link graph across repository Markdown, and deterministic codemap datasets used to evaluate possible missing documentation-to-code links. Supported local-link forms include ordinary Markdown links and images, reference definitions and uses, path-based wiki links, and common local HTML targets.
+## Core behavior
 
-You keep owning the actual files and hand-written content. Index reconciliation owns only clearly marked managed sections. Link reconciliation changes only a resolved destination path while preserving authored labels, titles, aliases, queries, fragments, and surrounding prose. Codemap analysis exports and ranks evidence but does not silently add or remove authored code-map links.
+Demon Docs can:
 
-`check` reports pending or unresolved work, `fix` applies safe deterministic updates, `watch` runs the same reconciliation core after relevant filesystem changes, and `demon` provides optional repository-local background lifecycle around that watcher.
+- maintain recursive folder indexes inside a configured documentation root;
+- preserve authored content outside explicit managed blocks;
+- validate and repair supported local Markdown, wiki, reference, image, and HTML file targets;
+- retain stable file identities and path history in a private `.ddocs/` repository;
+- project authored codemap references back onto configured code folders and files;
+- export deterministic codemap datasets and run benchmark or precision research;
+- watch relevant filesystem changes in the foreground; and
+- run one optional repository-local watcher through the repository demon and feeder lifecycle.
 
-## What it manages
-
-`Demon Docs` reconciles:
-
-- folder index files, such as `README.md`
-- direct file entries in each folder index
-- draft/stub file entries from a configured draft folder
-- direct child-folder entries
-- `Parent index` links in folder indexes by default, and in indexed files when configured
-- local Markdown links, images, reference definitions, wiki links, and common HTML file targets
-- undefined explicit and collapsed Markdown reference labels
-- stable file identities, link history, reverse indexes, and generated-write state in the private `.ddocs/` object repository
-- deterministic codemap extraction, evidence collection, holdout benchmarking, precision sampling, and tiered missing-link candidates
-- optional repository-local watcher ownership, feeder heartbeats, linked-worktree state, and bounded logs
-
-It preserves hand-authored content outside managed index blocks and preserves link labels, titles, query strings, and fragments when updating a path.
+It does not silently rewrite prose, choose among ambiguous targets, remove existing codemap links as irrelevant, or treat inferred research candidates as authored relationships.
 
 ## Installation
 
-Go is the sole implementation and supported runtime for Demon Docs. Install it from a checkout:
+Go is the supported implementation and runtime.
 
 ```bash
 git clone https://github.com/Lokee86/demon-docs.git
@@ -40,638 +30,139 @@ go install ./cmd/ddocs
 go install ./cmd/demon
 ```
 
-Or build a repository-local binary:
+Or build repository-local binaries:
 
 ```bash
 go build -o bin/ddocs ./cmd/ddocs
 go build -o bin/demon ./cmd/demon
 ```
 
-Ensure the Go install directory is on `PATH`, then verify the executable:
+Verify installation:
 
 ```bash
-ddocs --help
 ddocs --version
+ddocs --help
 demon --help
-demon --version
 ```
 
-`ddocs` is the canonical command. `demon` is an installed alias backed by the same internal app implementation and has identical behavior.
+`ddocs` is the canonical executable. `demon` is an alias backed by the same application implementation.
 
-## Quick Start
+## Quick start
 
-From the root of the repository you want Demon Docs to manage:
+From the repository to manage:
 
 ```bash
 ddocs init --root docs/
 ddocs fix
-ddocs check
-```
-
-`init` creates `.ddocs/config.toml`, records `docs/` as the docs root, and makes the current directory the repository root.
-
-`fix` writes needed updates. The first link-enabled `fix` establishes the private `.ddocs/` object repository without repairing links; later passes can use that baseline to reconcile moves. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
-
-## Development
-
-Run the complete local Go release gate:
-
-```bash
-make release-check
-```
-
-The release gate runs focused Go tests, the Go CLI fixture regression matrix, `go vet`, both executable builds, and CLI smoke checks for `ddocs` and `demon`. GitHub Actions runs the complete Go suite on Linux and Windows.
-
-Build and run directly from the checkout:
-
-```bash
-go run ./cmd/ddocs fix
-go run ./cmd/ddocs check
-```
-
-Installed usage is:
-
-```bash
 ddocs fix
 ddocs check
-ddocs watch
 ```
 
-The installed alias behaves identically:
+The first link-enabled mutating pass establishes private identity and history state. A second `fix` verifies idempotence before the read-only `check` gate.
 
-```bash
-demon fix
-demon check
-demon watch
-```
-
-Two intentional compatibility corrections are part of the Go contract: headings and marker-like comments inside fenced code blocks are treated as code, and source files retain their original final-newline state. Both behaviors have focused byte-level tests.
-
-CLI help is available at the top level and for each subcommand:
-
-```bash
-ddocs --help
-ddocs -v
-ddocs --version
-ddocs init --help
-ddocs status --help
-ddocs fix --help
-ddocs check --help
-ddocs watch --help
-ddocs config paths
-ddocs config show
-ddocs config init --local
-ddocs config init --global
-ddocs codemap --help
-ddocs codemap export --help
-ddocs codemap benchmark --help
-ddocs codemap precision --help
-ddocs demon --help
-```
-
-`-v` and `--version` are top-level version flags.
-
-Default conventions:
-
-```text
-docs root:       docs
-index file:      README.md
-draft folder:    stubs
-parent label:    Parent index
-marker prefix:   doc-ledger
-```
-
-## Commands
-
-```bash
-ddocs init --root docs/
-```
-
-Initializes the current directory as the repository root and writes `.ddocs/config.toml`. The specified docs root must already exist inside the repository.
+Inspect repository selection at any time:
 
 ```bash
 ddocs status
+ddocs config paths
+ddocs config show
 ```
 
-Shows the detected repository root, docs root, config path, and repository-owned `.docignore` path.
+See [Getting Started](docs/guides/getting-started.md) for adoption, ignore rules, subsystem selection, and recovery guidance.
 
-```bash
-ddocs fix
+## Primary commands
+
+```text
+ddocs init       initialize repository-local configuration
+ddocs status     show selected repository and documentation paths
+ddocs check      verify selected systems without authored-file writes
+ddocs fix        apply safe deterministic reconciliation
+ddocs watch      run reconciliation after relevant filesystem changes
+ddocs config     inspect or initialize configuration
+ddocs codemap    export and evaluate codemap evidence
+ddocs demon      manage repository-local watcher lifecycle
 ```
 
-Reconciles indexes and links, writes repository-contained updates, and persists link state.
+Subsystem selectors:
 
-```bash
-ddocs check
+```text
+--docs     documentation folder indexes and parent navigation
+--links    repository-local link validation and repair
+--reverse  code-folder reverse indexes
 ```
 
-Verifies indexes and links without writing files. It returns non-zero for pending updates, broken or ambiguous links, or uninitialized link state.
+Use `ddocs <command> --help` for exact flags. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
+
+## Safety model
+
+Demon Docs owns only explicit deterministic surfaces:
+
+- content between managed index markers;
+- configured parent-index navigation lines;
+- the path portion of a recognized local link when one destination is deterministic;
+- configured generated reverse-index regions; and
+- private state under `.ddocs/`.
+
+Labels, titles, aliases, queries, fragments, surrounding prose, source newline style, and final-newline state are preserved during supported link rewrites.
+
+Ambiguous targets remain unchanged and are reported for user resolution.
+
+## Automation
+
+Foreground automation:
 
 ```bash
 ddocs watch
 ```
 
-Runs one reconciliation immediately, then watches for relevant filesystem changes. Link-enabled watch mode observes the repository root and the parent directories of explicitly linked external targets so moved non-Markdown targets can trigger repairs.
-
-Select one subsystem explicitly when needed:
-
-```bash
-ddocs check -d      # documentation indexes only
-ddocs check -l      # links only
-ddocs check -r      # reverse indexes only
-ddocs fix --docs
-ddocs fix --links
-ddocs fix --reverse
-ddocs watch -d
-ddocs watch -l
-ddocs watch -r
-```
-
-Supplying selectors runs only those systems. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
-
-```bash
-ddocs watch --root docs --once
-```
-
-Runs the watcher path once and exits.
-
-A config file can replace repeated command flags:
-
-```bash
-ddocs fix --config .demon-docs.toml
-ddocs check --config .demon-docs.toml
-```
-
-Config commands:
-
-```bash
-ddocs config paths
-ddocs config show
-ddocs config init --local
-ddocs config init --global
-```
-
-Codemap analysis commands:
-
-```bash
-ddocs codemap export --output .ddocs/codemap.json
-ddocs codemap benchmark --help
-ddocs codemap precision --help
-```
-
-`codemap export` scans configured codemap headings and writes a deterministic dataset containing documents, normalized targets, resolution diagnostics, and content hashes. `benchmark` removes known authored targets in controlled holdouts and measures whether the deterministic evidence system recovers them. `precision` generates, samples, and evaluates ranked suggestions against curated labels. Candidates are divided into `hard_link` and `context` tiers; neither tier authorizes automatic documentation edits.
-
-See [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for evidence signals, current benchmark results, safety rules, and research artifacts.
-
-## Config Selection
-
-Demon Docs selects one base config before applying command-specific CLI overrides.
-
-Selection order:
-
-1. `--config PATH`
-2. nearest `.ddocs/config.toml`, found by searching upward
-3. current-directory `.demon-docs.toml`
-4. current-directory `demon-docs.toml`
-5. legacy local compatibility fallbacks
-6. canonical global user config at `demon-docs/config.toml`
-7. legacy global compatibility fallback at `doc-ledger/config.toml`
-8. built-in defaults
-
-Repository config is discovered upward. Legacy standalone local configs remain current-directory only. Local and global config files are not merged.
-
-`--root` still overrides the selected docs root for a single command. In an initialized repository, relative overrides resolve from the repository root and cannot escape it.
-
-CLI override examples:
-
-```bash
-ddocs fix --root docs --index-file "!README.md"
-ddocs fix --root docs --draft-folder "_drafts"
-ddocs fix --root docs --include "**/*.png"
-ddocs fix --root docs --exclude "**/*.tmp"
-ddocs fix --root docs --marker-prefix "nav-ledger"
-ddocs fix --root docs --parent-label "Back to Index"
-ddocs fix --root docs --parent-link-folder-indexes
-ddocs fix --root docs --no-parent-link-folder-indexes
-ddocs fix --root docs --parent-link-indexed-files
-ddocs fix --root docs --no-parent-link-indexed-files
-```
-
-## Folder indexes
-
-Every normal folder under the managed root gets an index file.
-
-By default, the index file is:
-
-```text
-README.md
-```
-
-Draft folders do not get their own index. By default, the draft folder is:
-
-```text
-stubs/
-```
-
-For this tree:
-
-```text
-docs/
-  README.md
-  overview.md
-  stubs/
-    future-topic.md
-  guides/
-    README.md
-    setup.md
-```
-
-`Demon Docs` maintains:
-
-```text
-docs/README.md
-docs/guides/README.md
-```
-
-It indexes `future-topic.md` from the parent folder’s stub section, not from `stubs/README.md`.
-
-## Managed sections
-
-`Demon Docs` owns only the content between its marker comments.
-
-Default managed sections:
-
-```markdown
-## Direct Files
-<!-- doc-ledger:files:start -->
-<!-- doc-ledger:files:end -->
-
-## Stub Files
-<!-- doc-ledger:stubs:start -->
-<!-- doc-ledger:stubs:end -->
-
-## Direct Folders
-<!-- doc-ledger:folders:start -->
-<!-- doc-ledger:folders:end -->
-```
-
-Content outside those marker blocks remains hand-authored.
-
-## Parent links
-
-`Demon Docs` maintains parent navigation lines where configured.
-
-Default shape:
-
-```markdown
-Parent index: [Folder Name](./README.md)
-```
-
-Rules:
-
-- child folder indexes point to `../README.md`
-- normal files do not get a parent link by default
-- files inside `stubs/` do not get a parent link by default
-- the root index has no parent link
-
-The label and index filename are configurable. `indexed_files` turns file-level parent links on when you want them.
-
-Parent-link override flags:
-
-- `--parent-link-folder-indexes`
-- `--no-parent-link-folder-indexes`
-- `--parent-link-indexed-files`
-- `--no-parent-link-indexed-files`
-
-Examples:
-
-```bash
-ddocs fix --root docs --parent-link-indexed-files
-ddocs fix --root docs --no-parent-link-folder-indexes
-```
-
-## Description preservation
-
-`Demon Docs` tries to preserve existing index descriptions.
-
-It preserves descriptions when:
-
-- a file remains in place
-- a folder remains in place
-- a stub graduates into the parent folder
-- a canonical file moves into the stub folder
-- a cross-folder move can be matched unambiguously
-
-Stub graduation removes the configured stub prefix:
-
-```markdown
-- [topic.md](stubs/topic.md) - Stub: Topic documentation.
-```
-
-becomes:
-
-```markdown
-- [topic.md](topic.md) - Topic documentation.
-```
-
-Moving a canonical file into the stub folder applies the reverse transformation.
-
-If a stale entry no longer maps to a current file or folder, `Demon Docs` removes it and reports a reconciliation message.
-
-## Configuration
-
-The canonical repository config is:
-
-```text
-.ddocs/config.toml
-```
-
-It is created by `ddocs init --root <docs-root>` and discovered by searching upward from the current directory.
-
-Legacy standalone and global configs remain supported:
-
-```text
-.demon-docs.toml
-demon-docs.toml
-demon-docs/config.toml
-```
-
-Compatibility fallbacks remain supported at lower priority:
-
-```text
-.doc-ledger.toml
-doc-ledger.toml
-doc-ledger/config.toml
-```
-
-Selection order:
-
-1. `--config PATH`
-2. nearest `.ddocs/config.toml`, found by searching upward
-3. current-directory `.demon-docs.toml`
-4. current-directory `demon-docs.toml`
-5. legacy local compatibility fallbacks
-6. canonical global user config at `demon-docs/config.toml`
-7. legacy global compatibility fallback at `doc-ledger/config.toml`
-8. built-in defaults
-
-Repository config is discovered upward. Legacy local config lookup is current-directory only. Local and global config files are not merged. CLI flags override the selected config.
-
-`--root` overrides the configured docs root.
-
-Minimal repository config:
-
-```toml
-docs_root = "docs"
-index_file = "README.md"
-
-[parent_link]
-folder_indexes = true
-indexed_files = false
-```
-
-Use the legacy compatibility switch if you want the older single flag:
-
-```toml
-root = "docs"
-
-[parent_link]
-enabled = true
-```
-
-Use file-level parent links:
-
-```toml
-root = "docs"
-index_file = "README.md"
-
-[parent_link]
-folder_indexes = true
-indexed_files = true
-```
-
-Disable all parent links:
-
-```toml
-root = "docs"
-index_file = "README.md"
-
-[parent_link]
-folder_indexes = false
-indexed_files = false
-```
-
-Use a custom draft folder:
-
-```toml
-[drafts]
-folder = "_drafts"
-description_prefix = "Draft: "
-```
-
-Customize section headings:
-
-```toml
-[sections.files]
-heading = "Files"
-
-[sections.stubs]
-heading = "Drafts"
-
-[sections.folders]
-heading = "Folders"
-```
-
-Customize marker prefix:
-
-```toml
-[markers]
-prefix = "docs-index"
-```
-
-Index non-Markdown files without editing them:
-
-```toml
-[files]
-include_patterns = ["**/*.md", "**/*.png", "**/*.pdf", "**/*.yaml"]
-
-[editable]
-parent_index_extensions = [".md", ".mdx"]
-```
-
-## Ignoring paths
-
-Place `.docignore` at the repository root, beside `.ddocs/`, to exclude files and directories from index scanning, link scanning, and watch events. It uses Git ignore syntax and is independent from `.gitignore`.
-
-Patterns are relative to the repository root. Legacy standalone configurations continue treating the docs root as the ignore root.
-
-```gitignore
-# Generated exports inside the docs root
-/docs/generated/
-
-# Private notes anywhere below docs/
-docs/**/*.private.md
-docs/scratch/**
-!docs/scratch/README.md
-```
-
-These directory names are always pruned at any depth and cannot be re-included:
-
-```text
-.git/
-.ddocs/
-.obsidian/
-logseq/
-```
-
-Watch mode watches and reloads the repository-root `.docignore` even when the docs root is a nested directory.
-
-## Repository demon
-
-Initialized repositories permit the self-managing repository watcher by
-default. One fresh demon owner serves each local `.ddocs/` repository while
-shell or agent feeders remain active:
+Repository-local detached ownership:
 
 ```bash
 demon run
 demon --status
 demon --logs
-demon acquire --client mcp
-demon heartbeat --token TOKEN
-demon release --token TOKEN
 ```
 
-The same lifecycle commands are available as `ddocs demon ...`. `demon acquire`, `heartbeat`, and `release` form the host-neutral feeder interface used by MCP, Codex, Hermes, and other agent adapters.
+Watch and demon modes are convenience layers. `ddocs check` remains the authoritative CI and recovery surface.
 
-Install automatic shell entry and exit tracking in Bash with:
+See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon](docs/operations/repository-demon.md).
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Documentation policy](docs/documentation-policy.md)
+- [Guides](docs/guides/README.md)
+- [Reference](docs/reference/README.md)
+- [Architecture](docs/architecture/README.md)
+- [Operations](docs/operations/README.md)
+- [Research](docs/research/README.md)
+- [Planning](docs/planning/README.md)
+- [Development](docs/development/README.md)
+
+Current behavior, future work, and benchmark evidence are intentionally separated. The [Roadmap](docs/planning/roadmap.md) summarizes planned direction but is not the canonical reference for shipped behavior.
+
+## Development
+
+Run the complete local release gate:
 
 ```bash
-eval "$(ddocs demon __shell-hook bash)"
+make release-check
 ```
 
-Or in a PowerShell profile with:
-
-```powershell
-Invoke-Expression (& ddocs demon __shell-hook powershell)
-```
-
-Shell feeding is implemented by the CLI. MCP and native agent integrations use
-the public host-neutral lifecycle: acquire a token with a client name, refresh
-it before feeder expiry, and release it on every terminal path. The demon does
-not host those integrations or deliver agent context.
-
-Runtime ownership, feeder heartbeats, shutdown requests, and bounded logs live
-under `.ddocs/runtime/`. The existing `ddocs watch` command remains a foreground
-watcher for explicit terminal-controlled use. See
-[Repository Demon](docs/repository-demon.md).
-
-## Watch mode
-
-Watch mode is for local convenience. It is not a replacement for `check`.
-
-The watcher:
-
-- runs one reconciliation immediately on startup
-- watches the docs root for index-only operation, or the repository root when links are enabled
-- reacts to relevant file and directory events
-- debounces noisy event bursts
-- runs one reconciliation at a time
-- schedules a follow-up pass if changes arrive during a run
-- logs timestamps and process IDs so watcher/fix races are visible
-
-Example:
-
-```bash
-ddocs watch --root docs
-```
-
-If a manual `fix` reports `0 file(s)` changed after files changed, a watcher may already have reconciled the tree. Check the watcher log. Generated link rewrites use a bounded worker pool while preserving deterministic planning and per-source atomic replacement.
-
-## Watcher automation
-
-Do not add a second PID-file or `setsid` wrapper around `ddocs watch` when the
-repository demon is enabled. The demon already owns detached startup,
-single-owner coordination, feeder heartbeats, shutdown grace, and logs.
-
-Use foreground `ddocs watch` only when you deliberately want the process
-attached to the current terminal. See [Watcher and
-Automation](docs/watcher-and-automation.md) for the distinction.
-
-## Testing
-
-Run the test suite:
+Run the Go suite directly:
 
 ```bash
 go test ./... -count=1
 ```
 
-Run the focused Go package tests and the Go CLI fixture regression matrix separately when needed:
+See [Testing and Fixtures](docs/development/testing-and-fixtures.md) and [Repository Layout](docs/development/repository-layout.md).
 
-```bash
-make test-go
-make regression
-```
+## Project status
 
-The regression matrix retains ten fixture scenarios and validates each with `fix`, a clean successful `check`, a second `fix`, and byte-identical complete fixture trees after the first and second fixes.
+Demon Docs is under active development. Repository indexing, local-link reconciliation, reverse indexes, watcher/demon lifecycle, and codemap research tooling are implemented. Reviewable suggestion decisions, broader diagnostics, and the polyglot code-intelligence track remain active or planned work.
 
-Useful manual smoke flow:
+See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 
-```bash
-ddocs init --root docs/
-ddocs fix
-ddocs check
-```
+## License
 
-For fixture stress testing, see:
-
-```text
-docs/make-dummy-docs.sh
-```
-
-That script generates a synthetic documentation tree for manual reconciliation tests.
-
-## Safety boundaries
-
-`Demon Docs` does not:
-
-- decide semantic documentation quality or ownership
-- validate heading-anchor existence yet
-- rewrite link labels, titles, aliases, surrounding prose, binary files, or external target files
-- treat a codemap suggestion as an authored relationship
-- recommend removing an existing codemap link as irrelevant
-- guess when more than one link or code target is plausible
-
-Index writes are confined to the configured docs root. Link rewrites are confined to repository Markdown source files and require one deterministic target. Codemap commands remain export, benchmark, and review tooling; they do not silently modify authored codemap sections. Symbolic-link entries are not traversed or edited.
-
-## Using `!README.md`
-
-Some repos prefer `!README.md` so folder indexes sort first in file explorers.
-
-That is supported through config:
-
-```toml
-root = "docs"
-index_file = "!README.md"
-```
-
-With that config, parent links use `!README.md` automatically:
-
-```markdown
-Parent index: [Guides](./!README.md)
-```
-
-## Repository hygiene
-
-Do not commit runtime artifacts:
-
-```text
-bin/
-ddocs
-demon
-ddocs.exe
-demon.exe
-.cache/
-dummy-docs/
-```
-
-The repo `.gitignore` should exclude those paths.
+See [LICENSE](LICENSE).

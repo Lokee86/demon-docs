@@ -1,5 +1,15 @@
 # Testing and Fixtures
 
+Parent index: [Development](./README.md)
+
+## Purpose
+
+This document describes the Demon Docs test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
+
+## Overview
+
+Testing is organized around deterministic behavior and source preservation. Focused package tests protect ownership boundaries, repository-level fixtures protect complete command behavior, and retained benchmarks expose performance or ranking regressions without turning research samples into universal claims.
+
 Demon Docs is covered by focused Go package tests, filesystem integration tests, CLI fixture regressions, codemap benchmark artifacts, and cross-platform CI. Go is the sole implementation and supported runtime.
 
 ## Test Commands
@@ -72,7 +82,7 @@ Link performance is measured at both package and full-CLI levels:
 
 The current recorded mass-rename median is 1.928 seconds for the first `ddocs fix -l` pass and 1.980 seconds for a repeated pass. The synthetic high-fanout move improved from 885–954 ms to 322–358 ms for the complete apply phase after generated source writes moved to a bounded 16-worker pool.
 
-See [Markdown Link Performance](link-performance.md) for the complete phase breakdown, throughput, methodology, historical comparison, and retained raw artifacts.
+See [Markdown Link Performance](../research/link-performance.md) for the complete phase breakdown, throughput, methodology, historical comparison, and retained raw artifacts.
 
 ## Repository-Demon Coverage
 
@@ -135,10 +145,10 @@ A release is eligible only when all CI jobs pass. In particular:
 
 ## Dummy Docs Fixture Generator
 
-`docs/make-dummy-docs.sh` creates a disposable nested documentation tree for manual stress testing.
+`docs/development/make-dummy-docs.sh` creates a disposable nested documentation tree for manual stress testing.
 
 ```bash
-./docs/make-dummy-docs.sh
+./docs/development/make-dummy-docs.sh
 ```
 
 Useful environment knobs include `ROOT_DIR`, `RECREATE`, `EXTENSIONS`, and the `MIN_*` / `MAX_*` folder and file counts. The default output directory is `dummy-docs/`, which is ignored by the repository.
@@ -146,7 +156,7 @@ Useful environment knobs include `ROOT_DIR`, `RECREATE`, `EXTENSIONS`, and the `
 A simple smoke flow is:
 
 ```bash
-./docs/make-dummy-docs.sh
+./docs/development/make-dummy-docs.sh
 ddocs fix --root dummy-docs
 ddocs check --root dummy-docs
 ```
@@ -155,7 +165,7 @@ ddocs check --root dummy-docs
 
 Agent-context claims require a separate empirical harness beyond package tests and codemap holdouts. The retained research uses authentic historical OSS tasks, paired no-context and context-injected conditions, independent code/documentation quality assessment, leakage controls, and an intentionally constructed harness control.
 
-Corpus preparation and deterministic harness validation can proceed without paid repeated model runs. See [Context-Injection Benchmarking](context-injection-benchmarking.md) and `research/context-benchmarking/`.
+Corpus preparation and deterministic harness validation can proceed without paid repeated model runs. See [Context-Injection Benchmarking](../research/context-injection-benchmarking.md) and `research/context-benchmarking/`.
 
 ## Code map
 
@@ -174,3 +184,20 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `research/link-performance/` — historical high-fanout and real-corpus move measurements.
 - `research/mass-rename-results/` — repeated whole-corpus rename correctness logs.
 - `research/mass-rename-timing/` — five-run mass-rename timing samples and summaries.
+
+## Failure modes
+
+Repository-wide tests must exclude nested `.worktrees/` and local generated outputs. Benchmark reports should identify their corpus and conditions. A changed fixture is not accepted merely because output differs; the behavioral contract and expected bytes must be reviewed.
+
+## Related docs
+
+- [Development](README.md)
+- [Repository Layout](repository-layout.md)
+- [Documentation Procedure](../documentation-procedure.md)
+- [Link Performance](../research/link-performance.md)
+- [Codemap Evidence](../research/codemap-evidence.md)
+- [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)
+
+## Notes
+
+The complete release gate is the preferred pre-merge verification because it combines tests, regression fixtures, vetting, builds, and CLI smoke checks.

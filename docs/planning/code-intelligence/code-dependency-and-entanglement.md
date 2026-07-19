@@ -1,5 +1,23 @@
 # Deterministic Code, Dependency, and Entanglement Facts
 
+Parent index: [Planned Code Intelligence](./README.md)
+
+## Purpose
+
+This document plans normalized dependency facts, bounded neighborhoods, impact projections, and entanglement indicators supplied through the future polyglot provider seam.
+
+## Overview
+
+The planned system would expose observed dependency and relationship facts without claiming that graph density alone proves architectural quality or semantic ownership.
+
+## Current status
+
+Back-burnered architecture plan. Existing codemap corpus adapters collect bounded repository evidence, but there is no general product code-dependency graph or impact-report contract.
+
+## Expected ownership
+
+Language adapters should provide normalized observed facts and capability metadata. Core projections should own deterministic ordering, bounds, unresolved states, and report composition.
+
 This document describes the back-burnered polyglot code-graph track: bounded code and dependency facts plus projections over those facts. It is optional analysis layered beside the existing documentation/link graph. It is not required for current documentation-folder reconciliation, link repair, codemap extraction, or the initial file/folder reverse-index implementation.
 
 The adapter seam comes before any language implementation. Demon Docs normalizes deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, language servers, or external code-intelligence providers instead of rebuilding those systems inside the project.
@@ -137,3 +155,25 @@ The code-graph track is ready to resume implementation when focused fixtures and
 - The definition and default scope of documentation/code mismatch reports.
 - Query syntax, export limits, cache keys, and invalidation granularity for large repositories.
 - The separate language-specific designs for call graphs and data-dependency facts.
+
+## Implementation sequence
+
+```text
+provider capability contract
+-> normalized dependency edge families
+-> deterministic bounded neighborhood queries
+-> impact and mismatch projections
+-> validation across multiple languages/providers
+```
+
+## Related docs
+
+- [Planned Code Intelligence](README.md)
+- [Repository Graph](repository-graph.md)
+- [Code-Symbol References](code-symbol-references.md)
+- [Codemap Evidence](../../research/codemap-evidence.md)
+- [Roadmap](../roadmap.md)
+
+## Notes
+
+Entanglement indicators are observations for review, not automatic judgments that a dependency or existing documentation link should be removed.

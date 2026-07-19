@@ -22,4 +22,4 @@ The reports are exploratory evidence only. Their scores estimated initial benchm
 - incomplete separation of code quality, documentation quality, task quality, and operational feasibility; and
 - limited manual validation.
 
-Future searches should use the matrix and protocol in [Context-Injection Benchmarking](../../../docs/context-injection-benchmarking.md). The historical scanner is retained under `../tools/initial-scan/` only so the initial results can be reproduced and audited.
+Future searches should use the matrix and protocol in [Context-Injection Benchmarking](../../../docs/research/context-injection-benchmarking.md). The historical scanner is retained under `../tools/initial-scan/` only so the initial results can be reproduced and audited.

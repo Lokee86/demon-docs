@@ -1,11 +1,25 @@
 # Watcher and Automation
 
+Parent index: [Operations](./README.md)
+
+## Purpose
+
+This document describes foreground watch behavior, event scope, debounce and serialization, output, and the boundary between explicit terminal ownership and the repository demon.
+
+## Overview
+
 Demon Docs exposes the same watcher through two operational surfaces:
 
 - `ddocs watch` runs explicitly in the foreground;
-- the [Repository Demon](repository-demon.md) manages a detached watcher while shells or agents are actively feeding it.
+- the [Repository Demon](./repository-demon.md) manages a detached watcher while shells or agents are actively feeding it.
 
 Both surfaces call the same deterministic reconciliation core. Neither is required for `ddocs check` or `ddocs fix`.
+
+## Operating model
+
+Foreground watch performs one reconciliation immediately, observes relevant filesystem locations, debounces noisy event bursts, and runs one reconciliation at a time. Changes arriving during a pass schedule one follow-up pass.
+
+The watcher is optional automation. A later `ddocs check` must be able to verify the same repository state without the watcher running.
 
 ## Watch Commands
 
@@ -47,7 +61,7 @@ Use foreground `watch` when you deliberately want the process attached to the cu
 
 Use the repository demon for normal self-managed local operation. Do not wrap `ddocs watch` in an additional PID-file, `setsid`, scheduled-task, or shell-startup daemonization script when the repository demon is enabled. A second lifecycle wrapper can create competing watchers and misleading status.
 
-The repository demon owns detached process startup, single-owner coordination, feeder heartbeats, shutdown grace, stale-owner recovery, and bounded repository-local logs. See [Repository Demon](repository-demon.md).
+The repository demon owns detached process startup, single-owner coordination, feeder heartbeats, shutdown grace, stale-owner recovery, and bounded repository-local logs. See [Repository Demon](./repository-demon.md).
 
 ## Output
 
@@ -87,3 +101,34 @@ Repository-demon tests separately cover ownership exclusion and stale recovery, 
 - `internal/demon/log.go` — bounded detached watcher logs.
 - `internal/app/demon.go` — daemon CLI and generated shell hooks.
 - `internal/repository/worktree.go` — linked-worktree runtime isolation.
+
+## Failure and recovery
+
+Stop foreground watch before diagnosing unexpected changes. If a manual `fix` reports no changes after an edit, inspect watcher output because the watcher may already have reconciled the tree.
+
+Do not add a second detached wrapper when the repository demon owns the watcher.
+
+## Verification
+
+```bash
+ddocs watch --once
+ddocs check
+```
+
+Focused tests:
+
+```bash
+go test ./internal/watch ./internal/app -count=1
+```
+
+## Related docs
+
+- [Operations](README.md)
+- [CI and Automation](../guides/ci-and-automation.md)
+- [Repository Demon](repository-demon.md)
+- [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
+- [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
+
+## Notes
+
+Link-enabled watch may observe repository and bounded external parent paths because non-Markdown target moves can require Markdown source repair.

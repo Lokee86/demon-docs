@@ -1,8 +1,24 @@
 # Codemap Missing-Link Evidence
 
+Parent index: [Research](./README.md)
+
+## Purpose
+
+This document records the deterministic evidence system for potentially missing codemap links, its commands, signals, suggestion tiers, curated precision results, corpora, and decision-safety contract.
+
+## Overview
+
 Demon Docs can extract authored code maps, build a deterministic repository corpus, rank possible missing targets, and evaluate the result against controlled holdouts or curated labels. This subsystem is implemented on `main`; the end-user accept/decline workflow remains planned.
 
 The system only suggests potentially missing relationships. It never recommends that an existing codemap link is irrelevant or should be removed.
+
+## Research status
+
+Implemented research tooling with an actively tuned scoring model. Recorded metrics describe pinned labeled samples and must not be interpreted as universal repository performance.
+
+## Research question
+
+Can deterministic repository facts rank potentially missing documentation-to-code links with enough precision to support human review while never recommending removal of existing authored links?
 
 ## Commands
 
@@ -155,3 +171,19 @@ This lifecycle is not yet exposed as a complete public command workflow.
 - `internal/app/codemap_benchmark.go` — benchmark CLI contract.
 - `internal/app/codemap_precision.go` — precision CLI contract.
 - `research/codemap-precision/` — pinned precision benchmark artifacts.
+
+## Limitations
+
+The primary curated baseline is repository- and sample-specific. Self-authored Demon Docs codemaps are useful development data but not an independent benchmark. Cross-repository corpora improve coverage but require curated labels before precision claims are valid.
+
+## Related docs
+
+- [Research](README.md)
+- [Reverse Indexes](../architecture/reverse-indexes.md)
+- [Roadmap](../planning/roadmap.md)
+- [Planned Code Intelligence](../planning/code-intelligence/README.md)
+- [Testing and Fixtures](../development/testing-and-fixtures.md)
+
+## Notes
+
+The product rule remains one-directional: suggest potentially missing links, never suggest that an existing authored relationship is irrelevant or should be removed.

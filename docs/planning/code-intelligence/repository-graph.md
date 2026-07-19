@@ -1,5 +1,23 @@
 # Planned Polyglot Repository and Code Graph
 
+Parent index: [Planned Code Intelligence](./README.md)
+
+## Purpose
+
+This document plans the normalized polyglot repository and code graph that may join existing documentation/link facts with provider-supplied code facts.
+
+## Overview
+
+The future graph is intended to normalize deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, or external code-intelligence providers. It should not rebuild every language analyzer inside Demon Docs.
+
+## Current status
+
+Back-burnered architecture plan. No general polyglot code graph is currently part of baseline reconciliation.
+
+## Expected ownership
+
+A language-neutral provider and normalized fact contract should own node, edge, provenance, resolution, and invalidation semantics. Language adapters should remain outside the core graph model.
+
 This document describes the back-burnered language-neutral graph that will join Demon Docs' existing documentation/link facts with bounded code facts from polyglot providers. It is not required for current folder-index reconciliation, link repair, codemap extraction, or the initial reverse-index implementation.
 
 Demon Docs already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
@@ -57,7 +75,7 @@ The initial edge vocabulary includes:
 - **symbol declaration:** a code symbol is declared in a code file; and
 - **symbol containment:** a symbol is contained by its reported package, type, module, or other symbol container.
 
-Provider facts may connect code nodes through imports, references, calls, implementations, reads/writes, or other bounded relation families when the provider declares that capability. Their normalized vocabulary and limits are defined in [Code, Dependency, and Entanglement Facts](code-dependency-and-entanglement.md). No code edge is required for current documentation reconciliation.
+Provider facts may connect code nodes through imports, references, calls, implementations, reads/writes, or other bounded relation families when the provider declares that capability. Their normalized vocabulary and limits are defined in [Code, Dependency, and Entanglement Facts](./code-dependency-and-entanglement.md). No code edge is required for current documentation reconciliation.
 
 Edge direction and names are part of the graph schema. A reverse documentation edge points from code target to documentation for projection and query purposes, while its provenance points back to the authored explicit reference that produced it.
 
@@ -164,3 +182,26 @@ The graph track is ready to resume implementation when focused fixtures and repe
 - The minimum adapter metadata and source-span encoding required in graph exports.
 - Cache boundaries and invalidation granularity for large repositories.
 - The later dependency-edge vocabulary and the separate design that will define language-specific call/data behavior.
+
+## Implementation sequence
+
+```text
+provider capability contract
+-> normalized fact model
+-> one adapter integration
+-> deterministic graph build/export
+-> bounded projections
+-> codemap and context consumers with separate scoring
+```
+
+## Related docs
+
+- [Planned Code Intelligence](README.md)
+- [Roadmap](../roadmap.md)
+- [Code Dependency and Entanglement](code-dependency-and-entanglement.md)
+- [Code-Symbol References](code-symbol-references.md)
+- [Codemap Evidence](../../research/codemap-evidence.md)
+
+## Notes
+
+A Go-only graph embedded directly into the core is not an acceptable first architecture step because the product boundary must remain polyglot.
