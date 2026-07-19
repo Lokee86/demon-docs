@@ -1,0 +1,698 @@
+{
+  "schema_version": 1,
+  "corpus": {
+    "repository": "space-rocks",
+    "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+    "reviewed_at": ""
+  },
+  "sampling": {
+    "seed": "space-rocks-current-precision-v1",
+    "source_report": "research/codemap-precision/current-source-report.json",
+    "candidate_count": 4493,
+    "requested_sample_count": 150,
+    "method": "balanced-documents-top-5-plus-lower-rank-fill-sha256"
+  },
+  "suggestions": [
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/webrtc/realtime_transport_session.gd",
+      "score": 36.45875954511676,
+      "evidence": [
+        "declared_symbol_mention:RealtimeTransportSession:x10",
+        "dependency_neighbor:client/tests/unit/test_client_connection_service.gd:outbound:gdscript_resource",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x3",
+        "related_document_target:docs/services/client/app-shell-and-session/session-boot-and-network-target.md:",
+        "related_document_target:docs/services/client/networking-flow/outbound-packet-sending.md:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "dependency_neighbor",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "RealtimeTransportSession is a direct documented collaborator: it owns realtime transport-session lifecycle, handlers, recovery, and close behavior, so this omitted implementation link materially improves coverage.",
+      "audit": {
+        "document_section": "Overview and Domain roles",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:30-36, 63-103",
+        "document_excerpt": "ClientConnectionService composes RealtimeTransportSession and configures its callbacks; RealtimeTransportSession owns the realtime transport-session lifecycle and handlers.",
+        "target_ref": "client/scripts/networking/webrtc/realtime_transport_session.gd: RealtimeTransportSession lifecycle and recovery handlers (lines 1-2, 29-53, 64-80, 141-147)",
+        "target_excerpt": "class_name RealtimeTransportSession; func start() creates and starts the transport; channel closure starts recovery; func close() clears the transport and recovery state.",
+        "target_sha256": "1138d5af8dc765212f708192e46fd36f019b53082e529b9d336ad402eaa403de",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/inbound/client_inbound_coordinator.gd",
+      "score": 35.97120420855573,
+      "evidence": [
+        "declared_symbol_mention:ClientInboundCoordinator:x10",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "related_document_target:docs/protocol/gameplay-packets.md:",
+        "related_document_target:docs/services/client/app-shell-and-session/session-boot-and-network-target.md:",
+        "sibling_of_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "sibling_of_existing_target:client/scripts/networking/inbound/server_packet_router.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "ClientInboundCoordinator is the direct implementation of the documented inbound/WebRTC handoff: it binds dispatcher signals, forwards gameplay lanes, and delegates WebRTC answers, ICE, readiness, and failure to the transport session.",
+      "audit": {
+        "document_section": "Overview and Domain roles",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:34-43, 71-94, 326-328",
+        "document_excerpt": "ClientConnectionService configures ClientInboundCoordinator callbacks; the coordinator owns the WebRTC control bindings and hands those outputs to RealtimeTransportSession.",
+        "target_ref": "client/scripts/networking/inbound/client_inbound_coordinator.gd: configure and WebRTC handler methods (lines 1-2, 18-45, 77-117)",
+        "target_excerpt": "func configure(dispatcher, pipeline, transport_session = null) binds dispatcher signals; the WebRTC handlers implement the documented transport handoff.",
+        "target_sha256": "5f76c7a743605dd4d4565f5d8d0e249b8b65e70d9bd75ca159204339d5f07bbf",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/tests/unit/test_session_network_controller.gd",
+      "score": 17.038691382768988,
+      "evidence": [
+        "dependency_neighbor:client/scripts/generated/constants/constants.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/networking/client_connection_service.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/session/session_network_controller.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/generated/constants/constants.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x5",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x2",
+        "sibling_of_existing_target:client/tests/unit/test_client_connection_service.gd:",
+        "sibling_of_existing_target:client/tests/unit/test_packet_codec.gd:",
+        "test_counterpart:client/scripts/session/session_network_controller.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The session-network test is genuinely adjacent to connection/auth and WebRTC readiness, but the document explicitly lists it as a handoff-boundary file and says adjacent files do not belong to lifecycle ownership.",
+      "audit": {
+        "document_section": "Code map",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:488-503",
+        "document_excerpt": "The document lists session_network_controller.gd among adjacent handoff files and states that those files do not belong to this document's lifecycle ownership.",
+        "target_ref": "client/tests/unit/test_session_network_controller.gd: connection/auth/WebRTC readiness and match-boundary tests (lines 3-5, 135-226, 236-323)",
+        "target_excerpt": "The tests drive FakeConnectionService connected/authenticated/WebRTC-ready events and assert SessionNetworkController requests and match transitions; this verifies a higher-level session controller.",
+        "target_sha256": "093f0a650767d03ad54be9ba4e61929ff2135638d4fbd6d5df8e47c307086a4e",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/session/gameplay_session_controller.gd",
+      "score": 16.699192596605723,
+      "evidence": [
+        "declared_symbol_mention:GameplaySessionController.reset",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x14",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/compact_lane_packet.gd:",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x13",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd::x3",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_packet_codec.gd::x2",
+        "related_document_target:docs/devtools/design/devtools-packet-protocol.md:",
+        "related_document_target:docs/protocol/gameplay-packets.md:",
+        "related_document_target:docs/protocol/realtime-websocket-protocol.md:",
+        "sibling_of_existing_target:client/scripts/session/session_network_controller.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "GameplaySessionController.reset is mentioned as a contrasting gameplay-session reset, but gameplay state application is explicitly outside this lifecycle document and the target is not a lifecycle owner or required transport implementation link.",
+      "audit": {
+        "document_section": "Realtime reset lifecycle",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:222-241",
+        "document_excerpt": "The connection-scoped realtime reset is distinguished from GameplaySessionController.reset(), which is a gameplay-session reset and does not perform the protocol reset.",
+        "target_ref": "client/scripts/session/gameplay_session_controller.gd: reset and gameplay input/packet handling (lines 86-148)",
+        "target_excerpt": "func reset() disables gameplay packet acceptance and resets the presentation/gameplay composition; the controller owns gameplay-session state rather than WebSocket lifecycle.",
+        "target_sha256": "2faae513ce87bd50f86435ee90bb43ac6b520085ce7e2c8fc3511575b97cae2a",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/tests/unit/test_client_packet_sender.gd",
+      "score": 14.951716120329772,
+      "evidence": [
+        "dependency_neighbor:client/scripts/networking/network_client.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/networking/outbound/client_packet_sender.gd:inbound:gdscript_resource",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_decode_result.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_encode_result.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "sibling_of_existing_target:client/tests/unit/test_client_connection_service.gd:",
+        "sibling_of_existing_target:client/tests/unit/test_packet_codec.gd:",
+        "test_counterpart:client/scripts/networking/outbound/client_packet_sender.gd:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "ClientPacketSender tests are meaningful outbound-networking verification, but outbound packet helper families are explicitly assigned to the separate Outbound Packet Sending document and the lifecycle document marks the adjacent sender as outside its ownership.",
+      "audit": {
+        "document_section": "Code map and Does not own",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:435-455, 488-503",
+        "document_excerpt": "Client packet helper families are outside this document, and client_packet_sender.gd is listed only as an adjacent handoff file.",
+        "target_ref": "client/tests/unit/test_client_packet_sender.gd: sender dependency, auth no-op, failure logging, and trace tests (lines 3-12, 35-88)",
+        "target_excerpt": "The tests cover ClientPacketSender dependency reporting, empty-auth no-op behavior, input/room sends, and operation traces; they verify outbound helpers rather than the socket lifecycle.",
+        "target_sha256": "47e5a6fb3e3c95c55c16477bddf1bcd8caacb441b1f9dc42642f2f5f9ad4faf0",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "docs/protocol/realtime-websocket-protocol.md",
+      "score": 7.683962001602465,
+      "evidence": [
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md::x6",
+        "git_cochange_with_existing_target:client/scripts/generated/constants/constants.gd:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x7",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/compact_lane_packet.gd::x8",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/lifecycle_lane_gate.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/tests/unit/test_packet_codec.gd::x2"
+      ],
+      "rank": 28,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "git_cochange_with_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The protocol document is substantively related to WebSocket transport, but this lifecycle document explicitly excludes packet schema/source-of-truth detail and defers broader protocol behavior to the protocol documentation; it is contextual rather than a needed direct code-map edge.",
+      "audit": {
+        "document_section": "Does not own",
+        "document_ref": "docs/services/client/networking-flow/websocket-connection-lifecycle.md:437-445",
+        "document_excerpt": "The lifecycle document does not own packet schema source-of-truth, generated constants, inbound classification, or payload-specific readers.",
+        "target_ref": "docs/protocol/realtime-websocket-protocol.md: realtime WebSocket protocol overview and transport boundaries (lines 7-15, 23-43)",
+        "target_excerpt": "This document describes the current realtime WebSocket protocol between the Godot client and Go game server, including transport route, framing, routing, and delivery semantics.",
+        "target_sha256": "d9b187a3dee91763301474ee0923ed7c6a5f466fdca4ebe4ebf253a957731c52",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/tests/unit/ui/menus/test_pregame_menu.gd",
+      "score": 7.277786402565681,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "test_counterpart:client/scripts/ui/menus/pregame_menu.gd:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "test_counterpart"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "The focused pregame menu test directly verifies the documented mode presentation and action-routing behavior, including labels, disabled buttons, and mode-specific emitted requests; the document currently names no focused test.",
+      "audit": {
+        "document_section": "Code map and Tests",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:84-102",
+        "document_excerpt": "The code map names the pregame implementation files, then says no focused test is documented and identifies the pregame menu implementation as the closest verification boundary.",
+        "target_ref": "client/tests/unit/ui/menus/test_pregame_menu.gd: mode presentation and action signal tests (lines 6-37, 58-170)",
+        "target_excerpt": "test_show_single_player_mode_sets_single_player_labels and test_show_multiplayer_mode_sets_multiplayer_labels assert mode presentation; subsequent tests assert valid and invalid action signals.",
+        "target_sha256": "1324ab2e4810692e5480a8fe4157906cfad2e1ccf429055a7b711d60c712678d",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/pregame_menu_flow.gd",
+      "score": 5.732025194968537,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x7",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/local-pilot-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/profile-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "PregameMenuFlow directly implements the documented mode and action-routing flow: it connects menu signals, switches modes, gates actions by mode, and hands off create, join, logout, profile, pilot, and transmission actions.",
+      "audit": {
+        "document_section": "Action routing and Code map",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:71-92",
+        "document_excerpt": "The document assigns mode-specific action routing to PregameMenu and describes high-level handoffs to focused pregame subflows.",
+        "target_ref": "client/scripts/ui/menu_flow/pregame_menu_flow.gd: configure, mode switching, and action handlers (lines 1-2, 21-60, 63-136)",
+        "target_excerpt": "func configure connects every pregame menu request; show_single_player/show_multiplayer set the current mode; action handlers gate Play Endless, Create, Join, Logout, Profile, and Select Pilot by mode.",
+        "target_sha256": "b7497c4083652220c313783ed93529bbec15a9bc515012fa42b175f7c023a6d4",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/local_pilot_flow.gd",
+      "score": 4.81840671831532,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x3",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/local-pilot-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/profile-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "LocalPilotFlow is a real pregame subflow reached by Select Pilot, but the document explicitly says local pilot selection policy is outside its ownership and points to the focused local-pilot flow for that behavior.",
+      "audit": {
+        "document_section": "Does not own and Related docs",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:45-55, 104-109",
+        "document_excerpt": "Local pilot selection policy is outside this document's ownership; Local Pilot Flow is the separate related document for that behavior.",
+        "target_ref": "client/scripts/ui/menu_flow/local_pilot_flow.gd: selector, profile create/edit/delete, and refresh flow (lines 1-5, 28-50, 120-136, 177-240, 243-318)",
+        "target_excerpt": "LocalPilotFlow owns selector display and local-profile create, edit, delete, and refresh operations; it is a focused subflow rather than the pregame mode router.",
+        "target_sha256": "8dec4843c0d8d963f5ddf4d0f2fe1ab05d52f392e806bd7f825fd70de2e4f5c5",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menus/",
+      "score": 3.9173926817736917,
+      "evidence": [
+        "exact_path_mention:client/scripts/ui/menus/",
+        "sibling_of_existing_target:client/scripts/ui/menus/pregame_menu.gd:",
+        "sibling_of_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The menus directory is genuinely within the documented pregame code root, but it is a broad container and the document already gives stronger file-level links to PregameMenu and its presenter/mode implementation.",
+      "audit": {
+        "document_section": "Code root and Code map",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:19-31, 84-102",
+        "document_excerpt": "The document identifies client/scripts/ui/menus/ as a primary implementation area and separately names the specific pregame menu files.",
+        "target_ref": "client/scripts/ui/menus/ (directory; representative pregame files: client/scripts/ui/menus/pregame_menu.gd and pregame_mode_presenter.gd)",
+        "target_excerpt": "Directory fingerprint is SHA-256 of newline-joined sorted repository-relative path:sha256 entries; the directory contains menu widgets, screens, and generated UID metadata.",
+        "target_sha256": "2460d61ffeedc9f4688bca9d44c14e619faad2552290ad2967160f1108ebdcae",
+        "target_kind": "directory"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/menu_flow_controller.gd",
+      "score": 3.8915250654677265,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "MenuFlowController configures and mounts the pregame flow, so it is meaningfully related, but it is a broad application route controller spanning sign-in, join, profile, and transmission flows rather than the pregame mode/action owner.",
+      "audit": {
+        "document_section": "Overview and Code root",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:9-31, 104-113",
+        "document_excerpt": "The pregame document keeps transmission and focused subflow handoffs at a high level and limits its primary implementation area to the pregame menu and menu-flow paths.",
+        "target_ref": "client/scripts/ui/menu_flow/menu_flow_controller.gd: _show_pregame composition and route management (lines 37-68, 83-93, 167-205)",
+        "target_excerpt": "_show_pregame instantiates PregameMenuFlow and configures it alongside TransmissionFlow, ProfileFlow, sign-in, and join-dialog routing; it is the surrounding composition controller.",
+        "target_sha256": "ecc00ef4c649156674edc0f4113882761792496c24e40c6d71cf5c74d898d6f1",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "docs/services/client/pregame-menu-flow/transmission-panel-flow.md",
+      "score": 1.5939547995747905,
+      "evidence": [
+        "git_cochange_with_document:docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md::x2",
+        "unique_basename_mention:transmission-panel-flow.md"
+      ],
+      "rank": 30,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "1-<2",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "unique_basename_mention",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "unique_basename_mention"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The transmission-panel document is a useful related boundary for the handoff mentioned here, but it documents the delegated panel behavior rather than implementing the pregame mode/action flow and is already linked from Related docs.",
+      "audit": {
+        "document_section": "Overview and Related docs",
+        "document_ref": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md:15-17, 104-109",
+        "document_excerpt": "Transmission-panel actions are handed off at a high level, while mounting details are deliberately left to the linked Transmission Panel Flow document.",
+        "target_ref": "docs/services/client/pregame-menu-flow/transmission-panel-flow.md: transmission mounting and clearing behavior (lines 11-19, 62-79)",
+        "target_excerpt": "The transmission-panel document describes mounting and clearing primary and subpanel content and routes Back through the active transmission state.",
+        "target_sha256": "38f6017045fc62f2341e0ae12b1d802d1993d2a2c2b3132a6bf0b60cd82c4680",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/",
+      "score": 5.678881806316692,
+      "evidence": [
+        "exact_path_mention:client/scripts/gameplay/spectate/:x2",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The spectate directory is the documented implementation area, but it is broad and redundant: the document already names each of its four implementation files and the directory also includes generated UID metadata.",
+      "audit": {
+        "document_section": "Code map and Tests",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:96-115",
+        "document_excerpt": "The code map names four specific spectate implementation files, while the closest verification boundary is the spectate directory.",
+        "target_ref": "client/scripts/gameplay/spectate/ (directory; four implementation files plus generated UID files)",
+        "target_excerpt": "Directory fingerprint is SHA-256 of newline-joined sorted repository-relative path:sha256 entries; it contains the named spectate implementation files and generated UID metadata.",
+        "target_sha256": "2ef67016bf3b28b2d5fcc64021229d55e013759ff137a08964bb0827c9806c46",
+        "target_kind": "directory"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/gameplay_spectate_flow.gd.uid",
+      "score": 3.3108825033895837,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The .uid file is generated/reference metadata for GameplaySpectateFlow, not the implementation of spectate behavior; it is related by basename but not useful as a direct semantic code-map link.",
+      "audit": {
+        "document_section": "Code map",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:96-105",
+        "document_excerpt": "The document's code map names gameplay_spectate_flow.gd as the implementation file, not its generated UID sidecar.",
+        "target_ref": "client/scripts/gameplay/spectate/gameplay_spectate_flow.gd.uid: generated resource identifier (line 1)",
+        "target_excerpt": "uid://bo0js4lu0ah7u",
+        "target_sha256": "e39ff9d4932d548c0066832c5466f6550b530f8ef84e57dda419a4700f74928e",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/spectate_menu_state.gd.uid",
+      "score": 3.305222297023521,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The .uid file is generated/reference metadata for SpectateMenuState, not the implementation of availability or target selection; it is not useful as a direct semantic code-map link.",
+      "audit": {
+        "document_section": "Code map",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:96-105",
+        "document_excerpt": "The document's code map names spectate_menu_state.gd as the implementation file, not its generated UID sidecar.",
+        "target_ref": "client/scripts/gameplay/spectate/spectate_menu_state.gd.uid: generated resource identifier (line 1)",
+        "target_excerpt": "uid://c6ig45moprqhp",
+        "target_sha256": "fcd6d26db067f70bef20fd363a4be7134ed01e798058371e7dac6eb803ef8345",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/spectate_session_flow.gd.uid",
+      "score": 3.301778170004769,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The .uid file is generated/reference metadata for SpectateSessionFlow, not the implementation of gameplay-state synchronization; it is not useful as a direct semantic code-map link.",
+      "audit": {
+        "document_section": "Code map",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:96-105",
+        "document_excerpt": "The document's code map names spectate_session_flow.gd as the implementation file, not its generated UID sidecar.",
+        "target_ref": "client/scripts/gameplay/spectate/spectate_session_flow.gd.uid: generated resource identifier (line 1)",
+        "target_excerpt": "uid://trfjoi2q0gxh",
+        "target_sha256": "41b187006c86efc83967620224eb63ee488324d18deff1eca448bd7a0d1b57c1",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/world/world_sync.gd",
+      "score": 3.0384662800558697,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "related_document_target:docs/services/client/input-and-targeting.md:",
+        "related_document_target:docs/services/game-server/simulation/players/player-camera-view-state.md:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "WorldSync is the direct implementation endpoint for the documented spectate camera/view-target handoff: GameplaySpectateFlow calls set_view_target_player and focus_camera_on_player on it.",
+      "audit": {
+        "document_section": "World-sync and camera handoff",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:90-94",
+        "document_excerpt": "The spectate flow hands the selected target to world sync through the view-target path and then to the camera focus path.",
+        "target_ref": "client/scripts/world/world_sync.gd: focus_camera_on_player, set_view_target_player, and clear_view_target_player (lines 210-223)",
+        "target_excerpt": "func focus_camera_on_player(player_id: String) -> bool delegates camera focus; func set_view_target_player(player_id: String) updates the active view target; clear_view_target_player clears it.",
+        "target_sha256": "a4fe55e149cfe3a13f8c3706d1bebee6967e2eec186e54a162836d6f809ca486",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/input/gameplay_input_flow.gd",
+      "score": 1.8919338721553514,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "related_document_target:docs/services/client/input-and-targeting.md:"
+      ],
+      "rank": 15,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "1-<2",
+      "rank_bucket": "11-20",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "incorrect",
+      "rationale": "GameplayInputFlow only gates and sends gameplay input packets, while this document explicitly separates spectate selection from gameplay targeting and does not own input handling; the related-document signal is evidence noise here.",
+      "audit": {
+        "document_section": "Does not own and Related docs",
+        "document_ref": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md:46-57, 117-125",
+        "document_excerpt": "The spectate flow does not own gameplay targeting rules or general gameplay behavior; Input And Targeting is only a related boundary.",
+        "target_ref": "client/scripts/gameplay/input/gameplay_input_flow.gd: process input packet emission (lines 1-2, 19-30)",
+        "target_excerpt": "func process(required_lane_baselines_synced) gates gameplay input and calls connection_service.send_input_packet(input_packet); it has no spectate target or camera behavior.",
+        "target_sha256": "72d97edabf9b2d0bdfd9f21d36bd2e290613e36366e8c160e3f1e83e014f1ea5",
+        "target_kind": "file"
+      }
+    }
+  ]
+}

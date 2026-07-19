@@ -3,7 +3,7 @@
   "corpus": {
     "repository": "space-rocks",
     "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
-    "reviewed_at": "2026-07-19"
+    "reviewed_at": ""
   },
   "sampling": {
     "seed": "space-rocks-current-precision-v1",
@@ -7716,9 +7716,9 @@
       "label": "plausible_but_unnecessary",
       "rationale": "The directory is the diagnostic-aggregator implementation root and is genuinely related, but it is a broad container combining hosted code, report-processing internals, storage, and the manual producer; the document already has more precise code-root and hosted-adapter links.",
       "audit": {
-        "document_section": "Code root and Code map",
-        "document_ref": "docs/services/diagnostic-aggregator/runtime-and-report-flow.md#code-map (lines 138-147)",
-        "document_excerpt": "The code map names the diagnostic-report service implementation, hosted adapter, manual producer, and game-server composition-root directory separately.",
+        "document_section": "## Code map",
+        "document_ref": "docs/services/game-server/integrations/diagnostic-aggregator-hosting.md#code-map (lines 95-108)",
+        "document_excerpt": "The code map identifies the game-server composition-root hosting adapter and the hosted diagnostic-aggregator adapter, while keeping the diagnostic service's handler, application-service, and report-store implementation paths outside the integration dependency.",
         "target_ref": "services/diagnostic-aggregator/ (directory; representative files: hosted/service.go, hosted/config.go, internal/diagnosticapi/, internal/reporting/, cmd/diagnostic-submit/)",
         "target_excerpt": "The directory contains 116 files spanning the manual producer, hosted adapter, diagnostic API/application/storage internals, and their tests; it is broader than one omitted semantic edge.",
         "target_sha256": "8a0683332e3df6904b03157c18244796f1fa3b828d0b99209db4e2f5b90b5c83",

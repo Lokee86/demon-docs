@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "corpus": {
+    "repository": "space-rocks",
+    "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+    "reviewed_at": ""
+  },
+  "sampling": {
+    "seed": "space-rocks-current-precision-v1",
+    "source_report": "research/codemap-precision/current-source-report.json",
+    "candidate_count": 4493,
+    "requested_sample_count": 150,
+    "method": "balanced-documents-top-5-plus-lower-rank-fill-sha256"
+  },
+  "suggestions": [
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/pages/index.astro",
+      "score": 13.300759505054838,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x3",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs::x3",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x4",
+        "git_cochange_with_existing_target:web-astro/package.json::x4",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x3",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x3",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts::x2",
+        "git_cochange_with_existing_target:web-astro/src/pages/rss.xml.js:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/pages/:",
+        "sibling_of_existing_target:web-astro/src/pages/rss.xml.js:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/",
+      "score": 8.704704733922934,
+      "evidence": [
+        "exact_path_mention:web-astro/:x4",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/astro.config.mjs:",
+        "sibling_of_existing_target:web-astro/package-lock.json:",
+        "sibling_of_existing_target:web-astro/package.json:",
+        "sibling_of_existing_target:web-astro/plasmic.json:",
+        "sibling_of_existing_target:web-astro/plasmic.lock:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/pages/devlog/[slug].astro",
+      "score": 8.101387747035798,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x3",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x2",
+        "git_cochange_with_existing_target:web-astro/package.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x2",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts::x2",
+        "git_cochange_with_existing_target:web-astro/src/pages/rss.xml.js:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/components/Homepage.tsx",
+      "score": 6.958028067337756,
+      "evidence": [
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x2",
+        "git_cochange_with_existing_target:web-astro/package.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x3",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "related_document_target:docs/services/web/crt-media-frame.md:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/components/PageHead.astro:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/content/homepageContent.ts",
+      "score": 6.138365898835837,
+      "evidence": [
+        "git_cochange_with_existing_target:web-astro/package-lock.json:",
+        "git_cochange_with_existing_target:web-astro/package.json:",
+        "git_cochange_with_existing_target:web-astro/plasmic.json:",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "related_document_target:docs/services/web/crt-media-frame.md:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/content/pageMetadata.ts:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "docs/services/web/crt-media-frame.md",
+      "score": 2.6294792462004994,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x2",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro:",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts:",
+        "unique_basename_mention:crt-media-frame.md"
+      ],
+      "rank": 24,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "unique_basename_mention",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "unique_basename_mention"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    }
+  ]
+}

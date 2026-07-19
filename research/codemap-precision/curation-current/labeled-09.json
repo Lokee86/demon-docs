@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "corpus": {
+    "repository": "space-rocks",
+    "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+    "reviewed_at": ""
+  },
+  "sampling": {
+    "seed": "space-rocks-current-precision-v1",
+    "source_report": "research/codemap-precision/current-source-report.json",
+    "candidate_count": 4493,
+    "requested_sample_count": 150,
+    "method": "balanced-documents-top-5-plus-lower-rank-fill-sha256"
+  },
+  "suggestions": [
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/pages/index.astro",
+      "score": 13.300759505054838,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x3",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs::x3",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x4",
+        "git_cochange_with_existing_target:web-astro/package.json::x4",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x3",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x3",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts::x2",
+        "git_cochange_with_existing_target:web-astro/src/pages/rss.xml.js:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/pages/:",
+        "sibling_of_existing_target:web-astro/src/pages/rss.xml.js:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "The deployment checklist requires the root route `/` to render the latest devlog, media, progress cards, utility panel, and fine print. This file is the concrete Astro implementation of that route and is therefore a missing route-level deployment link.",
+      "audit": {
+        "document_section": "## Smoke checks after Pages deploy",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:257",
+        "document_excerpt": "After the first successful deploy, check `/`. Expected: latest live devlog renders, hero media renders, article media renders, progress cards render, utility panel renders, fine print renders.",
+        "target_ref": "web-astro/src/pages/index.astro:13-20,49-50",
+        "target_excerpt": "The route loads the devlog collection, selects the latest entry into `homepageContent`, and mounts `HomepageClientMount` in the page body.",
+        "target_sha256": "40fe8b92dccd9ea44f9a8faaff670dfe986bf83b802be54fb7a13f8fdb54dbc9",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/",
+      "score": 8.704704733922934,
+      "evidence": [
+        "exact_path_mention:web-astro/:x4",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/astro.config.mjs:",
+        "sibling_of_existing_target:web-astro/package-lock.json:",
+        "sibling_of_existing_target:web-astro/package.json:",
+        "sibling_of_existing_target:web-astro/plasmic.json:",
+        "sibling_of_existing_target:web-astro/plasmic.lock:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The document explicitly identifies `web-astro/` as the deployable root and build boundary, so the directory is genuinely related. It is nevertheless a broad container whose deployment role is already represented by more precise configuration, route, content, and generated-output links.",
+      "audit": {
+        "document_section": "## Current deployment target",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:86-118",
+        "document_excerpt": "Deployable root: `web-astro/`. Cloudflare Pages should build the Astro site from `web-astro/`, not from the repository root.",
+        "target_ref": "web-astro/ (directory; representative files: web-astro/astro.config.mjs, web-astro/package.json, web-astro/src/pages/index.astro, web-astro/src/pages/devlog/[slug].astro)",
+        "target_excerpt": "The directory contains the Astro configuration, package/build metadata, and static route source that the document separately identifies as deployment-relevant.",
+        "target_sha256": "6c624c1023a91a657406d4aff6f4b19a1dede51b9b3b43f9a9c3744eed1fc13b",
+        "target_kind": "directory"
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/pages/devlog/[slug].astro",
+      "score": 8.101387747035798,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x3",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x2",
+        "git_cochange_with_existing_target:web-astro/package.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x2",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts::x2",
+        "git_cochange_with_existing_target:web-astro/src/pages/rss.xml.js:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "valid_missing_link",
+      "rationale": "The smoke-check section names `/devlog/<slug>/` as a production route and requires an individual devlog page, MDX body, and media paths to render. This file owns static path generation and the per-entry page, making it a clear omitted route implementation edge.",
+      "audit": {
+        "document_section": "## Smoke checks after Pages deploy",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:290-303",
+        "document_excerpt": "Check post route: `/devlog/<slug>/`. Expected: individual devlog page renders, MDX body appears after article media frame, media paths resolve, no stale test content appears.",
+        "target_ref": "web-astro/src/pages/devlog/[slug].astro:13-19,30-38",
+        "target_excerpt": "`getStaticPaths()` maps every devlog entry to a `slug`, and the page builds article metadata with `path: `/devlog/${entry.id}/``.",
+        "target_sha256": "14556255ea68b9ab93fdb826231a9f721e6d1a658078737607b2f1aca5083d9e",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/components/Homepage.tsx",
+      "score": 6.958028067337756,
+      "evidence": [
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/package-lock.json::x2",
+        "git_cochange_with_existing_target:web-astro/package.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.json::x2",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x3",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "related_document_target:docs/services/web/crt-media-frame.md:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/components/PageHead.astro:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "This component is genuinely involved in rendering the homepage behaviors listed in the deployment smoke check, including hero and article media plus utility content. The deployment document does not assign those UI responsibilities to this owned React wrapper, so the candidate is an indirect implementation detail rather than a necessary deployment codemap edge.",
+      "audit": {
+        "document_section": "## Smoke checks after Pages deploy",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:265-274",
+        "document_excerpt": "Expected for `/`: latest live devlog renders, hero media renders, article media renders, progress cards render, utility panel renders, fine print renders.",
+        "target_ref": "web-astro/src/components/Homepage.tsx:90-115,117-120",
+        "target_excerpt": "`Homepage_` normalizes content, derives hero and article media-frame props, and provides the `Devlog home` fallback when no published content exists.",
+        "target_sha256": "f3af6c968393e6d5dcb1d118372985a48483618b9bcb260b752973b8eb7155ae",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "web-astro/src/content/homepageContent.ts",
+      "score": 6.138365898835837,
+      "evidence": [
+        "git_cochange_with_existing_target:web-astro/package-lock.json:",
+        "git_cochange_with_existing_target:web-astro/package.json:",
+        "git_cochange_with_existing_target:web-astro/plasmic.json:",
+        "git_cochange_with_existing_target:web-astro/plasmic.lock::x2",
+        "git_cochange_with_existing_target:web-astro/src/content.config.ts::x3",
+        "related_document_target:docs/services/web/crt-media-frame.md:",
+        "related_document_target:docs/services/web/devlog-static-site.md:",
+        "related_document_target:docs/services/web/plasmic-astro-workflow.md:",
+        "sibling_of_existing_target:web-astro/src/content/pageMetadata.ts:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The file normalizes the homepage/devlog content fields that ultimately feed the deployed page, so the relationship is real. It is a supporting content helper rather than the deployment document’s named schema, route, asset, or build owner, making a direct link optional and overly specific.",
+      "audit": {
+        "document_section": "## Code map",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:716-726",
+        "document_excerpt": "The code map names `web-astro/src/content.config.ts` as the content collection schema and `web-astro/src/content/devlog/` as live devlog entries; it does not identify this normalization helper.",
+        "target_ref": "web-astro/src/content/homepageContent.ts:76-99",
+        "target_excerpt": "`normalizeHomepageContent()` fills missing text, media-kind, image-array, and boolean fields before the homepage component renders them.",
+        "target_sha256": "c7f02e3fa68bd04447938d89e4cbf21380576ed284efc15203a1757cfec0d017",
+        "target_kind": "file"
+      }
+    },
+    {
+      "document": "docs/services/web/cloudflare-pages-deployment.md",
+      "target": "docs/services/web/crt-media-frame.md",
+      "score": 2.6294792462004994,
+      "evidence": [
+        "git_cochange_with_document:docs/services/web/cloudflare-pages-deployment.md::x2",
+        "git_cochange_with_existing_target:web-astro/astro.config.mjs:",
+        "git_cochange_with_existing_target:web-astro/src/components/PageHead.astro:",
+        "git_cochange_with_existing_target:web-astro/src/content/pageMetadata.ts:",
+        "unique_basename_mention:crt-media-frame.md"
+      ],
+      "rank": 24,
+      "area": "services",
+      "subsystem": "web",
+      "score_bucket": "2-<8",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "unique_basename_mention",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "unique_basename_mention"
+      ],
+      "label": "plausible_but_unnecessary",
+      "rationale": "The CRT media-frame page is a genuinely related web implementation reference and is explicitly listed under Related docs. The deployment page also says CRT media-frame behavior is owned elsewhere, so this documentation link is contextual rather than a missing deployment implementation, configuration, contract, or owner edge.",
+      "audit": {
+        "document_section": "## Related docs",
+        "document_ref": "docs/services/web/cloudflare-pages-deployment.md:739-744",
+        "document_excerpt": "Related docs include Web, Devlog Static Site, Plasmic / Astro Workflow, and CRT Media Frame.",
+        "target_ref": "docs/services/web/crt-media-frame.md:11-17",
+        "target_excerpt": "The document defines the shared CRT presentation component and states that it does not own devlog content, media storage, route generation, or Plasmic layout source.",
+        "target_sha256": "f60b74767fe1bf0e0156fb13f1e5ecb645297508f5da4ce5e06ab193b4c21832",
+        "target_kind": "file"
+      }
+    }
+  ]
+}

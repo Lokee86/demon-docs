@@ -1,0 +1,698 @@
+{
+  "schema_version": 1,
+  "corpus": {
+    "repository": "space-rocks",
+    "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+    "reviewed_at": ""
+  },
+  "sampling": {
+    "seed": "space-rocks-current-precision-v1",
+    "source_report": "research/codemap-precision/current-source-report.json",
+    "candidate_count": 4493,
+    "requested_sample_count": 150,
+    "method": "balanced-documents-top-5-plus-lower-rank-fill-sha256"
+  },
+  "suggestions": [
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/webrtc/realtime_transport_session.gd",
+      "score": 36.45875954511676,
+      "evidence": [
+        "declared_symbol_mention:RealtimeTransportSession:x10",
+        "dependency_neighbor:client/tests/unit/test_client_connection_service.gd:outbound:gdscript_resource",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x3",
+        "related_document_target:docs/services/client/app-shell-and-session/session-boot-and-network-target.md:",
+        "related_document_target:docs/services/client/networking-flow/outbound-packet-sending.md:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "dependency_neighbor",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/networking/inbound/client_inbound_coordinator.gd",
+      "score": 35.97120420855573,
+      "evidence": [
+        "declared_symbol_mention:ClientInboundCoordinator:x10",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "related_document_target:docs/protocol/gameplay-packets.md:",
+        "related_document_target:docs/services/client/app-shell-and-session/session-boot-and-network-target.md:",
+        "sibling_of_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "sibling_of_existing_target:client/scripts/networking/inbound/server_packet_router.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/tests/unit/test_session_network_controller.gd",
+      "score": 17.038691382768988,
+      "evidence": [
+        "dependency_neighbor:client/scripts/generated/constants/constants.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/networking/client_connection_service.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/session/session_network_controller.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/generated/constants/constants.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x5",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x2",
+        "sibling_of_existing_target:client/tests/unit/test_client_connection_service.gd:",
+        "sibling_of_existing_target:client/tests/unit/test_packet_codec.gd:",
+        "test_counterpart:client/scripts/session/session_network_controller.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/scripts/session/gameplay_session_controller.gd",
+      "score": 16.699192596605723,
+      "evidence": [
+        "declared_symbol_mention:GameplaySessionController.reset",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x14",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/compact_lane_packet.gd:",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd::x5",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x13",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd::x3",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_packet_codec.gd::x2",
+        "related_document_target:docs/devtools/design/devtools-packet-protocol.md:",
+        "related_document_target:docs/protocol/gameplay-packets.md:",
+        "related_document_target:docs/protocol/realtime-websocket-protocol.md:",
+        "sibling_of_existing_target:client/scripts/session/session_network_controller.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "declared_symbol_mention",
+      "evidence_kinds": [
+        "declared_symbol_mention",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "client/tests/unit/test_client_packet_sender.gd",
+      "score": 14.951716120329772,
+      "evidence": [
+        "dependency_neighbor:client/scripts/networking/network_client.gd:inbound:gdscript_resource",
+        "dependency_neighbor:client/scripts/networking/outbound/client_packet_sender.gd:inbound:gdscript_resource",
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/network_client.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_decode_result.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_encode_result.gd:",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd:",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "sibling_of_existing_target:client/tests/unit/test_client_connection_service.gd:",
+        "sibling_of_existing_target:client/tests/unit/test_packet_codec.gd:",
+        "test_counterpart:client/scripts/networking/outbound/client_packet_sender.gd:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "8+",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target",
+        "test_counterpart"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "target": "docs/protocol/realtime-websocket-protocol.md",
+      "score": 7.683962001602465,
+      "evidence": [
+        "git_cochange_with_document:docs/services/client/networking-flow/websocket-connection-lifecycle.md::x6",
+        "git_cochange_with_existing_target:client/scripts/generated/constants/constants.gd:",
+        "git_cochange_with_existing_target:client/scripts/generated/networking/packets/packets.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/networking/client_connection_service.gd::x7",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_dispatcher.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/inbound/server_packet_router.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/networking/outbound/client_packet_sender.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/networking/packets/packet_codec.gd:",
+        "git_cochange_with_existing_target:client/scripts/networking/realtime/realtime_packet_pipeline.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/compact_lane_packet.gd::x8",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/lifecycle_lane_gate.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/protocol/realtime/realtime_router.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/session/session_network_controller.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/networking/realtime/test_realtime_packet_pipeline.gd::x2",
+        "git_cochange_with_existing_target:client/tests/unit/test_client_connection_service.gd::x4",
+        "git_cochange_with_existing_target:client/tests/unit/test_packet_codec.gd::x2"
+      ],
+      "rank": 28,
+      "area": "services",
+      "subsystem": "client/networking-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "git_cochange_with_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "git_cochange_with_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/tests/unit/ui/menus/test_pregame_menu.gd",
+      "score": 7.277786402565681,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x4",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "test_counterpart:client/scripts/ui/menus/pregame_menu.gd:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "test_counterpart",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "test_counterpart"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/pregame_menu_flow.gd",
+      "score": 5.732025194968537,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x7",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/local-pilot-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/profile-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/local_pilot_flow.gd",
+      "score": 4.81840671831532,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x3",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/local-pilot-flow.md:",
+        "related_document_target:docs/services/client/pregame-menu-flow/profile-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menus/",
+      "score": 3.9173926817736917,
+      "evidence": [
+        "exact_path_mention:client/scripts/ui/menus/",
+        "sibling_of_existing_target:client/scripts/ui/menus/pregame_menu.gd:",
+        "sibling_of_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "client/scripts/ui/menu_flow/menu_flow_controller.gd",
+      "score": 3.8915250654677265,
+      "evidence": [
+        "dependency_neighbor:client/scripts/ui/menu_flow/pregame_menu_mode.gd:inbound:gdscript_resource",
+        "git_cochange_with_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_menu.gd::x6",
+        "git_cochange_with_existing_target:client/scripts/ui/menus/pregame_mode_presenter.gd:",
+        "related_document_target:docs/services/client/menu-flow.md:",
+        "sibling_of_existing_target:client/scripts/ui/menu_flow/pregame_menu_mode.gd:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "dependency_neighbor",
+      "evidence_kinds": [
+        "dependency_neighbor",
+        "git_cochange_with_existing_target",
+        "related_document_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md",
+      "target": "docs/services/client/pregame-menu-flow/transmission-panel-flow.md",
+      "score": 1.5939547995747905,
+      "evidence": [
+        "git_cochange_with_document:docs/services/client/pregame-menu-flow/pregame-mode-and-actions.md::x2",
+        "unique_basename_mention:transmission-panel-flow.md"
+      ],
+      "rank": 30,
+      "area": "services",
+      "subsystem": "client/pregame-menu-flow",
+      "score_bucket": "1-<2",
+      "rank_bucket": "21+",
+      "primary_evidence_kind": "unique_basename_mention",
+      "evidence_kinds": [
+        "git_cochange_with_document",
+        "unique_basename_mention"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/",
+      "score": 5.678881806316692,
+      "evidence": [
+        "exact_path_mention:client/scripts/gameplay/spectate/:x2",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 1,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "exact_path_mention",
+      "evidence_kinds": [
+        "exact_path_mention",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/gameplay_spectate_flow.gd.uid",
+      "score": 3.3108825033895837,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 2,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/spectate_menu_state.gd.uid",
+      "score": 3.305222297023521,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 3,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/spectate/spectate_session_flow.gd.uid",
+      "score": 3.301778170004769,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd:",
+        "sibling_of_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:"
+      ],
+      "rank": 4,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "sibling_of_existing_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "sibling_of_existing_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/world/world_sync.gd",
+      "score": 3.0384662800558697,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd::x3",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "related_document_target:docs/services/client/input-and-targeting.md:",
+        "related_document_target:docs/services/game-server/simulation/players/player-camera-view-state.md:"
+      ],
+      "rank": 5,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "2-<8",
+      "rank_bucket": "1-5",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    },
+    {
+      "document": "docs/services/client/spectate-flow/spectate-session-and-camera-flow.md",
+      "target": "client/scripts/gameplay/input/gameplay_input_flow.gd",
+      "score": 1.8919338721553514,
+      "evidence": [
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_context.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/gameplay_spectate_flow.gd:",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_menu_state.gd::x2",
+        "git_cochange_with_existing_target:client/scripts/gameplay/spectate/spectate_session_flow.gd:",
+        "related_document_target:docs/services/client/input-and-targeting.md:"
+      ],
+      "rank": 15,
+      "area": "services",
+      "subsystem": "client/spectate-flow",
+      "score_bucket": "1-<2",
+      "rank_bucket": "11-20",
+      "primary_evidence_kind": "related_document_target",
+      "evidence_kinds": [
+        "git_cochange_with_existing_target",
+        "related_document_target"
+      ],
+      "label": "",
+      "rationale": "",
+      "audit": {
+        "document_section": "",
+        "document_ref": "",
+        "document_excerpt": "",
+        "target_ref": "",
+        "target_excerpt": "",
+        "target_sha256": "",
+        "target_kind": ""
+      }
+    }
+  ]
+}
