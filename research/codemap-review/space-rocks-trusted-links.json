@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "corpus": {
+    "repository": "space-rocks",
+    "revision": "3387c94d10fdb94008f27b404098f3e0c32d911c",
+    "reviewed_at": "2026-07-19",
+    "document_count": 10,
+    "trusted_link_count": 51,
+    "excluded_entry_count": 5
+  },
+  "relationship_types": {
+    "implementation": "Directly implements behavior or composition described by the document.",
+    "contract": "Defines source data, schema, packet shape, configuration, or another authoritative contract.",
+    "generated": "Generated artifact consumed by the documented behavior.",
+    "test": "Verifies behavior described by the document.",
+    "integration": "Hosts, routes, consumes, or hands off the documented behavior across an ownership boundary.",
+    "gate": "Controls whether the documented behavior is available in a build or runtime mode."
+  },
+  "documents": [
+    {
+      "document": "docs/services/game-server/simulation/players/player-respawn.md",
+      "category": "service",
+      "map_style": "annotated path list",
+      "links": [
+        {"target": "services/game-server/internal/game/session.go", "scope": "file", "relationship": "implementation", "review_note": "Owns respawn eligibility, cooldown state, ship recreation, and safe placement."},
+        {"target": "services/game-server/internal/game/input.go", "scope": "file", "relationship": "integration", "review_note": "Routes the respawn packet into authoritative respawn handling."},
+        {"target": "services/game-server/internal/game/combat.go", "scope": "file", "relationship": "integration", "review_note": "Creates the post-death state that makes respawn possible."},
+        {"target": "shared/constants/server_entities.toml", "scope": "file", "relationship": "contract", "review_note": "Defines source values for respawn and player lifecycle constants."},
+        {"target": "services/game-server/tests/game/respawn_test.go", "scope": "file", "relationship": "test", "review_note": "Directly tests cooldown, eligibility, safe placement, and world-wrap behavior."}
+      ]
+    },
+    {
+      "document": "docs/services/client/networking-flow/websocket-connection-lifecycle.md",
+      "category": "service",
+      "map_style": "grouped fenced path lists",
+      "links": [
+        {"target": "client/scripts/networking/network_client.gd", "scope": "file", "relationship": "implementation", "review_note": "Owns the low-level client connection lifecycle."},
+        {"target": "client/scripts/networking/client_connection_service.gd", "scope": "file", "relationship": "implementation", "review_note": "Coordinates connection state for higher-level client flows."},
+        {"target": "client/scripts/networking/packets/packet_codec.gd", "scope": "file", "relationship": "implementation", "review_note": "Encodes and decodes packets used by the connection."},
+        {"target": "client/scripts/generated/networking/packets/packets.gd", "scope": "file", "relationship": "generated", "review_note": "Provides generated packet constants and structures consumed by the connection path."},
+        {"target": "client/tests/unit/test_client_connection_service.gd", "scope": "file", "relationship": "test", "review_note": "Directly verifies client connection service behavior."}
+      ]
+    },
+    {
+      "document": "docs/services/player-data/profile-stats-flow.md",
+      "category": "service",
+      "map_style": "grouped fenced path lists",
+      "links": [
+        {"target": "services/player-data/playerdata/runtime.go", "scope": "file", "relationship": "implementation", "review_note": "Owns the player-data runtime used by profile and stats operations."},
+        {"target": "services/player-data/playerdata/store_router.go", "scope": "file", "relationship": "implementation", "review_note": "Selects the active persistence/store path described by the document."},
+        {"target": "services/player-data/playerdata/rails_store.go", "scope": "file", "relationship": "implementation", "review_note": "Implements the authenticated account-backed store adapter."},
+        {"target": "shared/player_data/stats.toml", "scope": "file", "relationship": "contract", "review_note": "Defines the source schema for player statistics."},
+        {"target": "services/game-server/internal/matchreporting/runtime_reporter.go", "scope": "file", "relationship": "integration", "review_note": "Calls into the player-data stats flow from game-server match reporting."}
+      ]
+    },
+    {
+      "document": "docs/services/diagnostic-aggregator/runtime-and-report-flow.md",
+      "category": "service",
+      "map_style": "annotated directory bullets",
+      "links": [
+        {"target": "services/diagnostic-aggregator/", "scope": "directory", "relationship": "implementation", "review_note": "Contains the diagnostic-report service implementation."},
+        {"target": "services/diagnostic-aggregator/hosted", "scope": "directory", "relationship": "integration", "review_note": "Provides the public hosted-service adapter."},
+        {"target": "services/diagnostic-aggregator/cmd/diagnostic-submit/", "scope": "directory", "relationship": "integration", "review_note": "Contains the current manual report producer."},
+        {"target": "services/game-server/cmd/game-server/", "scope": "directory", "relationship": "integration", "review_note": "Hosts the route and lifecycle wiring without owning aggregator behavior."}
+      ]
+    },
+    {
+      "document": "docs/protocol/player-data-http-api.md",
+      "category": "protocol",
+      "map_style": "cross-service grouped path lists",
+      "links": [
+        {"target": "services/game-server/cmd/game-server/player_data_http.go", "scope": "file", "relationship": "integration", "review_note": "Installs and hosts the player-data HTTP surface."},
+        {"target": "services/player-data/httpapi/profile_handler.go", "scope": "file", "relationship": "implementation", "review_note": "Implements the profile HTTP handler."},
+        {"target": "services/player-data/playerdata/rails_store.go", "scope": "file", "relationship": "integration", "review_note": "Connects authenticated profile operations to the API server."},
+        {"target": "client/scripts/profile/player_data_profile_api_client.gd", "scope": "file", "relationship": "integration", "review_note": "Consumes the HTTP protocol from the client."},
+        {"target": "shared/contracts/http/openapi.yaml", "scope": "file", "relationship": "contract", "review_note": "Defines the shared HTTP contract used by the documented surface."}
+      ]
+    },
+    {
+      "document": "docs/data/data-sync-and-ssot-pipeline.md",
+      "category": "data",
+      "map_style": "pipeline-grouped fenced path lists",
+      "links": [
+        {"target": "tools/data_sync/main.py", "scope": "file", "relationship": "implementation", "review_note": "CLI entry point for the documented synchronization pipeline."},
+        {"target": "tools/data_sync/data_sync/block_io.py", "scope": "file", "relationship": "implementation", "review_note": "Owns managed generated-block handling."},
+        {"target": "tools/data_sync/data_sync/packets_sync.py", "scope": "file", "relationship": "implementation", "review_note": "Implements packet contract synchronization."},
+        {"target": "tools/data_sync/data_sync/observability_sync.py", "scope": "file", "relationship": "implementation", "review_note": "Implements observability contract synchronization."},
+        {"target": "tools/data_sync/config.toml", "scope": "file", "relationship": "contract", "review_note": "Primary configuration for pipeline discovery and generation."}
+      ]
+    },
+    {
+      "document": "docs/data/observability-contract.md",
+      "category": "data",
+      "map_style": "flat code-and-test fenced list",
+      "links": [
+        {"target": "tools/data_sync/data_sync/observability_toml.py", "scope": "file", "relationship": "implementation", "review_note": "Loads and models the observability source contract."},
+        {"target": "tools/data_sync/data_sync/observability_validate.py", "scope": "file", "relationship": "implementation", "review_note": "Validates observability contract rules."},
+        {"target": "tools/data_sync/data_sync/observability_sync.py", "scope": "file", "relationship": "implementation", "review_note": "Coordinates generated observability outputs."},
+        {"target": "tools/data_sync/data_sync/generators/observability_go.py", "scope": "file", "relationship": "implementation", "review_note": "Generates the Go representation of the contract."},
+        {"target": "tools/data_sync/tests/test_observability_generators.py", "scope": "file", "relationship": "test", "review_note": "Verifies generated observability outputs."}
+      ]
+    },
+    {
+      "document": "docs/devtools/server/spawn-tools.md",
+      "category": "devtools",
+      "map_style": "ownership-grouped fenced path lists",
+      "links": [
+        {"target": "services/game-server/internal/devtools/handler.go", "scope": "file", "relationship": "implementation", "review_note": "Receives and dispatches server devtools commands."},
+        {"target": "services/game-server/internal/devtools/spawn_entity.go", "scope": "file", "relationship": "implementation", "review_note": "Implements generic entity spawn command behavior."},
+        {"target": "services/game-server/internal/networking/tooling/router.go", "scope": "file", "relationship": "integration", "review_note": "Routes tooling-channel commands into devtools handling."},
+        {"target": "services/game-server/internal/game/control_spawn.go", "scope": "file", "relationship": "integration", "review_note": "Provides the game-owned mutation seam used by devtools."},
+        {"target": "shared/packets/debug.toml", "scope": "file", "relationship": "contract", "review_note": "Defines source packet shapes for debug spawn commands."},
+        {"target": "services/game-server/internal/devtools/enabled_default.go", "scope": "file", "relationship": "gate", "review_note": "Controls default build availability of the devtools implementation."}
+      ]
+    },
+    {
+      "document": "docs/devtools/client/devtools-window.md",
+      "category": "devtools",
+      "map_style": "UI-composition grouped path lists",
+      "links": [
+        {"target": "client/scenes/devtools/devtools_window.tscn", "scope": "file", "relationship": "implementation", "review_note": "Defines the primary devtools window scene composition."},
+        {"target": "client/scripts/devtools/devtools_window.gd", "scope": "file", "relationship": "implementation", "review_note": "Owns primary window behavior."},
+        {"target": "client/scripts/devtools/devtools_window_controller.gd", "scope": "file", "relationship": "implementation", "review_note": "Coordinates window controls and state."},
+        {"target": "client/scripts/networking/inbound/tooling_packet_router.gd", "scope": "file", "relationship": "integration", "review_note": "Routes inbound tooling responses to client devtools consumers."},
+        {"target": "client/scripts/devtools/gameplay_debug_flow.gd", "scope": "file", "relationship": "integration", "review_note": "Connects window actions to gameplay debug command flow."}
+      ]
+    },
+    {
+      "document": "docs/protocol/realtime-websocket-protocol.md",
+      "category": "protocol",
+      "map_style": "large cross-runtime inventory",
+      "links": [
+        {"target": "client/scripts/protocol/realtime/", "scope": "directory", "relationship": "implementation", "review_note": "Contains the client realtime protocol implementation."},
+        {"target": "client/scripts/networking/packets/packet_codec.gd", "scope": "file", "relationship": "implementation", "review_note": "Owns client packet encoding and decoding at the protocol boundary."},
+        {"target": "services/game-server/internal/protocol/realtime/lanes.go", "scope": "file", "relationship": "implementation", "review_note": "Defines server realtime lane behavior."},
+        {"target": "shared/packets/realtime_wire.toml", "scope": "file", "relationship": "contract", "review_note": "Defines the compact realtime wire source contract."},
+        {"target": "services/game-server/internal/networking/websocket_write.go", "scope": "file", "relationship": "integration", "review_note": "Writes the server protocol output onto the websocket transport."},
+        {"target": "client/tests/unit/protocol/realtime/test_compact_lane_packet.gd", "scope": "file", "relationship": "test", "review_note": "Verifies compact lane packet compatibility on the client."}
+      ]
+    }
+  ],
+  "excluded_entries": [
+    {"document": "docs/devtools/server/spawn-tools.md", "target": "services/game-server/internal/game/state_packet.go", "reason": "Target does not exist at the reviewed revision; likely documentation drift."},
+    {"document": "docs/devtools/server/spawn-tools.md", "target": "services/game-server/tests/networking/inbound_devtools_test.go", "reason": "Target does not exist at the reviewed revision; likely moved or removed."},
+    {"document": "docs/protocol/realtime-websocket-protocol.md", "target": "services/game-server/internal/networking/outbound/gameplay_presentation.go", "reason": "Target does not exist at the reviewed revision."},
+    {"document": "docs/protocol/player-data-http-api.md", "target": "shared/player_data/*.toml", "reason": "Wildcard represents a family of files, not one exact document-to-code edge."},
+    {"document": "docs/devtools/client/devtools-window.md", "target": "server/debug", "reason": "Prose fragment was path-shaped but is not a repository target; parser artifact."}
+  ]
+}
