@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -95,14 +96,15 @@ func runChangesUndo(args []string, out, errOut io.Writer) int {
 	if err != nil {
 		return fail(errOut, err)
 	}
-	if _, err := links.ApplyGenerated([]links.GeneratedRewrite{rewrite}); err != nil {
+	undo, request := buildUndoRequest(*event.Change, current, updated, options.repairID)
+	rewrites := []links.GeneratedRewrite{rewrite}
+	if _, err := links.ApplyGenerated(rewrites); err != nil {
 		return fail(errOut, err)
+	}
+	if _, err := store.AppendBatch([]review.AppendRequest{request}); err != nil {
+		return fail(errOut, rollbackAfterReviewFailure(rewrites, err))
 	}
 	_ = links.DeletePendingSuppression(runtime.scope.RepositoryRoot, event.Change.SourceFileID)
-	undo, err := recordUndo(store, *event.Change, current, updated, options.repairID)
-	if err != nil {
-		return fail(errOut, err)
-	}
 	if options.block {
 		sourcePath, err := reviewPath(runtime.scope.RepositoryRoot, path)
 		if err != nil {
@@ -148,8 +150,7 @@ func runChangesUndoRun(args []string, out, errOut io.Writer) int {
 	var rewrites []links.GeneratedRewrite
 	type pendingUndo struct {
 		event      review.StoredEvent
-		current    []byte
-		updated    []byte
+		request    review.AppendRequest
 		sourcePath string
 	}
 	var pending []pendingUndo
@@ -183,16 +184,21 @@ func runChangesUndoRun(args []string, out, errOut io.Writer) int {
 		if err != nil {
 			return fail(errOut, err)
 		}
-		pending = append(pending, pendingUndo{event: event, current: current, updated: updated, sourcePath: sourcePath})
+		_, request := buildUndoRequest(*event.Change, current, updated, "")
+		pending = append(pending, pendingUndo{event: event, request: request, sourcePath: sourcePath})
 	}
 	if _, err := links.ApplyGenerated(rewrites); err != nil {
 		return fail(errOut, err)
 	}
+	requests := make([]review.AppendRequest, len(pending))
+	for index := range pending {
+		requests[index] = pending[index].request
+	}
+	if _, err := store.AppendBatch(requests); err != nil {
+		return fail(errOut, rollbackAfterReviewFailure(rewrites, err))
+	}
 	for _, item := range pending {
 		_ = links.DeletePendingSuppression(runtime.scope.RepositoryRoot, item.event.Change.SourceFileID)
-		if _, err := recordUndo(store, *item.event.Change, item.current, item.updated, ""); err != nil {
-			return fail(errOut, err)
-		}
 		if options.block {
 			if err := appendRepairControls(runtime.scope.RepositoryRoot, *item.event.Change, "", false, options.reason, item.sourcePath); err != nil {
 				return fail(errOut, err)
@@ -201,4 +207,11 @@ func runChangesUndoRun(args []string, out, errOut io.Writer) int {
 	}
 	fmt.Fprintf(out, "undid run %s (%d change(s))\n", options.id, len(pending))
 	return 0
+}
+
+func rollbackAfterReviewFailure(rewrites []links.GeneratedRewrite, recordErr error) error {
+	if rollbackErr := links.RollbackGenerated(rewrites); rollbackErr != nil {
+		return errors.Join(recordErr, fmt.Errorf("restore source files after review history failure: %w", rollbackErr))
+	}
+	return recordErr
 }

@@ -82,3 +82,69 @@ func TestReviewCLIRecordsUndoAndBlocksDeterministicRepair(t *testing.T) {
 		}
 	})
 }
+
+func TestSuggestionsSelectPreflightsAndAppliesOnlyChosenRepair(t *testing.T) {
+	withWorkingDirectory(t, t.TempDir(), func(root string) {
+		writeTestFile(t, filepath.Join(root, "docs", "source.md"), "# Source\n\n[manual](missing/manual.pdf)\n[guide](guide.md)\n")
+		writeTestFile(t, filepath.Join(root, "references", "manual.pdf"), "manual")
+		writeTestFile(t, filepath.Join(root, "docs", "a", "guide.md"), "# Guide A\n")
+		writeTestFile(t, filepath.Join(root, "docs", "b", "guide.md"), "# Guide B\n")
+
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("init code=%d stderr=%q", code, stderr.String())
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix", "-l"}, &stdout, &stderr); code != 1 {
+			t.Fatalf("baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"suggestions", "docs/source.md"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("suggestions code=%d stderr=%q", code, stderr.String())
+		}
+		fields := strings.Fields(stdout.String())
+		if len(fields) == 0 || !strings.HasPrefix(fields[0], "sg-") {
+			t.Fatalf("missing suggestion ID: %q", stdout.String())
+		}
+		suggestionID := fields[0]
+		original := readTestFile(t, filepath.Join(root, "docs", "source.md"))
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"suggestions", "select", suggestionID, "99"}, &stdout, &stderr); code != 2 {
+			t.Fatalf("invalid selection code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		if got := readTestFile(t, filepath.Join(root, "docs", "source.md")); got != original {
+			t.Fatalf("failed selection modified the source:\n%s", got)
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"suggestions", "select", suggestionID, "1"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("selection code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		selected := readTestFile(t, filepath.Join(root, "docs", "source.md"))
+		if !strings.Contains(selected, "[manual](missing/manual.pdf)") {
+			t.Fatalf("selection applied an unrelated deterministic repair: %q", selected)
+		}
+		if strings.Contains(selected, "[guide](guide.md)") || !(strings.Contains(selected, "[guide](a/guide.md)") || strings.Contains(selected, "[guide](b/guide.md)")) {
+			t.Fatalf("selected repair was not applied: %q", selected)
+		}
+		if count := strings.Count(stdout.String(), "applied "); count != 1 {
+			t.Fatalf("selection reported %d applied changes: %q", count, stdout.String())
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix", "-l"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("deferred repair code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		if got := readTestFile(t, filepath.Join(root, "docs", "source.md")); !strings.Contains(got, "../references/manual.pdf") {
+			t.Fatalf("deferred deterministic repair was lost: %q", got)
+		}
+	})
+}

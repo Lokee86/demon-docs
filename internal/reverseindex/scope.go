@@ -56,7 +56,7 @@ func ResolveRoots(repositoryRoot, docsRoot, cwd string, commandPaths, configured
 		if !repository.Contains(repositoryRoot, path) {
 			return nil, fmt.Errorf("reverse-index root is outside repository: %s", path)
 		}
-		if inside(path, docsRoot) {
+		if inside(path, docsRoot) || inside(docsRoot, path) {
 			return nil, fmt.Errorf("reverse-index root overlaps docs root: %s", path)
 		}
 		if hasWorktreePart(repositoryRoot, path) {

@@ -59,3 +59,13 @@ func TestResolveRootsRequiresExplicitScope(t *testing.T) {
 		t.Fatal("expected docs root rejection")
 	}
 }
+
+func TestResolveRootsRejectsRootContainingDocsRoot(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "workspace", "docs")
+	mustWrite(t, filepath.Join(docsRoot, "guide.md"), "# Guide\n")
+
+	if _, err := ResolveRoots(repositoryRoot, docsRoot, repositoryRoot, []string{"workspace"}, nil); err == nil {
+		t.Fatal("expected reverse-index root containing docs root to be rejected")
+	}
+}

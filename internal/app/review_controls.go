@@ -60,7 +60,7 @@ func runChangesBlock(args []string, unblock bool, out, errOut io.Writer) int {
 	return 0
 }
 
-func recordUndo(store *review.Store, original review.Change, before, after []byte, repairID string) (review.Change, error) {
+func buildUndoRequest(original review.Change, before, after []byte, repairID string) (review.Change, review.AppendRequest) {
 	now := time.Now().UTC()
 	undo := review.Change{
 		ID:           review.NewID("ch"),
@@ -76,8 +76,12 @@ func recordUndo(store *review.Store, original review.Change, before, after []byt
 		UndoRepairID: repairID,
 		AppliedAt:    now,
 	}
-	_, err := store.Append(review.Event{Type: review.EventChange, Time: now, Change: &undo}, before, after)
-	return undo, err
+	request := review.AppendRequest{
+		Event:  review.Event{Type: review.EventChange, Time: now, Change: &undo},
+		Before: before,
+		After:  after,
+	}
+	return undo, request
 }
 
 func appendRepairControls(root string, change review.Change, repairID string, unblock bool, reason, currentSourcePath string) error {

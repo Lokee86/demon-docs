@@ -62,6 +62,56 @@ func TestSelectedAmbiguousSuggestionBecomesRecordedRepair(t *testing.T) {
 	}
 }
 
+func TestSelectedExternalCandidatePreservesAbsolutePath(t *testing.T) {
+	root := t.TempDir()
+	external := t.TempDir()
+	oldTarget := filepath.Join(external, "old", "manual.pdf")
+	candidateTarget := filepath.Join(external, "new", "manual.pdf")
+	oldTargetText := filepath.ToSlash(oldTarget)
+	candidateTargetText := filepath.ToSlash(candidateTarget)
+	sourceText := "[manual](<" + oldTargetText + ">)\n"
+	sourcePath := filepath.Join(root, "README.md")
+	writeTestFile(t, sourcePath, sourceText)
+	writeTestFile(t, candidateTarget, "manual")
+	start := strings.Index(sourceText, oldTargetText)
+
+	plan := Plan{
+		RepositoryRoot: root,
+		Unresolved:     1,
+		Files: FilesManifest{Files: []FileRecord{
+			{ID: "source", Path: "README.md", Scope: "repository", Kind: "file", Present: true},
+			{ID: "target", Path: candidateTargetText, Scope: "external", Kind: "file", Present: true},
+		}},
+		Links: LinksManifest{Links: []LinkRecord{{
+			ID:           "link",
+			SourceFileID: "source",
+			SourcePath:   "README.md",
+			Start:        start,
+			End:          start + len(oldTargetText),
+			Line:         1,
+			Column:       start + 1,
+			Syntax:       "inline",
+			RawPath:      oldTargetText,
+			Angle:        true,
+			Target:       oldTargetText,
+			Status:       "ambiguous",
+			Candidates:   []string{candidateTargetText},
+		}}},
+	}
+	suggestion := review.LinkSuggestion("source", "README.md", "link", oldTargetText, []string{candidateTargetText})
+	candidate := suggestion.Candidates[0]
+
+	if err := ApplySelectedSuggestion(&plan, suggestion, candidate); err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Updates) != 1 {
+		t.Fatalf("updates = %d, want 1", len(plan.Updates))
+	}
+	if !strings.Contains(plan.Updates[0].NewText, "<"+candidateTargetText+">") {
+		t.Fatalf("external candidate path was not preserved: %q", plan.Updates[0].NewText)
+	}
+}
+
 func TestBlockedDeterministicRepairIsNotReapplied(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, filepath.Join(root, "README.md"), "[manual](old/manual.pdf)\n")

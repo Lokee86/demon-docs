@@ -149,25 +149,24 @@ func ApplyGenerated(rewrites []GeneratedRewrite) ([]Suppression, error) {
 	}
 
 	suppressions := make([]Suppression, len(pending))
-	applyErrors := runLinkWorkers(len(pending), func(index int) error {
+	attempted := make([]int, 0, len(pending))
+	for index := range pending {
 		item := &pending[index]
+		if err := preflightGeneratedRewrite(item); err != nil {
+			return nil, generatedApplyFailure(pending, attempted, err)
+		}
+		attempted = append(attempted, index)
 		if err := replaceGenerated(item.path, item.rewrite.newData, item.mode); err != nil {
-			return fmt.Errorf("apply generated rewrite %s: %w", item.path, err)
+			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("apply generated rewrite %s: %w", item.path, err))
 		}
 		current, err := os.ReadFile(item.path)
 		if err != nil {
-			return fmt.Errorf("verify generated rewrite %s: %w", item.path, err)
+			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("verify generated rewrite %s: %w", item.path, err))
 		}
 		if actual := sha256Digest(current); actual != item.rewrite.ExpectedNewSHA256 {
-			return fmt.Errorf("generated rewrite new hash mismatch %s: expected %s, got %s", item.path, item.rewrite.ExpectedNewSHA256, actual)
+			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("generated rewrite new hash mismatch %s: expected %s, got %s", item.path, item.rewrite.ExpectedNewSHA256, actual))
 		}
 		suppressions[index] = suppressionFor(item.rewrite)
-		return nil
-	})
-	for _, err := range applyErrors {
-		if err != nil {
-			return nil, err
-		}
 	}
 	return suppressions, nil
 }

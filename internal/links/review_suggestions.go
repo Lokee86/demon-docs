@@ -67,7 +67,10 @@ func ApplySelectedSuggestion(plan *Plan, suggestion review.Suggestion, candidate
 		return fmt.Errorf("suggestion %s is no longer unresolved", suggestion.ID)
 	}
 	sourcePath := filepath.Join(plan.RepositoryRoot, filepath.FromSlash(record.SourcePath))
-	targetPath := filepath.Join(plan.RepositoryRoot, filepath.FromSlash(candidate.Target))
+	targetPath := filepath.FromSlash(candidate.Target)
+	if !filepath.IsAbs(targetPath) {
+		targetPath = filepath.Join(plan.RepositoryRoot, targetPath)
+	}
 	document, err := textio.Read(sourcePath)
 	if err != nil {
 		return err

@@ -119,7 +119,7 @@ func htmlAttributeValue(source string, start, end int) (int, int) {
 		return start, i
 	}
 	i := start
-	for i < end && !isHTMLSpace(source[i]) && source[i] != '>' && source[i] != '/' {
+	for i < end && !isHTMLSpace(source[i]) && source[i] != '>' {
 		i++
 	}
 	return start, i

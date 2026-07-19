@@ -8,18 +8,38 @@ import (
 	"github.com/Lokee86/demon-docs/internal/review"
 )
 
-func recordGeneratedChanges(plan *Plan) error {
+type reviewBatchAppender interface {
+	AppendBatch([]review.AppendRequest) ([]review.StoredEvent, error)
+}
+
+var openReviewBatchStore = func(root string) (reviewBatchAppender, error) {
+	return review.Open(root)
+}
+
+type generatedChangeBatch struct {
+	store    reviewBatchAppender
+	changes  []review.Change
+	requests []review.AppendRequest
+}
+
+func prepareGeneratedChanges(plan *Plan) (generatedChangeBatch, error) {
 	if len(plan.Rewrites) == 0 {
-		return nil
+		return generatedChangeBatch{}, nil
 	}
-	store, err := review.Open(plan.RepositoryRoot)
+	store, err := openReviewBatchStore(plan.RepositoryRoot)
 	if err != nil {
-		return err
+		return generatedChangeBatch{}, err
 	}
+
 	runID := review.NewID("run")
 	linksByID := make(map[string]LinkRecord, len(plan.Links.Links))
 	for _, record := range plan.Links.Links {
 		linksByID[record.ID] = record
+	}
+	batch := generatedChangeBatch{
+		store:    store,
+		changes:  make([]review.Change, 0, len(plan.Rewrites)),
+		requests: make([]review.AppendRequest, 0, len(plan.Rewrites)),
 	}
 	for _, rewrite := range plan.Rewrites {
 		kind := rewrite.Kind
@@ -80,11 +100,27 @@ func recordGeneratedChanges(plan *Plan) error {
 			change.Related = append(change.Related, item)
 		}
 		sort.Slice(change.Related, func(i, j int) bool { return change.Related[i].Path < change.Related[j].Path })
-		event := review.Event{Type: review.EventChange, Time: change.AppliedAt, Change: &change}
-		if _, err := store.Append(event, rewrite.OldData(), rewrite.NewData()); err != nil {
-			return fmt.Errorf("record applied change %s: %w", change.ID, err)
-		}
-		plan.AppliedChanges = append(plan.AppliedChanges, change)
+		batch.changes = append(batch.changes, change)
 	}
+	for index := range batch.changes {
+		change := &batch.changes[index]
+		rewrite := plan.Rewrites[index]
+		batch.requests = append(batch.requests, review.AppendRequest{
+			Event:  review.Event{Type: review.EventChange, Time: change.AppliedAt, Change: change},
+			Before: rewrite.OldData(),
+			After:  rewrite.NewData(),
+		})
+	}
+	return batch, nil
+}
+
+func recordGeneratedChanges(plan *Plan, batch generatedChangeBatch) error {
+	if len(batch.requests) == 0 {
+		return nil
+	}
+	if _, err := batch.store.AppendBatch(batch.requests); err != nil {
+		return fmt.Errorf("record applied change batch: %w", err)
+	}
+	plan.AppliedChanges = append(plan.AppliedChanges, batch.changes...)
 	return nil
 }

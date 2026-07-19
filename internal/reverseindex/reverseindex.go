@@ -11,7 +11,7 @@ type Plan struct {
 	ReferenceCount int
 }
 
-func (p Plan) Failed() bool { return len(p.Updates) > 0 }
+func (p Plan) Failed() bool { return len(p.Updates) > 0 || len(p.Diagnostics) > 0 }
 
 type facts struct {
 	fileDocs   map[string]map[string]struct{}

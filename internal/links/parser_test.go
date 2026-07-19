@@ -49,6 +49,17 @@ func TestParseMarkdownLinksFindsHTMLAndWikiTargets(t *testing.T) {
 	}
 }
 
+func TestParseMarkdownLinksFindsUnquotedHTMLPathWithSlash(t *testing.T) {
+	source := "<a href=docs/guide.md>Guide</a>\n"
+	found := parseMarkdownLinks(source)
+	if len(found) != 1 {
+		t.Fatalf("found %d links, want 1: %#v", len(found), found)
+	}
+	if found[0].RawPath != "docs/guide.md" || found[0].Syntax != "html" {
+		t.Fatalf("unexpected HTML link: %#v", found[0])
+	}
+}
+
 func TestParseMarkdownDocumentReportsUndefinedExplicitReferences(t *testing.T) {
 	source := "[known][guide]\n[missing][nope]\n[collapsed][]\n[guide]: docs/guide.md\n`[ignored][missing]`\n"
 	parsed := parseMarkdownDocument(source)

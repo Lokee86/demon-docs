@@ -124,6 +124,31 @@ func TestReverseFlagErrorsWhenCodemapSectionHasNoTargets(t *testing.T) {
 	})
 }
 
+func TestReverseCheckFailsForUnresolvedScopedTarget(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	mustMakeDir(t, filepath.Join(repositoryRoot, "src"))
+	mustMakeDir(t, docsRoot)
+	mustWriteAppFile(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `src/missing.go`\n")
+
+	withWorkingDirectory(t, repositoryRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "-r", "--reverse-root", "src"}, &out, &errOut); code != 1 {
+			t.Fatalf("check code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		for _, expected := range []string{"ddocs check failed", "diagnostic:", "src/missing.go"} {
+			if !strings.Contains(out.String(), expected) {
+				t.Fatalf("check output omitted %q: %q", expected, out.String())
+			}
+		}
+	})
+}
+
 func TestReverseFlagAppearsInStandardCommandHelp(t *testing.T) {
 	for _, command := range []string{"check", "fix", "watch"} {
 		var out, errOut bytes.Buffer

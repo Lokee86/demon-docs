@@ -1,6 +1,7 @@
 package links
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -23,16 +24,24 @@ func applyAndSaveWithTimings(plan *Plan) (int, ApplyTimings, error) {
 }
 
 func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
+	changeBatch, err := prepareGeneratedChanges(plan)
+	if err != nil {
+		return 0, err
+	}
+
 	rewriteStarted := time.Now()
 	suppressions, err := ApplyGenerated(plan.Rewrites)
 	timings.FilesystemRewrite = time.Since(rewriteStarted)
 	if err != nil {
 		return 0, err
 	}
-	plan.Suppressions = suppressions
-	if err := recordGeneratedChanges(plan); err != nil {
+	if err := recordGeneratedChanges(plan, changeBatch); err != nil {
+		if rollbackErr := RollbackGenerated(plan.Rewrites); rollbackErr != nil {
+			return 0, errors.Join(err, fmt.Errorf("restore source files after review history failure: %w", rollbackErr))
+		}
 		return 0, err
 	}
+	plan.Suppressions = suppressions
 
 	refreshStarted := time.Now()
 	if err := refreshGeneratedSources(plan); err != nil {

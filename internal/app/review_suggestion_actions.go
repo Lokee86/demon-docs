@@ -29,21 +29,6 @@ func runSuggestionsSelect(ctx context.Context, args []string, out, errOut io.Wri
 	if len(args) == 2 {
 		selector = args[1]
 	}
-	var applied []review.Change
-	if len(runtime.linkPlan.Rewrites) > 0 {
-		if _, err := links.ApplyAndSave(&runtime.linkPlan); err != nil {
-			return fail(errOut, err)
-		}
-		applied = append(applied, runtime.linkPlan.AppliedChanges...)
-		runtime, code = loadReviewRuntime(ctx, errOut)
-		if code != 0 {
-			return code
-		}
-		suggestion, ok = findSuggestion(runtime.suggestions, args[0])
-		if !ok {
-			return fail(errOut, fmt.Errorf("suggestion changed after deterministic repairs: %s", args[0]))
-		}
-	}
 	candidate, err := chooseCandidate(suggestion, selector)
 	if err != nil {
 		return fail(errOut, err)
@@ -51,6 +36,7 @@ func runSuggestionsSelect(ctx context.Context, args []string, out, errOut io.Wri
 	if candidate.Declined {
 		return fail(errOut, fmt.Errorf("candidate %d is declined; reconsider the suggestion first", candidate.Index))
 	}
+	links.PrepareSelectionPlan(&runtime.linkPlan)
 	if suggestion.Kind == review.SuggestionLinkRepair {
 		err = links.ApplySelectedSuggestion(&runtime.linkPlan, suggestion, candidate)
 	} else {
@@ -62,8 +48,7 @@ func runSuggestionsSelect(ctx context.Context, args []string, out, errOut io.Wri
 	if _, err := links.ApplyAndSave(&runtime.linkPlan); err != nil {
 		return fail(errOut, err)
 	}
-	applied = append(applied, runtime.linkPlan.AppliedChanges...)
-	for _, change := range applied {
+	for _, change := range runtime.linkPlan.AppliedChanges {
 		fmt.Fprintf(out, "applied %s  %s  %s\n", change.ID, change.Kind, change.SourcePath)
 	}
 	return 0
