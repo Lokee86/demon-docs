@@ -36,6 +36,29 @@ extensions = [".md", ".mdx"]
 	}
 }
 
+func TestReverseIndexRootsLoadWithFoldersCompatibilityAlias(t *testing.T) {
+	dir := t.TempDir()
+	for name, section := range map[string]string{
+		"roots.toml":   "[reverse_index]\nroots = [\"client\", \"services/game-server\"]\n",
+		"folders.toml": "[reverse_index]\nfolders = [\"client\"]\n",
+	} {
+		path := filepath.Join(dir, name)
+		if err := os.WriteFile(path, []byte(section), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		loaded, err := Load(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(loaded.ReverseIndex.Roots) == 0 || loaded.ReverseIndex.Roots[0] != "client" {
+			t.Fatalf("reverse-index roots not loaded from %s: %+v", name, loaded.ReverseIndex)
+		}
+	}
+	if !strings.Contains(StarterText(), "[reverse_index]\nroots = []") {
+		t.Fatal("starter config omitted reverse-index roots")
+	}
+}
+
 func TestDemonRunDefaultsAndAtomicEditPreserveText(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.toml")

@@ -14,19 +14,17 @@ type Plan struct {
 func (p Plan) Failed() bool { return len(p.Updates) > 0 }
 
 type facts struct {
-	fileDocs       map[string]map[string]struct{}
-	folderDocs     map[string]map[string]struct{}
-	exactFiles     map[string]struct{}
-	eligibleFolder map[string]struct{}
-	titles         map[string]string
+	fileDocs   map[string]map[string]struct{}
+	folderDocs map[string]map[string]struct{}
+	exactFiles map[string]struct{}
+	titles     map[string]string
 }
 
 func newFacts() facts {
 	return facts{
-		fileDocs:       map[string]map[string]struct{}{},
-		folderDocs:     map[string]map[string]struct{}{},
-		exactFiles:     map[string]struct{}{},
-		eligibleFolder: map[string]struct{}{},
-		titles:         map[string]string{},
+		fileDocs:   map[string]map[string]struct{}{},
+		folderDocs: map[string]map[string]struct{}{},
+		exactFiles: map[string]struct{}{},
+		titles:     map[string]string{},
 	}
 }

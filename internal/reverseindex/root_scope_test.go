@@ -1,29 +1,61 @@
 package reverseindex
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/Lokee86/demon-docs/internal/codemap"
-	"github.com/Lokee86/demon-docs/internal/config"
 )
 
-func TestBuildSkipsRepositoryRootAndControlDirectoryTargets(t *testing.T) {
+func TestResolveRootsUsesConfiguredRepositoryRelativeRoots(t *testing.T) {
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")
-	mustWrite(t, filepath.Join(docsRoot, "scope.md"), "# Scope\n\n## Code map\n\n- `root.go`\n- `.ddocs/config.go`\n- `src/feature.go`\n")
-	mustWrite(t, filepath.Join(repositoryRoot, "root.go"), "package root\n")
-	mustWrite(t, filepath.Join(repositoryRoot, ".ddocs", "config.go"), "package control\n")
-	mustWrite(t, filepath.Join(repositoryRoot, "src", "feature.go"), "package src\n")
-
-	plan, err := Build(repositoryRoot, docsRoot, config.Default(), codemap.DefaultFormat())
+	configured := filepath.Join(repositoryRoot, "services")
+	mustWrite(t, filepath.Join(docsRoot, "guide.md"), "# Guide\n")
+	if err := os.MkdirAll(filepath.Join(configured, "api"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	roots, err := ResolveRoots(repositoryRoot, docsRoot, repositoryRoot, nil, []string{"services", "services/api"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(plan.Updates) != 1 {
-		t.Fatalf("expected only src index, got %#v", plan.Updates)
+	if len(roots) != 1 || roots[0] != configured {
+		t.Fatalf("roots=%v", roots)
 	}
-	if got := filepath.Dir(plan.Updates[0].Path); got != filepath.Join(repositoryRoot, "src") {
-		t.Fatalf("index folder=%s", got)
+}
+
+func TestResolveRootsAcceptsRelativeAndAbsoluteCommandPaths(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	cwd := filepath.Join(repositoryRoot, "services")
+	api := filepath.Join(cwd, "api")
+	worker := filepath.Join(cwd, "worker")
+	mustWrite(t, filepath.Join(docsRoot, "guide.md"), "# Guide\n")
+	if err := os.MkdirAll(api, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(worker, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	roots, err := ResolveRoots(repositoryRoot, docsRoot, cwd, []string{"api", worker}, []string{"ignored-config-root"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(roots) != 2 || roots[0] != api || roots[1] != worker {
+		t.Fatalf("roots=%v", roots)
+	}
+}
+
+func TestResolveRootsRequiresExplicitScope(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	mustWrite(t, filepath.Join(docsRoot, "guide.md"), "# Guide\n")
+	if _, err := ResolveRoots(repositoryRoot, docsRoot, repositoryRoot, nil, nil); err == nil {
+		t.Fatal("expected missing reverse-index roots error")
+	}
+	if _, err := ResolveRoots(repositoryRoot, docsRoot, repositoryRoot, []string{"."}, nil); err == nil {
+		t.Fatal("expected repository root rejection")
+	}
+	if _, err := ResolveRoots(repositoryRoot, docsRoot, repositoryRoot, []string{"docs"}, nil); err == nil {
+		t.Fatal("expected docs root rejection")
 	}
 }

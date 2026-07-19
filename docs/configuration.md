@@ -26,6 +26,8 @@ The supported keys are:
 - `docs_root`
 - `root` as a legacy standalone-config alias
 - `index_file`
+- `[reverse_index].roots`
+- `[reverse_index].folders` as a compatibility alias
 - `[markers].prefix`
 - `[parent_link].label`
 - `[parent_link].folder_indexes`
@@ -140,6 +142,9 @@ The defaults reflect the standalone repo behavior:
 docs_root = "docs"
 index_file = "README.md"
 
+[reverse_index]
+roots = []
+
 [markers]
 prefix = "doc-ledger"
 
@@ -211,6 +216,28 @@ Legacy standalone config files may continue using `root`; both keys load into th
 - To keep the legacy filename, set `index_file = "!README.md"`.
 
 Projects that want `!README.md` should set `index_file = "!README.md"` in config.
+
+## `[reverse_index].roots`
+
+`[reverse_index].roots` selects the repository folders where code-folder reverse indexes may be generated. There is no repository-wide default; an empty list disables unscoped reverse-index commands.
+
+Configured roots are resolved relative to the repository root and traversed recursively. Only folders beneath those roots can receive reverse-index managed sections. Overlapping roots are collapsed to the broadest selected root.
+
+```toml
+[reverse_index]
+roots = ["client", "services/game-server", "services/player-data"]
+```
+
+Each reverse-index command also accepts one or more positional directory paths. Positional paths replace the configured roots for that invocation. Relative paths resolve from the current working directory; absolute paths are accepted when they remain inside the repository.
+
+```bash
+ddocs reverse-index check services/game-server
+ddocs reverse-index fix client services/player-data
+cd services/game-server
+ddocs reverse-index watch --once .
+```
+
+`[reverse_index].folders` remains accepted as an alias for older experimental configs, but `roots` is the canonical key.
 
 ## `[markers].prefix`
 
@@ -318,7 +345,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository owns one `.docignore` file at its repository root, beside `.ddocs/`. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events.
+An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -343,7 +370,7 @@ The following directory names are permanently excluded at any depth and cannot b
 - `.obsidian/`
 - `logseq/`
 
-Watch mode watches the repository root for `.docignore` changes, reloads the rules, and adds watches for directories that become visible. Index-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
+Watch mode watches the repository root for the base `.docignore`. Reverse-index watch mode watches only the selected roots plus their ancestor directories, detects nested `.docignore` changes, reloads the hierarchy, and adds watches for directories that become visible. Forward index-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
 
 ## `[editable].parent_index_extensions`
 

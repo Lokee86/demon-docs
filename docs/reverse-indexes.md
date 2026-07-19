@@ -1,6 +1,6 @@
 # Code-Folder Reverse Indexes
 
-This document describes the planned design for reverse indexes that project documentation coverage onto code folders, files, and symbols. It is a focused design boundary, not an implementation claim or a final reference-syntax specification.
+This document describes the code-folder reverse-index boundary and the current initial implementation. File- and folder-level codemap projection is implemented; symbol adapters, richer coverage reports, and move-aware repair remain later work.
 
 ## Purpose and Index Type
 
@@ -13,7 +13,7 @@ The two directions reconcile differently:
 - forward indexes start at a documentation folder and enumerate its direct documentation children;
 - reverse indexes start at authored documentation references, resolve their code targets, and group the resolved references by code target.
 
-A reverse index must therefore not be treated as another recursive folder listing, and its generated entries must not be used as input to rebuild the forward documentation tree.
+A reverse index must not be used as input to rebuild the forward documentation tree. Its output locations are nevertheless selected by explicit recursive traversal roots: the roots decide where indexes may exist, while authored codemap references decide which documentation backlinks appear.
 
 ## Inputs
 
@@ -88,9 +88,30 @@ The typed repository graph is the shared deterministic model of paths, folders, 
 
 Language adapters contribute bounded symbol facts, source spans, and diagnostics. They do not infer conceptual symbols or semantic documentation relationships. Repositories without a supported adapter remain usable at folder and file level, with unsupported symbol references kept visible.
 
+## Current Scope Selection
+
+Reverse indexing has no repository-wide implicit scope. Configure one or more repository-relative roots:
+
+```toml
+[reverse_index]
+roots = ["client", "services/game-server"]
+```
+
+The selected roots are traversed recursively. Source files remain visible even when they have no documentation backlink, while resolved codemap targets add file- or folder-level backlinks. Nested `.docignore` files are loaded during traversal and apply relative to the directory containing them.
+
+The commands accept positional directory paths as a one-run override:
+
+```bash
+ddocs reverse-index check services/game-server
+ddocs reverse-index fix /absolute/path/inside/the/repository/client
+ddocs reverse-index watch --once client
+```
+
+Relative positional paths resolve from the current working directory. Absolute paths must remain inside the repository. Repository root, documentation-root, ignored, and nested-worktree scopes are rejected.
+
 ## CLI and Daemon Boundary
 
-The static CLI must be able to fully build, check, and fix reverse indexes from repository inputs. Build and check must work without a running service. Fix may update only explicitly managed generated sections and must leave unresolved authored references as reviewable diagnostics or candidates.
+The static CLI can build, check, fix, and foreground-watch reverse indexes from repository inputs. Build and check must work without a running service. Fix may update only explicitly managed generated sections and must leave unresolved authored references as reviewable diagnostics or candidates.
 
 A daemon only automates or schedules these same static operations. It may coalesce changes and retain disposable caches, but it does not own reverse-index correctness, repository truth, or a daemon-only recovery path. Removing its state must leave the CLI able to rebuild and check the projection. MCP, plugins, and other interfaces are separate adapters and need not be hosted by the daemon.
 

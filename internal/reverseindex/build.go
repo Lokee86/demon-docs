@@ -8,12 +8,11 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/config"
-	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
-func Build(repositoryRoot, docsRoot string, c config.Config, format codemap.Format) (Plan, error) {
+func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format) (Plan, error) {
 	repositoryRoot, err := filepath.Abs(repositoryRoot)
 	if err != nil {
 		return Plan{}, err
@@ -22,7 +21,10 @@ func Build(repositoryRoot, docsRoot string, c config.Config, format codemap.Form
 	if err != nil {
 		return Plan{}, err
 	}
-	policy, err := ignorepolicy.Load(repositoryRoot)
+	if len(roots) == 0 {
+		return Plan{}, fmt.Errorf("no reverse-index roots selected")
+	}
+	hierarchy, folders, err := discoverScopeFolders(repositoryRoot, roots)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -36,19 +38,16 @@ func Build(repositoryRoot, docsRoot string, c config.Config, format codemap.Form
 	for _, document := range dataset.Documents {
 		collected.titles[document.Path] = documentTitle(repositoryRoot, document.Path)
 	}
-	for _, diagnostic := range dataset.Diagnostics {
-		plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", diagnostic.DocumentPath, diagnostic.Source.Line, diagnostic.Message))
-	}
 	for _, item := range dataset.Entries {
 		paths := resolvedPaths(item.Resolution)
 		if len(paths) == 0 {
-			if item.Resolution.Status != codemap.ResolutionUnsupported {
+			if item.Resolution.Status != codemap.ResolutionUnsupported && entryPotentiallyInScope(repositoryRoot, roots, item.Entry, format) {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s target %s", item.Entry.DocumentPath, item.Entry.Source.Line, item.Resolution.Status, item.Entry.Target))
 			}
 			continue
 		}
 		for _, relative := range paths {
-			accepted, targetErr := collected.addTarget(repositoryRoot, docsRoot, relative, item.Entry.DocumentPath, policy)
+			accepted, targetErr := collected.addTarget(repositoryRoot, roots, folders, hierarchy, relative, item.Entry.DocumentPath)
 			if targetErr != nil {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", item.Entry.DocumentPath, item.Entry.Source.Line, targetErr))
 				continue
@@ -59,19 +58,24 @@ func Build(repositoryRoot, docsRoot string, c config.Config, format codemap.Form
 		}
 	}
 
-	folderFiles, existingManaged, err := inventoryFolders(repositoryRoot, docsRoot, c, policy, collected)
+	folderFiles, existingManaged, err := inventoryFolders(repositoryRoot, c, hierarchy, folders, collected)
 	if err != nil {
 		return Plan{}, err
 	}
-	folders := map[string]struct{}{}
-	for folder := range collected.eligibleFolder {
-		folders[folder] = struct{}{}
+	selected := map[string]struct{}{}
+	for folder, files := range folderFiles {
+		if len(files) > 0 {
+			selected[folder] = struct{}{}
+		}
+	}
+	for relative := range collected.folderDocs {
+		selected[filepath.Join(repositoryRoot, filepath.FromSlash(relative))] = struct{}{}
 	}
 	for folder := range existingManaged {
-		folders[folder] = struct{}{}
+		selected[folder] = struct{}{}
 	}
-	ordered := sortedFolders(folders)
-	for _, folder := range ordered {
+
+	for _, folder := range sortedFolders(selected) {
 		indexPath := filepath.Join(folder, c.IndexFile)
 		block := renderBlock(repositoryRoot, indexPath, folder, folderFiles[folder], collected, c)
 		update, changed, reconcileErr := reconcileIndex(indexPath, folder, block, c)

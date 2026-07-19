@@ -19,7 +19,7 @@ func TestBuildCreatesCodeFolderIndexWithDocumentationBacklinks(t *testing.T) {
 	mustWrite(t, filepath.Join(codeRoot, "transport.go"), "package runtime\n")
 	mustWrite(t, filepath.Join(codeRoot, "README.md"), "# Runtime Package\n\nManual context stays here.\n")
 
-	plan, err := Build(repositoryRoot, docsRoot, config.Default(), codemap.DefaultFormat())
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func TestBuildCreatesCodeFolderIndexWithDocumentationBacklinks(t *testing.T) {
 	if strings.Count(text, "[Runtime Guide]") != 1 {
 		t.Fatalf("duplicate documentation backlink:\n%s", text)
 	}
-	clean, err := Build(repositoryRoot, docsRoot, config.Default(), codemap.DefaultFormat())
+	clean, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,19 +51,66 @@ func TestBuildCreatesCodeFolderIndexWithDocumentationBacklinks(t *testing.T) {
 	}
 }
 
-func TestBuildExcludesDocsAndNestedWorktrees(t *testing.T) {
+func TestBuildTraversesConfiguredRootsRecursively(t *testing.T) {
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")
-	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `src/feature.go`\n")
-	mustWrite(t, filepath.Join(repositoryRoot, "src", "feature.go"), "package src\n")
-	mustWrite(t, filepath.Join(repositoryRoot, ".worktrees", "other", "src", "copy.go"), "package src\n")
+	codeRoot := filepath.Join(repositoryRoot, "services")
+	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/handler.go`\n- `client/view.gd`\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "handler.go"), "package api\n")
+	mustWrite(t, filepath.Join(codeRoot, "worker", "worker.go"), "package worker\n")
+	mustWrite(t, filepath.Join(repositoryRoot, "client", "view.gd"), "extends Node\n")
 
-	plan, err := Build(repositoryRoot, docsRoot, config.Default(), codemap.DefaultFormat())
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(plan.Updates) != 1 || filepath.Dir(plan.Updates[0].Path) != filepath.Join(repositoryRoot, "src") {
-		t.Fatalf("unexpected updates: %#v", plan.Updates)
+	if len(plan.Updates) != 2 {
+		t.Fatalf("expected recursive indexes for two service folders, got %#v", plan.Updates)
+	}
+	for _, update := range plan.Updates {
+		if strings.Contains(update.Path, filepath.Join(repositoryRoot, "client")) {
+			t.Fatalf("wrote outside configured root: %s", update.Path)
+		}
+	}
+}
+
+func TestBuildHonorsNestedDocignoreFiles(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	codeRoot := filepath.Join(repositoryRoot, "services")
+	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/handler.go`\n- `services/api/generated/client.go`\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "handler.go"), "package api\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "generated", "client.go"), "package generated\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", ".docignore"), "generated/\n")
+
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Updates) != 1 || filepath.Dir(plan.Updates[0].Path) != filepath.Join(codeRoot, "api") {
+		t.Fatalf("nested .docignore was not respected: %#v", plan.Updates)
+	}
+}
+
+func TestBuildScopesMissingTargetDiagnostics(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	codeRoot := filepath.Join(repositoryRoot, "services")
+	mustWrite(t, filepath.Join(docsRoot, "missing.md"), "# Missing\n\n## Code map\n\n- `services/missing.go`\n- `client/missing.gd`\n")
+	if err := os.MkdirAll(codeRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(plan.Diagnostics, "\n")
+	if !strings.Contains(joined, "services/missing.go") {
+		t.Fatalf("scoped missing target was not reported: %v", plan.Diagnostics)
+	}
+	if strings.Contains(joined, "client/missing.gd") {
+		t.Fatalf("out-of-scope target was reported: %v", plan.Diagnostics)
 	}
 }
 
@@ -74,7 +121,7 @@ func TestBuildRendersDirectoryMappingsAsFolderDocumentation(t *testing.T) {
 	mustWrite(t, filepath.Join(docsRoot, "service.md"), "# Service Design\n\n## Code map\n\n- `service/`\n")
 	mustWrite(t, filepath.Join(codeRoot, "main.go"), "package service\n")
 
-	plan, err := Build(repositoryRoot, docsRoot, config.Default(), codemap.DefaultFormat())
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
 	if err != nil {
 		t.Fatal(err)
 	}

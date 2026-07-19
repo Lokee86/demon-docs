@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"strings"
+	"os"
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
@@ -25,7 +25,7 @@ func reverseIndexCommandHelp(w io.Writer, command string) {
 		watchUsage = " [--once] [--debounce-seconds FLOAT]"
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 	}
-	fmt.Fprintf(w, "usage: ddocs reverse-index %s [-h] [--root PATH] [--config PATH]\n                                  [--no-local-config] [--no-global-config]\n                                  [--index-file NAME] [--heading TEXT]\n                                  [--target-base BASE] [--target-root PATH]%s\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --index-file NAME   override the code-folder index filename\n  --heading TEXT      accepted codemap heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document\n  --target-root PATH  repository-relative component root; repeat as needed\n%s", command, watchUsage, watchOptions)
+	fmt.Fprintf(w, "usage: ddocs reverse-index %s [-h] [--root PATH] [--config PATH]\n                                  [--no-local-config] [--no-global-config]\n                                  [--index-file NAME] [--heading TEXT]\n                                  [--target-base BASE] [--target-root PATH]%s\n                                  [PATH ...]\n\nRecursively reconcile configured reverse-index roots, or the positional directory paths supplied to this command. Relative positional paths are resolved from the current working directory.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --index-file NAME   override the code-folder index filename\n  --heading TEXT      accepted codemap heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document\n  --target-root PATH  repository-relative component root; repeat as needed\n%s\nPaths:\n  PATH                directory to reverse index recursively; positional paths replace [reverse_index].roots\n", command, watchUsage, watchOptions)
 }
 
 func runReverseIndex(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -76,10 +76,6 @@ func runReverseIndex(ctx context.Context, args []string, out, errOut io.Writer) 
 		fmt.Fprintf(errOut, "ddocs reverse-index %s: error: %v\n", command, err)
 		return 2
 	}
-	if fs.NArg() != 0 {
-		fmt.Fprintf(errOut, "ddocs reverse-index %s: error: unrecognized arguments: %s\n", command, strings.Join(fs.Args(), " "))
-		return 2
-	}
 	if targetBase != string(codemap.TargetBaseRepository) && targetBase != string(codemap.TargetBaseDocument) {
 		fmt.Fprintf(errOut, "ddocs reverse-index %s: error: invalid --target-base %q; expected repository or document\n", command, targetBase)
 		return 2
@@ -103,19 +99,27 @@ func runReverseIndex(ctx context.Context, args []string, out, errOut io.Writer) 
 	}
 	format.TargetBase = codemap.TargetBase(targetBase)
 	format.TargetRoots = targetRoots.values
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fail(errOut, err)
+	}
+	roots, err := reverseindex.ResolveRoots(scope.RepositoryRoot, scope.DocsRoot, cwd, fs.Args(), resolved.ReverseIndex.Roots)
+	if err != nil {
+		return fail(errOut, err)
+	}
 
 	if command == "watch" {
 		seconds := resolved.Watch.DebounceSeconds
 		if debounce >= 0 {
 			seconds = debounce
 		}
-		if err := reverseindex.Watch(ctx, scope.RepositoryRoot, scope.DocsRoot, resolved, format, time.Duration(seconds*float64(time.Second)), once, out); err != nil {
+		if err := reverseindex.Watch(ctx, scope.RepositoryRoot, scope.DocsRoot, roots, resolved, format, time.Duration(seconds*float64(time.Second)), once, out); err != nil {
 			return fail(errOut, err)
 		}
 		return 0
 	}
 
-	plan, err := reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, resolved, format)
+	plan, err := reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, roots, resolved, format)
 	if err != nil {
 		return fail(errOut, err)
 	}

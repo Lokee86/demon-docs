@@ -25,19 +25,27 @@ var sourceNames = map[string]struct{}{
 	"Dockerfile": {}, "Gemfile": {}, "Makefile": {}, "Procfile": {}, "Rakefile": {},
 }
 
-func inventoryFolders(repositoryRoot, docsRoot string, c config.Config, policy ignorepolicy.Policy, f facts) (map[string][]string, map[string]struct{}, error) {
+func inventoryFolders(repositoryRoot string, c config.Config, hierarchy *ignorepolicy.Hierarchy, folders map[string]struct{}, f facts) (map[string][]string, map[string]struct{}, error) {
 	folderFiles := map[string][]string{}
-	for folder := range f.eligibleFolder {
+	existingManaged := map[string]struct{}{}
+	for _, folder := range sortedFolders(folders) {
+		indexPath := filepath.Join(folder, c.IndexFile)
+		if doc, err := textio.Read(indexPath); err == nil && strings.Contains(doc.Text, markerStart(c)) {
+			existingManaged[folder] = struct{}{}
+		} else if err != nil && !os.IsNotExist(err) {
+			return nil, nil, err
+		}
+
 		entries, err := os.ReadDir(folder)
 		if err != nil {
 			return nil, nil, err
 		}
 		for _, entry := range entries {
-			if entry.IsDir() || entry.Type()&os.ModeSymlink != 0 || !entry.Type().IsRegular() || entry.Name() == c.IndexFile {
+			if entry.IsDir() || entry.Type()&os.ModeSymlink != 0 || !entry.Type().IsRegular() || entry.Name() == c.IndexFile || entry.Name() == ignorepolicy.FileName {
 				continue
 			}
 			path := filepath.Join(folder, entry.Name())
-			ignored, err := policy.Ignored(path, false)
+			ignored, err := hierarchy.Ignored(path, false)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -48,8 +56,7 @@ func inventoryFolders(repositoryRoot, docsRoot string, c config.Config, policy i
 		}
 		sort.Strings(folderFiles[folder])
 	}
-	existing, err := findManagedIndexes(repositoryRoot, docsRoot, c, policy)
-	return folderFiles, existing, err
+	return folderFiles, existingManaged, nil
 }
 
 func indexableCodeFile(repositoryRoot, path string, exact map[string]struct{}) bool {
@@ -64,43 +71,4 @@ func indexableCodeFile(repositoryRoot, path string, exact map[string]struct{}) b
 	}
 	_, ok := sourceExtensions[strings.ToLower(filepath.Ext(path))]
 	return ok
-}
-
-func findManagedIndexes(repositoryRoot, docsRoot string, c config.Config, policy ignorepolicy.Policy) (map[string]struct{}, error) {
-	managed := map[string]struct{}{}
-	err := filepath.WalkDir(repositoryRoot, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if path != repositoryRoot {
-			if inside(path, docsRoot) {
-				if entry.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-			if entry.IsDir() && worktreeDirectory(entry.Name()) {
-				return filepath.SkipDir
-			}
-			ignored, err := policy.Ignored(path, entry.IsDir())
-			if err != nil {
-				return err
-			}
-			if ignored {
-				if entry.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-		}
-		if entry.IsDir() || filepath.Base(path) != c.IndexFile {
-			return nil
-		}
-		doc, err := textio.Read(path)
-		if err == nil && strings.Contains(doc.Text, markerStart(c)) {
-			managed[filepath.Dir(path)] = struct{}{}
-		}
-		return nil
-	})
-	return managed, err
 }
