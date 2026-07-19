@@ -1,0 +1,188 @@
+# Behavioral Contract Matrix
+
+Parent index: [Development](./README.md)
+
+## Purpose
+
+This document maps Demon Docs' critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
+
+## Overview
+
+A package inventory proves that code has a documentation pointer. It does not prove that the system's safety properties are protected or that a maintainer knows which test must change with a behavioral decision.
+
+This matrix uses the more useful unit of coverage:
+
+```text
+stateful flow
+mutation boundary
+persistent model
+concurrency boundary
+public contract
+extension seam
+```
+
+Each row names a durable contract rather than every individual test. Test files listed here are the primary evidence; related tests may exist elsewhere.
+
+## How to use this matrix
+
+Before changing a listed behavior:
+
+1. read the canonical owner;
+2. identify whether the change is a contract change or an implementation-preserving refactor;
+3. update or add the focused test before weakening an invariant;
+4. run the broader package or integration gate;
+5. update this matrix when ownership or verification changes; and
+6. update public reference, limits, or migration documentation when users can observe the change.
+
+A test passing does not authorize undocumented contract changes. A document claim without a protecting test should be treated as an identified coverage gap.
+
+## Managed documentation contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Managed replacements preserve bytes outside the owned block | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `internal/markdown/source_preservation_test.go`, `markdown_test.go` | `go test ./internal/markdown ./internal/reconcile -count=1` |
+| Fence-contained headings, markers, and parent lines remain examples | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestGoldmarkIgnoresHeadingsInsideCodeFences`, `TestMarkerLikeFenceContentIsNeverManaged`, `TestUpdateParentIgnoresFencedParentLinkCandidates` | regression fixtures and full Go suite |
+| Missing and legacy managed sections migrate within bounded structural ranges | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestManagedSectionMigrationAndPlacement`, `TestMalformedBlockRepairStopsBeforeFollowingSection` | `make regression` |
+| Stable descriptions survive normal reconciliation | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestExistingDescriptionsAndRootDisplayTitleRemainStable` | fixture matrix |
+| Direct/stub and unique cross-folder transitions preserve descriptions without ambiguous guessing | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `transitions_moves_test.go` | fixture matrix |
+| LF, CRLF, mixed endings, trailing spaces, and final-newline state are preserved as documented | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `line_endings_test.go`, `source_preservation_test.go`, `textio_test.go` | Linux and Windows CI |
+| Planning is deterministic, idempotent, and non-mutating | [Reconciliation Model](../architecture/reconciliation-pipeline.md) | `determinism_test.go`, `TestCheckPlanningDoesNotMutate` | `ddocs fix --docs` followed by clean `ddocs check --docs` |
+| No forward-index write escapes the managed docs root | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestApplyWithinRejectsOutsideWriteBeforeMutation` | full Go suite |
+
+## Link and authored-file mutation contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Supported link syntax is parsed without treating protected code as links | [Supported Link Syntax](../reference/supported-link-syntax.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `internal/links/parser_test.go` and syntax-specific tests | `go test ./internal/links -count=1` |
+| First link pass records a baseline before identity-based repair | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget`, `TestBrokenLinkGuessWaitsUntilAfterInitialScan` | repository link fixture checks |
+| Ambiguous targets are reported rather than selected automatically | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `TestAmbiguousGuessIsLeftForTheUser`, wiki ambiguity tests | `ddocs check --links` |
+| Batch preflight prevents every generated source write when any source changed | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestApplyGeneratedPreflightFailurePreventsAllWrites` | `go test ./internal/links -count=1` |
+| Generated replacement preserves suppression order and deterministic plans | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestApplyGeneratedPreservesSuppressionOrder`, concurrency tests | link integration suite |
+| Rollback never overwrites content created after Demon Docs' write | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRollbackGeneratedRefusesToOverwriteNewerContent` | full Go suite |
+| Review-publication failure restores generated source content | [Review Ledger](../architecture/review-ledger.md) | `TestApplyAndSaveRestoresSourcesWhenReviewBatchFails`, `TestRollbackAfterReviewFailureRestoresUndoSource` | review CLI integration suite |
+| Stateless move preflights hashes and repository containment | [Stateless Document Refactoring](../guides/document-refactoring.md) | `internal/links/move_test.go`, `internal/app/move_test.go` | `go test ./internal/links ./internal/app -count=1` |
+
+## Private state and review contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Private state transactions reject stale bases | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRepositoryRejectsStaleTransaction` | `go test ./internal/ddrepo -count=1` |
+| One record update rewrites only its deterministic shard and root | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestSingleRecordUpdateOnlyChangesItsShard`, codec tests | private-state package suite |
+| Review event batches publish a complete chain or nothing | [Review Ledger](../architecture/review-ledger.md) | `store_batch_test.go` | `go test ./internal/review ./internal/links ./internal/app -count=1` |
+| Declines remain effective until their evidence fingerprint changes | [Review Ledger](../architecture/review-ledger.md) | `TestPolicyKeepsDeclineUntilFingerprintChanges` | review CLI integration suite |
+| User selection applies only the chosen candidate after preflight | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) | `TestSuggestionsSelectPreflightsAndAppliesOnlyChosenRepair`, `TestPrepareSelectionPlanRemovesAutomaticWritesAndRestoresRecords` | review CLI integration suite |
+| Undo can target one repair while preserving unrelated transformations | [Review Ledger](../architecture/review-ledger.md) | `TestBuildUndoDataSupportsOneRepairWithinFileChange`, review CLI tests | full Go suite |
+| Undo-created repair blocks prevent immediate deterministic reapplication | [Review Ledger](../architecture/review-ledger.md) | `TestReviewCLIRecordsUndoAndBlocksDeterministicRepair`, `TestBlockedDeterministicRepairIsNotReapplied` | review CLI integration suite |
+
+## Watcher and daemon contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Debounced events produce one run plus one follow-up when events arrive during execution | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestSchedulerDebouncesAndRunsFollowup` | `go test ./internal/watch -count=1` |
+| Selected systems share one reconciliation run lock | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestRootSelectedWithRunLockSerializesReconciliation`, reverse watch serialization test | watch and reverse-index suites |
+| Initial reconciliation completes before observer creation | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestInitialFixCompletesBeforeObserverCreation` | watch integration suite |
+| Generated writes do not create an infinite self-write loop | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestWatchConvergesWithoutSelfWriteLoop` | watch integration suite |
+| Watch scope follows new directories and `.docignore` changes | [Watcher and Automation](../operations/watcher-and-automation.md) | watcher contract tests for nested directories, deletion, and ignore reload | Linux and Windows CI |
+| Exactly one fresh repository-demon owner may hold the lease | [Repository Demon](../operations/repository-demon.md) | `runtime_test.go`, `ownership_stress_test.go` | repeated focused stress plus full suite |
+| Stale or abandoned demon ownership can be recovered token-safely | [Repository Demon](../operations/repository-demon.md) | stale recovery and contention stress tests | Linux and Windows CI |
+| Status is read-only and does not delete expired feeder records | [Repository Demon](../operations/repository-demon.md) | `TestStatusSnapshotDoesNotDeleteExpiredFeeder`, app status test | demon package and CLI suite |
+
+## Reverse-index contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Reverse roots require explicit safe scope and cannot contain the docs root | [Reverse Index Architecture](../architecture/reverse-indexes.md) | `root_scope_test.go` | `go test ./internal/reverseindex ./internal/app -count=1` |
+| Reverse traversal honors nested `.docignore` domains | [Reverse Index Architecture](../architecture/reverse-indexes.md) | `TestBuildHonorsNestedDocignoreFiles`, watch reload test | reverse-index integration suite |
+| Missing or unresolved scoped codemap targets fail check deterministically | [Reverse Index Architecture](../architecture/reverse-indexes.md) | reverse-index build and app tests | `ddocs check --reverse` on fixtures |
+| Reverse watch participates in shared serialization | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestWatchWithRunLockSerializesReconciliation` | combined watch suite |
+
+## Codemap analysis contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| Extraction reads only configured codemap sections and preserves source spans | [Codemap Extraction and Dataset](../architecture/codemap-extraction-and-dataset.md) | extractor and inventory fixture tests | `go test ./internal/codemap -count=1` |
+| Target resolution keeps missing, ambiguous, unsupported, and pattern states explicit | [Codemap Extraction and Dataset](../architecture/codemap-extraction-and-dataset.md) | dataset target-base/root/ambiguity tests | codemap export command tests |
+| Corpus adapters emit only recognized local deterministic facts | [Codemap Corpus and Adapters](../architecture/codemap-corpus-adapters.md) | corpus dependency, symbol, path, history, and related-document tests | `go test ./internal/codemapcorpus -count=1` |
+| Existing authored targets and the document itself are excluded from candidates | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) | evidence collector tests | evidence and benchmark suites |
+| Suggestion ranking, admission, caps, fan-out discounting, and tiers are deterministic | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) | `codemapbench/adapters*_test.go`, symbol and current tests | pinned source-report comparison |
+| Controlled holdouts do not leak through document text, visible targets, or related documents | [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md) | run/orchestrator tests and app benchmark engine isolation test | pinned repository holdout |
+| Holdout selection is deterministic and input-order independent | [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md) | `holdout_test.go` | repeated benchmark with fixed seed |
+| Report JSON is canonical and schema-versioned | [Codemap Report Formats](../reference/codemap-report-formats.md) | `report_export_test.go`, dataset stable JSON test | artifact diff in research validation |
+| Precision samples are deterministic, stratified, auditable, and fully labeled before evaluation | [Codemap Precision Governance](../research/codemap-precision-governance.md) | `codemapprecision/precision_test.go` | pinned labeled evaluation |
+| Existing links are never proposed for removal or irrelevance | [Codemap Pipeline](../architecture/codemap-pipeline.md) | current suggestion visibility/exclusion tests and review integration | manual report review plus full suite |
+
+## CLI and configuration contracts
+
+| Contract | Canonical owner | Focused tests | Broader gate |
+| --- | --- | --- | --- |
+| `check` reports drift without writing | [CLI Reference](../reference/cli.md), [Application Orchestration](../architecture/application-orchestration.md) | `TestCheckReportsDriftWithoutWriting` and feature-selection tests | fixture matrix |
+| Feature selectors run only requested systems | [CLI Reference](../reference/cli.md) | `feature_flags_test.go` | CLI regression suite |
+| Every public and nested command has scoped side-effect-free help | [Testing and Fixtures](testing-and-fixtures.md) | `help_test.go`, `help_nested_test.go`, `cmd/demon/main_test.go` | smoke gate |
+| Configuration selection and compatibility aliases retain documented precedence | [Configuration Reference](../reference/configuration.md), [Compatibility and Migrations](../reference/compatibility-and-migrations.md) | config behavior and alias tests | Linux and Windows CI |
+| Config mutation preserves unrelated comments, keys, and formatting | [Configuration Reference](../reference/configuration.md) | demon-run atomic edit tests | config package suite |
+
+## Release-gate mapping
+
+The preferred complete gate remains:
+
+```bash
+make release-check
+```
+
+It combines package tests, fixture regression, vet, builds, and executable smoke tests. Additional research gates are required only when codemap ranking, evidence, sampling, or report semantics change.
+
+Documentation-only changes should still run:
+
+```bash
+go run ./cmd/ddocs fix --docs
+go run ./cmd/ddocs check --docs
+go run ./cmd/ddocs check --links
+go test ./... -count=1
+go vet ./...
+```
+
+## Adding a contract
+
+Add a row when a change introduces or reveals a durable invariant whose violation could:
+
+- alter authored files unexpectedly;
+- corrupt or fork persistent state;
+- weaken ambiguity or containment refusal;
+- change concurrency ownership;
+- change a public command, format, or diagnostic;
+- invalidate a benchmark or precision comparison; or
+- make a future refactor unsafe without knowing the behavior.
+
+Do not add rows for private helper implementation details that are fully covered by a broader contract.
+
+## Failure modes
+
+This matrix becomes misleading when:
+
+- test names move and the row is not updated;
+- a broad package suite is listed without naming the contract-focused test;
+- research artifacts are treated as universal release guarantees;
+- a changed contract updates tests but not canonical documentation;
+- a document claims a guarantee that no test protects; or
+- a package row is mistaken for flow-level behavioral coverage.
+
+## Code map
+
+- `internal/**/*_test.go` — focused package contracts.
+- `tests/` — repository-level fixture regression.
+- `.github/workflows/ci.yml` — cross-platform gates.
+- `Makefile` — local release-check composition.
+- `research/` — pinned codemap and performance validation artifacts.
+
+## Related docs
+
+- [Testing and Fixtures](testing-and-fixtures.md)
+- [Documentation Coverage Map](documentation-coverage.md)
+- [Documentation Policy](../documentation-policy.md)
+- [Safe Extension Procedures](safe-extension-procedures.md)
+- [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md)
+- [Codemap Pipeline](../architecture/codemap-pipeline.md)
+
+## Notes
+
+This matrix documents the tests that protect intended behavior. It is not a generated code-coverage report and does not replace reading the focused tests before changing their contract.

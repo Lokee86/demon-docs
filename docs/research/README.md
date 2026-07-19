@@ -8,7 +8,9 @@ Benchmarks, corpora, evaluation methodology, and recorded evidence. Research pag
 
 <!-- doc-ledger:files:start -->
 
+- [codemap-benchmark-methodology.md](codemap-benchmark-methodology.md) - Deterministic holdout selection, answer-isolation controls, classification, metrics, reproducibility, and limitations.
 - [codemap-evidence.md](codemap-evidence.md) - Missing-link evidence signals, tiering, curated precision results, corpora, and safety interpretation.
+- [codemap-precision-governance.md](codemap-precision-governance.md) - Deterministic sampling, human audit and labels, evaluation validation, subgroup metrics, and tuning governance.
 - [context-injection-benchmarking.md](context-injection-benchmarking.md) - Historical-task context-injection research design, controls, measurements, and retained fixtures.
 - [link-performance.md](link-performance.md) - High-fanout, real-repository, and mass-rename link reconciliation performance evidence.
 <!-- doc-ledger:files:end -->

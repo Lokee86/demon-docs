@@ -538,6 +538,8 @@ Package-level coverage alone is insufficient. A broad package may contain severa
 
 A map entry is not sufficient by itself. The linked document must actually explain responsibility, flow, state ownership, non-ownership boundaries, invariants, failure and recovery behavior, extension seams, and relevant tests or public contracts.
 
+Package-level coverage is also not sufficient when one package owns several independent stateful flows. Every durable mutation boundary, persistent model, concurrency boundary, machine-readable contract, and safe-extension seam requires a canonical explanation at an appropriate level of detail. `docs/development/behavioral-contract-matrix.md` maps critical invariants to the tests and release gates that protect them.
+
 ## Related docs
 
 - [Documentation Procedure](documentation-procedure.md)

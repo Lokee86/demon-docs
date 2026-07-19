@@ -165,14 +165,21 @@ Use `ddocs codemap precision --help` for generation, sampling, and evaluation co
 
 Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, and deterministic holdout tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
 
+## Behavioral Contract Verification
+
+The [Behavioral Contract Matrix](behavioral-contract-matrix.md) maps critical source-preservation, mutation, persistence, concurrency, benchmark, CLI, and compatibility guarantees to their canonical owners and focused tests.
+
+Use it when changing a durable invariant. Package coverage alone is not sufficient: a stateful flow may contain several independently protected contracts inside one package.
+
 ## Documentation Coverage Verification
 
-Documentation changes are verified at three levels:
+Documentation changes are verified at four levels:
 
 ```text
 structure and indexes
 local links and orphan reachability
 implementation ownership coverage
+behavior-to-test contract coverage
 ```
 
 Run the repository's own documentation reconciliation:
@@ -268,6 +275,8 @@ Repository-wide tests must exclude nested `.worktrees/` and local generated outp
 - [Development](README.md)
 - [Repository Layout](repository-layout.md)
 - [Documentation Coverage Map](documentation-coverage.md)
+- [Behavioral Contract Matrix](behavioral-contract-matrix.md)
+- [Safe Extension Procedures](safe-extension-procedures.md)
 - [Documentation Procedure](../documentation-procedure.md)
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)

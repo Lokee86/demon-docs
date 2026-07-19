@@ -216,12 +216,16 @@ Confirm that:
 ```text
 every production package has a canonical current owner
 every public command family has a task or reference owner
+every independent stateful flow and mutation boundary has an explanation
+persistent models and concurrency boundaries have explicit lifecycle ownership
+safe-extension seams explain how to change them without violating invariants
+critical behavioral contracts map to focused tests and release gates
 small utility packages map to the subsystem they concretely serve
 implemented behavior is not owned only by research or planning
 new limits are recorded when the implementation remains incomplete
 ```
 
-A coverage-table link does not replace substantive documentation. Open the linked owner and verify that it actually describes the changed responsibility.
+A coverage-table link does not replace substantive documentation. Open the linked owner and verify that it actually describes the changed responsibility. Update the [Behavioral Contract Matrix](development/behavioral-contract-matrix.md) when a durable invariant or its protecting test changes.
 
 ## 11. Verify
 
@@ -237,6 +241,9 @@ The document has Purpose, Overview, Related docs, and Notes.
 Type-specific sections are present.
 Current behavior is not owned only by planning or research.
 Implementation docs explain ownership and include useful code maps.
+Independent stateful flows are not hidden inside one umbrella package page.
+Critical invariants link to focused tests in the behavioral contract matrix.
+Safe-extension procedures cover new public or persistent seams.
 Guides state prerequisites, expected result, and recovery.
 Moved links resolve.
 The root README remains a product entry point rather than a complete manual.
@@ -249,6 +256,8 @@ Run the project documentation checks and normal test gate after structural chang
 - [Documentation Policy](documentation-policy.md)
 - [Demon Docs Documentation](README.md)
 - [Testing and Fixtures](development/testing-and-fixtures.md)
+- [Behavioral Contract Matrix](development/behavioral-contract-matrix.md)
+- [Safe Extension Procedures](development/safe-extension-procedures.md)
 - [Repository Layout](development/repository-layout.md)
 
 ## Notes
