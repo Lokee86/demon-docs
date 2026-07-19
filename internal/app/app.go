@@ -124,7 +124,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "fix", "check", "watch":
 		return runTree(ctx, args[0], args[1:], out, errOut)
 	case "codemap":
-		return runCodemap(args[1:], out, errOut)
+		return runCodemap(ctx, args[1:], out, errOut)
 	case "config":
 		return runConfig(args[1:], out, errOut)
 	default:
@@ -526,16 +526,16 @@ func resolveScope(arg optionalString, configured, configPath string) (repository
 func fail(w io.Writer, err error) int { fmt.Fprintf(w, "ddocs error: %v\n", err); return 2 }
 
 func codemapHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export} ...\n\nExtract authored code-map relationships from the configured documentation tree.\n\npositional arguments:\n  {export}\n    export              write the deterministic codemap dataset as JSON\n\noptions:\n  -h, --help            show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n\noptions:\n  -h, --help            show this help message and exit")
 }
 
 func codemapExportHelp(w io.Writer) {
 	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
 }
 
-func runCodemap(args []string, out, errOut io.Writer) int {
+func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export} ...")
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark} ...")
 		fmt.Fprintln(errOut, "ddocs codemap: error: the following arguments are required: codemap_command")
 		return 2
 	}
@@ -543,9 +543,12 @@ func runCodemap(args []string, out, errOut io.Writer) int {
 		codemapHelp(out)
 		return 0
 	}
+	if args[0] == "benchmark" {
+		return runCodemapBenchmark(ctx, args[1:], out, errOut)
+	}
 	if args[0] != "export" {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export} ...")
-		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export)\n", args[0])
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark} ...")
+		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export, benchmark)\n", args[0])
 		return 2
 	}
 	if helpRequested(args[1:]) {
