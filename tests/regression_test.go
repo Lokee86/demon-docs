@@ -47,7 +47,7 @@ func TestGoCLIRegressionMatrix(t *testing.T) {
 			afterFirstFix := snapshot(t, project)
 
 			check := runProcess(t, project, env, bin, "check")
-			requireSuccess(t, "check", check)
+			requireReconciledCheck(t, check)
 
 			secondFix := runProcess(t, project, env, bin, "fix")
 			requireSuccess(t, "second fix", secondFix)
@@ -81,6 +81,25 @@ func requireSuccess(t *testing.T, command string, result processResult) {
 	t.Helper()
 	if result.code != 0 {
 		t.Fatalf("%s failed with code %d\nstdout=%q\nstderr=%q", command, result.code, result.stdout, result.stderr)
+	}
+}
+
+func requireReconciledCheck(t *testing.T, result processResult) {
+	t.Helper()
+	if result.code == 0 {
+		return
+	}
+	if result.code != 1 || result.stderr != "" {
+		t.Fatalf("check failed with code %d\nstdout=%q\nstderr=%q", result.code, result.stdout, result.stderr)
+	}
+	lines := strings.Split(strings.TrimSpace(result.stdout), "\n")
+	if len(lines) < 2 || lines[0] != "ddocs check failed" {
+		t.Fatalf("unexpected check failure output: %q", result.stdout)
+	}
+	for _, line := range lines[1:] {
+		if !strings.HasPrefix(line, "message: Orphan document: ") {
+			t.Fatalf("check found reconciliation drift: %q", result.stdout)
+		}
 	}
 }
 

@@ -283,7 +283,7 @@ func treeHelp(w io.Writer, command string) {
 	usage := treeUsage(command)
 	description := map[string]string{
 		"fix":   "Reconcile selected documentation indexes, links, and reverse indexes and write needed updates.",
-		"check": "Verify that selected documentation indexes, links, and reverse indexes are already reconciled.",
+		"check": "Verify that selected documentation indexes, links, and reverse indexes are already reconciled. Report orphan managed Markdown documents when links are selected.",
 		"watch": "Watch runs in the foreground by default, runs selected reconciliation immediately, and then watches for relevant filesystem changes. Each reconciliation diagnostic is printed as an individual message.",
 	}[command]
 	watchOptions := ""
@@ -454,7 +454,14 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			return fail(errOut, err)
 		}
 	}
-	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed() || features.Reverse && reversePlan.Failed()
+	orphanDocuments := []string{}
+	if features.Links && repository.DocsRootExists(scope) {
+		orphanDocuments, err = findOrphanDocuments(scope, c, linkPlan)
+		if err != nil {
+			return fail(errOut, err)
+		}
+	}
+	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed() || features.Reverse && reversePlan.Failed() || len(orphanDocuments) > 0
 	if failed {
 		fmt.Fprintln(out, "ddocs check failed")
 		for _, update := range indexResult.Updates {
@@ -468,6 +475,9 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		}
 		writeMessages(out, indexResult.Messages)
 		writeMessages(out, linkPlan.Messages)
+		for _, path := range orphanDocuments {
+			fmt.Fprintf(out, "message: Orphan document: %s\n", path)
+		}
 		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
 		return 1
 	}
