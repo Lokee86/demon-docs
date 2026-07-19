@@ -46,6 +46,7 @@ The Demon Docs tests are split across small, focused areas:
 - parent index behavior
 - reconciliation planning and file updates
 - watcher scheduling and filtering
+- repository-demon ownership, feeders, shutdown, logs, hooks, and linked worktrees
 - end-to-end flows
 - public config examples
 
@@ -67,7 +68,8 @@ A release is eligible only when all CI jobs pass. In particular:
 - the ten-fixture Go CLI regression matrix is green;
 - focused specification tests cover the intentional compatibility corrections;
 - `go vet`, both executable builds, and CLI smoke checks for `ddocs` and `demon` are green;
-- repeated reconciliation is byte-identical and check mode remains non-mutating.
+- repeated reconciliation is byte-identical and check mode remains non-mutating;
+- repeated daemon ownership and feeder tests are free of timing-dependent failures.
 
 ## Dummy Docs Fixture Generator
 
@@ -133,3 +135,6 @@ It is deliberately outside the current Go release gate. Repository classificatio
 - `tests/regression_fixtures_test.go`
 - `internal/reconcile/reconcile_test.go`
 - `internal/watch/watch_test.go`
+- `internal/demon/runtime_test.go`
+- `internal/app/demon_test.go`
+- `internal/repository/worktree_test.go`

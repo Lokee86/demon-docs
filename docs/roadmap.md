@@ -10,7 +10,8 @@ The current foundation is the stable, repository-native reconciliation layer:
 - Recursive folder indexes describe direct files, draft/stub files, and child folders.
 - Managed Markdown sections are the only generated regions; authored content outside them is preserved.
 - Parent navigation links keep folder indexes and configured indexed documents connected to their owning index.
-- `check`, `fix`, and `watch` provide reconciliation, verification, and continuous local maintenance.
+- `check`, `fix`, and foreground `watch` provide reconciliation, verification, and explicit continuous local maintenance.
+- The repository demon provides single-owner detached watcher lifecycle while shell or agent feeders remain active, without becoming a correctness dependency.
 - `-i` / `--indexes` and `-l` / `--links` select either subsystem independently.
 - A focused repository-root Markdown link graph tracks local links to Markdown, assets, directories, absolute filesystem paths, and accessible external targets.
 - Stable internal file IDs, path history, and fingerprints support deterministic move reconciliation without modifying source files to embed IDs.
@@ -99,13 +100,13 @@ Future evidence should compare paired historical tasks with and without Demon Do
 
 Before claiming that agent context improves implementation work, develop the benchmark corpus and harness described in [Context-Injection Benchmarking](context-injection-benchmarking.md). This research is not required to begin deterministic context implementation and does not require immediate paid model trials. Corpus preparation, pinned historical tasks, control fixtures, and deterministic bundle inspection can proceed first.
 
-## Phase 8: Watch/Daemon Operational Expansion
+## Phase 8: Repository Demon and Operational Expansion
 
-`ddocs watch` is already the Demon Docs daemon: it runs the same static reconciliation core continuously in the foreground, observes relevant filesystem changes, coalesces events, and reruns selected index or link operations.
+The self-managing repository demon now wraps the same watcher used by foreground `ddocs watch`. It provides one fresh owner per local `.ddocs/` repository, shell and agent feeder heartbeats, detached startup, stale-owner recovery, shutdown grace, status, bounded logs, and independent linked-worktree runtime state.
 
-Later operational work may improve lifecycle management, incremental scheduling, graph-cache reuse, status reporting, or service integration. Those enhancements must not create exclusive correctness behavior. The static CLI remains authoritative for CI, rebuilds, recovery, and debugging, and deleting disposable daemon caches must never remove repository truth.
+Foreground `ddocs watch` remains available for explicit terminal-controlled operation. The static CLI remains authoritative for CI, rebuilds, recovery, and debugging, and deleting runtime state or disposable caches must never remove repository truth.
 
-MCP and plugins remain separate interfaces. They may call the deterministic core directly or connect to a running service, but they do not require a competing repository model.
+Further operational work may add MCP and native-plugin feeder adapters, packaging and installation improvements, broader cross-platform lifecycle tests, incremental scheduling, or graph-cache reuse. Those integrations remain outside Demon Docs core and must translate host lifecycle into the generic agent-feeder protocol rather than creating a competing repository model or daemon implementation.
 
 ## Phase 9: Optional LLM Assistance
 
@@ -120,7 +121,7 @@ LLM output remains a proposal: it must be reviewable, attributable to its inputs
 - **Authored intent remains the source of truth:** generated projections do not replace or silently reinterpret hand-authored prose.
 - **Projections are generated:** indexes, backlinks, maps, reports, and bundles are views of the underlying repository model.
 - **Explicit resolution only:** concept resolution is deterministic only against explicit repository vocabulary, aliases, paths, symbols, headings, active files, or Git changes; ambiguity yields candidates or waits for a concrete target.
-- **Watch is the daemon:** `ddocs watch` automates the same static core capabilities and may later retain disposable caches; it adds no exclusive product capability, and the static CLI remains authoritative.
+- **One core, two watcher surfaces:** foreground `ddocs watch` and the self-managing repository demon run the same static core; neither adds exclusive product capability, and the static CLI remains authoritative.
 - **Thin integrations:** CLI, MCP, Hermes, Claude Code, plugins, and other adapters use the same deterministic core rather than creating parallel repository models.
 - **Optional adapters:** language-specific analysis is enabled deliberately and does not reduce baseline usability.
 - **No semantic prose generation in core:** core Demon Docs behavior maintains structure and explicit references, not guessed explanations.
@@ -131,15 +132,15 @@ The current foundation and Phase 1 establish trustworthy static Markdown-link up
 
 Phase 3 adds the distinct reverse documentation mappings and code-folder indexes. Phase 4 adds optional deterministic symbol nodes, and Phase 5 adds bounded code and dependency facts. Phase 6 consumes the broader deterministic graph for reproducible projections, including entanglement views and context bundles. Phase 7 exposes those capabilities through thin adapters without creating a competing core.
 
-Phase 8 improves the already-existing `watch` daemon's operational characteristics after the relevant static capabilities exist. Phase 9 comes last because proposals must be constrained by deterministic graph and diff data; it remains optional and outside the correctness path.
+Phase 8 establishes and expands the self-managing lifecycle around the existing watcher, including generic shell and agent feeders, while keeping host adapters separate. Phase 9 comes last because proposals must be constrained by deterministic graph and diff data; it remains optional and outside the correctness path.
 
 ## Explicit Non-Goals
 
 - Replacing Git, Markdown, or the repository filesystem with a proprietary storage model.
 - Treating inferred semantic relationships as equivalent to explicit authored references.
 - Generating or rewriting semantic prose as part of deterministic core operations.
-- Requiring the `watch` daemon for one-shot CLI recovery, CI, rebuilds, or correctness verification.
-- Making `watch` the source of repository truth, or giving it capabilities unavailable through the static core.
+- Requiring the repository demon for one-shot CLI recovery, CI, rebuilds, or correctness verification.
+- Making the repository demon or foreground watcher the source of repository truth, or giving either capabilities unavailable through the static core.
 - Requiring MCP or plugins to be hosted by the daemon rather than exposing them as separate interfaces.
 - Requiring an LLM, a network connection, or a language adapter for baseline reconciliation.
 - Deterministically resolving an unconstrained free-form concept without an explicit vocabulary, alias, path, symbol, heading, active-file, or Git-change match.

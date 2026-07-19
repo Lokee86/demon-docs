@@ -19,6 +19,8 @@ These integrations do not own repository truth, target resolution, graph identit
 
 The daemon, when available, watches repository and Git changes, coalesces events, and triggers the same static rebuild, reconciliation, and projection operations. It does not deliver agent context or host integrations. MCP and native plugins call the static core or their own thin service/interface and remain separate from the daemon.
 
+Operational feeder registration is also separate from context delivery. An MCP or native host adapter may register a generic `agent` feeder while a job or session is active and remove it on every terminal path. That feeder only keeps the repository watcher alive; it does not make the daemon an MCP server, context service, or host-specific integration.
+
 ## Context Inputs
 
 A context request may provide any combination of the following deterministic inputs:
