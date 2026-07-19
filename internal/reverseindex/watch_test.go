@@ -13,6 +13,23 @@ import (
 	"github.com/Lokee86/demon-docs/internal/config"
 )
 
+type blockingLocker struct {
+	entered chan struct{}
+	release chan struct{}
+	once    sync.Once
+}
+
+func newBlockingLocker() *blockingLocker {
+	return &blockingLocker{entered: make(chan struct{}), release: make(chan struct{})}
+}
+
+func (l *blockingLocker) Lock() {
+	l.once.Do(func() { close(l.entered) })
+	<-l.release
+}
+
+func (l *blockingLocker) Unlock() {}
+
 type synchronizedBuffer struct {
 	mu   sync.Mutex
 	text strings.Builder
@@ -28,6 +45,50 @@ func (b *synchronizedBuffer) String() string {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.text.String()
+}
+
+func TestWatchWithRunLockSerializesReconciliation(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	codeRoot := filepath.Join(repositoryRoot, "services")
+	apiRoot := filepath.Join(codeRoot, "api")
+	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/handler.go`\n")
+	mustWrite(t, filepath.Join(apiRoot, "handler.go"), "package api\n")
+
+	locker := newBlockingLocker()
+	done := make(chan error, 1)
+	go func() {
+		done <- WatchWithRunLock(context.Background(), repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat(), 0, true, nil, locker)
+	}()
+
+	select {
+	case <-locker.entered:
+	case <-time.After(2 * time.Second):
+		close(locker.release)
+		t.Fatal("reverse-index reconciliation did not acquire the shared run lock")
+	}
+	index := filepath.Join(apiRoot, "README.md")
+	_, statErr := os.Stat(index)
+	wroteBeforeRelease := statErr == nil
+	if statErr != nil && !os.IsNotExist(statErr) {
+		close(locker.release)
+		t.Fatal(statErr)
+	}
+	close(locker.release)
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("reverse-index reconciliation did not finish after the run lock was released")
+	}
+	if wroteBeforeRelease {
+		t.Fatal("reverse-index reconciliation wrote files before the shared run lock was released")
+	}
+	if _, err := os.Stat(index); err != nil {
+		t.Fatalf("reverse-index reconciliation did not write the index after release: %v", err)
+	}
 }
 
 func TestWatchReloadsNestedDocignoreAndAddsVisibleDirectories(t *testing.T) {
