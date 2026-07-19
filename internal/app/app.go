@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/model"
@@ -103,7 +104,7 @@ func (n boolNeg) IsBoolFlag() bool { return true }
 
 func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
 		fmt.Fprintln(errOut, "ddocs: error: the following arguments are required: command")
 		return 2
 	}
@@ -122,20 +123,22 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runStatus(args[1:], out, errOut)
 	case "fix", "check", "watch":
 		return runTree(ctx, args[0], args[1:], out, errOut)
+	case "codemap":
+		return runCodemap(args[1:], out, errOut)
 	case "config":
 		return runConfig(args[1:], out, errOut)
 	default:
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
-		choices := "init, status, fix, check, watch, config"
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
+		choices := "init, status, fix, check, watch, codemap, config"
 		if runtime.GOOS == "windows" {
-			choices = "'init', 'status', 'fix', 'check', 'watch', 'config'"
+			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
+	fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...\n\nddocs reconciles folder indexes and local Markdown links with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile and write updated files\n    check               reconcile without writing files\n    watch               watch the tree and rerun reconciliation\n    codemap             extract and export authored code-map relationships\n    config              inspect config path selection and resolved config\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check\n  ddocs watch\n  ddocs codemap export\n  ddocs config paths\n  ddocs config show\n  ddocs fix --root docs\n  ddocs --version")
 }
 
 func initHelp(w io.Writer) {
@@ -298,7 +301,7 @@ var (
 func writeTreeParseError(w io.Writer, command string, err error) {
 	message := err.Error()
 	if match := unknownFlagPattern.FindStringSubmatch(message); match != nil {
-		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
+		fmt.Fprintln(w, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
 		fmt.Fprintf(w, "ddocs: error: unrecognized arguments: --%s\n", match[1])
 		return
 	}
@@ -352,7 +355,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ...")
+		fmt.Fprintln(errOut, "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ...")
 		fmt.Fprintf(errOut, "ddocs: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
@@ -522,6 +525,97 @@ func resolveScope(arg optionalString, configured, configPath string) (repository
 }
 func fail(w io.Writer, err error) int { fmt.Fprintf(w, "ddocs error: %v\n", err); return 2 }
 
+func codemapHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export} ...\n\nExtract authored code-map relationships from the configured documentation tree.\n\npositional arguments:\n  {export}\n    export              write the deterministic codemap dataset as JSON\n\noptions:\n  -h, --help            show this help message and exit")
+}
+
+func codemapExportHelp(w io.Writer) {
+	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace defaults\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --output PATH       write JSON to a file instead of stdout")
+}
+
+func runCodemap(args []string, out, errOut io.Writer) int {
+	if len(args) == 0 {
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export} ...")
+		fmt.Fprintln(errOut, "ddocs codemap: error: the following arguments are required: codemap_command")
+		return 2
+	}
+	if args[0] == "-h" || args[0] == "--help" {
+		codemapHelp(out)
+		return 0
+	}
+	if args[0] != "export" {
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export} ...")
+		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export)\n", args[0])
+		return 2
+	}
+	if helpRequested(args[1:]) {
+		codemapExportHelp(out)
+		return 0
+	}
+
+	fs := flag.NewFlagSet("ddocs codemap export", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	var flags commonFlags
+	var headings stringsFlag
+	var output optionalString
+	targetBase := string(codemap.TargetBaseRepository)
+	fs.Var(&flags.root, "root", "override the configured docs root")
+	fs.Var(&flags.config, "config", "explicit ddocs config file")
+	fs.BoolVar(&flags.noLocal, "no-local-config", false, "skip current-directory local config")
+	fs.BoolVar(&flags.noGlobal, "no-global-config", false, "skip the global user config")
+	fs.Var(&headings, "heading", "accepted code-map heading")
+	fs.StringVar(&targetBase, "target-base", targetBase, "repository or document")
+	fs.Var(&output, "output", "write JSON to a file")
+	if err := fs.Parse(args[1:]); err != nil {
+		fmt.Fprintf(errOut, "ddocs codemap export: error: %v\n", err)
+		return 2
+	}
+	if fs.NArg() != 0 {
+		writeUnrecognized(errOut, fs.Args())
+		return 2
+	}
+	if targetBase != string(codemap.TargetBaseRepository) && targetBase != string(codemap.TargetBaseDocument) {
+		fmt.Fprintf(errOut, "ddocs codemap export: error: invalid --target-base %q; expected repository or document\n", targetBase)
+		return 2
+	}
+	resolved, configPath, code := load(flags, errOut)
+	if code != 0 {
+		return code
+	}
+	scope, err := resolveScope(flags.root, resolved.Root, configPath)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	if !repository.DocsRootExists(scope) {
+		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", scope.DocsRoot)
+		return 2
+	}
+	format := codemap.DefaultFormat()
+	if len(headings.values) > 0 {
+		format.SectionHeadings = headings.values
+	}
+	format.TargetBase = codemap.TargetBase(targetBase)
+	dataset, err := codemap.BuildDataset(scope.RepositoryRoot, scope.DocsRoot, format)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	if output.set {
+		if err := codemap.ExportDataset(output.value, dataset); err != nil {
+			return fail(errOut, err)
+		}
+		fmt.Fprintf(out, "exported %d codemap link(s) from %d document(s) to %s\n", len(dataset.Entries), len(dataset.Documents), output.value)
+		return 0
+	}
+	encoded, err := codemap.MarshalDataset(dataset)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	if _, err := out.Write(encoded); err != nil {
+		return fail(errOut, err)
+	}
+	return 0
+}
+
 func configHelp(w io.Writer) {
 	fmt.Fprintln(w, "usage: ddocs config [-h] {paths,show,init} ...\n\nInspect config discovery and show the resolved selected config.\n\npositional arguments:\n  {paths,show,init}\n    paths            show config path candidates\n    show             show the resolved selected config\n    init             write a legacy standalone config file\n\noptions:\n  -h, --help         show this help message and exit\n\nRepository config is discovered by searching upward for .ddocs/config.toml.\nLegacy local config lookup remains current-directory only.\nLocal and global configs are not merged.\nCLI flags override the selected config.\n\nSubcommands:\n  paths  print repository, local, global, and selected config paths\n  show   print the resolved selected config\n  init   write a legacy standalone local or global config")
 }
@@ -539,7 +633,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,config} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,fix,check,watch,codemap,config} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"
