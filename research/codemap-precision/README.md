@@ -119,6 +119,36 @@ The positive-only holdout again recovers 10/10 links, with four recovered links 
 
 These rules are repository-agnostic, but their thresholds are still calibrated on one repository. Cross-repository validation remains necessary before claiming general precision.
 
+## Third tuning pass: directional counterpart confidence
+
+The third pass tightens two remaining noisy qualification paths while preserving every candidate in the context pool:
+
+- dependency-neighbor candidates require score at least 18 rather than 16; and
+- a source/test counterpart may still qualify a recognized test target with independent dependency, related-document, or sibling support, but promoting a non-test implementation target through counterpart evidence now additionally requires score at least 20.
+
+This distinguishes a directly useful verification target from a production file that happens to share a counterpart relationship but lacks enough combined evidence to justify a permanent codemap link.
+
+Measured against the same 150 labels:
+
+| Tier/metric | Result |
+|---|---:|
+| Hard-link suggestions | 68 |
+| Hard-link strict precision | 75.00% (51/68) |
+| Hard-link relevance precision | 98.53% (67/68) |
+| Hard-link recovery within labeled valid links | 72.86% (51/70) |
+| Hard-link suggestions per sampled document | 2.72 |
+| Context suggestions | 82 |
+| Context strict precision | 23.17% (19/82) |
+| Context relevance precision | 79.27% (65/82) |
+
+Compared with the second pass, strict precision rises 2.14 percentage points and relevance rises 1.39 points with no loss of labeled-valid recovery. One unnecessary dependency-only candidate and one incorrect implementation-counterpart candidate move to context. One incorrect hard-link candidate remains.
+
+On the complete pinned Space Rocks source pool, the implementation produces 621 `hard_link` and 3,872 `context` candidates across the same 4,493 total suggestions, averaging 4.17 hard-link candidates per mapped document. This is ten fewer direct-review candidates than the second pass while retaining the complete context relationship pool.
+
+The positive-only ten-link holdout remains 10/10, with four recovered links in `hard_link` and six in `context`. The stricter direct-review boundary therefore improves measured precision without reducing discovery recall on the retained holdout.
+
+These measurements remain calibrated on one repository and one manually reviewed sample. The third-pass thresholds should not be generalized as universal defaults until additional repositories are evaluated.
+
 ## Reproduction
 
 From the Demon Docs repository, with the pinned Space Rocks checkout available:

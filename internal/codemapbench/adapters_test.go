@@ -52,8 +52,8 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 		return items
 	}
 	candidates := []evidence.Candidate{
-		{Path: "src/dependency_hard.go", Evidence: dependencyEvidence("hard", 4)},
-		{Path: "src/dependency_context.go", Evidence: dependencyEvidence("context", 3)},
+		{Path: "src/dependency_hard.go", Evidence: dependencyEvidence("hard", 5)},
+		{Path: "src/dependency_context.go", Evidence: dependencyEvidence("context", 4)},
 		{Path: "src/explicit_context.go", Evidence: []evidence.Evidence{{Kind: evidence.KindExactPathMention, Count: 1}}},
 		{Path: "src/explicit_symbol_context.go", Evidence: []evidence.Evidence{
 			{Kind: evidence.KindExactPathMention, Count: 1},
@@ -64,9 +64,20 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 			{Kind: evidence.KindTestCounterpart, Source: "src/test_history.go", Count: 1},
 			{Kind: evidence.KindGitTargetCoChange, Source: "src/owner.go", Count: 2},
 		}},
-		{Path: "src/test_supported_hard.go", Evidence: []evidence.Evidence{
-			{Kind: evidence.KindTestCounterpart, Source: "src/test_supported.go", Count: 1},
+		{Path: "src/test_supported_hard_test.go", Evidence: []evidence.Evidence{
+			{Kind: evidence.KindTestCounterpart, Source: "src/test_supported_hard.go", Count: 1},
 			{Kind: evidence.KindSiblingTarget, Source: "src/owner.go", Count: 1},
+		}},
+		{Path: "src/implementation_counterpart_context.go", Evidence: []evidence.Evidence{
+			{Kind: evidence.KindTestCounterpart, Source: "src/implementation_counterpart_context_test.go", Count: 1},
+			{Kind: evidence.KindSiblingTarget, Source: "src/owner.go", Count: 1},
+		}},
+		{Path: "src/implementation_counterpart_hard.go", Evidence: []evidence.Evidence{
+			{Kind: evidence.KindTestCounterpart, Source: "src/implementation_counterpart_hard_test.go", Count: 1},
+			{Kind: evidence.KindDependencyNeighbor, Source: "src/dependency_a.go", Detail: "outbound:go_import", Count: 1},
+			{Kind: evidence.KindDependencyNeighbor, Source: "src/dependency_b.go", Detail: "outbound:go_import", Count: 1},
+			{Kind: evidence.KindDependencyNeighbor, Source: "src/dependency_c.go", Detail: "outbound:go_import", Count: 1},
+			{Kind: evidence.KindDependencyNeighbor, Source: "src/dependency_d.go", Detail: "outbound:go_import", Count: 1},
 		}},
 		{Path: "src/related_only_context.go", Evidence: []evidence.Evidence{{Kind: evidence.KindRelatedDocumentTarget, Source: "docs/related.md", Count: 1}}},
 		{Path: "src/related_hard.go", Evidence: []evidence.Evidence{
@@ -83,10 +94,10 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 	for _, suggestion := range suggestions {
 		byTarget[suggestion.Target] = suggestion
 	}
-	if got := byTarget["src/dependency_hard.go"]; got.Score != HardLinkDependencyMinimumScore || got.Tier != SuggestionTierHardLink {
+	if got := byTarget["src/dependency_hard.go"]; got.Score < HardLinkDependencyMinimumScore || got.Tier != SuggestionTierHardLink {
 		t.Fatalf("dependency-backed hard link = %#v", got)
 	}
-	for _, target := range []string{"src/related_hard.go", "src/test_supported_hard.go"} {
+	for _, target := range []string{"src/related_hard.go", "src/test_supported_hard_test.go", "src/implementation_counterpart_hard.go"} {
 		if got := byTarget[target]; got.Tier != SuggestionTierHardLink {
 			t.Fatalf("%s tier = %q, want hard link: %#v", target, got.Tier, suggestions)
 		}
@@ -97,10 +108,30 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 		"src/explicit_symbol_context.go",
 		"src/test_only_context.go",
 		"src/test_history_context.go",
+		"src/implementation_counterpart_context.go",
 		"src/related_only_context.go",
 	} {
 		if got := byTarget[target]; got.Tier != SuggestionTierContext {
 			t.Fatalf("%s tier = %q, want context: %#v", target, got.Tier, suggestions)
+		}
+	}
+}
+
+func TestIsTestTargetRecognizesCommonConventions(t *testing.T) {
+	for _, target := range []string{
+		"src/runtime_test.go",
+		"src/tests/runtime.go",
+		"src/spec/runtime.rb",
+		"src/test_runtime.py",
+		"src/runtime.spec.ts",
+	} {
+		if !isTestTarget(target) {
+			t.Fatalf("%q was not recognized as a test target", target)
+		}
+	}
+	for _, target := range []string{"src/runtime.go", "src/testing/runtime.go", "src/contest/runtime.ts"} {
+		if isTestTarget(target) {
+			t.Fatalf("%q was incorrectly recognized as a test target", target)
 		}
 	}
 }

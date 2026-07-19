@@ -18,7 +18,7 @@
   "precision_at_3": 0.5466666666666666,
   "precision_at_5": 0.528,
   "hard_link_sample_valid_recall": 0.7285714285714285,
-  "hard_link_suggestions_per_document": 2.8,
+  "hard_link_suggestions_per_document": 2.72,
   "per_document": {
     "docs/data/collision-shape-data.md": {
       "precision_at_1": {
@@ -716,18 +716,18 @@
   },
   "by_tier": {
     "context": {
-      "total": 80,
+      "total": 82,
       "valid_missing_link": 19,
-      "accepted_non_junk": 64,
-      "overall_precision": 0.2375,
-      "acceptance_precision": 0.8
+      "accepted_non_junk": 65,
+      "overall_precision": 0.23170731707317074,
+      "acceptance_precision": 0.7926829268292683
     },
     "hard_link": {
-      "total": 70,
+      "total": 68,
       "valid_missing_link": 51,
-      "accepted_non_junk": 68,
-      "overall_precision": 0.7285714285714285,
-      "acceptance_precision": 0.9714285714285714
+      "accepted_non_junk": 67,
+      "overall_precision": 0.75,
+      "acceptance_precision": 0.9852941176470589
     }
   },
   "sampling_coverage": {

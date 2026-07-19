@@ -3,7 +3,9 @@ package codemapbench
 import (
 	"fmt"
 	"math"
+	"path"
 	"sort"
+	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/evidence"
 )
@@ -12,11 +14,12 @@ import (
 // The benchmark is intended to measure useful surfaced suggestions, not every
 // weak relationship that can be inferred from repository history.
 const (
-	DefaultSuggestionLimitPerDocument  = 30
-	HardLinkSuggestionLimitPerDocument = 5
-	HardLinkDependencyMinimumScore     = 16
-	RepeatedMentionReservePerDocument  = 2
-	RepeatedMentionMinimumCount        = 2
+	DefaultSuggestionLimitPerDocument             = 30
+	HardLinkSuggestionLimitPerDocument            = 5
+	HardLinkDependencyMinimumScore                = 18
+	HardLinkImplementationCounterpartMinimumScore = 20
+	RepeatedMentionReservePerDocument             = 2
+	RepeatedMentionMinimumCount                   = 2
 )
 
 type evidenceAtom struct {
@@ -35,6 +38,7 @@ type rankedSuggestion struct {
 	hasRelatedDocumentTarget bool
 	hasSiblingTarget         bool
 	hasGitDocumentCoChange   bool
+	targetIsTest             bool
 }
 
 // SuggestionsFromEvidence ranks deterministic evidence candidates. Repeated
@@ -54,7 +58,8 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 			continue
 		}
 		itemResult := rankedSuggestion{
-			suggestion: Suggestion{Link: Link{Document: document, Target: candidate.Path}},
+			suggestion:   Suggestion{Link: Link{Document: document, Target: candidate.Path}},
+			targetIsTest: isTestTarget(candidate.Path),
 		}
 		for _, item := range candidate.Evidence {
 			atom := suggestionEvidenceAtom(item)
@@ -182,7 +187,7 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	// Filename-based test counterparts need independent semantic support so a
 	// similarly named test in another service cannot qualify by structure alone.
 	if item.hasTestCounterpart && (item.hasDependencyNeighbor || item.hasRelatedDocumentTarget || item.hasSiblingTarget) {
-		return true
+		return item.targetIsTest || item.suggestion.Score >= HardLinkImplementationCounterpartMinimumScore
 	}
 	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
 		return true
@@ -190,6 +195,27 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	// A target inherited through a related document becomes link-worthy when it
 	// also changed directly with the current document.
 	return item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
+}
+
+func isTestTarget(value string) bool {
+	value = strings.ReplaceAll(value, "\\", "/")
+	for _, segment := range strings.Split(strings.ToLower(path.Dir(value)), "/") {
+		if segment == "test" || segment == "tests" || segment == "spec" || segment == "specs" {
+			return true
+		}
+	}
+	base := strings.ToLower(strings.TrimSuffix(path.Base(value), path.Ext(value)))
+	for _, prefix := range []string{"test_", "spec_"} {
+		if strings.HasPrefix(base, prefix) {
+			return true
+		}
+	}
+	for _, suffix := range []string{"_test", "_spec", ".test", ".spec"} {
+		if strings.HasSuffix(base, suffix) {
+			return true
+		}
+	}
+	return false
 }
 
 func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {
