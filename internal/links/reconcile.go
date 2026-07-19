@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/textio"
@@ -21,18 +22,39 @@ type replacement struct {
 }
 
 func Reconcile(repositoryRoot string) (Plan, error) {
+	plan, _, err := reconcileWithTimings(repositoryRoot)
+	return plan, err
+}
+
+func reconcileWithTimings(repositoryRoot string) (Plan, ReconcileTimings, error) {
+	started := time.Now()
+	var timings ReconcileTimings
+	plan, err := reconcile(repositoryRoot, &timings)
+	timings.Total = time.Since(started)
+	return plan, timings, err
+}
+
+func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 	root, err := filepath.Abs(repositoryRoot)
 	if err != nil {
 		return Plan{}, err
 	}
+
+	stateStarted := time.Now()
 	previousFiles, previousLinks, initialized, err := loadState(root)
+	timings.StateLoad = time.Since(stateStarted)
 	if err != nil {
 		return Plan{}, err
 	}
+
+	inventoryStarted := time.Now()
 	inventory, err := buildInventory(root, previousFiles)
+	timings.InventoryBuild = time.Since(inventoryStarted)
 	if err != nil {
 		return Plan{}, err
 	}
+
+	planningStarted := time.Now()
 	plan := Plan{
 		RepositoryRoot:      filepath.Clean(root),
 		Initialized:         initialized,
@@ -75,6 +97,7 @@ func Reconcile(repositoryRoot string) (Plan, error) {
 	}
 	plan.Files = inventory.manifest
 	sortManifests(&plan.Files, &plan.Links)
+	timings.Planning = time.Since(planningStarted)
 	return plan, nil
 }
 

@@ -4,22 +4,47 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
 func ApplyAndSave(plan *Plan) (int, error) {
+	updates, _, err := applyAndSaveWithTimings(plan)
+	return updates, err
+}
+
+func applyAndSaveWithTimings(plan *Plan) (int, ApplyTimings, error) {
+	started := time.Now()
+	var timings ApplyTimings
+	updates, err := applyAndSave(plan, &timings)
+	timings.Total = time.Since(started)
+	return updates, timings, err
+}
+
+func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
+	rewriteStarted := time.Now()
 	suppressions, err := ApplyGenerated(plan.Rewrites)
+	timings.FilesystemRewrite = time.Since(rewriteStarted)
 	if err != nil {
 		return 0, err
 	}
 	plan.Suppressions = suppressions
+
+	refreshStarted := time.Now()
 	if err := refreshGeneratedSources(plan); err != nil {
+		timings.GeneratedSourceRefresh = time.Since(refreshStarted)
 		return 0, err
 	}
+	timings.GeneratedSourceRefresh = time.Since(refreshStarted)
+
+	publicationStarted := time.Now()
 	if err := Save(*plan); err != nil {
+		timings.DdocsPublication = time.Since(publicationStarted)
 		return 0, err
 	}
+	timings.DdocsPublication = time.Since(publicationStarted)
+
 	return len(plan.Rewrites), nil
 }
 
