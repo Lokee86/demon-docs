@@ -27,7 +27,7 @@ func TestCLIFileAndRenderingOverrides(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			root := t.TempDir()
 			writeTestFile(t, filepath.Join(root, filepath.FromSlash(test.file)), "# Fixture\n")
-			args := append([]string{"fix", "--root", root}, test.args...)
+			args := append([]string{"fix", "-i", "--root", root}, test.args...)
 			var stdout, stderr bytes.Buffer
 			if code := Run(context.Background(), args, &stdout, &stderr); code != 0 {
 				t.Fatalf("code=%d stderr=%q", code, stderr.String())
@@ -56,7 +56,7 @@ func TestCLIParentLabelAndBooleanOverrides(t *testing.T) {
 	writeTestFile(t, filepath.Join(root, "page.md"), "# Page\n")
 	writeTestFile(t, filepath.Join(root, "guide", "topic.md"), "# Topic\n")
 	var stdout, stderr bytes.Buffer
-	args := []string{"fix", "--root", root, "--parent-label", "Up", "--parent-link-indexed-files", "--no-parent-link-folder-indexes"}
+	args := []string{"fix", "-i", "--root", root, "--parent-label", "Up", "--parent-link-indexed-files", "--no-parent-link-folder-indexes"}
 	if code := Run(context.Background(), args, &stdout, &stderr); code != 0 {
 		t.Fatalf("code=%d stderr=%q", code, stderr.String())
 	}
