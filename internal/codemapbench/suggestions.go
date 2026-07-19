@@ -28,9 +28,13 @@ type evidenceAtom struct {
 type rankedSuggestion struct {
 	suggestion               Suggestion
 	repeatedMentionCount     int
+	hasExactPathMention      bool
 	hasDeclaredSymbolMention bool
 	hasTestCounterpart       bool
 	hasDependencyNeighbor    bool
+	hasRelatedDocumentTarget bool
+	hasSiblingTarget         bool
+	hasGitDocumentCoChange   bool
 }
 
 // SuggestionsFromEvidence ranks deterministic evidence candidates. Repeated
@@ -82,12 +86,20 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 				itemResult.repeatedMentionCount = item.Count
 			}
 			switch item.Kind {
+			case evidence.KindExactPathMention:
+				itemResult.hasExactPathMention = true
 			case evidence.KindDeclaredSymbolMention:
 				itemResult.hasDeclaredSymbolMention = true
 			case evidence.KindTestCounterpart:
 				itemResult.hasTestCounterpart = true
 			case evidence.KindDependencyNeighbor:
 				itemResult.hasDependencyNeighbor = true
+			case evidence.KindRelatedDocumentTarget:
+				itemResult.hasRelatedDocumentTarget = true
+			case evidence.KindSiblingTarget:
+				itemResult.hasSiblingTarget = true
+			case evidence.KindGitDocumentCoChange:
+				itemResult.hasGitDocumentCoChange = true
 			}
 		}
 		sort.Strings(itemResult.suggestion.Evidence)
@@ -145,11 +157,13 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 	})
 
 	result := make([]Suggestion, 0, len(ordered))
-	for index, item := range ordered {
+	hardLinks := 0
+	for _, item := range ordered {
 		suggestion := item.suggestion
 		suggestion.Tier = SuggestionTierContext
-		if index < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
+		if hardLinks < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
 			suggestion.Tier = SuggestionTierHardLink
+			hardLinks++
 		}
 		result = append(result, suggestion)
 	}
@@ -157,10 +171,25 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 }
 
 func (item rankedSuggestion) isHardLinkCandidate() bool {
-	if item.hasDeclaredSymbolMention || item.hasTestCounterpart {
+	// An exact path mention is already explicit document context. Keep it in the
+	// context tier rather than proposing the same relationship as a hard link.
+	if item.hasExactPathMention {
+		return false
+	}
+	if item.hasDeclaredSymbolMention {
 		return true
 	}
-	return item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore
+	// Filename-based test counterparts need independent semantic support so a
+	// similarly named test in another service cannot qualify by structure alone.
+	if item.hasTestCounterpart && (item.hasDependencyNeighbor || item.hasRelatedDocumentTarget || item.hasSiblingTarget) {
+		return true
+	}
+	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
+		return true
+	}
+	// A target inherited through a related document becomes link-worthy when it
+	// also changed directly with the current document.
+	return item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
 }
 
 func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {

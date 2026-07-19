@@ -87,7 +87,37 @@ Measured against the same 150 labels:
 
 On the complete current Space Rocks source pool, 602 of 4,493 candidates are `hard_link` and 3,891 are `context`, averaging 4.04 hard-link candidates per mapped document. Nine of 149 documents have no hard-link candidate.
 
-The positive-only ten-link holdout still recovers 10/10 links because context candidates are not discarded. Four recovered links are in the hard-link tier and six remain context. Therefore the tuning improves the direct recommendation surface without pretending that the broader relevant context has no value. Hard-link-only recall remains deliberately lower and must continue to be measured alongside precision.
+The positive-only ten-link holdout still recovers 10/10 links because context candidates are not discarded. Four recovered links are in the hard-link tier and six remain context. Therefore the tuning improves the direct recommendation surface without pretending that the broader relevant context has no value. Hard-link sample coverage remains deliberately lower and must continue to be measured alongside precision.
+
+## Second tuning pass: explicit context and corroborated structure
+
+The second pass tightens the hard-link boundary without removing any candidate from the context pool:
+
+- exact path mentions remain `context` because the target is already explicitly exposed by the document;
+- source/test counterparts require independent dependency, related-document, or sibling evidence rather than qualifying through filename structure alone;
+- related-document targets can qualify when direct Git co-change with the current document corroborates the inherited relationship; and
+- the five-item hard-link cap counts qualifying candidates within the retained 30-candidate pool, so weaker context candidates do not consume hard-link slots merely because they rank higher.
+
+Measured against the same 150 labels:
+
+| Tier/metric | Result |
+|---|---:|
+| Hard-link suggestions | 70 |
+| Hard-link strict precision | 72.86% (51/70) |
+| Hard-link relevance precision | 97.14% (68/70) |
+| Hard-link recovery within labeled valid links | 72.86% (51/70) |
+| Hard-link suggestions per sampled document | 2.80 |
+| Context suggestions | 80 |
+| Context strict precision | 23.75% (19/80) |
+| Context relevance precision | 80.00% (64/80) |
+
+Compared with the first pass, strict precision rises 8.66 percentage points and relevance rises 2.08 points, while recovery within the labeled valid set falls 1.43 points. This is a favorable review-surface tradeoff: the hard tier contains fewer sampled suggestions, substantially fewer unnecessary links, and only two incorrect suggestions.
+
+On the complete pinned Space Rocks source pool, the Go implementation produces 631 `hard_link` and 3,862 `context` candidates across the same 4,493 total suggestions. That averages 4.23 hard-link candidates per mapped document, and 10 of 149 documents have no hard-link candidate. The full-pool hard count rises slightly from the first pass because qualifying lower-ranked candidates can now fill hard-link slots previously consumed by context-only candidates.
+
+The positive-only holdout again recovers 10/10 links, with four recovered links in `hard_link` and six in `context`. Thus overall discovery recall is unchanged even though the direct-review tier is stricter. The 72.86% figure above is sample coverage of manually labeled valid links, not an estimate of recall over every missing link in the repository.
+
+These rules are repository-agnostic, but their thresholds are still calibrated on one repository. Cross-repository validation remains necessary before claiming general precision.
 
 ## Reproduction
 

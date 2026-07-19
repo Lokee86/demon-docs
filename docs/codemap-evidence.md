@@ -33,8 +33,8 @@ Each candidate retains its evidence kind, source, detail, count, and a determini
 
 Ranked candidates are separated without discarding the broader relationship set:
 
-- `hard_link` identifies a bounded, high-confidence surface for direct codemap review. It is limited to the top five candidates per document and currently requires a declared-symbol mention, a source/test counterpart, or sufficiently strong dependency-neighbor evidence.
-- `context` identifies weaker or indirect relationships that can still improve bounded agent context. These candidates remain available even when they are not strong enough to recommend as permanent documentation links.
+- `hard_link` identifies a bounded, high-confidence surface for direct codemap review. At most five qualifying candidates are selected per document from the retained 30-candidate pool, even when weaker context candidates rank above them. A candidate currently qualifies through a declared-symbol mention; a source/test counterpart with independent dependency, related-document, or sibling support; dependency-neighbor evidence with score at least 16; or related-document evidence reinforced by direct Git co-change with the current document.
+- `context` identifies weaker, indirect, or already-explicit relationships that can still improve bounded agent context. Exact path mentions remain context because the document already exposes the target directly, and unsupported source/test counterparts remain context rather than qualifying by filename structure alone.
 
 A tier is not an automatic write decision. It does not declare an existing link irrelevant, and it does not bypass persisted declines or human review. Schema-1 reports created before tiers existed may omit the field; evaluation treats that legacy empty value as `context` and rejects unknown non-empty tier values.
 
