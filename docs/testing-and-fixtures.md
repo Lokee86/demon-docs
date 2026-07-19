@@ -61,6 +61,19 @@ Focused link tests cover:
 - initial baseline and incremental storage timing; and
 - watch-event suppression for expected generated writes.
 
+## Link Performance Benchmarks
+
+Link performance is measured at both package and full-CLI levels:
+
+- `BenchmarkInitialIndexing` measures a fresh 250-file repository;
+- `BenchmarkSingleFileIncrementalUpdate` measures one changed source in a converged 500-file repository;
+- `BenchmarkHighFanoutTargetMove` measures a target move requiring 250 source rewrites; and
+- the copied Space Rocks mass-rename harness renames 341 Markdown files and repairs 3,717 links per pass.
+
+The current recorded mass-rename median is 1.928 seconds for the first `ddocs fix -l` pass and 1.980 seconds for a repeated pass. The synthetic high-fanout move improved from 885–954 ms to 322–358 ms for the complete apply phase after generated source writes moved to a bounded 16-worker pool.
+
+See [Markdown Link Performance](link-performance.md) for the complete phase breakdown, throughput, methodology, historical comparison, and retained raw artifacts.
+
 ## Repository-Demon Coverage
 
 Daemon tests cover:
@@ -158,3 +171,6 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `internal/codemapprecision/*_test.go` — curated precision evaluation coverage.
 - `research/codemap-precision/` — pinned labels and evaluation artifacts.
 - `research/context-benchmarking/` — historical-task and harness research artifacts.
+- `research/link-performance/` — historical high-fanout and real-corpus move measurements.
+- `research/mass-rename-results/` — repeated whole-corpus rename correctness logs.
+- `research/mass-rename-timing/` — five-run mass-rename timing samples and summaries.

@@ -82,9 +82,11 @@ Before writing, every source must still match its expected old hash. Writes use 
 
 If a source changed concurrently, the generated rewrite aborts without overwriting the user's content. The next reconciliation processes that source through the external-edit path.
 
-Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing and a single-file incremental update so storage and scanning regressions remain visible.
+Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing, single-file incremental updates, high-fanout target moves, and repeated whole-corpus filename renames so storage, scanning, planning, and write regressions remain visible.
 
 Generated source rewrites are planned deterministically first, then applied through a bounded worker pool. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change the planned output, stored identities, or diagnostic ordering.
+
+Recorded Windows measurements show the 16-worker implementation applying a synthetic 250-source high-fanout move in 322–358 ms, compared with 885–954 ms before bounded parallel writes. A copied Space Rocks stress test repaired 3,717 links across 340 Markdown sources in a median 1.93–1.98 seconds per mass-rename pass. See [Markdown Link Performance](link-performance.md) for methodology, phase timings, throughput, and retained artifacts.
 
 ## Commands and Feature Selection
 

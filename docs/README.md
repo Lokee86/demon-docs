@@ -13,6 +13,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [Reconciliation Model](reconciliation-model.md): How Demon Docs scans, plans, applies, and verifies deterministic index and link updates.
 - [Watcher and Automation](watcher-and-automation.md): Foreground watch behavior and its relationship to the repository demon.
 - [Testing and Fixtures](testing-and-fixtures.md): Release gates, fixture strategy, link/codemap regression coverage, and research benchmarks.
+- [Markdown Link Performance](link-performance.md): High-fanout move benchmarks, real Space Rocks move timings, and repeated 3,717-link mass-rename measurements.
 - [Code-Folder Reverse Indexes](reverse-indexes.md): Implemented file/folder reverse documentation projections and the remaining symbol, repair, and reporting boundaries.
 - [Deterministic Typed Repository Graph](repository-graph.md): Back-burnered architecture for joining the existing documentation/link graph with normalized polyglot code facts.
 - [Code-Symbol References](code-symbol-references.md): Planned declaration-level references behind the same polyglot adapter seam as the future code graph.
@@ -31,6 +32,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [codemap-evidence.md](codemap-evidence.md) - Codemap Evidence documentation.
 - [configuration.md](configuration.md) - Configuration documentation.
 - [context-injection-benchmarking.md](context-injection-benchmarking.md) - Future context-injection benchmarking research plan.
+- [link-performance.md](link-performance.md) - Recorded link reconciliation, move, and mass-rename performance.
 - [markdown-links.md](markdown-links.md) - Markdown Links documentation.
 - [reconciliation-model.md](reconciliation-model.md) - Reconciliation Model documentation.
 - [repository-demon.md](repository-demon.md) - Repository Demon documentation.
