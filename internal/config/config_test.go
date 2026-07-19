@@ -10,7 +10,7 @@ import (
 
 func TestDefaultsAndAliases(t *testing.T) {
 	c := Default()
-	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles || !c.Demon.Run {
+	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles || !c.Demon.Run || !c.Index.Enabled || !c.Links.Enabled {
 		t.Fatalf("unexpected defaults: %+v", c)
 	}
 	dir := t.TempDir()
@@ -51,6 +51,11 @@ func TestCodemapHeadingsLoadFromConfig(t *testing.T) {
 	}
 	if !strings.Contains(StarterText(), "[codemap]\nheadings =") {
 		t.Fatal("starter config omitted codemap headings")
+	}
+	for _, section := range []string{"[index]\nenabled = true", "[links]\nenabled = true"} {
+		if !strings.Contains(StarterText(), section) {
+			t.Fatalf("starter config omitted %s", section)
+		}
 	}
 }
 
@@ -110,6 +115,60 @@ func TestDemonRunDefaultsAndAtomicEditPreserveText(t *testing.T) {
 	loaded, err = Load(path)
 	if err != nil || !loaded.Demon.Run {
 		t.Fatalf("re-enable failed: %+v %v", loaded, err)
+	}
+}
+
+func TestRepositoryFeatureSettingsLoadAndPreserveText(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.toml")
+	original := "# keep this comment\ndocs_root = \"docs\"\n\n[index]\nenabled = true # index comment\n\n[links]\nenabled = true # links comment\n"
+	if err := os.WriteFile(path, []byte(original), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetIndexEnabled(path, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetLinksEnabled(path, false); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Index.Enabled || loaded.Links.Enabled {
+		t.Fatalf("feature settings were not disabled: %+v", loaded)
+	}
+	text, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"# keep this comment", "enabled = false # index comment", "enabled = false # links comment"} {
+		if !strings.Contains(string(text), want) {
+			t.Fatalf("updated config missing %q: %s", want, text)
+		}
+	}
+}
+
+func TestFeatureSettingsAddMissingSections(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.toml")
+	if err := os.WriteFile(path, []byte("docs_root = \"docs\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetIndexEnabled(path, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := SetLinksEnabled(path, false); err != nil {
+		t.Fatal(err)
+	}
+	text, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"[index]\nenabled = false", "[links]\nenabled = false"} {
+		if !strings.Contains(string(text), want) {
+			t.Fatalf("missing feature section %q: %s", want, text)
+		}
 	}
 }
 

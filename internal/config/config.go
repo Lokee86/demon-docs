@@ -37,6 +37,8 @@ type Review struct {
 	UndoDepth      int
 	UndoMaxAgeDays int
 }
+type Index struct{ Enabled bool }
+type Links struct{ Enabled bool }
 type ReverseIndex struct{ Roots []string }
 type Codemap struct{ Headings []string }
 type Template struct {
@@ -55,6 +57,8 @@ type Config struct {
 	Template        Template
 	Demon           Demon
 	Review          Review
+	Index           Index
+	Links           Links
 	ReverseIndex    ReverseIndex
 	Codemap         Codemap
 }
@@ -70,6 +74,8 @@ func Default() Config {
 		Template:     Template{[]string{"files", "stubs", "folders"}, true, true, true, true},
 		Demon:        Demon{Run: true},
 		Review:       Review{UndoDepth: 100, UndoMaxAgeDays: 30},
+		Index:        Index{Enabled: true},
+		Links:        Links{Enabled: true},
 		ReverseIndex: ReverseIndex{Roots: []string{}},
 		Codemap: Codemap{Headings: []string{
 			"Code map",
@@ -89,7 +95,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
 }
 
 type rawConfig struct {
@@ -134,6 +140,12 @@ type rawConfig struct {
 		UndoDepth      *int `toml:"undo_depth"`
 		UndoMaxAgeDays *int `toml:"undo_max_age_days"`
 	} `toml:"review"`
+	Index *struct {
+		Enabled *bool `toml:"enabled"`
+	} `toml:"index"`
+	Links *struct {
+		Enabled *bool `toml:"enabled"`
+	} `toml:"links"`
 	ReverseIndex *struct {
 		Roots   *[]string `toml:"roots"`
 		Folders *[]string `toml:"folders"`
@@ -255,6 +267,12 @@ func Load(path string) (Config, error) {
 			c.Review.UndoMaxAgeDays = *review.UndoMaxAgeDays
 		}
 	}
+	if index := raw.Index; index != nil && index.Enabled != nil {
+		c.Index.Enabled = *index.Enabled
+	}
+	if links := raw.Links; links != nil && links.Enabled != nil {
+		c.Links.Enabled = *links.Enabled
+	}
 	if r := raw.ReverseIndex; r != nil {
 		if r.Roots != nil {
 			c.ReverseIndex.Roots = *r.Roots
@@ -297,12 +315,24 @@ func Load(path string) (Config, error) {
 // config file. The line-oriented edit intentionally keeps comments, unknown
 // keys, and formatting outside this setting intact.
 func SetDemonRun(path string, enabled bool) error {
+	return setBoolean(path, "demon", "run", enabled)
+}
+
+func SetIndexEnabled(path string, enabled bool) error {
+	return setBoolean(path, "index", "enabled", enabled)
+}
+
+func SetLinksEnabled(path string, enabled bool) error {
+	return setBoolean(path, "links", "enabled", enabled)
+}
+
+func setBoolean(path, section, key string, enabled bool) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
 	text := string(data)
-	updated := setDemonRunText(text, enabled)
+	updated := setBooleanText(text, section, key, enabled)
 	if updated == text {
 		return nil
 	}
@@ -331,26 +361,30 @@ func SetDemonRun(path string, enabled bool) error {
 }
 
 func setDemonRunText(text string, enabled bool) string {
+	return setBooleanText(text, "demon", "run", enabled)
+}
+
+func setBooleanText(text, sectionName, key string, enabled bool) string {
 	value := strconv.FormatBool(enabled)
 	lines := strings.SplitAfter(text, "\n")
 	section := -1
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(strings.TrimSuffix(line, "\r\n"))
 		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
-			if trimmed == "[demon]" {
+			if trimmed == "["+sectionName+"]" {
 				section = i
 				continue
 			}
 			if section >= 0 {
-				lines = append(lines[:i], append([]string{"run = " + value + "\n"}, lines[i:]...)...)
+				lines = append(lines[:i], append([]string{key + " = " + value + "\n"}, lines[i:]...)...)
 				return strings.Join(lines, "")
 			}
 		}
 		if section >= 0 {
 			content := strings.TrimSuffix(strings.TrimSuffix(line, "\n"), "\r")
-			if strings.HasPrefix(strings.TrimSpace(content), "run") {
+			if strings.HasPrefix(strings.TrimSpace(content), key) {
 				prefix := content[:len(content)-len(strings.TrimLeft(content, " \t"))]
-				rest := strings.TrimSpace(strings.TrimSpace(content)[len("run"):])
+				rest := strings.TrimSpace(strings.TrimSpace(content)[len(key):])
 				if strings.HasPrefix(rest, "=") {
 					comment := ""
 					if at := strings.Index(rest, "#"); at >= 0 {
@@ -360,7 +394,7 @@ func setDemonRunText(text string, enabled bool) string {
 					if strings.HasSuffix(line, "\r\n") {
 						ending = "\r\n"
 					}
-					lines[i] = prefix + "run = " + value + comment + ending
+					lines[i] = prefix + key + " = " + value + comment + ending
 					return strings.Join(lines, "")
 				}
 			}
@@ -371,14 +405,14 @@ func setDemonRunText(text string, enabled bool) string {
 		if len(text) > 0 && !strings.HasSuffix(text, "\n") {
 			ending = "\n"
 		}
-		lines = append(lines, ending+"run = "+value+"\n")
+		lines = append(lines, ending+key+" = "+value+"\n")
 		return strings.Join(lines, "")
 	}
 	separator := ""
 	if text != "" && !strings.HasSuffix(text, "\n") {
 		separator = "\n"
 	}
-	return text + separator + "\n[demon]\nrun = " + value + "\n"
+	return text + separator + "\n[" + sectionName + "]\n" + key + " = " + value + "\n"
 }
 
 func LocalPath(cwd string) string {

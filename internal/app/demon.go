@@ -316,7 +316,12 @@ func demonServe(ctx context.Context, args []string, out, errOut io.Writer) int {
 			return resolveErr
 		}
 		scope := repository.Scope{RepositoryRoot: location.Root, DocsRoot: docsRoot, ConfigPath: location.ConfigPath, IgnorePath: filepath.Join(location.Root, ".docignore"), Initialized: true}
-		features := watch.Features{Indexes: true, Links: true, Reverse: len(c.ReverseIndex.Roots) > 0}
+		features := watch.Features{
+			Indexes:    c.Index.Enabled,
+			Links:      c.Links.Enabled,
+			TrackLinks: true,
+			Reverse:    len(c.ReverseIndex.Roots) > 0,
+		}
 		reverse := reverseOptions{}
 		if features.Reverse {
 			reverse, resolveErr = resolveReverseOptions(commonFlags{}, c, scope)

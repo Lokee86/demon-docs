@@ -177,6 +177,27 @@ func TestRotatingLogIsBounded(t *testing.T) {
 	}
 }
 
+func TestServeConsumesShutdownRequest(t *testing.T) {
+	r := testRuntime(t)
+	owner, won, err := r.Claim(1)
+	if err != nil || !won {
+		t.Fatal(err)
+	}
+	if err := r.RequestShutdown(); err != nil {
+		t.Fatal(err)
+	}
+	err = r.Serve(context.Background(), owner, func() (bool, error) { return true, nil }, func(ctx context.Context, _ io.Writer) error {
+		<-ctx.Done()
+		return nil
+	}, io.Discard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.ShutdownRequested() {
+		t.Fatal("served shutdown request was not cleared for a replacement owner")
+	}
+}
+
 func TestServeStopsAfterGraceWithoutFeeders(t *testing.T) {
 	r := testRuntime(t)
 	r.Timing.ShutdownGrace = 30 * time.Millisecond
