@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
@@ -15,10 +16,18 @@ import (
 )
 
 func Watch(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, debounce time.Duration, once bool, out io.Writer) error {
+	return WatchWithRunLock(ctx, repositoryRoot, docsRoot, roots, c, format, debounce, once, out, nil)
+}
+
+func WatchWithRunLock(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, debounce time.Duration, once bool, out io.Writer, runLock sync.Locker) error {
 	if out == nil {
 		out = io.Discard
 	}
 	run := func() error {
+		if runLock != nil {
+			runLock.Lock()
+			defer runLock.Unlock()
+		}
 		plan, err := Build(repositoryRoot, docsRoot, roots, c, format)
 		if err != nil {
 			return err
