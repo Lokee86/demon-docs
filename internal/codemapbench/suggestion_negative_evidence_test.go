@@ -25,11 +25,37 @@ func TestSuggestionsFromEvidenceRejectsUnownedDependencyLockfiles(t *testing.T) 
 				Count:  1,
 			}},
 		},
+		{
+			Path: "services/runtime/go.sum",
+			Evidence: []evidence.Evidence{
+				{
+					Kind:   evidence.KindSiblingTarget,
+					Source: "services/runtime/",
+					Detail: "module sibling",
+					Count:  1,
+				},
+				{
+					Kind:   evidence.KindGitDocumentCoChange,
+					Source: "docs/runtime.md",
+					Detail: "co-change",
+					Count:  1,
+				},
+			},
+		},
 	}
 
 	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
-	if len(suggestions) != 1 || suggestions[0].Target != "vendor/checksums.lock" {
+	if len(suggestions) != 2 {
 		t.Fatalf("unexpected lockfile suggestions: %#v", suggestions)
+	}
+	byTarget := make(map[string]Suggestion, len(suggestions))
+	for _, suggestion := range suggestions {
+		byTarget[suggestion.Target] = suggestion
+	}
+	for _, target := range []string{"vendor/checksums.lock", "services/runtime/go.sum"} {
+		if _, exists := byTarget[target]; !exists {
+			t.Fatalf("supported lockfile %q was removed: %#v", target, suggestions)
+		}
 	}
 }
 

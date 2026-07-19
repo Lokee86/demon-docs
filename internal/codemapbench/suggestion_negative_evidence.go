@@ -13,11 +13,12 @@ type suggestionEvidenceProfile struct {
 	hasDeclaredSymbolMention bool
 	hasDependencyNeighbor    bool
 	hasRelatedDocumentTarget bool
+	hasSupportingEvidence    bool
 }
 
 func rejectIncidentalSuggestionCandidate(candidate evidence.Candidate) bool {
 	profile := profileSuggestionEvidence(candidate.Evidence)
-	if isDependencyLockfile(candidate.Path) && !profile.hasOwnershipEvidence() {
+	if isDependencyLockfile(candidate.Path) && !profile.hasSupportingEvidence {
 		return true
 	}
 	if profile.hasUniqueBasenameMention && !profile.hasExplicitOrOwnershipEvidence() {
@@ -40,6 +41,9 @@ func profileSuggestionEvidence(items []evidence.Evidence) suggestionEvidenceProf
 			profile.hasDependencyNeighbor = true
 		case evidence.KindRelatedDocumentTarget:
 			profile.hasRelatedDocumentTarget = true
+		}
+		if item.Kind != evidence.KindExactPathMention && item.Kind != evidence.KindUniqueBasenameMention {
+			profile.hasSupportingEvidence = true
 		}
 	}
 	return profile
