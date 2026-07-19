@@ -25,6 +25,7 @@ You keep owning the actual files and hand-written content. Index reconciliation 
 - undefined explicit and collapsed Markdown reference labels
 - stable file identities, link history, reverse indexes, and generated-write state in the private `.ddocs/` object repository
 - deterministic codemap extraction, evidence collection, holdout benchmarking, precision sampling, and tiered missing-link candidates
+- repository-local suggestion decisions, Git-backed applied-change history, bounded undo, and repair blocks
 - optional repository-local watcher ownership, feeder heartbeats, linked-worktree state, and bounded logs
 
 It preserves hand-authored content outside managed index blocks and preserves link labels, titles, query strings, and fragments when updating a path.
@@ -126,6 +127,8 @@ ddocs codemap --help
 ddocs codemap export --help
 ddocs codemap benchmark --help
 ddocs codemap precision --help
+ddocs suggestions --help
+ddocs changes --help
 ddocs demon --help
 ```
 
@@ -222,6 +225,26 @@ ddocs codemap precision --help
 `codemap export` scans configured codemap headings and writes a deterministic dataset containing documents, normalized targets, resolution diagnostics, and content hashes. `benchmark` removes known authored targets in controlled holdouts and measures whether the deterministic evidence system recovers them. `precision` generates, samples, and evaluates ranked suggestions against curated labels. Candidates are divided into `hard_link` and `context` tiers; neither tier authorizes automatic documentation edits.
 
 See [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for evidence signals, current benchmark results, safety rules, and research artifacts.
+
+Suggestion review and applied-change history:
+
+```bash
+ddocs suggestions [FILE]
+ddocs suggestions show SUGGESTION
+ddocs suggestions select SUGGESTION [CANDIDATE]
+ddocs suggestions decline SUGGESTION [CANDIDATE] --reason "..."
+ddocs suggestions reconsider SUGGESTION
+
+ddocs changes [FILE]
+ddocs changes related FILE
+ddocs changes show CHANGE
+ddocs changes undo CHANGE [--repair REPAIR] [--block]
+ddocs changes undo-run RUN [--block]
+ddocs changes block CHANGE [--repair REPAIR]
+ddocs changes unblock CHANGE [--repair REPAIR]
+```
+
+Ambiguous link repairs and codemap missing-link candidates are suggestions. Selecting one converts it into the normal hash-guarded repair path. Deterministic single-target link repairs remain automatic but are recorded as inspectable changes. Undo is available by reconciliation run, file change, or individual repair while the recorded after-state still matches. See [Suggestions, Repairs, and Change History](docs/review-ledger.md).
 
 ## Config Selection
 
@@ -640,6 +663,7 @@ That script generates a synthetic documentation tree for manual reconciliation t
 - treat a codemap suggestion as an authored relationship
 - recommend removing an existing codemap link as irrelevant
 - guess when more than one link or code target is plausible
+- perform arbitrary historical selective reverts through later user edits
 
 Index writes are confined to the configured docs root. Link rewrites are confined to repository Markdown source files and require one deterministic target. Codemap commands remain export, benchmark, and review tooling; they do not silently modify authored codemap sections. Symbolic-link entries are not traversed or edited.
 

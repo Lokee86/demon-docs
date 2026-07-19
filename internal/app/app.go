@@ -133,22 +133,26 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runTree(ctx, args[0], args[1:], out, errOut)
 	case "codemap":
 		return runCodemap(ctx, args[1:], out, errOut)
+	case "suggestions":
+		return runSuggestions(ctx, args[1:], out, errOut)
+	case "changes":
+		return runChanges(args[1:], out, errOut)
 	case "config":
 		return runConfig(args[1:], out, errOut)
 	case "demon":
 		return runDemon(ctx, args[1:], out, errOut)
 	default:
 		fmt.Fprintln(errOut, topUsageLine)
-		choices := "init, status, fix, check, watch, codemap, config, demon"
+		choices := "init, status, fix, check, watch, codemap, suggestions, changes, config, demon"
 		if runtime.GOOS == "windows" {
-			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'config', 'demon'"
+			choices = "'init', 'status', 'fix', 'check', 'watch', 'codemap', 'suggestions', 'changes', 'config', 'demon'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintf(w, "%s\n\nddocs reconciles documentation indexes, reverse indexes, and repository-local links in Markdown documents with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation-folder indexes\n  -l, --links           repository-local Markdown links\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
+	fmt.Fprintf(w, "%s\n\nddocs reconciles documentation indexes, reverse indexes, and repository-local links in Markdown documents with the filesystem.\n\npositional arguments:\n  {init,status,fix,check,watch,codemap,suggestions,changes,config,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation-folder indexes\n  -l, --links           repository-local Markdown links\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -887,5 +891,5 @@ func show(w io.Writer, c config.Config, path string) {
 	if selected == "" {
 		selected = "<built-in defaults>"
 	}
-	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[review]\nundo_depth = %d\nundo_max_age_days = %d\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), c.Review.UndoDepth, c.Review.UndoMaxAgeDays, quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
 }

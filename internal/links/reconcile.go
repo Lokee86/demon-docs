@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/review"
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
@@ -66,10 +67,14 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 		plan.Messages = append(plan.Messages, "Link state is not initialized; this pass records a baseline and does not repair links.")
 	}
 
+	policy, err := review.LoadPolicy(root)
+	if err != nil {
+		return Plan{}, fmt.Errorf("load review policy: %w", err)
+	}
 	previousBySource := previousLinkIndex(previousLinks)
 	previousByID := fileRecordIndex(previousFiles)
 	currentByID := fileRecordIndex(inventory.manifest)
-	internal, err := buildInternalMoveRewrites(root, previousBySource, previousByID, currentByID)
+	internal, err := buildInternalMoveRewrites(root, previousBySource, previousByID, currentByID, policy)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -84,6 +89,7 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 			}
 			plan.Links.Links = append(plan.Links.Links, rewrite.records...)
 			plan.Messages = append(plan.Messages, rewrite.messages...)
+			plan.Unresolved += rewrite.unresolved
 			continue
 		}
 		previousSource := previousByID[source.record.ID]
@@ -95,7 +101,7 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 			}
 			continue
 		}
-		if err := reconcileMarkdownSource(&plan, inventory, source, previousRecords, initialized); err != nil {
+		if err := reconcileMarkdownSource(&plan, inventory, source, previousRecords, initialized, policy); err != nil {
 			return Plan{}, err
 		}
 	}
@@ -106,13 +112,14 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 }
 
 type internalRewritePlan struct {
-	rewrite  GeneratedRewrite
-	update   model.FileUpdate
-	records  []LinkRecord
-	messages []string
+	rewrite    GeneratedRewrite
+	update     model.FileUpdate
+	records    []LinkRecord
+	messages   []string
+	unresolved int
 }
 
-func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRecord, previousByID, currentByID map[string]*FileRecord) (map[string]internalRewritePlan, error) {
+func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRecord, previousByID, currentByID map[string]*FileRecord, policy review.Policy) (map[string]internalRewritePlan, error) {
 	movedTargets := make(map[string]*FileRecord)
 	for id, current := range currentByID {
 		previous := previousByID[id]
@@ -146,6 +153,7 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 		records := append([]LinkRecord(nil), previousRecords...)
 		var replacements []replacement
 		var messages []string
+		unresolved := 0
 		metadataChanged := false
 		for index := range records {
 			target := movedTargets[records[index].TargetFileID]
@@ -166,6 +174,19 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 				metadataChanged = true
 				continue
 			}
+			if state, decision := reviewRepairPolicy(policy, sourceID, currentSource.Path, records[index], records[index].RawPath, newPath, target.ID); state != review.MatchNone {
+				records[index].SourcePath = currentSource.Path
+				records[index].Candidates = []string{target.Path}
+				records[index].Status = "blocked"
+				label := "Blocked"
+				if state == review.MatchStale {
+					records[index].Status = "stale_block"
+					label = "Stale blocked"
+				}
+				messages = append(messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, currentSource.Path, records[index].Line, records[index].RawPath, newPath, reviewReason(decision.Reason)))
+				unresolved++
+				continue
+			}
 			replacements = append(replacements, replacement{
 				linkID:   records[index].ID,
 				start:    records[index].Start,
@@ -181,8 +202,8 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 			messages = append(messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", currentSource.Path, records[index].Line, replacements[len(replacements)-1].oldValue, newPath))
 		}
 		if len(replacements) == 0 {
-			if metadataChanged {
-				result[sourceID] = internalRewritePlan{records: records}
+			if metadataChanged || unresolved > 0 {
+				result[sourceID] = internalRewritePlan{records: records, messages: messages, unresolved: unresolved}
 			}
 			continue
 		}
@@ -194,16 +215,17 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 		updated := applyReplacements(document.Text, replacements)
 		old := document.Text
 		result[sourceID] = internalRewritePlan{
-			rewrite:  rewrite,
-			update:   model.FileUpdate{Path: sourcePath, OldText: &old, NewText: updated},
-			records:  records,
-			messages: messages,
+			rewrite:    rewrite,
+			update:     model.FileUpdate{Path: sourcePath, OldText: &old, NewText: updated},
+			records:    records,
+			messages:   messages,
+			unresolved: unresolved,
 		}
 	}
 	return result, nil
 }
 
-func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized bool) error {
+func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized bool, policy review.Policy) error {
 	document, err := textio.Read(source.path)
 	if err != nil {
 		return fmt.Errorf("read Markdown source %s: %w", source.path, err)
@@ -263,10 +285,22 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 				record.Status = "case_mismatch"
 				if initialized {
 					newPath := renderTargetForSyntax(found.Syntax, found.RawPath, style, source.path, actualPath)
-					replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
-					record.RawPath = newPath
-					record.Target = newPath + found.Suffix
-					plan.Messages = append(plan.Messages, fmt.Sprintf("Updated link case in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+					if state, decision := reviewRepairPolicy(policy, source.record.ID, source.record.Path, record, found.RawPath, newPath, targetRecord.ID); state != review.MatchNone {
+						record.Status = "blocked"
+						label := "Blocked"
+						if state == review.MatchStale {
+							record.Status = "stale_block"
+							label = "Stale blocked"
+						}
+						record.Candidates = []string{storePath(inventory.root, actualPath)}
+						plan.Unresolved++
+						plan.Messages = append(plan.Messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason)))
+					} else {
+						replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+						record.RawPath = newPath
+						record.Target = newPath + found.Suffix
+						plan.Messages = append(plan.Messages, fmt.Sprintf("Updated link case in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+					}
 				}
 			}
 			plan.Links.Links = append(plan.Links.Links, record)
@@ -304,11 +338,22 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			if newPath == found.RawPath {
 				record.Status = "valid"
 			} else {
-				record.Status = "moved"
-				replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
-				record.RawPath = newPath
-				record.Target = newPath + found.Suffix
-				plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+				if state, decision := reviewRepairPolicy(policy, source.record.ID, source.record.Path, record, found.RawPath, newPath, targetRecord.ID); state != review.MatchNone {
+					record.Status = "blocked"
+					label := "Blocked"
+					if state == review.MatchStale {
+						record.Status = "stale_block"
+						label = "Stale blocked"
+					}
+					plan.Unresolved++
+					plan.Messages = append(plan.Messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason)))
+				} else {
+					record.Status = "moved"
+					replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+					record.RawPath = newPath
+					record.Target = newPath + found.Suffix
+					plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+				}
 			}
 		default:
 			record.Status = "ambiguous"

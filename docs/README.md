@@ -7,6 +7,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 
 - [Roadmap](roadmap.md): Current shipped behavior, active tuning work, near-term work, and the back-burnered polyglot code-graph track.
 - [Codemap Missing-Link Evidence](codemap-evidence.md): Implemented codemap export, evidence, holdout benchmarking, precision evaluation, current metrics, and decision-safety rules.
+- [Suggestions, Repairs, and Change History](review-ledger.md): Suggestion decisions, Git-backed applied-change history, undo granularity, and repair blocks.
 - [Markdown Link Reconciliation](markdown-links.md): Repository-scoped link validation, persistent identity state, supported syntax, and deterministic path repair.
 - [Repository Demon](repository-demon.md): Self-managed watcher ownership, shell and agent feeders, worktrees, shutdown, recovery, and logs.
 - [Configuration](configuration.md): Config selection, repository settings, defaults, and supported CLI overrides.
@@ -38,6 +39,7 @@ This `docs/` folder holds deeper design, operational, research, and maintenance 
 - [repository-demon.md](repository-demon.md) - Repository Demon documentation.
 - [repository-graph.md](repository-graph.md) - Repository Graph documentation.
 - [reverse-indexes.md](reverse-indexes.md) - Reverse Indexes documentation.
+- [review-ledger.md](review-ledger.md) - Suggestions, repairs, applied-change history, undo, and repair blocks.
 - [roadmap.md](roadmap.md) - Roadmap documentation.
 - [testing-and-fixtures.md](testing-and-fixtures.md) - Testing And Fixtures documentation.
 - [watcher-and-automation.md](watcher-and-automation.md) - Watcher And Automation documentation.

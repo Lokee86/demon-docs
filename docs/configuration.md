@@ -54,6 +54,8 @@ The supported keys are:
 - `[template].include_related_docs`
 - `[template].include_notes`
 - `[demon].run`
+- `[review].undo_depth`
+- `[review].undo_max_age_days`
 
 ## Repository Demon
 
@@ -76,6 +78,18 @@ correctness dependency. `check`, `fix`, and foreground `watch` remain available
 when it is disabled. Shell hooks use `shell` feeders; MCP and native host
 adapters can use the host-neutral `agent` feeder lifecycle without moving host
 logic into Demon Docs core. See [Repository Demon](repository-demon.md).
+
+## Review and Undo
+
+```toml
+[review]
+undo_depth = 100
+undo_max_age_days = 30
+```
+
+`undo_depth` limits how many recent non-undo applied changes remain eligible for reversal. `0` disables undo and `-1` removes the depth limit. `undo_max_age_days` limits eligibility by age; `0` removes the age limit. These settings do not delete audit history.
+
+Demon Docs supports undo by reconciliation run, one file change, or one repair within a file change. Every undo remains hash-guarded and refuses to overwrite later edits. See [Suggestions, Repairs, and Change History](review-ledger.md).
 
 ## Codemap Configuration
 
@@ -209,6 +223,10 @@ ignored_suffixes = ["~", ".swp", ".tmp", ".bak"]
 
 [demon]
 run = true
+
+[review]
+undo_depth = 100
+undo_max_age_days = 30
 
 [template]
 include_ownership = true
@@ -560,7 +578,7 @@ In that setup:
 
 ## Link State
 
-Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing, but exposes no Git workflow for this state.
+Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing. Link state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither ref creates commits in the user's normal Git history.
 
 The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 
@@ -573,3 +591,4 @@ The first link-enabled `fix` or `watch` pass establishes this baseline without r
 - `internal/repository/scope.go` — repository-root and docs-root resolution boundaries.
 - `internal/repository/repository.go` — repository discovery and initialization.
 - `internal/links/` — schema-versioned link state governed by repository scope rather than TOML keys.
+- `internal/review/` — review history, decisions, blocks, and undo eligibility.
