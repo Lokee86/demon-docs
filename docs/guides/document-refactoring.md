@@ -96,6 +96,7 @@ Inspect the reported rollback result and Git status. The command attempts restor
 ## Related docs
 
 - [CLI Reference](../reference/cli.md)
+- [Stateless Move Transaction](../architecture/stateless-move-transaction.md)
 - [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
