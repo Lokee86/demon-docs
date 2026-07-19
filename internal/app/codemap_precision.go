@@ -17,14 +17,14 @@ import (
 const precisionSampleSeed = "demon-docs-codemap-precision-sample-v1"
 
 func codemapPrecisionHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap precision [-h] {source,sample,evaluate} ...\n\nGenerate a current suggestion report, create a deterministic unlabeled sample, or evaluate a fully labeled benchmark.\n\nsubcommands:\n  source              generate current suggestions with authored links visible\n  sample              create an unlabeled precision benchmark template\n  evaluate            evaluate a fully labeled precision benchmark\n\nThe legacy flag-only form is equivalent to evaluate.")
+	fmt.Fprintln(w, "usage: ddocs codemap precision [-h] {source,sample,evaluate} ...\n\nGenerate a current suggestion report, create a deterministic unlabeled sample, or evaluate a fully labeled benchmark. These research commands never edit authored codemap sections.\n\nsubcommands:\n  source              generate current suggestions with authored links visible\n  sample              create an unlabeled precision benchmark template\n  evaluate            evaluate a fully labeled precision benchmark\n\noptions:\n  -h, --help          show this help message and exit\n\nRun `ddocs codemap precision <subcommand> --help` for exact inputs and output behavior. The legacy flag-only form is equivalent to evaluate.")
 }
 
 func runCodemapPrecision(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if err := ctx.Err(); err != nil {
 		return fail(errOut, err)
 	}
-	if helpRequested(args) {
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
 		codemapPrecisionHelp(out)
 		return 0
 	}
@@ -35,14 +35,14 @@ func runCodemapPrecision(ctx context.Context, args []string, out, errOut io.Writ
 		return runCodemapPrecisionSample(args[1:], out, errOut)
 	}
 	if len(args) > 0 && args[0] == "evaluate" {
-		args = args[1:]
+		return runCodemapPrecisionEvaluate(args[1:], out, errOut)
 	}
 	return runCodemapPrecisionEvaluate(args, out, errOut)
 }
 
 func runCodemapPrecisionSample(args []string, out, errOut io.Writer) int {
 	if helpRequested(args) {
-		fmt.Fprintln(out, "usage: ddocs codemap precision sample [-h] --suggestions PATH [--count N] [--seed TEXT] [--repository TEXT] [--revision TEXT] [--output PATH]\n\nCreate a deterministic unlabeled precision benchmark template.")
+		fmt.Fprintln(out, "usage: ddocs codemap precision sample [-h] --suggestions PATH [--count N]\n                                      [--seed TEXT] [--repository TEXT]\n                                      [--revision TEXT] [--output PATH]\n\nCreate a deterministic unlabeled precision benchmark template from one current-suggestion JSON report. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --suggestions PATH  source report produced by `precision source`\n  --count N           number of suggestions to sample (default 150)\n  --seed TEXT         deterministic sampling seed\n  --repository TEXT   repository metadata recorded in the sample\n  --revision TEXT     revision metadata recorded in the sample\n  --output PATH       write JSON to a file instead of stdout")
 		return 0
 	}
 	fs := flag.NewFlagSet("ddocs codemap precision sample", flag.ContinueOnError)
@@ -112,7 +112,7 @@ func runCodemapPrecisionSample(args []string, out, errOut io.Writer) int {
 
 func runCodemapPrecisionEvaluate(args []string, out, errOut io.Writer) int {
 	if helpRequested(args) {
-		fmt.Fprintln(out, "usage: ddocs codemap precision evaluate [-h] --benchmark PATH --suggestions PATH [--format {text,json}] [--output PATH]\n\nEvaluate a fully labeled codemap precision benchmark against a deterministic suggestion report.")
+		fmt.Fprintln(out, "usage: ddocs codemap precision evaluate [-h] --benchmark PATH --suggestions PATH\n                                        [--format {text,json}] [--output PATH]\n\nEvaluate a fully labeled precision benchmark against the deterministic suggestion report used to produce or compare the sample. The report is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --benchmark PATH    fully labeled precision benchmark JSON\n  --suggestions PATH  deterministic current-suggestion report JSON\n  --format FORMAT     text or json (default text)\n  --output PATH       write the report to a file instead of stdout")
 		return 0
 	}
 	fs := flag.NewFlagSet("ddocs codemap precision evaluate", flag.ContinueOnError)

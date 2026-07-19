@@ -12,11 +12,17 @@ import (
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	args := os.Args[1:]
-	if len(args) > 0 && args[0] != "demon" && isDemonCommand(args[0]) {
-		args = append([]string{"demon"}, args...)
+	os.Exit(app.Run(ctx, normalizeDemonArgs(os.Args[1:]), os.Stdout, os.Stderr))
+}
+
+func normalizeDemonArgs(args []string) []string {
+	if len(args) == 0 || args[0] == "-h" || args[0] == "--help" {
+		return []string{"demon", "--help"}
 	}
-	os.Exit(app.Run(ctx, args, os.Stdout, os.Stderr))
+	if args[0] != "demon" && isDemonCommand(args[0]) {
+		return append([]string{"demon"}, args...)
+	}
+	return args
 }
 
 func isDemonCommand(command string) bool {

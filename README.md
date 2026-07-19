@@ -105,7 +105,7 @@ Subsystem selectors:
 --reverse  code-folder reverse indexes
 ```
 
-Use `ddocs <command> --help` for exact flags. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
+Use `ddocs <command> --help` or `ddocs <command> <subcommand> --help` for exact scoped flags and safety behavior. `demon --help` opens the repository-demon command family. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
 
 ## Safety model
 

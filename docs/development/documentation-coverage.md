@@ -30,7 +30,7 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 | Code boundary | Responsibility | Canonical current docs |
 | --- | --- | --- |
 | `cmd/ddocs/` | Canonical executable entry | [Application Orchestration](../architecture/application-orchestration.md), [CLI Reference](../reference/cli.md) |
-| `cmd/demon/` | Alias executable entry | [Application Orchestration](../architecture/application-orchestration.md), [Repository Demon](../operations/repository-demon.md) |
+| `cmd/demon/` | Repository-demon alias entry and argument normalization | [Application Orchestration](../architecture/application-orchestration.md), [Repository Demon](../operations/repository-demon.md), [CLI Reference](../reference/cli.md) |
 | `internal/app/` | Command parsing, selection, orchestration, output, aggregate result | [Application Orchestration](../architecture/application-orchestration.md), [CLI Reference](../reference/cli.md), command-specific guides |
 | `internal/app/move.go` | Stateless move command integration | [Stateless Document Refactoring](../guides/document-refactoring.md), [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md) |
 | `internal/app/orphans.go` | Orphan health projection | [Document Health Checks](../guides/document-health-checks.md), [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
@@ -93,7 +93,8 @@ The root README and roadmap are entry and status documents. They do not satisfy 
 
 | Public surface | Task guide | Exact/current owner |
 | --- | --- | --- |
-| Install, initialize, first baseline | [Getting Started](../guides/getting-started.md) | [CLI Reference](../reference/cli.md), [Configuration Reference](../reference/configuration.md) |
+| Install, version, and scoped help discovery | [Getting Started](../guides/getting-started.md) | [CLI Reference](../reference/cli.md), [Testing and Fixtures](testing-and-fixtures.md) |
+| Initialize and first baseline | [Getting Started](../guides/getting-started.md) | [CLI Reference](../reference/cli.md), [Configuration Reference](../reference/configuration.md) |
 | `status`, `config paths`, `config show` | [Getting Started](../guides/getting-started.md) | [Configuration Reference](../reference/configuration.md) |
 | `check`, `fix`, selectors | [Getting Started](../guides/getting-started.md), [CI and Automation](../guides/ci-and-automation.md) | [CLI Reference](../reference/cli.md), [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md) |
 | Managed folder indexes and parent links | [Getting Started](../guides/getting-started.md) | [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md), [Managed Files and State](../reference/managed-files-and-state.md) |

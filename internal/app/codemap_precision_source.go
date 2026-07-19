@@ -16,7 +16,7 @@ import (
 
 func runCodemapPrecisionSource(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if helpRequested(args) {
-		fmt.Fprintln(out, "usage: ddocs codemap precision source [-h] [--repo PATH] [--dataset PATH] [--exclude-prefix PATH] [--output PATH]\n\nGenerate current missing-link suggestions while treating every authored codemap link as visible. The JSON report is suitable input for `ddocs codemap precision sample`.\n\noptions:\n  --repo PATH            repository to analyze\n  --dataset PATH         use a prebuilt codemap dataset\n  --exclude-prefix PATH  exclude documents under this repository-relative prefix; repeatable\n  --output PATH          source report output file")
+		fmt.Fprintln(out, "usage: ddocs codemap precision source [-h] [--repo PATH] [--dataset PATH]\n                                      [--exclude-prefix PATH] [--output PATH]\n\nGenerate current missing-link suggestions while treating every authored codemap link as visible. The JSON report is suitable input for `ddocs codemap precision sample` and is written to stdout unless --output is provided.\n\noptions:\n  -h, --help            show this help message and exit\n  --repo PATH           repository to analyze (default current directory)\n  --dataset PATH        use a prebuilt codemap dataset\n  --exclude-prefix PATH exclude documents under this repository-relative prefix; repeat as needed\n  --output PATH         write JSON to a file instead of stdout\n\nThis command does not edit authored codemap sections.")
 		return 0
 	}
 	fs := flag.NewFlagSet("ddocs codemap precision source", flag.ContinueOnError)

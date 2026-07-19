@@ -8,7 +8,7 @@ This document describes the implemented application boundary that resolves confi
 
 ## Overview
 
-Both `ddocs` and `demon` enter the same internal application package. The executable wrappers supply process arguments and version metadata; `internal/app` owns command parsing and coordination across repository discovery, configuration, documentation reconciliation, local links, orphan health checks, stateless moves, review commands, reverse indexes, codemap analysis, watch mode, and demon lifecycle.
+Both `ddocs` and `demon` enter the same internal application package. The `demon` wrapper normalizes bare and help invocations into the repository-demon command family while preserving shared version handling. `internal/app` owns scoped command parsing and coordination across repository discovery, configuration, documentation reconciliation, local links, orphan health checks, stateless moves, review commands, reverse indexes, codemap analysis, watch mode, and demon lifecycle.
 
 The application layer coordinates ownership. It does not reimplement scanner, link, reverse-index, repository-state, or daemon mechanics.
 
@@ -24,8 +24,8 @@ cmd/demon/
 
 The application boundary owns:
 
-- top-level and subcommand dispatch;
-- help and version behavior;
+- top-level and nested-subcommand dispatch;
+- scoped help and shared version behavior;
 - repository and configuration selection;
 - translation of CLI flags into subsystem options;
 - `--docs`, `--links`, and `--reverse` selection semantics;
@@ -88,6 +88,8 @@ Command parsing must not become an alternative source of repository truth. Resol
 - Read-only commands do not apply authored-file reconciliation writes.
 - Ambiguous subsystem diagnostics are not converted into guessed fixes by the application layer.
 - Both executable names must expose compatible behavior unless a command is intentionally alias-specific.
+- Bare `demon` and `demon --help` resolve to repository-demon help; `demon --version` remains the shared product version.
+- Nested help must describe the requested subcommand rather than falling back to its parent summary.
 - Help text and documentation must change with public command behavior.
 
 ## Code map
@@ -95,9 +97,11 @@ Command parsing must not become an alternative source of repository truth. Resol
 Primary files and packages:
 
 - `cmd/ddocs/main.go` - canonical executable entry.
-- `cmd/demon/main.go` - alias executable entry.
+- `cmd/demon/main.go` - repository-demon alias entry and argument normalization.
+- `cmd/demon/main_test.go` - alias help and version-routing coverage.
 - `internal/app/app.go` - main command parsing and reconciliation orchestration.
-- `internal/app/help_test.go` - help and public command coverage.
+- `internal/app/help_test.go` - top-level help and public command coverage.
+- `internal/app/help_nested_test.go` - scoped nested help coverage.
 - `internal/app/cli_contract_test.go` - CLI contract coverage.
 - `internal/app/demon.go` - repository-demon and shell-hook command integration.
 - `internal/app/move.go` - stateless refactoring command integration.
@@ -125,6 +129,8 @@ Relevant coverage includes:
 - `internal/app/app_test.go`
 - `internal/app/cli_contract_test.go`
 - `internal/app/help_test.go`
+- `internal/app/help_nested_test.go`
+- `cmd/demon/main_test.go`
 - `internal/app/demon_test.go`
 - `internal/app/feature_flags_test.go`
 - `internal/app/codemap_export_test.go`

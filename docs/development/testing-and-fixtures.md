@@ -47,6 +47,28 @@ A direct full-suite run is:
 go test ./... -count=1
 ```
 
+## CLI Help Coverage
+
+Help tests cover the complete public command tree, not only top-level command names. Every public command and nested subcommand must:
+
+- return exit code `0` for `-h` and `--help`;
+- write help to stdout without runtime or repository side effects;
+- show usage scoped to the requested command;
+- list every accepted flag, required positional identifier, and important default;
+- state mutation, hash-guard, persistence, or output behavior when those details affect safe use; and
+- remain reachable through both `ddocs demon ...` and the installed `demon ...` alias where applicable.
+
+`internal/app/help_test.go` owns top-level command contracts. `internal/app/help_nested_test.go` owns review, precision, and feeder subcommand routing. `cmd/demon/main_test.go` verifies that bare `demon` and `demon --help` open daemon-specific help while shared version handling remains available.
+
+A parent summary is not acceptable output for a requested nested command. For example, these must remain distinct:
+
+```bash
+ddocs suggestions --help
+ddocs suggestions select --help
+ddocs codemap precision --help
+ddocs codemap precision sample --help
+```
+
 ## Fixture Regression Matrix
 
 `make regression` runs the Go CLI fixture matrix. It builds the binary once, then runs each retained scenario through `fix`, verifies a clean successful `check`, runs `fix` again, and requires the complete fixture tree to be byte-identical after the first and second fixes.
@@ -219,6 +241,8 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `tests/regression_fixtures_test.go` — fixture-tree assertions.
 - `internal/links/*_test.go` — link syntax, state, move, review integration, rewrite, concurrency, and timing coverage.
 - `internal/review/*_test.go` — review history, policy replay, and undo coverage.
+- `internal/app/help_test.go` and `help_nested_test.go` — top-level and scoped nested CLI help contracts.
+- `cmd/demon/main_test.go` — standalone demon alias argument normalization.
 - `internal/app/move_test.go` — stateless move CLI coverage.
 - `internal/app/orphans_test.go` and `orphans_integration_test.go` — document-health rules and command behavior.
 - `internal/app/review_cli_test.go` — suggestion and applied-change CLI coverage.

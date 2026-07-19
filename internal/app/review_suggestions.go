@@ -11,12 +11,16 @@ import (
 )
 
 func suggestionsHelp(out io.Writer) {
-	fmt.Fprintln(out, "usage: ddocs suggestions [-h] [FILE]\n       ddocs suggestions {declined,log,show,select,decline,reconsider} ...\n\nInspect and decide ambiguous link repairs and codemap missing-link suggestions. Selecting a candidate converts it into a normal hash-guarded repair.\n\ncommands:\n  declined [FILE]                 show effective declined suggestions\n  log [FILE]                      show suggestion decision history\n  show SUGGESTION                 show one current or historical suggestion\n  select SUGGESTION [CANDIDATE]   apply the selected repair\n  decline SUGGESTION [CANDIDATE] [--reason TEXT]\n                                  decline one candidate or the whole issue\n  reconsider SUGGESTION           clear effective declines for the issue")
+	fmt.Fprintln(out, "usage: ddocs suggestions [-h] [FILE]\n       ddocs suggestions {declined,log,show,select,decline,reconsider} ...\n\nInspect and decide ambiguous link repairs and codemap missing-link suggestions. With no subcommand, current suggestions are listed and may be filtered by one repository-relative source FILE. Selecting a candidate converts it into a normal hash-guarded repair.\n\ncommands:\n  declined [FILE]                 show effective declined suggestions\n  log [FILE]                      show suggestion decision history\n  show SUGGESTION                 show one current or historical suggestion\n  select SUGGESTION [CANDIDATE]   apply the selected repair\n  decline SUGGESTION [CANDIDATE] [--reason TEXT]\n                                  decline one candidate or the whole issue\n  reconsider SUGGESTION           clear effective declines for the issue\n\noptions:\n  -h, --help                      show this help message and exit\n\nRun `ddocs suggestions <command> --help` for candidate selection, persistence, and mutation details.")
 }
 
 func runSuggestions(ctx context.Context, args []string, out, errOut io.Writer) int {
-	if helpRequested(args) {
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
 		suggestionsHelp(out)
+		return 0
+	}
+	if len(args) > 1 && isSuggestionCommand(args[0]) && helpRequested(args[1:]) {
+		suggestionCommandHelp(out, args[0])
 		return 0
 	}
 	if len(args) == 0 || !isSuggestionCommand(args[0]) {

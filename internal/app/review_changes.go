@@ -13,12 +13,16 @@ import (
 )
 
 func changesHelp(out io.Writer) {
-	fmt.Fprintln(out, "usage: ddocs changes [-h] [FILE]\n       ddocs changes {related,show,log,undo,undo-run,block,unblock} ...\n\nInspect, undo, and block Demon Docs repairs. Undo is available by reconciliation run, file change, or individual repair while the recorded after-state still matches.\n\ncommands:\n  related FILE                         show repairs caused by or targeting FILE\n  show CHANGE                          show one applied change and its diff\n  log [FILE]                           show applied-change and control history\n  undo CHANGE [--repair REPAIR] [--block] [--reason TEXT]\n  undo-run RUN [--block] [--reason TEXT]\n  block CHANGE [--repair REPAIR] [--reason TEXT]\n  unblock CHANGE [--repair REPAIR]")
+	fmt.Fprintln(out, "usage: ddocs changes [-h] [FILE]\n       ddocs changes {related,show,log,undo,undo-run,block,unblock} ...\n\nInspect, undo, and control recorded Demon Docs repairs. With no subcommand, applied changes are listed and may be filtered by one tracked source FILE. Undo is available by reconciliation run, file change, or individual repair while the recorded after-state still matches.\n\ncommands:\n  related FILE                         show repairs caused by or targeting FILE\n  show CHANGE                          show one applied change and its diff\n  log [FILE]                           show applied-change and control history\n  undo CHANGE [--repair REPAIR] [--block] [--reason TEXT]\n  undo-run RUN [--block] [--reason TEXT]\n  block CHANGE [--repair REPAIR] [--reason TEXT]\n  unblock CHANGE [--repair REPAIR]\n\noptions:\n  -h, --help                           show this help message and exit\n\nRun `ddocs changes <command> --help` for hash guards, repair IDs, blocks, and run-level behavior.")
 }
 
 func runChanges(args []string, out, errOut io.Writer) int {
-	if helpRequested(args) {
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
 		changesHelp(out)
+		return 0
+	}
+	if len(args) > 1 && isChangesCommand(args[0]) && helpRequested(args[1:]) {
+		changeCommandHelp(out, args[0])
 		return 0
 	}
 	if len(args) == 0 || !isChangesCommand(args[0]) {

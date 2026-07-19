@@ -8,12 +8,17 @@ This document summarizes the public Demon Docs command surface, subsystem select
 
 ## Overview
 
-`ddocs` is the canonical executable. `demon` is an installed alias backed by the same internal application implementation. Top-level and subcommand help remain the source of truth for every accepted flag:
+`ddocs` is the canonical executable. `demon` is an installed alias for the repository-demon command family. Top-level, command, and nested-subcommand help remain the source of truth for every accepted flag:
 
 ```bash
 ddocs --help
 ddocs <command> --help
+ddocs <command> <subcommand> --help
+demon --help
+demon <command> --help
 ```
+
+Help is scoped to the requested command. For example, `ddocs suggestions select --help` describes candidate selection rather than repeating the parent suggestions summary, and `ddocs codemap precision sample --help` lists the required report input and sampling flags.
 
 Commands either inspect state, plan without writing, apply deterministic repository changes, run foreground automation, or manage the repository demon lifecycle.
 
@@ -115,16 +120,18 @@ Repository-local `.ddocs/config.toml` remains the preferred initialized-reposito
 ```bash
 ddocs codemap export --output PATH
 ddocs codemap benchmark ...
-ddocs codemap precision ...
+ddocs codemap precision source ...
+ddocs codemap precision sample ...
+ddocs codemap precision evaluate ...
 ```
 
-`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision` generates and evaluates ranked candidates against curated labels.
+`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision source` generates current suggestions without hiding authored links, `precision sample` creates a deterministic unlabeled review set, and `precision evaluate` compares a labeled benchmark with its deterministic suggestion report. The legacy flag-only precision form remains equivalent to `evaluate`.
 
 These commands do not silently modify authored codemap sections.
 
 ## Repository demon commands
 
-The same lifecycle is available through `demon ...` and `ddocs demon ...`.
+The same lifecycle is available through `demon ...` and `ddocs demon ...`. Running `demon` with no arguments or `demon --help` opens the repository-demon help page; `demon --version` reports the shared Demon Docs version.
 
 Primary operations include:
 
@@ -173,7 +180,7 @@ Configuration can override these conventions.
 
 Undo refuses to overwrite a file whose current content no longer matches the recorded after hash.
 
-Use [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md) for the behavioral contract and the command's own `--help` output for exact flag syntax.
+Use [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md) for the behavioral contract and the command's own scoped `--help` output for exact flag syntax, required identifiers, default values, mutation guards, and output behavior.
 
 ## Examples
 
