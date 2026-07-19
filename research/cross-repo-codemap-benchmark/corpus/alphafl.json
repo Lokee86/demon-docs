@@ -1,0 +1,73 @@
+{
+  "id": "alphafl",
+  "class": "native_relevant_source_files",
+  "languages": [
+    "C++",
+    "MPC"
+  ],
+  "extraction_mode": "markdown_links",
+  "benchmark_mode": "extraction_only",
+  "holdout_count": 0,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+  "docs_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+  "code_revision": "555426323ddbc2d0f463a5b84d3f8b2a9be3f231",
+  "docs_revision": "555426323ddbc2d0f463a5b84d3f8b2a9be3f231",
+  "documents_scanned": [
+    "README.md"
+  ],
+  "resolved_pair_count": 7,
+  "resolved_document_count": 1,
+  "resolved_target_count": 7,
+  "pairs": [
+    {
+      "document": "README.md",
+      "target": "Alpha/alpha-client.cpp",
+      "marker": "Relevant source files",
+      "line": 138,
+      "resolved_target": "Alpha/alpha-client.cpp"
+    },
+    {
+      "document": "README.md",
+      "target": "Alpha/alpha-server.cpp",
+      "marker": "Relevant source files",
+      "line": 139,
+      "resolved_target": "Alpha/alpha-server.cpp"
+    },
+    {
+      "document": "README.md",
+      "target": "Programs/Source/alpha_sa.mpc",
+      "marker": "Relevant source file",
+      "line": 157,
+      "resolved_target": "Programs/Source/alpha_sa.mpc"
+    },
+    {
+      "document": "README.md",
+      "target": "Alpha/alpha_input_client.cpp",
+      "marker": "Relevant source files",
+      "line": 175,
+      "resolved_target": "Alpha/alpha_input_client.cpp"
+    },
+    {
+      "document": "README.md",
+      "target": "Programs/Source/alpha_input_orig.mpc",
+      "marker": "Relevant source files",
+      "line": 176,
+      "resolved_target": "Programs/Source/alpha_input_orig.mpc"
+    },
+    {
+      "document": "README.md",
+      "target": "Programs/Source/alpha_select_orig.mpc",
+      "marker": "Relevant source files",
+      "line": 195,
+      "resolved_target": "Programs/Source/alpha_select_orig.mpc"
+    },
+    {
+      "document": "README.md",
+      "target": "Programs/Source/alpha_select_silent.mpc",
+      "marker": "Relevant source files",
+      "line": 196,
+      "resolved_target": "Programs/Source/alpha_select_silent.mpc"
+    }
+  ]
+}

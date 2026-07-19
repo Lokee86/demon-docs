@@ -1,0 +1,88 @@
+{
+  "id": "agent-orchestrator",
+  "class": "native_key_files_section",
+  "languages": [
+    "Go",
+    "TypeScript",
+    "TSX"
+  ],
+  "extraction_mode": "leading_entry",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 3,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+  "docs_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+  "code_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+  "docs_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 9,
+  "resolved_document_count": 1,
+  "resolved_target_count": 9,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "README.md",
+      "marker": "Where to look first",
+      "line": 48,
+      "resolved_target": "README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/README.md",
+      "marker": "Where to look first",
+      "line": 49,
+      "resolved_target": "docs/README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/architecture.md",
+      "marker": "Where to look first",
+      "line": 50,
+      "resolved_target": "docs/architecture.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/STATUS.md",
+      "marker": "Where to look first",
+      "line": 51,
+      "resolved_target": "docs/STATUS.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/cli/README.md",
+      "marker": "Where to look first",
+      "line": 52,
+      "resolved_target": "docs/cli/README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "CLAUDE.md",
+      "marker": "Where to look first",
+      "line": 53,
+      "resolved_target": "CLAUDE.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/dto.go",
+      "marker": "API contract changes",
+      "line": 104,
+      "resolved_target": "backend/internal/httpd/controllers/dto.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/specgen/build.go",
+      "marker": "API contract changes",
+      "line": 105,
+      "resolved_target": "backend/internal/httpd/apispec/specgen/build.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "openapi.yaml",
+      "marker": "API contract changes",
+      "line": 126,
+      "resolved_target": "backend/internal/httpd/apispec/openapi.yaml"
+    }
+  ]
+}

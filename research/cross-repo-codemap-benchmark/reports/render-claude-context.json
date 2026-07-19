@@ -1,0 +1,606 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-render-claude-context-v1",
+  "known_links": [
+    {
+      "document": "CLAUDE.md",
+      "target": "index.js"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/cleanup.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/setup.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/teardown.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": ".claude/settings.local.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "CHANGELOG.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "LICENSE.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "README.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/architecture.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/development.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/project-overview.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "index.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "package-lock.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/cleanup.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/create.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/setup.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/teardown.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/fileCollector.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/fileProcessor.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/importResolver.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "index.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/commands/create.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileCollector.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileProcessor.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/importResolver.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/validation.js"
+    }
+  ],
+  "visible_links": [
+    {
+      "document": "CLAUDE.md",
+      "target": "index.js"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/teardown.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": ".claude/settings.local.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "CHANGELOG.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "CLAUDE.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "LICENSE.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "README.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/architecture.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/development.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "index.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "package-lock.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/cleanup.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/create.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/setup.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/commands/teardown.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/fileCollector.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/fileProcessor.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "index.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/commands/create.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileProcessor.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/importResolver.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/targetValidator.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/targets.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/utils/validation.js"
+    }
+  ],
+  "hidden_links": [
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/cleanup.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/setup.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/project-overview.md"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/importResolver.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileCollector.js"
+    }
+  ],
+  "recovered_links": [
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/cleanup.js"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/setup.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/importResolver.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "package.json"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileCollector.js"
+    }
+  ],
+  "recovered_suggestions": [
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/cleanup.js",
+      "score": 2.5840593484403582,
+      "evidence": [
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/teardown.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/setup.js",
+      "score": 2.5840593484403582,
+      "evidence": [
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/teardown.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/importResolver.js",
+      "score": 9.047438028571658,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/fileProcessor.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/fileCollector.js:",
+        "sibling_of_existing_target:src/fileProcessor.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/validation.js",
+      "score": 4.523719014285829,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/utils/targetValidator.js:",
+        "sibling_of_existing_target:src/utils/targets.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "package.json",
+      "score": 5.178340982509624,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "exact_path_mention:package.json:x3",
+        "sibling_of_existing_target:index.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/fileCollector.js",
+      "score": 11.071130243223998,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/fileProcessor.js:outbound:javascript_import",
+        "exact_path_mention:src/fileCollector.js:x3",
+        "sibling_of_existing_target:src/fileProcessor.js:",
+        "sibling_of_existing_target:src/importResolver.js:"
+      ],
+      "tier": "context"
+    }
+  ],
+  "missed_links": [
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/validation.js"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "docs/project-overview.md"
+    }
+  ],
+  "unmatched_suggestions": [
+    {
+      "document": "CLAUDE.md",
+      "target": "src/commands/cleanup.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/commands/create.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/commands/setup.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/commands/teardown.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/fileCollector.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/fileProcessor.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/importResolver.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/utils/targetValidator.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/utils/targets.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "CLAUDE.md",
+      "target": "src/utils/validation.js",
+      "score": 1.1562593052715515,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "index.js",
+      "score": 9.722706232293572,
+      "evidence": [
+        "dependency_neighbor:src/commands/teardown.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targetValidator.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/commands/create.js",
+      "score": 2.5840593484403582,
+      "evidence": [
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/teardown.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/architecture.md",
+      "target": "src/utils/nestedProperties.js",
+      "score": 6,
+      "evidence": [
+        "dependency_neighbor:src/commands/teardown.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/utils/targetValidator.js:",
+        "sibling_of_existing_target:src/utils/targets.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/files.md",
+      "target": "src/utils/nestedProperties.js",
+      "score": 10,
+      "evidence": [
+        "dependency_neighbor:src/commands/setup.js:outbound:javascript_import",
+        "dependency_neighbor:src/commands/teardown.js:outbound:javascript_import",
+        "sibling_of_existing_target:src/utils/targetValidator.js:",
+        "sibling_of_existing_target:src/utils/targets.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "CLAUDE.md",
+      "score": 3.6309297535714573,
+      "evidence": [
+        "exact_path_mention:CLAUDE.md:x2",
+        "sibling_of_existing_target:index.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/commands/cleanup.js",
+      "score": 8.408764345084952,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/fileProcessor.js:inbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/commands/setup.js",
+      "score": 4.408764345084952,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "docs/project-overview.md",
+      "target": "src/commands/teardown.js",
+      "score": 4.408764345084952,
+      "evidence": [
+        "dependency_neighbor:index.js:outbound:javascript_import",
+        "dependency_neighbor:src/utils/targets.js:inbound:javascript_import",
+        "sibling_of_existing_target:src/commands/create.js:"
+      ],
+      "tier": "context"
+    }
+  ],
+  "already_linked_suggestions": [],
+  "duplicate_suggestions": [],
+  "invalid_suggestions": [],
+  "raw_suggestion_count": 24,
+  "unique_suggestion_count": 24,
+  "precision": 0.25,
+  "recall": 0.75
+}

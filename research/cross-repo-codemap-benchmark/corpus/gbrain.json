@@ -1,0 +1,2522 @@
+{
+  "id": "gbrain",
+  "class": "native_per_file_index",
+  "languages": [
+    "TypeScript"
+  ],
+  "extraction_mode": "leading_entry",
+  "benchmark_mode": "stress",
+  "holdout_count": 10,
+  "status": "qualifies",
+  "code_repository": "https://github.com/garrytan/gbrain.git",
+  "docs_repository": "https://github.com/garrytan/gbrain.git",
+  "code_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+  "docs_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+  "documents_scanned": [
+    "docs/architecture/KEY_FILES.md"
+  ],
+  "resolved_pair_count": 357,
+  "resolved_document_count": 1,
+  "resolved_target_count": 357,
+  "pairs": [
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "CHANGELOG.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 7,
+      "resolved_target": "CHANGELOG.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-key-files-current-state.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 9,
+      "resolved_target": "scripts/check-key-files-current-state.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/engine-constants.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 13,
+      "resolved_target": "src/core/engine-constants.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/background-work.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 14,
+      "resolved_target": "src/core/background-work.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/graph-signals.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 15,
+      "resolved_target": "src/core/search/graph-signals.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/explain-formatter.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 17,
+      "resolved_target": "src/core/search/explain-formatter.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/context-engine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 19,
+      "resolved_target": "src/core/context-engine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/watch.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 21,
+      "resolved_target": "src/commands/watch.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/audit-writer.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 23,
+      "resolved_target": "src/core/audit/audit-writer.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cli-force-exit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 24,
+      "resolved_target": "src/core/cli-force-exit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/search/search-stats-graph-signals.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 27,
+      "resolved_target": "test/search/search-stats-graph-signals.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/engine-factory.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 29,
+      "resolved_target": "src/core/engine-factory.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/pglite-engine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 30,
+      "resolved_target": "src/core/pglite-engine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/pglite-lock.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 31,
+      "resolved_target": "src/core/pglite-lock.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cjk.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 33,
+      "resolved_target": "src/core/cjk.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit-slug-fallback.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 34,
+      "resolved_target": "src/core/audit-slug-fallback.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/embedding-pricing.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 35,
+      "resolved_target": "src/core/embedding-pricing.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/post-upgrade-reembed.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 36,
+      "resolved_target": "src/core/post-upgrade-reembed.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/reindex.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 37,
+      "resolved_target": "src/commands/reindex.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/reindex-code.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 38,
+      "resolved_target": "src/commands/reindex-code.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/fts-language.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 39,
+      "resolved_target": "src/core/fts-language.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/reindex-search-vector.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 40,
+      "resolved_target": "src/commands/reindex-search-vector.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sources-ops.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 42,
+      "resolved_target": "src/core/sources-ops.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/utils.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 43,
+      "resolved_target": "src/core/utils.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/db.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 44,
+      "resolved_target": "src/core/db.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/migrate-engine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 45,
+      "resolved_target": "src/commands/migrate-engine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sync-failure-ledger.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 48,
+      "resolved_target": "src/core/sync-failure-ledger.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/storage.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 49,
+      "resolved_target": "src/core/storage.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/storage-config.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 50,
+      "resolved_target": "src/core/storage-config.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/disk-walk.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 51,
+      "resolved_target": "src/core/disk-walk.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/git-head.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 52,
+      "resolved_target": "src/core/git-head.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/source-health.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 53,
+      "resolved_target": "src/core/source-health.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/git-remote.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 54,
+      "resolved_target": "src/core/git-remote.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/brain-repo-durability.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 55,
+      "resolved_target": "src/core/brain-repo-durability.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/storage.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 56,
+      "resolved_target": "src/commands/storage.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "gbrain.yml",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 57,
+      "resolved_target": "gbrain.yml"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/supabase-admin.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 58,
+      "resolved_target": "src/core/supabase-admin.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/file-resolver.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 59,
+      "resolved_target": "src/core/file-resolver.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/errors.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 61,
+      "resolved_target": "src/core/errors.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/code-def.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 63,
+      "resolved_target": "src/commands/code-def.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/code-graph-readiness.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 64,
+      "resolved_target": "src/core/code-graph-readiness.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/eval.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 67,
+      "resolved_target": "src/core/search/eval.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/source-boost.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 68,
+      "resolved_target": "src/core/search/source-boost.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/sql-ranking.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 69,
+      "resolved_target": "src/core/search/sql-ranking.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/title-match.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 70,
+      "resolved_target": "src/core/search/title-match.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/alias-normalize.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 71,
+      "resolved_target": "src/core/search/alias-normalize.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/evidence.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 72,
+      "resolved_target": "src/core/search/evidence.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/mode.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 73,
+      "resolved_target": "src/core/search/mode.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/search-diagnose.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 74,
+      "resolved_target": "src/commands/search-diagnose.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/reindex-aliases.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 75,
+      "resolved_target": "src/commands/reindex-aliases.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/eval/retrieval-quality/harness.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 76,
+      "resolved_target": "src/eval/retrieval-quality/harness.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/architecture/RETRIEVAL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 77,
+      "resolved_target": "docs/architecture/RETRIEVAL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/types.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 78,
+      "resolved_target": "src/core/types.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 79,
+      "resolved_target": "src/commands/eval.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-cross-modal.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 80,
+      "resolved_target": "src/commands/eval-cross-modal.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/eval/cycle-default.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 81,
+      "resolved_target": "src/core/eval/cycle-default.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cross-modal-eval/json-repair.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 82,
+      "resolved_target": "src/core/cross-modal-eval/json-repair.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cross-modal-eval/aggregate.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 83,
+      "resolved_target": "src/core/cross-modal-eval/aggregate.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cross-modal-eval/runner.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 84,
+      "resolved_target": "src/core/cross-modal-eval/runner.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cross-modal-eval/receipt-name.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 85,
+      "resolved_target": "src/core/cross-modal-eval/receipt-name.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cross-modal-eval/receipt-write.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 86,
+      "resolved_target": "src/core/cross-modal-eval/receipt-write.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-export.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 87,
+      "resolved_target": "src/commands/eval-export.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-prune.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 88,
+      "resolved_target": "src/commands/eval-prune.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-replay.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 89,
+      "resolved_target": "src/commands/eval-replay.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/bench/baseline-file.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 90,
+      "resolved_target": "src/core/bench/baseline-file.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/nightly-probe-adapters.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 91,
+      "resolved_target": "src/core/cycle/nightly-probe-adapters.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/eval-replay-gate.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 93,
+      "resolved_target": "test/eval-replay-gate.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/nightly-quality-probe.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 94,
+      "resolved_target": "src/core/cycle/nightly-quality-probe.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-trajectory.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 95,
+      "resolved_target": "src/commands/eval-trajectory.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/trajectory-format.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 96,
+      "resolved_target": "src/core/trajectory-format.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/think/intent.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 97,
+      "resolved_target": "src/core/think/intent.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-suspected-contradictions.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 98,
+      "resolved_target": "src/commands/eval-suspected-contradictions.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/think/index.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 99,
+      "resolved_target": "src/core/think/index.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-longmemeval.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 101,
+      "resolved_target": "src/commands/eval-longmemeval.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/eval-bench.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 102,
+      "resolved_target": "docs/eval-bench.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/eval-capture.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 103,
+      "resolved_target": "src/core/eval-capture.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/eval-capture-scrub.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 104,
+      "resolved_target": "src/core/eval-capture-scrub.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/eval-capture.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 106,
+      "resolved_target": "docs/eval-capture.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/public-exports.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 107,
+      "resolved_target": "test/public-exports.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/embedding.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 108,
+      "resolved_target": "src/core/embedding.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sync-delta.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 109,
+      "resolved_target": "src/core/sync-delta.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/spend-posture.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 110,
+      "resolved_target": "src/core/spend-posture.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/dims.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 111,
+      "resolved_target": "src/core/ai/dims.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/types.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 112,
+      "resolved_target": "src/core/ai/types.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/recipes/zeroentropyai.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 114,
+      "resolved_target": "src/core/ai/recipes/zeroentropyai.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/recipes/llama-server-reranker.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 115,
+      "resolved_target": "src/core/ai/recipes/llama-server-reranker.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/recipes/openrouter.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 116,
+      "resolved_target": "src/core/ai/recipes/openrouter.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/rerank-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 117,
+      "resolved_target": "src/core/rerank-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/embedding-column.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 118,
+      "resolved_target": "src/core/search/embedding-column.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/rerank.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 119,
+      "resolved_target": "src/core/search/rerank.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/return-policy.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 120,
+      "resolved_target": "src/core/search/return-policy.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/autocut.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 121,
+      "resolved_target": "src/core/search/autocut.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/recipes/voyage.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 122,
+      "resolved_target": "src/core/ai/recipes/voyage.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/recipes/anthropic.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 123,
+      "resolved_target": "src/core/ai/recipes/anthropic.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/model-pricing.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 124,
+      "resolved_target": "src/core/model-pricing.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/anthropic-pricing.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 125,
+      "resolved_target": "src/core/anthropic-pricing.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/takes-quality-eval/pricing.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 126,
+      "resolved_target": "src/core/takes-quality-eval/pricing.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/budget/budget-tracker.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 127,
+      "resolved_target": "src/core/budget/budget-tracker.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit-week-file.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 128,
+      "resolved_target": "src/core/audit-week-file.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/diarize/payload-fitter.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 130,
+      "resolved_target": "src/core/diarize/payload-fitter.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/brainstorm/checkpoint.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 131,
+      "resolved_target": "src/core/brainstorm/checkpoint.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/remediation-checkpoint.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 132,
+      "resolved_target": "src/core/remediation-checkpoint.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/model-config.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 133,
+      "resolved_target": "src/core/model-config.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/model-resolver.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 134,
+      "resolved_target": "src/core/ai/model-resolver.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/gateway.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 135,
+      "resolved_target": "src/core/ai/gateway.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/models.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 137,
+      "resolved_target": "src/commands/models.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/init-embed-check.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 138,
+      "resolved_target": "src/core/init-embed-check.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/ai/build-gateway-config.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 139,
+      "resolved_target": "src/core/ai/build-gateway-config.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-trigger-index.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 141,
+      "resolved_target": "src/core/skill-trigger-index.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-catalog.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 142,
+      "resolved_target": "src/core/skill-catalog.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/check-resolvable.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 143,
+      "resolved_target": "src/core/check-resolvable.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/repo-root.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 144,
+      "resolved_target": "src/core/repo-root.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/check-resolvable.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 145,
+      "resolved_target": "src/commands/check-resolvable.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/resolver-filenames.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 146,
+      "resolved_target": "src/core/resolver-filenames.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/skillify.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 147,
+      "resolved_target": "src/commands/skillify.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/skillify-check.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 148,
+      "resolved_target": "src/commands/skillify-check.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/book-mirror.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 149,
+      "resolved_target": "src/commands/book-mirror.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/skillpack.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 150,
+      "resolved_target": "src/commands/skillpack.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/archive-crawler-config.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 152,
+      "resolved_target": "src/core/archive-crawler-config.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/helpers/cli-pty-runner.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 153,
+      "resolved_target": "test/helpers/cli-pty-runner.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/advisor.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 155,
+      "resolved_target": "src/commands/advisor.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-manifest.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 157,
+      "resolved_target": "src/core/skill-manifest.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/routing-eval.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 158,
+      "resolved_target": "src/commands/routing-eval.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/filing-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 159,
+      "resolved_target": "src/core/filing-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-frontmatter.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 160,
+      "resolved_target": "src/core/skill-frontmatter.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-brain-first.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 161,
+      "resolved_target": "src/core/skill-brain-first.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/skill-fix-gates.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 162,
+      "resolved_target": "src/core/skill-fix-gates.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit-skill-brain-first.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 163,
+      "resolved_target": "src/core/audit-skill-brain-first.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/dry-fix.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 164,
+      "resolved_target": "src/core/dry-fix.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/backoff.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 165,
+      "resolved_target": "src/core/backoff.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/retry.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 166,
+      "resolved_target": "src/core/retry.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/process-watchdog.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 167,
+      "resolved_target": "src/core/process-watchdog.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/batch-retry-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 168,
+      "resolved_target": "src/core/audit/batch-retry-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/lock-renewal-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 169,
+      "resolved_target": "src/core/audit/lock-renewal-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/redact-connection-info.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 170,
+      "resolved_target": "src/core/audit/redact-connection-info.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/lock-renewal-tick.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 171,
+      "resolved_target": "src/core/minions/lock-renewal-tick.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/worker-exit-codes.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 172,
+      "resolved_target": "src/core/minions/worker-exit-codes.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/rss-default.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 173,
+      "resolved_target": "src/core/minions/rss-default.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/extract-atoms-drain.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 174,
+      "resolved_target": "src/core/cycle/extract-atoms-drain.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-worker-lock-renewal-shape.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 175,
+      "resolved_target": "scripts/check-worker-lock-renewal-shape.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/doctor-cause-rank.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 176,
+      "resolved_target": "src/core/doctor-cause-rank.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/pool-recovery-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 179,
+      "resolved_target": "src/core/audit/pool-recovery-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/db-disconnect-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 182,
+      "resolved_target": "src/core/audit/db-disconnect-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-no-double-retry.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 184,
+      "resolved_target": "scripts/check-no-double-retry.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/fail-improve.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 185,
+      "resolved_target": "src/core/fail-improve.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/transcription.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 186,
+      "resolved_target": "src/core/transcription.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/enrichment-service.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 187,
+      "resolved_target": "src/core/enrichment-service.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/enrich.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 188,
+      "resolved_target": "src/commands/enrich.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/data-research.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 189,
+      "resolved_target": "src/core/data-research.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/link-extraction.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 194,
+      "resolved_target": "src/core/link-extraction.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/extract.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 195,
+      "resolved_target": "src/commands/extract.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/extract/receipt-writer.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 196,
+      "resolved_target": "src/core/extract/receipt-writer.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/graph-query.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 198,
+      "resolved_target": "src/commands/graph-query.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/sources.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 199,
+      "resolved_target": "src/commands/sources.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/reindex-frontmatter.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 200,
+      "resolved_target": "src/commands/reindex-frontmatter.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/source-resolver.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 201,
+      "resolved_target": "src/core/source-resolver.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sync.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 202,
+      "resolved_target": "src/core/sync.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/engine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 204,
+      "resolved_target": "src/core/engine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/cli.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 206,
+      "resolved_target": "src/cli.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/conventions/brain-routing.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 212,
+      "resolved_target": "skills/conventions/brain-routing.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/operations-trust-boundary.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 215,
+      "resolved_target": "test/operations-trust-boundary.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/content-sanity-literals.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 217,
+      "resolved_target": "src/core/content-sanity-literals.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/embed-skip.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 218,
+      "resolved_target": "src/core/embed-skip.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/audit/content-sanity-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 219,
+      "resolved_target": "src/core/audit/content-sanity-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/import-file.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 223,
+      "resolved_target": "src/core/import-file.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/quarantine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 224,
+      "resolved_target": "src/core/quarantine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/content-sanity.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 225,
+      "resolved_target": "src/core/content-sanity.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/quarantine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 226,
+      "resolved_target": "src/commands/quarantine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/hybrid.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 227,
+      "resolved_target": "src/core/search/hybrid.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/zombie-reap.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 230,
+      "resolved_target": "src/core/zombie-reap.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/queue.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 232,
+      "resolved_target": "src/core/minions/queue.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/worker.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 233,
+      "resolved_target": "src/core/minions/worker.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/supervisor.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 234,
+      "resolved_target": "src/core/minions/supervisor.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/child-worker-supervisor.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 235,
+      "resolved_target": "src/core/minions/child-worker-supervisor.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/spawn-helpers.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 236,
+      "resolved_target": "src/core/minions/spawn-helpers.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/niceness.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 237,
+      "resolved_target": "src/core/minions/niceness.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/worker-registry.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 238,
+      "resolved_target": "src/core/minions/worker-registry.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/supervisor-pid.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 239,
+      "resolved_target": "src/core/minions/supervisor-pid.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handler-timeouts.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 240,
+      "resolved_target": "src/core/minions/handler-timeouts.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/types.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 241,
+      "resolved_target": "src/core/minions/types.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/shell.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 243,
+      "resolved_target": "src/core/minions/handlers/shell.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/shell-inherit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 244,
+      "resolved_target": "src/core/minions/handlers/shell-inherit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/shell-validate.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 245,
+      "resolved_target": "src/core/minions/handlers/shell-validate.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/shell-redact.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 246,
+      "resolved_target": "src/core/minions/handlers/shell-redact.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/shell-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 249,
+      "resolved_target": "src/core/minions/handlers/shell-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/supervisor-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 250,
+      "resolved_target": "src/core/minions/handlers/supervisor-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/backpressure-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 251,
+      "resolved_target": "src/core/minions/backpressure-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/subagent.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 252,
+      "resolved_target": "src/core/minions/handlers/subagent.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/subagent-aggregator.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 253,
+      "resolved_target": "src/core/minions/handlers/subagent-aggregator.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/handlers/subagent-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 254,
+      "resolved_target": "src/core/minions/handlers/subagent-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/rate-leases.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 255,
+      "resolved_target": "src/core/minions/rate-leases.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/wait-for-completion.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 256,
+      "resolved_target": "src/core/minions/wait-for-completion.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/transcript.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 257,
+      "resolved_target": "src/core/minions/transcript.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/plugin-loader.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 258,
+      "resolved_target": "src/core/minions/plugin-loader.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/tools/brain-allowlist.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 259,
+      "resolved_target": "src/core/minions/tools/brain-allowlist.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/mcp/tool-defs.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 260,
+      "resolved_target": "src/mcp/tool-defs.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/attachments.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 261,
+      "resolved_target": "src/core/minions/attachments.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/agent.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 262,
+      "resolved_target": "src/commands/agent.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/agent-logs.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 263,
+      "resolved_target": "src/commands/agent-logs.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/features.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 265,
+      "resolved_target": "src/commands/features.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/mcp/server.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 267,
+      "resolved_target": "src/mcp/server.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/mcp/dispatch.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 268,
+      "resolved_target": "src/mcp/dispatch.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/mcp/rate-limit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 269,
+      "resolved_target": "src/mcp/rate-limit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sql-query.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 271,
+      "resolved_target": "src/core/sql-query.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/serve.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 272,
+      "resolved_target": "src/commands/serve.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/oauth-provider.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 273,
+      "resolved_target": "src/core/oauth-provider.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/auth.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 275,
+      "resolved_target": "src/commands/auth.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/connect.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 276,
+      "resolved_target": "src/commands/connect.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/upgrade.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 277,
+      "resolved_target": "src/commands/upgrade.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/repair-jsonb.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 279,
+      "resolved_target": "src/commands/repair-jsonb.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/orphans.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 280,
+      "resolved_target": "src/commands/orphans.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/salience.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 281,
+      "resolved_target": "src/commands/salience.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/anomalies.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 282,
+      "resolved_target": "src/commands/anomalies.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/eval-whoknows.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 284,
+      "resolved_target": "src/commands/eval-whoknows.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/fixtures/whoknows-eval.jsonl",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 285,
+      "resolved_target": "test/fixtures/whoknows-eval.jsonl"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/write-through.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 288,
+      "resolved_target": "src/core/write-through.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/model-id.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 289,
+      "resolved_target": "src/core/model-id.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/transcripts.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 291,
+      "resolved_target": "src/commands/transcripts.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/integrity.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 292,
+      "resolved_target": "src/commands/integrity.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/migrate.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 294,
+      "resolved_target": "src/core/migrate.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/timeline-dedup-repair.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 295,
+      "resolved_target": "src/core/timeline-dedup-repair.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/progress.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 296,
+      "resolved_target": "src/core/progress.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/console-prefix.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 297,
+      "resolved_target": "src/core/console-prefix.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/db-lock.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 299,
+      "resolved_target": "src/core/db-lock.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sync-concurrency.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 300,
+      "resolved_target": "src/core/sync-concurrency.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/worker-pool.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 301,
+      "resolved_target": "src/core/worker-pool.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/extract-conversation-facts.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 303,
+      "resolved_target": "src/commands/extract-conversation-facts.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/embedding-dim-check.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 304,
+      "resolved_target": "src/core/embedding-dim-check.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/postgres-engine.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 305,
+      "resolved_target": "src/core/postgres-engine.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/sync.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 307,
+      "resolved_target": "src/commands/sync.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/import.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 308,
+      "resolved_target": "src/commands/import.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/sort-newest-first.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 309,
+      "resolved_target": "src/core/sort-newest-first.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/synthesize.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 311,
+      "resolved_target": "src/core/cycle/synthesize.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-gateway-routed-no-direct-anthropic.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 312,
+      "resolved_target": "scripts/check-gateway-routed-no-direct-anthropic.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/patterns.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 313,
+      "resolved_target": "src/core/cycle/patterns.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/extract-facts.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 314,
+      "resolved_target": "src/core/cycle/extract-facts.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/fence-shared.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 315,
+      "resolved_target": "src/core/fence-shared.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/entities/resolve.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 316,
+      "resolved_target": "src/core/entities/resolve.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/phantom-redirect.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 317,
+      "resolved_target": "src/core/cycle/phantom-redirect.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/facts/phantom-audit.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 318,
+      "resolved_target": "src/core/facts/phantom-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/emotional-weight.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 319,
+      "resolved_target": "src/core/cycle/emotional-weight.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/anomaly.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 320,
+      "resolved_target": "src/core/cycle/anomaly.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/recompute-emotional-weight.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 321,
+      "resolved_target": "src/core/cycle/recompute-emotional-weight.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/transcripts.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 322,
+      "resolved_target": "src/core/transcripts.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/operations-descriptions.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 323,
+      "resolved_target": "src/core/operations-descriptions.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/transcript-discovery.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 324,
+      "resolved_target": "src/core/cycle/transcript-discovery.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/dream.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 325,
+      "resolved_target": "src/commands/dream.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/friction.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 326,
+      "resolved_target": "src/commands/friction.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/claw-test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 327,
+      "resolved_target": "src/commands/claw-test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/_friction-protocol.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 328,
+      "resolved_target": "skills/_friction-protocol.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-progress-to-stdout.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 329,
+      "resolved_target": "scripts/check-progress-to-stdout.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/progress-events.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 330,
+      "resolved_target": "docs/progress-events.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/markdown.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 331,
+      "resolved_target": "src/core/markdown.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-jsonb-pattern.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 332,
+      "resolved_target": "scripts/check-jsonb-pattern.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-jsonb-params.mjs",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 333,
+      "resolved_target": "scripts/check-jsonb-params.mjs"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-source-id-projection.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 334,
+      "resolved_target": "scripts/check-source-id-projection.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docker-compose.ci.yml",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 335,
+      "resolved_target": "docker-compose.ci.yml"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/select-e2e.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 336,
+      "resolved_target": "scripts/select-e2e.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/run-e2e.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 337,
+      "resolved_target": "scripts/run-e2e.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/llms-config.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 338,
+      "resolved_target": "scripts/llms-config.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "AGENTS.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 339,
+      "resolved_target": "AGENTS.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/UPGRADING_DOWNSTREAM_AGENTS.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 340,
+      "resolved_target": "docs/UPGRADING_DOWNSTREAM_AGENTS.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-embedded.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 341,
+      "resolved_target": "src/core/schema-embedded.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/schema.sql",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 342,
+      "resolved_target": "src/schema.sql"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/integrations.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 343,
+      "resolved_target": "src/commands/integrations.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/search/expansion.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 344,
+      "resolved_target": "src/core/search/expansion.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/architecture/infra-layer.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 348,
+      "resolved_target": "docs/architecture/infra-layer.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/ethos/THIN_HARNESS_FAT_SKILLS.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 349,
+      "resolved_target": "docs/ethos/THIN_HARNESS_FAT_SKILLS.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/ethos/MARKDOWN_SKILLS_AS_RECIPES.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 350,
+      "resolved_target": "docs/ethos/MARKDOWN_SKILLS_AS_RECIPES.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/repo-architecture.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 351,
+      "resolved_target": "docs/guides/repo-architecture.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/sub-agent-routing.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 352,
+      "resolved_target": "docs/guides/sub-agent-routing.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/skill-development.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 353,
+      "resolved_target": "docs/guides/skill-development.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/idea-capture.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 354,
+      "resolved_target": "docs/guides/idea-capture.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/quiet-hours.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 355,
+      "resolved_target": "docs/guides/quiet-hours.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/guides/diligence-ingestion.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 356,
+      "resolved_target": "docs/guides/diligence-ingestion.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/designs/HOMEBREW_FOR_PERSONAL_AI.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 357,
+      "resolved_target": "docs/designs/HOMEBREW_FOR_PERSONAL_AI.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/_brain-filing-rules.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 360,
+      "resolved_target": "skills/_brain-filing-rules.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/_output-rules.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 363,
+      "resolved_target": "skills/_output-rules.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/signal-detector/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 364,
+      "resolved_target": "skills/signal-detector/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/brain-ops/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 365,
+      "resolved_target": "skills/brain-ops/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/idea-ingest/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 366,
+      "resolved_target": "skills/idea-ingest/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/media-ingest/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 367,
+      "resolved_target": "skills/media-ingest/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/meeting-ingestion/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 368,
+      "resolved_target": "skills/meeting-ingestion/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/citation-fixer/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 369,
+      "resolved_target": "skills/citation-fixer/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/repo-architecture/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 370,
+      "resolved_target": "skills/repo-architecture/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/skill-creator/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 371,
+      "resolved_target": "skills/skill-creator/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/daily-task-manager/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 372,
+      "resolved_target": "skills/daily-task-manager/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/daily-task-prep/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 373,
+      "resolved_target": "skills/daily-task-prep/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/cross-modal-review/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 374,
+      "resolved_target": "skills/cross-modal-review/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/cron-scheduler/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 375,
+      "resolved_target": "skills/cron-scheduler/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/reports/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 376,
+      "resolved_target": "skills/reports/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/testing/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 377,
+      "resolved_target": "skills/testing/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/soul-audit/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 378,
+      "resolved_target": "skills/soul-audit/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/webhook-transforms/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 379,
+      "resolved_target": "skills/webhook-transforms/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/data-research/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 380,
+      "resolved_target": "skills/data-research/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/minion-orchestrator/SKILL.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 381,
+      "resolved_target": "skills/minion-orchestrator/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/publish.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 384,
+      "resolved_target": "src/commands/publish.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/backlinks.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 385,
+      "resolved_target": "src/commands/backlinks.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/lint.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 386,
+      "resolved_target": "src/commands/lint.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/report.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 387,
+      "resolved_target": "src/commands/report.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/destructive-guard.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 388,
+      "resolved_target": "src/core/destructive-guard.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/pages.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 389,
+      "resolved_target": "src/commands/pages.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/op-checkpoint.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 390,
+      "resolved_target": "src/core/op-checkpoint.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/brain-score-recommendations.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 391,
+      "resolved_target": "src/core/brain-score-recommendations.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/jobs.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 393,
+      "resolved_target": "src/commands/jobs.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/minions/protected-names.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 394,
+      "resolved_target": "src/core/minions/protected-names.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/autopilot.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 395,
+      "resolved_target": "src/commands/autopilot.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/abort-check.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 396,
+      "resolved_target": "src/core/abort-check.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 397,
+      "resolved_target": "src/core/cycle.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/embed.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 398,
+      "resolved_target": "src/commands/embed.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cli-options.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 399,
+      "resolved_target": "src/core/cli-options.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "openclaw.plugin.json",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 400,
+      "resolved_target": "openclaw.plugin.json"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/capture.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 401,
+      "resolved_target": "src/commands/capture.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "package.json",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 410,
+      "resolved_target": "package.json"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/conventions/calibration.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 424,
+      "resolved_target": "skills/conventions/calibration.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "docs/architecture/calibration-quality-gate-spec.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 435,
+      "resolved_target": "docs/architecture/calibration-quality-gate-spec.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/takes-resolution.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 437,
+      "resolved_target": "test/takes-resolution.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/base-phase.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 441,
+      "resolved_target": "src/core/cycle/base-phase.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/propose-takes.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 442,
+      "resolved_target": "src/core/cycle/propose-takes.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/grade-takes.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 443,
+      "resolved_target": "src/core/cycle/grade-takes.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/cycle/calibration-profile.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 444,
+      "resolved_target": "src/core/cycle/calibration-profile.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/voice-gate.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 445,
+      "resolved_target": "src/core/calibration/voice-gate.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/cross-brain.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 446,
+      "resolved_target": "src/core/calibration/cross-brain.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/nudge.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 447,
+      "resolved_target": "src/core/calibration/nudge.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/take-forecast.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 448,
+      "resolved_target": "src/core/calibration/take-forecast.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/gstack-coupling.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 449,
+      "resolved_target": "src/core/calibration/gstack-coupling.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/svg-renderer.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 450,
+      "resolved_target": "src/core/calibration/svg-renderer.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/undo-wave.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 451,
+      "resolved_target": "src/core/calibration/undo-wave.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/think-ab.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 452,
+      "resolved_target": "src/core/calibration/think-ab.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/calibration/recall-footer.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 453,
+      "resolved_target": "src/core/calibration/recall-footer.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/eval-contradictions/calibration-join.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 454,
+      "resolved_target": "src/core/eval-contradictions/calibration-join.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/think/prompt.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 455,
+      "resolved_target": "src/core/think/prompt.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/calibration.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 456,
+      "resolved_target": "src/commands/calibration.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/serve-http.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 457,
+      "resolved_target": "src/commands/serve-http.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/takes.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 458,
+      "resolved_target": "src/commands/takes.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/doctor.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 459,
+      "resolved_target": "src/commands/doctor.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "admin/src/pages/Calibration.tsx",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 460,
+      "resolved_target": "admin/src/pages/Calibration.tsx"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "admin/src/index.css",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 461,
+      "resolved_target": "admin/src/index.css"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "scripts/check-synthetic-corpus-privacy.sh",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 463,
+      "resolved_target": "scripts/check-synthetic-corpus-privacy.sh"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "test/regressions/v0.36.1.0-iron-rule.test.ts",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 464,
+      "resolved_target": "test/regressions/v0.36.1.0-iron-rule.test.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "DESIGN.md",
+      "marker": "Key files \u2014 per-file index (gbrain repo)",
+      "line": 465,
+      "resolved_target": "DESIGN.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/pack-lock.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 476,
+      "resolved_target": "src/core/schema-pack/pack-lock.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/mutate-audit.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 477,
+      "resolved_target": "src/core/schema-pack/mutate-audit.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/registry.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 478,
+      "resolved_target": "src/core/schema-pack/registry.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/best-effort.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 479,
+      "resolved_target": "src/core/schema-pack/best-effort.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/lint-rules.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 480,
+      "resolved_target": "src/core/schema-pack/lint-rules.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/redos-guard.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 481,
+      "resolved_target": "src/core/schema-pack/redos-guard.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/query-cache-invalidator.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 482,
+      "resolved_target": "src/core/schema-pack/query-cache-invalidator.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/mutate.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 483,
+      "resolved_target": "src/core/schema-pack/mutate.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/stats.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 484,
+      "resolved_target": "src/core/schema-pack/stats.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/schema-pack/sync.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 485,
+      "resolved_target": "src/core/schema-pack/sync.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/schema.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 486,
+      "resolved_target": "src/commands/schema.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/core/operations.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 487,
+      "resolved_target": "src/core/operations.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "src/commands/whoknows.ts",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 488,
+      "resolved_target": "src/commands/whoknows.ts"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/schema-author/SKILL.md",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 489,
+      "resolved_target": "skills/schema-author/SKILL.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/conventions/schema-evolution.md",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 490,
+      "resolved_target": "skills/conventions/schema-evolution.md"
+    },
+    {
+      "document": "docs/architecture/KEY_FILES.md",
+      "target": "skills/RESOLVER.md",
+      "marker": "Key files (v0.40.7.0 additions)",
+      "line": 491,
+      "resolved_target": "skills/RESOLVER.md"
+    }
+  ]
+}

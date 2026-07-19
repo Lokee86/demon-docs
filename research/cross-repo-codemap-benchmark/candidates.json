@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "candidates": [
+    {
+      "id": "gbrain",
+      "class": "native_per_file_index",
+      "code_repository": "https://github.com/garrytan/gbrain.git",
+      "docs_repository": "https://github.com/garrytan/gbrain.git",
+      "documents": ["docs/architecture/KEY_FILES.md"],
+      "section_markers": ["Key files", "Key Files"],
+      "languages": ["TypeScript"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "stress",
+      "holdout_count": 10,
+      "rationale": "Repository-maintained per-file architecture index explicitly used as an editing reference."
+    },
+    {
+      "id": "agent-orchestrator",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+      "docs_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Where to look first", "For code entry points", "API contract changes"],
+      "languages": ["Go", "TypeScript", "TSX"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "rationale": "Native agent guidance maps architecture responsibilities and code entry points to concrete files and directories."
+    },
+    {
+      "id": "adk-python",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/google/adk-python.git",
+      "docs_repository": "https://github.com/google/adk-python.git",
+      "documents": ["AGENTS.md", "contributing/adk_project_overview_and_architecture.md"],
+      "section_markers": ["Key Files and Locations", "Key Files"],
+      "languages": ["Python"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "discovery_only",
+      "rationale": "Project guidance and architecture documentation identify concrete implementation entry points."
+    },
+    {
+      "id": "agent-zero",
+      "class": "native_architecture_key_files",
+      "code_repository": "https://github.com/agent0ai/agent-zero.git",
+      "docs_repository": "https://github.com/agent0ai/agent-zero.git",
+      "documents": ["docs/developer/architecture.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["Python", "JavaScript"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "discovery_only",
+      "rationale": "Architecture document contains an explicit file-to-responsibility table."
+    },
+    {
+      "id": "marktext",
+      "class": "native_architecture_map",
+      "code_repository": "https://github.com/marktext/marktext.git",
+      "docs_repository": "https://github.com/marktext/marktext.git",
+      "documents": ["docs/dev/ARCHITECTURE.md"],
+      "section_markers": ["Overview", "Introduction to MarkText"],
+      "languages": ["JavaScript", "Vue"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "discovery_only",
+      "rationale": "Architecture guide maps runtime flow and repository areas to source paths."
+    },
+    {
+      "id": "render-claude-context",
+      "class": "native_generated_style_docs",
+      "code_repository": "https://github.com/czottmann/render-claude-context.git",
+      "docs_repository": "https://github.com/czottmann/render-claude-context.git",
+      "documents": ["docs/**/*.md", "CLAUDE.md", "AGENTS.md"],
+      "section_markers": ["Key Files", "Files Catalog", "Architecture"],
+      "languages": ["TypeScript"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "primary",
+      "holdout_count": 8,
+      "rationale": "Repository advertises architecture and file-catalog documentation with concrete file references."
+    },
+    {
+      "id": "zeroclaw-wiki",
+      "class": "generated_relevant_source_files",
+      "code_repository": "https://github.com/zeroclaw-labs/zeroclaw.git",
+      "docs_repository": "https://github.com/zeroclaw-labs/zeroclaw.wiki.git",
+      "documents": ["*.md"],
+      "section_markers": ["Relevant source files"],
+      "languages": ["Rust"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "discovery_only",
+      "rationale": "Wiki pages expose repeated document-level Relevant source files blocks; kept separate because mappings are generated."
+    },
+    {
+      "id": "alphafl",
+      "class": "native_relevant_source_files",
+      "code_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+      "docs_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+      "documents": ["README.md"],
+      "section_markers": ["Relevant source files", "Relevant source file"],
+      "languages": ["C++", "MPC"],
+      "extraction_mode": "markdown_links",
+      "benchmark_mode": "extraction_only",
+      "rationale": "Human-authored experiment documentation explicitly names source files implementing each benchmark."
+    },
+    {
+      "id": "bifrost",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/maximhq/bifrost.git",
+      "docs_repository": "https://github.com/maximhq/bifrost.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files Quick Reference"],
+      "languages": ["Go", "TypeScript"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "rationale": "Repository guidance provides a compact responsibility-to-file quick reference for a polyglot gateway."
+    },
+    {
+      "id": "beads-rust",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+      "docs_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files by Module"],
+      "languages": ["Rust"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "rationale": "Repository guidance groups concrete Rust implementation files by module responsibility."
+    },
+    {
+      "id": "genesis",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+      "docs_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+      "documents": [".github/contributing/ARCHITECTURE.md"],
+      "section_markers": ["Key Files Reference"],
+      "languages": ["Python"],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "rationale": "Architecture guidance provides concrete implementation entry points for a large Python simulation project."
+    }
+  ]
+}

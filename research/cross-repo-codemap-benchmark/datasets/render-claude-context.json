@@ -1,0 +1,910 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "CLAUDE.md",
+      "size": 2989,
+      "sha256": "20a4b9186ca6b8a26fb269806803ab811a29f21657dcbb42af31b2d9723dfa92",
+      "entry_count": 2,
+      "diagnostic_count": 0
+    },
+    {
+      "path": "docs/architecture.md",
+      "size": 7845,
+      "sha256": "55c86a879f05b7e9f34676629141483fd676341211e91783d5599d3467b60428",
+      "entry_count": 6,
+      "diagnostic_count": 0
+    },
+    {
+      "path": "docs/files.md",
+      "size": 5378,
+      "sha256": "302b3b4ad66ef9fca8d2b60efe008cc8d35ca7a2612de91eaaeab1ad0efe2bd4",
+      "entry_count": 21,
+      "diagnostic_count": 0
+    },
+    {
+      "path": "docs/project-overview.md",
+      "size": 5222,
+      "sha256": "d4aceed5adf58c82254d60a317ca385983cd4aee84c6c3508bba14e25bb7c447",
+      "entry_count": 9,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "CLAUDE.md",
+        "heading": "Key Files",
+        "target": "index.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 11,
+          "column": 1,
+          "end_line": 11,
+          "end_column": 94
+        },
+        "raw_line": "- **Main Entry Point**: `index.js` - CLI tool implementation with shebang for direct execution"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "index.js",
+        "exists": true,
+        "size": 6012,
+        "sha256": "5af08ffa318fa01177a5bf0b00ef3ce1356e58b1860228feb5a74ad93e0b09ac"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "CLAUDE.md",
+        "heading": "Key Files",
+        "target": "package.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 12,
+          "column": 1,
+          "end_line": 12,
+          "end_column": 98
+        },
+        "raw_line": "- **Configuration**: `package.json` - Package configuration with bin entry for global installation"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "package.json",
+        "exists": true,
+        "size": 1059,
+        "sha256": "e17f9c75bc2b1efbb56f1dab9d5080e26b0dd4242061dd539a6515b8271666a6"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/commands/cleanup.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 40,
+          "column": 1,
+          "end_line": 40,
+          "end_column": 86
+        },
+        "raw_line": "- cleanup.js: Generated file removal across all output modes (origin, global, project)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/cleanup.js",
+        "exists": true,
+        "size": 3236,
+        "sha256": "62773572b779722e96c2fea2bc22a5aabce9db958d3d48e83c91dba2750abb18"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/commands/setup.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 41,
+          "column": 1,
+          "end_line": 41,
+          "end_column": 81
+        },
+        "raw_line": "- setup.js: AI tool configuration file integration for auto-loading context files"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/setup.js",
+        "exists": true,
+        "size": 2153,
+        "sha256": "ccda5e81b807f3e1fc7a84f565704d887a6f6de85b31fa1f22aaf666a7e0cafc"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/commands/teardown.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 42,
+          "column": 1,
+          "end_line": 42,
+          "end_column": 58
+        },
+        "raw_line": "- teardown.js: Configuration removal from AI tool settings"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/teardown.js",
+        "exists": true,
+        "size": 2369,
+        "sha256": "235a0dbce27a464d4fcbc14c5b8d002693146ea86ee645664c2894f11cd5e585"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/utils/validation.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 45,
+          "column": 1,
+          "end_line": 45,
+          "end_column": 80
+        },
+        "raw_line": "- validation.js: `validateFilename()` with security checks for filesystem safety"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/validation.js",
+        "exists": true,
+        "size": 876,
+        "sha256": "43e6e619559f6f7c809bb8d97f11ab8cc8a5d639a22d269fa0dd9717dbe29c09"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/utils/targetValidator.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 46,
+          "column": 1,
+          "end_line": 46,
+          "end_column": 94
+        },
+        "raw_line": "- targetValidator.js: `validateTarget()` for supported AI tool names (crush, gemini, opencode)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targetValidator.js",
+        "exists": true,
+        "size": 732,
+        "sha256": "4b35eab72cca40f3a39145c8ddccb0e454f9712ad5875cc3b97603e01c58938e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/architecture.md",
+        "heading": "Architecture",
+        "target": "src/utils/targets.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 47,
+          "column": 1,
+          "end_line": 47,
+          "end_column": 98
+        },
+        "raw_line": "- targets.js: `getTargetGlobalFolder()` and `getDefaultTarget()` for AI tool configuration mapping"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targets.js",
+        "exists": true,
+        "size": 2690,
+        "sha256": "06c62fc04b85ffce21901e297812efe4764c6bd9bc0380b0833d32689b2191d9"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/fileCollector.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 19,
+          "column": 1,
+          "end_line": 19,
+          "end_column": 58
+        },
+        "raw_line": "**File Collection** - `src/fileCollector.js` (lines 23-48)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/fileCollector.js",
+        "exists": true,
+        "size": 1662,
+        "sha256": "1d27909e0827163e4195ab5e1ad5bc56711f03871721a52d992964380e48cad6"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/importResolver.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 24,
+          "column": 1,
+          "end_line": 24,
+          "end_column": 61
+        },
+        "raw_line": "**Import Resolution** - `src/importResolver.js` (lines 48-93)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/importResolver.js",
+        "exists": true,
+        "size": 3509,
+        "sha256": "8f312c261de8ac0989f1d6d043372121f8d4b8d54a4ca337e242bb72417c1f23"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/fileProcessor.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 29,
+          "column": 1,
+          "end_line": 29,
+          "end_column": 59
+        },
+        "raw_line": "**File Processing** - `src/fileProcessor.js` (lines 18-259)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/fileProcessor.js",
+        "exists": true,
+        "size": 8782,
+        "sha256": "968e8944a3e95df346b7bea9a744eb3ebb82d0c604da6c7ab4a3bac91fae3e94"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/commands/create.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 37,
+          "column": 1,
+          "end_line": 37,
+          "end_column": 59
+        },
+        "raw_line": "**Create Command** - `src/commands/create.js` (lines 25-60)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/create.js",
+        "exists": true,
+        "size": 2347,
+        "sha256": "7a58ecb8ea4c8f55785b1c3240f1d58e383665a7fed0790e2f5ee9c0ad162573"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/commands/cleanup.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 43,
+          "column": 1,
+          "end_line": 43,
+          "end_column": 47
+        },
+        "raw_line": "**Cleanup Command** - `src/commands/cleanup.js`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/cleanup.js",
+        "exists": true,
+        "size": 3236,
+        "sha256": "62773572b779722e96c2fea2bc22a5aabce9db958d3d48e83c91dba2750abb18"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/commands/setup.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 48,
+          "column": 1,
+          "end_line": 48,
+          "end_column": 81
+        },
+        "raw_line": "**Setup/Teardown Commands** - `src/commands/setup.js`, `src/commands/teardown.js`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/setup.js",
+        "exists": true,
+        "size": 2153,
+        "sha256": "ccda5e81b807f3e1fc7a84f565704d887a6f6de85b31fa1f22aaf666a7e0cafc"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/commands/teardown.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 48,
+          "column": 1,
+          "end_line": 48,
+          "end_column": 81
+        },
+        "raw_line": "**Setup/Teardown Commands** - `src/commands/setup.js`, `src/commands/teardown.js`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/teardown.js",
+        "exists": true,
+        "size": 2369,
+        "sha256": "235a0dbce27a464d4fcbc14c5b8d002693146ea86ee645664c2894f11cd5e585"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/utils/validation.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 54,
+          "column": 1,
+          "end_line": 54,
+          "end_column": 56
+        },
+        "raw_line": "- `validation.js` - Filename validation and sanitization"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/validation.js",
+        "exists": true,
+        "size": 876,
+        "sha256": "43e6e619559f6f7c809bb8d97f11ab8cc8a5d639a22d269fa0dd9717dbe29c09"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/utils/targetValidator.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 55,
+          "column": 1,
+          "end_line": 55,
+          "end_column": 74
+        },
+        "raw_line": "- `targetValidator.js` - AI tool target validation (crush/gemini/opencode)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targetValidator.js",
+        "exists": true,
+        "size": 732,
+        "sha256": "4b35eab72cca40f3a39145c8ddccb0e454f9712ad5875cc3b97603e01c58938e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "src/utils/targets.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 56,
+          "column": 1,
+          "end_line": 56,
+          "end_column": 63
+        },
+        "raw_line": "- `targets.js` - Target configuration and global folder mapping"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targets.js",
+        "exists": true,
+        "size": 2690,
+        "sha256": "06c62fc04b85ffce21901e297812efe4764c6bd9bc0380b0833d32689b2191d9"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "package.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 60,
+          "column": 1,
+          "end_line": 60,
+          "end_column": 55
+        },
+        "raw_line": "**Package Configuration** - `package.json` (lines 1-25)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "package.json",
+        "exists": true,
+        "size": 1059,
+        "sha256": "e17f9c75bc2b1efbb56f1dab9d5080e26b0dd4242061dd539a6515b8271666a6"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "package-lock.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 65,
+          "column": 1,
+          "end_line": 65,
+          "end_column": 55
+        },
+        "raw_line": "**Dependencies** - `node_modules/`, `package-lock.json`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "package-lock.json",
+        "exists": true,
+        "size": 729,
+        "sha256": "430713e05696b4f4e0054d11de576958a317e55cc410cc93ac784a915c1ae63d"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "CLAUDE.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 71,
+          "column": 1,
+          "end_line": 71,
+          "end_column": 52
+        },
+        "raw_line": "**Project Instructions** - `CLAUDE.md` (lines 1-100)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "CLAUDE.md",
+        "exists": true,
+        "size": 2989,
+        "sha256": "20a4b9186ca6b8a26fb269806803ab811a29f21657dcbb42af31b2d9723dfa92"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": ".claude/settings.local.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 81,
+          "column": 1,
+          "end_line": 81,
+          "end_column": 50
+        },
+        "raw_line": "**Settings Files** - `.claude/settings.local.json`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": ".claude/settings.local.json",
+        "exists": true,
+        "size": 333,
+        "sha256": "0ab5239ce45accc4cdbe11d3efe6ee331ebf1c5577aa1d0d6ea50180be62b156"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 87,
+          "column": 1,
+          "end_line": 87,
+          "end_column": 36
+        },
+        "raw_line": "**User Documentation** - `README.md`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "README.md",
+        "exists": true,
+        "size": 9824,
+        "sha256": "4cf5d019f357aa19ec01e022c78267fc3a56ef7e8f373ac7a42a3f8c64797327"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "docs/architecture.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 93,
+          "column": 1,
+          "end_line": 93,
+          "end_column": 63
+        },
+        "raw_line": "- `architecture.md` - System design and component relationships"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/architecture.md",
+        "exists": true,
+        "size": 7845,
+        "sha256": "55c86a879f05b7e9f34676629141483fd676341211e91783d5599d3467b60428"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "docs/development.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 96,
+          "column": 1,
+          "end_line": 96,
+          "end_column": 59
+        },
+        "raw_line": "- `development.md` - Code patterns and development workflow"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/development.md",
+        "exists": true,
+        "size": 18234,
+        "sha256": "fdb46345c14cc49dcc675a9a2a614348b70b6e48bd7116b29010539c23696dfa"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "docs/project-overview.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 98,
+          "column": 1,
+          "end_line": 98,
+          "end_column": 56
+        },
+        "raw_line": "- `project-overview.md` - High-level project description"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/project-overview.md",
+        "exists": true,
+        "size": 5222,
+        "sha256": "d4aceed5adf58c82254d60a317ca385983cd4aee84c6c3508bba14e25bb7c447"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "CHANGELOG.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 100,
+          "column": 1,
+          "end_line": 100,
+          "end_column": 35
+        },
+        "raw_line": "**Change History** - `CHANGELOG.md`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "CHANGELOG.md",
+        "exists": true,
+        "size": 1583,
+        "sha256": "a06b2bcd19028de9a1c82634a7cb4b872db87c9bff02e4f6e0e84e9e76a4495c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "LICENSE.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 104,
+          "column": 1,
+          "end_line": 104,
+          "end_column": 24
+        },
+        "raw_line": "**Legal** - `LICENSE.md`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "LICENSE.md",
+        "exists": true,
+        "size": 1071,
+        "sha256": "f0bc1df978707133dd9476e935f7ea334a779da3e9b664e1d1346abb80d6eedc"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/files.md",
+        "heading": "Files Catalog",
+        "target": "index.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 121,
+          "column": 1,
+          "end_line": 121,
+          "end_column": 54
+        },
+        "raw_line": "- `index.js` imports all command modules and utilities"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "index.js",
+        "exists": true,
+        "size": 6012,
+        "sha256": "5af08ffa318fa01177a5bf0b00ef3ce1356e58b1860228feb5a74ad93e0b09ac"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "index.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 14,
+          "column": 1,
+          "end_line": 14,
+          "end_column": 148
+        },
+        "raw_line": "**Binary Configuration** - `package.json` (lines 6-7): NPM bin entry mapping `render-claude-context` command to `./index.js` executable with shebang"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "index.js",
+        "exists": true,
+        "size": 6012,
+        "sha256": "5af08ffa318fa01177a5bf0b00ef3ce1356e58b1860228feb5a74ad93e0b09ac"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "package.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 14,
+          "column": 1,
+          "end_line": 14,
+          "end_column": 148
+        },
+        "raw_line": "**Binary Configuration** - `package.json` (lines 6-7): NPM bin entry mapping `render-claude-context` command to `./index.js` executable with shebang"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "package.json",
+        "exists": true,
+        "size": 1059,
+        "sha256": "e17f9c75bc2b1efbb56f1dab9d5080e26b0dd4242061dd539a6515b8271666a6"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/fileCollector.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 15,
+          "column": 1,
+          "end_line": 15,
+          "end_column": 176
+        },
+        "raw_line": "**File Discovery** - `src/fileCollector.js` (lines 23-47): Hierarchical directory traversal from current working directory up to home directory, including `~/.claude/CLAUDE.md`"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/fileCollector.js",
+        "exists": true,
+        "size": 1662,
+        "sha256": "1d27909e0827163e4195ab5e1ad5bc56711f03871721a52d992964380e48cad6"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/importResolver.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 16,
+          "column": 1,
+          "end_line": 16,
+          "end_column": 186
+        },
+        "raw_line": "**Import Resolution** - `src/importResolver.js` (lines 48-93): Recursive `@path` import processing with tilde expansion (`~/`), front matter stripping, and circular dependency protection"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/importResolver.js",
+        "exists": true,
+        "size": 3509,
+        "sha256": "8f312c261de8ac0989f1d6d043372121f8d4b8d54a4ca337e242bb72417c1f23"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/fileProcessor.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 17,
+          "column": 1,
+          "end_line": 17,
+          "end_column": 201
+        },
+        "raw_line": "**Content Generation** - `src/fileProcessor.js` (lines 114-143): Context assembly with HTML comment file separators, automatic command inclusion from `~/.claude/commands/`, and reverse-order processing"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/fileProcessor.js",
+        "exists": true,
+        "size": 8782,
+        "sha256": "968e8944a3e95df346b7bea9a744eb3ebb82d0c604da6c7ab4a3bac91fae3e94"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/commands/create.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 18,
+          "column": 1,
+          "end_line": 18,
+          "end_column": 190
+        },
+        "raw_line": "**Command Implementation** - `src/commands/create.js` (lines 25-56): Output mode routing (origin/global/project) with target-specific global folder resolution and mutual exclusion validation"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/commands/create.js",
+        "exists": true,
+        "size": 2347,
+        "sha256": "7a58ecb8ea4c8f55785b1c3240f1d58e383665a7fed0790e2f5ee9c0ad162573"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/utils/targets.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 19,
+          "column": 1,
+          "end_line": 19,
+          "end_column": 206
+        },
+        "raw_line": "**Target Configuration** - `src/utils/targets.js` (lines 13-39): AI tool configuration mapping for Crush (`~/.config/crush/`), Gemini (`~/.gemini/`), and opencode (`~/.config/opencode/`) with settings paths"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targets.js",
+        "exists": true,
+        "size": 2690,
+        "sha256": "06c62fc04b85ffce21901e297812efe4764c6bd9bc0380b0833d32689b2191d9"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/utils/targetValidator.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 20,
+          "column": 1,
+          "end_line": 20,
+          "end_column": 153
+        },
+        "raw_line": "**Validation Utilities** - `src/utils/validation.js`, `src/utils/targetValidator.js`: Input validation for filenames and target names with error handling"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/targetValidator.js",
+        "exists": true,
+        "size": 732,
+        "sha256": "4b35eab72cca40f3a39145c8ddccb0e454f9712ad5875cc3b97603e01c58938e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "docs/project-overview.md",
+        "heading": "Key Files",
+        "target": "src/utils/validation.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 20,
+          "column": 1,
+          "end_line": 20,
+          "end_column": 153
+        },
+        "raw_line": "**Validation Utilities** - `src/utils/validation.js`, `src/utils/targetValidator.js`: Input validation for filenames and target names with error handling"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/utils/validation.js",
+        "exists": true,
+        "size": 876,
+        "sha256": "43e6e619559f6f7c809bb8d97f11ab8cc8a5d639a22d269fa0dd9717dbe29c09"
+      }
+    }
+  ],
+  "diagnostics": []
+}

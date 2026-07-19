@@ -1,0 +1,121 @@
+{
+  "id": "beads-rust",
+  "class": "native_key_files_section",
+  "languages": [
+    "Rust"
+  ],
+  "extraction_mode": "leading_entry",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 3,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+  "docs_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+  "code_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+  "docs_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 14,
+  "resolved_document_count": 1,
+  "resolved_target_count": 14,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "cli/mod.rs",
+      "marker": "Key Files by Module",
+      "line": 334,
+      "resolved_target": "src/cli/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "model/mod.rs",
+      "marker": "Key Files by Module",
+      "line": 336,
+      "resolved_target": "src/model/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "storage/sqlite.rs",
+      "marker": "Key Files by Module",
+      "line": 337,
+      "resolved_target": "src/storage/sqlite.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "storage/schema.rs",
+      "marker": "Key Files by Module",
+      "line": 338,
+      "resolved_target": "src/storage/schema.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "storage/events.rs",
+      "marker": "Key Files by Module",
+      "line": 339,
+      "resolved_target": "src/storage/events.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "sync/mod.rs",
+      "marker": "Key Files by Module",
+      "line": 340,
+      "resolved_target": "src/sync/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "sync/path.rs",
+      "marker": "Key Files by Module",
+      "line": 341,
+      "resolved_target": "src/sync/path.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "sync/history.rs",
+      "marker": "Key Files by Module",
+      "line": 342,
+      "resolved_target": "src/sync/history.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "config/mod.rs",
+      "marker": "Key Files by Module",
+      "line": 343,
+      "resolved_target": "src/config/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "error/structured.rs",
+      "marker": "Key Files by Module",
+      "line": 344,
+      "resolved_target": "src/error/structured.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "validation/mod.rs",
+      "marker": "Key Files by Module",
+      "line": 345,
+      "resolved_target": "src/validation/mod.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "util/id.rs",
+      "marker": "Key Files by Module",
+      "line": 346,
+      "resolved_target": "src/util/id.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "util/hash.rs",
+      "marker": "Key Files by Module",
+      "line": 347,
+      "resolved_target": "src/util/hash.rs"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "format/rich.rs",
+      "marker": "Key Files by Module",
+      "line": 348,
+      "resolved_target": "src/format/rich.rs"
+    }
+  ]
+}

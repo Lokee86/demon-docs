@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "candidate_count": 11,
+  "qualifying_count": 2,
+  "results": [
+    {
+      "id": "gbrain",
+      "class": "native_per_file_index",
+      "languages": [
+        "TypeScript"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "stress",
+      "holdout_count": 10,
+      "status": "qualifies",
+      "code_repository": "https://github.com/garrytan/gbrain.git",
+      "docs_repository": "https://github.com/garrytan/gbrain.git",
+      "code_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+      "docs_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+      "documents_scanned": [
+        "docs/architecture/KEY_FILES.md"
+      ],
+      "resolved_pair_count": 357,
+      "resolved_document_count": 1,
+      "resolved_target_count": 357,
+      "unresolved_pair_count": 38,
+      "unresolved_examples": [
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/context/",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 20
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/commands/sync.ts:resolveSlugByPathOrSourcePath",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 41
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/chunkers/",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 60
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/assets/wasm/",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 62
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/search/",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 65
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/search/intent.ts",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 66
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/ai/gateway.ts:withBudgetTracker",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 129
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/skillpack/{manifest-v1,tarball,state,remote-source,trust-prompt,bootstrap-display,scaffold-third-party,registry-schema,registry-client,rubric,doctor,init-scaffold,pack-publish,endorse,audit}.ts",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 151
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/skillpack/{init-brain-pack,brain-pack-advisory,brain-pack-lint,brain-resident-locate,nag-state}.ts",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 154
+        },
+        {
+          "document": "docs/architecture/KEY_FILES.md",
+          "target": "src/core/chronicle/{eligibility,config,backstop,extract-events,ontology,narrative}.ts",
+          "marker": "Key files \u2014 per-file index (gbrain repo)",
+          "line": 156
+        }
+      ]
+    },
+    {
+      "id": "agent-orchestrator",
+      "class": "native_key_files_section",
+      "languages": [
+        "Go",
+        "TypeScript",
+        "TSX"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+      "docs_repository": "https://github.com/ComposioHQ/agent-orchestrator.git",
+      "code_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+      "docs_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 9,
+      "resolved_document_count": 1,
+      "resolved_target_count": 9,
+      "unresolved_pair_count": 6,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/httpd/controllers/",
+          "marker": "For code entry points",
+          "line": 58
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/service/",
+          "marker": "For code entry points",
+          "line": 59
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/domain/",
+          "marker": "For code entry points",
+          "line": 60
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/ports/",
+          "marker": "For code entry points",
+          "line": 61
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/storage/sqlite/",
+          "marker": "For code entry points",
+          "line": 62
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "backend/internal/storage/sqlite/gen/",
+          "marker": "For code entry points",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "id": "adk-python",
+      "class": "native_key_files_section",
+      "languages": [
+        "Python"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "discovery_only",
+      "holdout_count": 0,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/google/adk-python.git",
+      "docs_repository": "https://github.com/google/adk-python.git",
+      "code_revision": "be5828f317c7430411df29974cd9ccfa875e90de",
+      "docs_revision": "be5828f317c7430411df29974cd9ccfa875e90de",
+      "documents_scanned": [
+        "AGENTS.md",
+        "contributing/adk_project_overview_and_architecture.md"
+      ],
+      "resolved_pair_count": 0,
+      "resolved_document_count": 0,
+      "resolved_target_count": 0,
+      "unresolved_pair_count": 0
+    },
+    {
+      "id": "agent-zero",
+      "class": "native_architecture_key_files",
+      "languages": [
+        "Python",
+        "JavaScript"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "discovery_only",
+      "holdout_count": 0,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/agent0ai/agent-zero.git",
+      "docs_repository": "https://github.com/agent0ai/agent-zero.git",
+      "code_revision": "d1d48bc9c0e6e253e87c354ce757c518820c6e25",
+      "docs_revision": "d1d48bc9c0e6e253e87c354ce757c518820c6e25",
+      "documents_scanned": [
+        "docs/developer/architecture.md"
+      ],
+      "resolved_pair_count": 0,
+      "resolved_document_count": 0,
+      "resolved_target_count": 0,
+      "unresolved_pair_count": 0
+    },
+    {
+      "id": "marktext",
+      "class": "native_architecture_map",
+      "languages": [
+        "JavaScript",
+        "Vue"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "discovery_only",
+      "holdout_count": 0,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/marktext/marktext.git",
+      "docs_repository": "https://github.com/marktext/marktext.git",
+      "code_revision": "43bd8b77795fb27b1a9512737c000f7362031ea0",
+      "docs_revision": "43bd8b77795fb27b1a9512737c000f7362031ea0",
+      "documents_scanned": [],
+      "resolved_pair_count": 0,
+      "resolved_document_count": 0,
+      "resolved_target_count": 0,
+      "unresolved_pair_count": 0
+    },
+    {
+      "id": "render-claude-context",
+      "class": "native_generated_style_docs",
+      "languages": [
+        "TypeScript"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "primary",
+      "holdout_count": 8,
+      "status": "qualifies",
+      "code_repository": "https://github.com/czottmann/render-claude-context.git",
+      "docs_repository": "https://github.com/czottmann/render-claude-context.git",
+      "code_revision": "9ae730cd94f6d956e53561ff68ae2924ec492127",
+      "docs_revision": "9ae730cd94f6d956e53561ff68ae2924ec492127",
+      "documents_scanned": [
+        "CLAUDE.md",
+        "docs/architecture.md",
+        "docs/development.md",
+        "docs/files.md",
+        "docs/project-overview.md"
+      ],
+      "resolved_pair_count": 38,
+      "resolved_document_count": 4,
+      "resolved_target_count": 21,
+      "unresolved_pair_count": 19,
+      "unresolved_examples": [
+        {
+          "document": "CLAUDE.md",
+          "target": "SPEC.md",
+          "marker": "Key Files",
+          "line": 13
+        },
+        {
+          "document": "CLAUDE.md",
+          "target": "docs/",
+          "marker": "Key Files",
+          "line": 14
+        },
+        {
+          "document": "docs/architecture.md",
+          "target": "importPath.startsWith(\"~/\"",
+          "marker": "Key Files",
+          "line": 64
+        },
+        {
+          "document": "docs/architecture.md",
+          "target": "globalFolder.startsWith(\"~/\"",
+          "marker": "Key Files",
+          "line": 86
+        },
+        {
+          "document": "docs/files.md",
+          "target": "node_modules/",
+          "marker": "Files Catalog",
+          "line": 65
+        },
+        {
+          "document": "docs/files.md",
+          "target": "CLAUDE-derived.md",
+          "marker": "Files Catalog",
+          "line": 76
+        },
+        {
+          "document": "docs/files.md",
+          "target": "build-system.md",
+          "marker": "Files Catalog",
+          "line": 94
+        },
+        {
+          "document": "docs/files.md",
+          "target": "deployment.md",
+          "marker": "Files Catalog",
+          "line": 95
+        },
+        {
+          "document": "docs/files.md",
+          "target": "testing.md",
+          "marker": "Files Catalog",
+          "line": 97
+        },
+        {
+          "document": "docs/files.md",
+          "target": "src/commands/",
+          "marker": "Files Catalog",
+          "line": 110
+        }
+      ]
+    },
+    {
+      "id": "zeroclaw-wiki",
+      "class": "generated_relevant_source_files",
+      "languages": [
+        "Rust"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "discovery_only",
+      "holdout_count": 0,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/zeroclaw-labs/zeroclaw.git",
+      "docs_repository": "https://github.com/zeroclaw-labs/zeroclaw.wiki.git",
+      "code_revision": "fd2d1a0441a02c502cd6e48b0845025339f52f7c",
+      "docs_revision": "6c1fcb92719162fdaf46db4065a50bbaa13ac57f",
+      "documents_scanned": [
+        "_Sidebar.md",
+        "Home.md"
+      ],
+      "resolved_pair_count": 0,
+      "resolved_document_count": 0,
+      "resolved_target_count": 0,
+      "unresolved_pair_count": 0
+    },
+    {
+      "id": "alphafl",
+      "class": "native_relevant_source_files",
+      "languages": [
+        "C++",
+        "MPC"
+      ],
+      "extraction_mode": "markdown_links",
+      "benchmark_mode": "extraction_only",
+      "holdout_count": 0,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+      "docs_repository": "https://github.com/Barkhausen-Institut/AlphaFL.git",
+      "code_revision": "555426323ddbc2d0f463a5b84d3f8b2a9be3f231",
+      "docs_revision": "555426323ddbc2d0f463a5b84d3f8b2a9be3f231",
+      "documents_scanned": [
+        "README.md"
+      ],
+      "resolved_pair_count": 7,
+      "resolved_document_count": 1,
+      "resolved_target_count": 7,
+      "unresolved_pair_count": 1,
+      "unresolved_examples": [
+        {
+          "document": "README.md",
+          "target": "Alpha/alpha-pre.cpp",
+          "marker": "Relevant source files",
+          "line": 140
+        }
+      ]
+    },
+    {
+      "id": "bifrost",
+      "class": "native_key_files_section",
+      "languages": [
+        "Go",
+        "TypeScript"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/maximhq/bifrost.git",
+      "docs_repository": "https://github.com/maximhq/bifrost.git",
+      "code_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+      "docs_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 14,
+      "resolved_document_count": 1,
+      "resolved_target_count": 14,
+      "unresolved_pair_count": 6,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "core/inference.go",
+          "marker": "Key Files Quick Reference",
+          "line": 649
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "core/pool/pool_prod.go",
+          "marker": "Key Files Quick Reference",
+          "line": 656
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "core/internal/llmtests/",
+          "marker": "Key Files Quick Reference",
+          "line": 663
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "core/internal/mcptests/",
+          "marker": "Key Files Quick Reference",
+          "line": 664
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "tests/e2e/core/",
+          "marker": "Key Files Quick Reference",
+          "line": 665
+        },
+        {
+          "document": "AGENTS.md",
+          "target": ".github/workflows/",
+          "marker": "Key Files Quick Reference",
+          "line": 667
+        }
+      ]
+    },
+    {
+      "id": "beads-rust",
+      "class": "native_key_files_section",
+      "languages": [
+        "Rust"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+      "docs_repository": "https://github.com/Dicklesworthstone/beads_rust.git",
+      "code_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+      "docs_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 14,
+      "resolved_document_count": 1,
+      "resolved_target_count": 14,
+      "unresolved_pair_count": 1,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "cli/commands",
+          "marker": "Key Files by Module",
+          "line": 335
+        }
+      ]
+    },
+    {
+      "id": "genesis",
+      "class": "native_key_files_section",
+      "languages": [
+        "Python"
+      ],
+      "extraction_mode": "leading_entry",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+      "docs_repository": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+      "code_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+      "docs_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+      "documents_scanned": [
+        ".github/contributing/ARCHITECTURE.md"
+      ],
+      "resolved_pair_count": 5,
+      "resolved_document_count": 1,
+      "resolved_target_count": 5,
+      "unresolved_pair_count": 0
+    }
+  ]
+}

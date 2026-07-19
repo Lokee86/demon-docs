@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "algorithm_baseline": "aa6eb48c686b0423e104530418b4e9fd32e3aa78",
+  "benchmarks": [
+    {
+      "id": "agent-orchestrator",
+      "class": "native_key_files_section",
+      "languages": [
+        "Go",
+        "TypeScript",
+        "TSX"
+      ],
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "code_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+      "docs_revision": "b55f6c5c99f5b1f25cd61e3c79cd41a0112c4801",
+      "document_count": 1,
+      "known_link_count": 9,
+      "dataset": "datasets/agent-orchestrator.json",
+      "repository_checkout": "checkouts/agent-orchestrator/code",
+      "status": "completed",
+      "raw_suggestion_count": 30,
+      "unique_suggestion_count": 30,
+      "recovered_link_count": 1,
+      "missed_link_count": 2,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 1,
+      "precision": 0.03333333333333333,
+      "recall": 0.3333333333333333
+    },
+    {
+      "id": "beads-rust",
+      "class": "native_key_files_section",
+      "languages": [
+        "Rust"
+      ],
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "code_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+      "docs_revision": "fb70077389a88998f4557c6b33f7f29cde3431dc",
+      "document_count": 1,
+      "known_link_count": 14,
+      "dataset": "datasets/beads-rust.json",
+      "repository_checkout": "checkouts/beads-rust/code",
+      "status": "completed",
+      "raw_suggestion_count": 32,
+      "unique_suggestion_count": 32,
+      "recovered_link_count": 1,
+      "missed_link_count": 2,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 1,
+      "precision": 0.03125,
+      "recall": 0.3333333333333333
+    },
+    {
+      "id": "bifrost",
+      "class": "native_key_files_section",
+      "languages": [
+        "Go",
+        "TypeScript"
+      ],
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 3,
+      "code_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+      "docs_revision": "e1550bf2d804b8af3548f6d863b9555bfd06d381",
+      "document_count": 1,
+      "known_link_count": 14,
+      "dataset": "datasets/bifrost.json",
+      "repository_checkout": "checkouts/bifrost/code",
+      "status": "completed",
+      "raw_suggestion_count": 32,
+      "unique_suggestion_count": 32,
+      "recovered_link_count": 2,
+      "missed_link_count": 1,
+      "hard_recovered_count": 1,
+      "context_recovered_count": 1,
+      "precision": 0.0625,
+      "recall": 0.6666666666666666
+    },
+    {
+      "id": "gbrain",
+      "class": "native_per_file_index",
+      "languages": [
+        "TypeScript"
+      ],
+      "benchmark_mode": "stress",
+      "holdout_count": 10,
+      "code_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+      "docs_revision": "f72de97943eb9dc1292a80f85d19db7e311855dc",
+      "document_count": 1,
+      "known_link_count": 357,
+      "dataset": "datasets/gbrain.json",
+      "repository_checkout": "checkouts/gbrain/code",
+      "status": "completed",
+      "raw_suggestion_count": 30,
+      "unique_suggestion_count": 30,
+      "recovered_link_count": 3,
+      "missed_link_count": 7,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 3,
+      "precision": 0.1,
+      "recall": 0.3
+    },
+    {
+      "id": "genesis",
+      "class": "native_key_files_section",
+      "languages": [
+        "Python"
+      ],
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "code_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+      "docs_revision": "6d2d19ecb734b35f51ab5e8862b954b780cfed09",
+      "document_count": 1,
+      "known_link_count": 5,
+      "dataset": "datasets/genesis.json",
+      "repository_checkout": "checkouts/genesis/code",
+      "status": "completed",
+      "raw_suggestion_count": 30,
+      "unique_suggestion_count": 30,
+      "recovered_link_count": 1,
+      "missed_link_count": 0,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 1,
+      "precision": 0.03333333333333333,
+      "recall": 1
+    },
+    {
+      "id": "render-claude-context",
+      "class": "native_generated_style_docs",
+      "languages": [
+        "TypeScript"
+      ],
+      "benchmark_mode": "primary",
+      "holdout_count": 8,
+      "code_revision": "9ae730cd94f6d956e53561ff68ae2924ec492127",
+      "docs_revision": "9ae730cd94f6d956e53561ff68ae2924ec492127",
+      "document_count": 4,
+      "known_link_count": 38,
+      "dataset": "datasets/render-claude-context.json",
+      "repository_checkout": "checkouts/render-claude-context/code",
+      "status": "completed",
+      "raw_suggestion_count": 24,
+      "unique_suggestion_count": 24,
+      "recovered_link_count": 6,
+      "missed_link_count": 2,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 6,
+      "precision": 0.25,
+      "recall": 0.75
+    }
+  ]
+}

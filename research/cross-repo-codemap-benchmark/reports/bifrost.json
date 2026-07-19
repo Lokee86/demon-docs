@@ -1,0 +1,662 @@
+{
+  "schema_version": 1,
+  "seed": "cross-repo-bifrost-v1",
+  "known_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/utils/utils.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/chatcompletions.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/plugin.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/provider.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/responses.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/docs.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/devpprof.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/inference.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/config.schema.json"
+    }
+  ],
+  "visible_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/utils/utils.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/chatcompletions.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/provider.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/responses.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/docs.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/devpprof.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/inference.go"
+    }
+  ],
+  "hidden_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/plugin.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/config.schema.json"
+    }
+  ],
+  "recovered_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost.go"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/plugin.go"
+    }
+  ],
+  "recovered_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost.go",
+      "score": 39.9488358057978,
+      "evidence": [
+        "declared_symbol_mention:ChannelMessage:x2",
+        "declared_symbol_mention:ProviderQueue:x4",
+        "dependency_neighbor:core/providers/utils/utils.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "exact_path_mention:core/bifrost.go:x2"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/plugin.go",
+      "score": 73.06938774884883,
+      "evidence": [
+        "declared_symbol_mention:HTTPTransportPlugin:x3",
+        "declared_symbol_mention:LLMPlugin:x3",
+        "declared_symbol_mention:MCPPlugin:x3",
+        "declared_symbol_mention:ObservabilityPlugin:x2",
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "hard_link"
+    }
+  ],
+  "missed_links": [
+    {
+      "document": "AGENTS.md",
+      "target": "transports/config.schema.json"
+    }
+  ],
+  "unmatched_suggestions": [
+    {
+      "document": "AGENTS.md",
+      "target": "config.json",
+      "score": 1.1697541313627178,
+      "evidence": [
+        "exact_path_mention:config.json:x4"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/bifrost_test.go",
+      "score": 5.857122175783302,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "test_counterpart:core/schemas/bifrost.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/account.go",
+      "score": 16.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:ComprehensiveTestConfig:x2",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "hard_link"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/validation_presets.go",
+      "score": 16.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:BasicChatExpectations",
+        "declared_symbol_mention:ToolCallExpectations",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "hard_link"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/agent_test_helpers.go",
+      "score": 16.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:AgentTestConfig",
+        "declared_symbol_mention:SetupAgentTest",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "hard_link"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/fixtures.go",
+      "score": 9.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:DynamicLLMMocker",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/",
+      "score": 1.1697541313627178,
+      "evidence": [
+        "exact_path_mention:core/providers/:x5"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/gemini/types.go",
+      "score": 9.616513919200296,
+      "evidence": [
+        "declared_symbol_mention:GeminiEmbeddingResponse",
+        "dependency_neighbor:core/providers/utils/utils.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/providers/openai/responses_test.go",
+      "score": 5.071543654354558,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "test_counterpart:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/account.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/async.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/batch.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/cachedcontents.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/containers.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_native.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_test.go",
+      "score": 7.581795909397822,
+      "evidence": [
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:",
+        "test_counterpart:core/schemas/context.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_wasm.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/count_tokens.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/duration.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/embedding.go",
+      "score": 4.785175233704561,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "core/schemas/trace.go",
+      "score": 5.477053995484869,
+      "evidence": [
+        "dependency_neighbor:core/providers/utils/utils.go:outbound:go_import",
+        "dependency_neighbor:framework/streaming/accumulator.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
+        "sibling_of_existing_target:core/schemas/bifrost.go:",
+        "sibling_of_existing_target:core/schemas/chatcompletions.go:",
+        "sibling_of_existing_target:core/schemas/context.go:",
+        "sibling_of_existing_target:core/schemas/provider.go:",
+        "sibling_of_existing_target:core/schemas/responses.go:",
+        "unique_basename_mention:trace.go"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "examples/plugins/hello-world/main.go",
+      "score": 16.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:HTTPTransportStreamChunkHook:x2",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "hard_link"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/mcp_headers/main.go",
+      "score": 9.07154365435456,
+      "evidence": [
+        "declared_symbol_mention:NewProvider",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator_test.go",
+      "score": 8.612019963209198,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:framework/streaming/accumulator.go:",
+        "test_counterpart:framework/streaming/accumulator.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "framework/streaming/responses_test.go",
+      "score": 5.612019963209198,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:framework/streaming/accumulator.go:",
+        "test_counterpart:core/schemas/responses.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance_test.go",
+      "score": 9.01530313845184,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/devpprof.go:",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/governance.go:",
+        "sibling_of_existing_target:transports/bifrost-http/handlers/inference.go:",
+        "test_counterpart:transports/bifrost-http/handlers/governance.go:"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/lib/middleware.go",
+      "score": 10.903312124830025,
+      "evidence": [
+        "declared_symbol_mention:ChainMiddlewares",
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:outbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/main.go",
+      "score": 8.071543654354558,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/plugins.go",
+      "score": 8.071543654354558,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/server.go",
+      "score": 8.071543654354558,
+      "evidence": [
+        "dependency_neighbor:core/schemas/bifrost.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/chatcompletions.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/context.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
+        "dependency_neighbor:core/schemas/responses.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/devpprof.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/governance.go:inbound:go_import",
+        "dependency_neighbor:transports/bifrost-http/handlers/inference.go:inbound:go_import"
+      ],
+      "tier": "context"
+    }
+  ],
+  "already_linked_suggestions": [],
+  "duplicate_suggestions": [],
+  "invalid_suggestions": [],
+  "raw_suggestion_count": 32,
+  "unique_suggestion_count": 32,
+  "precision": 0.0625,
+  "recall": 0.6666666666666666
+}
