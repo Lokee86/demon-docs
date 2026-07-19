@@ -31,6 +31,7 @@ The repository root [README](../README.md) is the product introduction and quick
 - [Architecture](architecture/README.md) - Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior.
 - [Development](development/README.md) - Contributor workflow, testing, repository layout, fixtures, and release verification.
 - [Guides](guides/README.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Demon Docs.
+- [Limits](limits/README.md) - Current user-visible limitations, incomplete surfaces, workarounds, ownership, and removal conditions.
 - [Operations](operations/README.md) - Watcher, repository demon, recovery, troubleshooting, and runtime behavior.
 - [Planning](planning/README.md) - Future, unresolved, proposed, or back-burnered work.
 - [Reference](reference/README.md) - Exact CLI, configuration, state, syntax, diagnostic, and file-format reference.

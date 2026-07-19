@@ -524,7 +524,17 @@ an implementation document has only a code list and no ownership prose
 a guide duplicates the full CLI or config reference
 links still point to moved or deleted documentation
 current behavior exists only in the root README or roadmap
+a production package or public command has no canonical current documentation owner
+the documentation coverage map points only to planning or research for implemented code
 ```
+
+## Implementation coverage policy
+
+`docs/development/documentation-coverage.md` maps every production package and public command family to canonical current documentation.
+
+Update that map when a production package, command group, or durable ownership boundary is added, removed, renamed, or materially reassigned. Small utility packages may share the current architecture owner of the subsystem they serve. Major independent boundaries require a dedicated current owner.
+
+A map entry is not sufficient by itself. The linked document must actually explain the package responsibility, flow, non-ownership boundary, and relevant tests or public contract.
 
 ## Related docs
 

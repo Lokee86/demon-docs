@@ -143,6 +143,30 @@ Use `ddocs codemap precision --help` for generation, sampling, and evaluation co
 
 Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, and deterministic holdout tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
 
+## Documentation Coverage Verification
+
+Documentation changes are verified at three levels:
+
+```text
+structure and indexes
+local links and orphan reachability
+implementation ownership coverage
+```
+
+Run the repository's own documentation reconciliation:
+
+```bash
+go run ./cmd/ddocs fix --docs
+go run ./cmd/ddocs check --docs
+go run ./cmd/ddocs check --links
+```
+
+Then review [Documentation Coverage Map](documentation-coverage.md) against the current immediate directories under `cmd/` and `internal/`. Every production package must have a canonical current owner, and every public command family must have an exact reference or task workflow.
+
+The coverage audit is semantic rather than a generated line-count target. A package name appearing in a code map does not count when the linked document fails to explain its responsibility, flow, non-ownership boundary, and tests.
+
+Structural review should also confirm that normal documents contain one parent index, purpose, overview, related-docs section, and notes section. Architecture pages additionally require code root, responsibilities, does-not-own boundaries, code map, and tests. Guides require prerequisites, expected result, and failure/recovery guidance.
+
 ## Continuous Integration
 
 `.github/workflows/ci.yml` runs:
@@ -219,6 +243,7 @@ Repository-wide tests must exclude nested `.worktrees/` and local generated outp
 
 - [Development](README.md)
 - [Repository Layout](repository-layout.md)
+- [Documentation Coverage Map](documentation-coverage.md)
 - [Documentation Procedure](../documentation-procedure.md)
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)

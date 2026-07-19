@@ -150,6 +150,7 @@ See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon]
 - [Reference](docs/reference/README.md)
 - [Architecture](docs/architecture/README.md)
 - [Operations](docs/operations/README.md)
+- [Current limitations](docs/limits/README.md)
 - [Research](docs/research/README.md)
 - [Planning](docs/planning/README.md)
 - [Development](docs/development/README.md)

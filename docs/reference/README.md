@@ -9,6 +9,7 @@ Exact public contracts for commands, configuration, managed files, private state
 <!-- doc-ledger:files:start -->
 
 - [cli.md](cli.md) - Command groups, selectors, mutation behavior, and primary invocation forms.
+- [compatibility-and-migrations.md](compatibility-and-migrations.md) - Supported legacy names, automatic state migrations, schema refusal, and upgrade compatibility boundaries.
 - [configuration.md](configuration.md) - Configuration selection, defaults, keys, examples, and repository scope rules.
 - [diagnostics-and-exit-behavior.md](diagnostics-and-exit-behavior.md) - Diagnostic classes, non-zero conditions, ambiguity behavior, and output expectations.
 - [managed-files-and-state.md](managed-files-and-state.md) - Managed Markdown blocks, `.docignore`, `.ddocs/` state, source-preservation guarantees, and mutation boundaries.

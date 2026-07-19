@@ -8,6 +8,7 @@ Running behavior, watcher and demon ownership, runtime state, recovery, troubles
 
 <!-- doc-ledger:files:start -->
 
+- [host-adapters.md](host-adapters.md) - Integrate MCP, agent, editor, or other hosts through acquire, heartbeat, and release feeder commands.
 - [recovery-and-troubleshooting.md](recovery-and-troubleshooting.md) - Diagnose configuration, stale automation, state corruption, ambiguous links, and unexpected reconciliation.
 - [repository-demon.md](repository-demon.md) - Single-owner repository watcher lifecycle, feeders, worktrees, runtime state, shutdown, and logs.
 - [watcher-and-automation.md](watcher-and-automation.md) - Foreground watch behavior and its relationship to the repository demon.

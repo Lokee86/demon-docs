@@ -22,7 +22,8 @@ Follow these steps in order:
 7. Add related docs, code maps, recovery information, and notes.
 8. Graduate implemented facts out of planning and research.
 9. Remove stale, duplicated, or legacy material.
-10. Verify structure, links, and product accuracy.
+10. Update implementation-to-document coverage.
+11. Verify structure, links, and product accuracy.
 ```
 
 ## 1. Classify the information
@@ -206,7 +207,23 @@ Check for:
 
 Delete fully replaced material rather than maintaining indefinite redirects inside the repository. Git history remains the recovery source.
 
-## 10. Verify
+## 10. Update implementation coverage
+
+When production code or public commands change, update [Documentation Coverage Map](development/documentation-coverage.md).
+
+Confirm that:
+
+```text
+every production package has a canonical current owner
+every public command family has a task or reference owner
+small utility packages map to the subsystem they concretely serve
+implemented behavior is not owned only by research or planning
+new limits are recorded when the implementation remains incomplete
+```
+
+A coverage-table link does not replace substantive documentation. Open the linked owner and verify that it actually describes the changed responsibility.
+
+## 11. Verify
 
 Before completion, verify:
 
