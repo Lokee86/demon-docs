@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "repository": "shazow/wifitui",
+  "pull_request": 178,
+  "base_commit": "111f53dee103724c0bbafd155cdcb51f8ab2a731",
+  "verification": "go test ./...",
+  "baseline_environment": "WSL bash login shell",
+  "baseline_passed": true,
+  "classification_status": "unreviewed",
+  "task_text_status": "needs original issue text review"
+}

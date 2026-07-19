@@ -114,6 +114,18 @@ If you are working from the repo checkout, `go run ./cmd/ddocs` is the primary f
 - Keep them disposable.
 - Use them when you want a noisy tree that exercises nesting, stubs, and cross-folder reconciliation.
 
+## Future Agent-Context Benchmarking
+
+The deterministic context feature requires a separate research benchmark beyond package and reconciliation tests. The planned protocol uses authentic historical OSS tasks across independent code-quality and documentation-quality quadrants, matched no-context and context-injected conditions, and an intentionally constructed harness control.
+
+This work is deliberately staged so corpus preparation and harness design can proceed without paying for repeated model trials. See [Context-Injection Benchmarking](context-injection-benchmarking.md).
+
+## Future Context-Benchmark Research
+
+The deterministic context feature will eventually need a separate research corpus and harness. That work is documented in [Context-Injection Benchmarking](context-injection-benchmarking.md) and retained under `research/context-benchmarking/`.
+
+It is deliberately outside the current Go release gate. Repository classification, historical-task preparation, deterministic context generation, and harness dry runs can advance without paid model trials; paired and repeated agent runs remain future work.
+
 ## Related Files
 
 - `docs/make-dummy-docs.sh`

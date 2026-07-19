@@ -29,5 +29,9 @@ tmp/
 temp/
 scratch/
 dummy-docs/
+research/context-benchmarking/clones/
+research/context-benchmarking/runs/
+research/context-benchmarking/workspaces/
+research/context-benchmarking/**/source/
 
 notes.txt

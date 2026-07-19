@@ -1,0 +1,852 @@
+{
+  "generated_at": "2026-07-19T00:09:11.906258+00:00",
+  "tasks": [
+    {
+      "repository": "shazow/wifitui",
+      "number": 174,
+      "title": "wifi/iwd: Fix iwd backend to use actual D-Bus API",
+      "url": "https://github.com/shazow/wifitui/pull/174",
+      "body": "## Summary\r\n- The iwd backend was written against a non-existent D-Bus API \u2014 methods like `GetDevices`, `GetKnownNetworks`, `ForgetNetwork`, and the `Version` property don't exist in iwd\r\n- Rewrote to use the real iwd D-Bus API: `ObjectManager.GetManagedObjects` for discovery, correct `GetOrderedNetworks` return type `a(on)`, argument-less `Network.Connect` and `KnownNetwork.Forget`, and proper signal strength conversion from centidBm to 0-100%\r\n\r\nFixes #171\r\n\r\n## Test plan\r\n- [x] Verified iwd is now detected as available on an Arch Linux system with iwd running\r\n- [x] Verified `BuildNetworkList` returns visible networks with correct SSIDs, signal strength, security type, and known network status\r\n- [x] All existing tests pass (`go test ./...`)\r\n- [x] Test connecting to a network via `ActivateConnection`\r\n- [x] Test forgetting a known network via `ForgetNetwork`\r\n- [x] Test toggling wireless on/off via `SetWireless`\r\n\r\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)",
+      "state": "closed",
+      "merged_at": "2026-04-03T14:45:14Z",
+      "base_branch": "main",
+      "base_commit": "8a244a4ba99253ab63173e3d7c37479f85027e79",
+      "head_commit": "f523fd6dbacc92acd775c969af0c7e6449111a76",
+      "merge_commit": "00836080eb873da6fc3a581b2bc9e9303db31651",
+      "changed_files": 5,
+      "additions": 374,
+      "deletions": 201,
+      "changed_paths": [
+        "backend_linux.go",
+        "backend_linux_test.go",
+        "wifi/iwd/iwd.go",
+        "wifi/networkmanager/networkmanager.go",
+        "wifi/networkmanager/networkmanager_test.go"
+      ],
+      "test_paths": [
+        "backend_linux_test.go",
+        "wifi/networkmanager/networkmanager_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 171,
+          "title": "Error: The name is not activatable",
+          "body": "Trying on Arch Linux with Omarchy. \n\nInstalled with `eget shazow/wifitui` and with `brew install wifitui`. Same result: Both `wifitui` and `wifitui list` return \"Error: The name is not activatable\"\n\n",
+          "state": "closed",
+          "created_at": "2026-03-29T15:05:59Z",
+          "closed_at": "2026-04-03T14:45:16Z",
+          "url": "https://github.com/shazow/wifitui/issues/171",
+          "labels": [
+            "bug"
+          ]
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "shazow/wifitui",
+      "number": 173,
+      "title": "Check NetworkManager availability, add backend fallback and tests",
+      "url": "https://github.com/shazow/wifitui/pull/173",
+      "body": "### Motivation\r\n\r\n- Ensure the app falls back to the iwd backend when NetworkManager's D-Bus service is not actually available even if a client proxy can be constructed. \r\n- Make backend selection extensible and testable so behavior can be overridden in unit tests.\r\n- Fixes #171 \r\n\r\n### Description\r\n\r\n- Replace the hard-coded NetworkManager-first initialization with a `backends` slice of constructors and iterate it in `GetBackend()` to return the first successful backend.  \r\n- Add `backend_linux_test.go` with `TestGetBackend_FallsBackToIWDWhenNetworkManagerUnavailable` to verify fallback to the mock/iwd backend when NetworkManager initialization reports an unavailable D-Bus service.  \r\n- In `wifi/networkmanager/networkmanager.go`, force a lightweight `GetPropertyVersion()` call after creating the NetworkManager proxy to detect when the D-Bus service is not actually available, returning `wifi.ErrNotAvailable` for those errors.  \r\n- Add `isUnavailableDBusError()` to classify DBus errors like `ServiceUnknown`, `NameHasNoOwner`, and `The name is not activatable`, and add `TestIsUnavailableDBusError` in `networkmanager_test.go`.  \r\n\r\n### Testing\r\n\r\n- Ran the new unit tests `TestGetBackend_FallsBackToIWDWhenNetworkManagerUnavailable` and `TestIsUnavailableDBusError` as part of `go test ./...`, and both tests passed.  \r\n- Existing networkmanager unit tests that check device caching still pass after the change.\r\n\r\n------\r\n[Codex Task](https://chatgpt.com/codex/tasks/task_e_69cd661402c483258cb87b5dbc95904b)",
+      "state": "closed",
+      "merged_at": "2026-04-03T14:45:16Z",
+      "base_branch": "main",
+      "base_commit": "8a244a4ba99253ab63173e3d7c37479f85027e79",
+      "head_commit": "a3e869b46d8bb2136fe6e0d6802d9d4d282bf40c",
+      "merge_commit": "a3e869b46d8bb2136fe6e0d6802d9d4d282bf40c",
+      "changed_files": 4,
+      "additions": 108,
+      "deletions": 5,
+      "changed_paths": [
+        "backend_linux.go",
+        "backend_linux_test.go",
+        "wifi/networkmanager/networkmanager.go",
+        "wifi/networkmanager/networkmanager_test.go"
+      ],
+      "test_paths": [
+        "backend_linux_test.go",
+        "wifi/networkmanager/networkmanager_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 171,
+          "title": "Error: The name is not activatable",
+          "body": "Trying on Arch Linux with Omarchy. \n\nInstalled with `eget shazow/wifitui` and with `brew install wifitui`. Same result: Both `wifitui` and `wifitui list` return \"Error: The name is not activatable\"\n\n",
+          "state": "closed",
+          "created_at": "2026-03-29T15:05:59Z",
+          "closed_at": "2026-04-03T14:45:16Z",
+          "url": "https://github.com/shazow/wifitui/issues/171",
+          "labels": [
+            "bug"
+          ]
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "shazow/wifitui",
+      "number": 163,
+      "title": "TUI improvements: Width-aware List/Edit, fit to terminal",
+      "url": "https://github.com/shazow/wifitui/pull/163",
+      "body": "Consolidated PR for merging various TUI improvements.\r\n\r\nFocused around making List and Edit views be width-aware and take up the entire width of the terminal. Fixes #160.\r\n\r\n### Key changes\r\n\r\n- **Shared window state**\r\n  - Added `internal/tui/window.go` with `WindowState` and helper methods for:\r\n    - current terminal dimensions\r\n    - fallback width/height logic\r\n    - content-width clamping\r\n\r\n- **List view layout refactor (`internal/tui/list.go`)**\r\n  - `ListModel` now stores:\r\n    - shared `window` pointer\r\n    - `ssidColumnWidth`\r\n    - `desiredColumnWidth`\r\n  - Added dynamic column sizing based on actual SSID + icon width (`refreshColumns`).\r\n  - Centralized available-width calculation and list sizing.\r\n  - Title spacing (`WiFi Network ... Signal`) is now recomputed from current column width.\r\n  - Extracted icon selection into `getIcon(...)` helper.\r\n  - Added `newEditModel(...)` so edit screens inherit current window sizing context.\r\n\r\n- **Edit view responsiveness (`internal/tui/edit.go`)**\r\n  - Added window-aware constructor: `NewEditModelWithWindow(...)`.\r\n  - Added internal width logic:\r\n    - `availableContentWidth()`\r\n    - `applyWindowWidth(...)`\r\n  - `tea.WindowSizeMsg` handling now updates input widths from terminal size.\r\n  - Details panel width is no longer fixed; it scales with available content width.\r\n\r\n- **Top-level model integration (`internal/tui/tui.go`)**\r\n  - `NewModel(...)` now creates a shared `WindowState` and injects it into the list model.\r\n  - Minor message-case restructuring while preserving status clear behavior.\r\n\r\n- **Tests**\r\n  - New:\r\n    - `internal/tui/window_test.go`\r\n    - `internal/tui/list_layout_test.go`\r\n  - Updated:\r\n    - `internal/tui/edit_test.go`\r\n    - `internal/tui/list_test.go`\r\n  - Minor newline/format-only cleanup in a few files.",
+      "state": "closed",
+      "merged_at": "2026-03-22T17:34:36Z",
+      "base_branch": "main",
+      "base_commit": "4583f965beaac68ed8de4cdfebd614645fcbac8a",
+      "head_commit": "536da9e020e33f166285a2e0c5edd86a6399384b",
+      "merge_commit": "86e3912f192617d5cbbc001f0ca059f710ddbe3d",
+      "changed_files": 12,
+      "additions": 398,
+      "deletions": 52,
+      "changed_paths": [
+        "internal/tui/edit.go",
+        "internal/tui/edit_test.go",
+        "internal/tui/focus_test.go",
+        "internal/tui/list.go",
+        "internal/tui/list_layout_test.go",
+        "internal/tui/list_test.go",
+        "internal/tui/scanschedule.go",
+        "internal/tui/stack.go",
+        "internal/tui/tui.go",
+        "internal/tui/tui_test.go",
+        "internal/tui/window.go",
+        "internal/tui/window_test.go"
+      ],
+      "test_paths": [
+        "internal/tui/edit_test.go",
+        "internal/tui/focus_test.go",
+        "internal/tui/list_layout_test.go",
+        "internal/tui/list_test.go",
+        "internal/tui/tui_test.go",
+        "internal/tui/window_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 160,
+          "title": "ui: Span border full window width",
+          "body": "Right now the window border shrinks to fit the content rather than the full width of the window.\n\nIdeally we want to span the full window, and we can also adjust the columns dynamically to take advantage of the increased width when available.\n\nThere's a WIP PR that gets this most of the way: https://github.com/shazow/wifitui/pull/135\n\nJust need to review/edit it more thoroughly, possibly a minor rewrite. ",
+          "state": "closed",
+          "created_at": "2026-03-17T12:48:42Z",
+          "closed_at": "2026-03-22T18:14:12Z",
+          "url": "https://github.com/shazow/wifitui/issues/160",
+          "labels": [
+            "enhancement",
+            "soon"
+          ]
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "shazow/wifitui",
+      "number": 167,
+      "title": "list: (5 APs) -> \ud83d\udce1\u00d75",
+      "url": "https://github.com/shazow/wifitui/pull/167",
+      "body": "### Motivation\r\n- Replace the verbose aggregation label like `(5 APs)` with a compact, emoji-based annotation `\ud83d\udce1\u00d75` when a network has more than one access point, and show nothing for a single AP for a cleaner list view.\r\n- Make the symbol configurable via theme so users can customize the appearance in `theme.toml` or their own theme files.\r\n\r\n### Description\r\n- Update the list renderer to build the count annotation as `fmt.Sprintf(\" %s\u00d7%d\", CurrentTheme.AccessPointIcon, len(i.AccessPoints))` when `len(i.AccessPoints) > 1` (in `internal/tui/list.go`).\r\n- Add a new `AccessPointIcon string` field to `Theme`, wire it into `NewDefaultTheme()` with a default of `\ud83d\udce1`, and include `AccessPointIcon = \"\ud83d\udce1\"` in `theme.toml` (in `internal/tui/theme.go` and `theme.toml`).\r\n- Add unit tests verifying the rendered AP annotation for aggregated networks and absence of annotation for a single AP (`internal/tui/list_test.go`), and a test that `LoadTheme` reads the new `AccessPointIcon` field (`internal/tui/theme_test.go`).\r\n\r\n### Testing\r\n- Ran the full test suite with `go test ./...` and all tests completed successfully.\r\n- New unit tests exercise rendering and theme loading and passed as part of the test run.\r\n\r\nFixes #164 \r\n\r\n------\r\n[Codex Task](https://chatgpt.com/codex/tasks/task_e_69c7e1c1cb20832580d02e3c4466a250)",
+      "state": "closed",
+      "merged_at": "2026-03-28T16:48:38Z",
+      "base_branch": "main",
+      "base_commit": "86e3912f192617d5cbbc001f0ca059f710ddbe3d",
+      "head_commit": "b729d4c6941d5673db37f7cb73919e6931e80a59",
+      "merge_commit": "f625e122912c67bcbd205fb9800eee09b223dadc",
+      "changed_files": 5,
+      "additions": 67,
+      "deletions": 1,
+      "changed_paths": [
+        "internal/tui/list.go",
+        "internal/tui/list_test.go",
+        "internal/tui/theme.go",
+        "internal/tui/theme_test.go",
+        "theme.toml"
+      ],
+      "test_paths": [
+        "internal/tui/list_test.go",
+        "internal/tui/theme_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 164,
+          "title": "ui: Improve list view \"(3 APs)\" annotation",
+          "body": "I kinda don't love seeing things like \"(3 APs)\" in the list view.\n\n<img width=\"50%\" height=\"50%\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/2ecce519-5a37-44fd-8ded-b6842d538a2a\" />\n\nSome ideas of how to improve them:\n\n1. Emojis?  Max out on three emojis for APs, so 2 APs would say `\ud83d\udce1\ud83d\udce1`, 5 APs would still say `\ud83d\udce1\ud83d\udce1\ud83d\udce1\u2795` maybe? 1 AP would be nothing (since that's implied) Or maybe `\ud83d\udce1\u00b7\u00b7\u00b7+` for 8?\n2. `AP\u2716\ufe0f3`? Or `\ud83d\udce1\u2716\ufe0f3`? Or simply `\ud83d\udce13`? `3\ud83d\udce1`? `\ud83d\udce1\u00b73`?\n3. Other ideas?\n\nThis annotation should be configurable in the theme.",
+          "state": "closed",
+          "created_at": "2026-03-22T18:09:05Z",
+          "closed_at": "2026-03-28T16:48:39Z",
+          "url": "https://github.com/shazow/wifitui/issues/164",
+          "labels": [
+            "enhancement"
+          ]
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "openstack-exporter/openstack-exporter",
+      "number": 378,
+      "title": "Adding node retired exporting",
+      "url": "https://github.com/openstack-exporter/openstack-exporter/pull/378",
+      "body": "Fixes #377 \r\n\r\nAlso starts the V2 Migration discussed in https://github.com/openstack-exporter/openstack-exporter/issues/385\r\n\r\n## Testing with DevStack\r\n\r\n### Regression Testing\r\n\r\nChecking for any metric formatting changes - there don't seem to be any.\r\n\r\nBefore\r\n\r\n```bash\r\nstack@ip-172-31-12-57:~/openstack-exporter$ curl \"http://localhost:9180/metrics\" | grep openstack_ironic_node\r\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\r\n                                 Dload  Upload   Total   Spent    Left  Speed\r\n100  7147    0  7147    0     0   3052      0 --:--:--  0:00:02 --:--:--  3052\r\n# HELP openstack_ironic_node node\r\n# TYPE openstack_ironic_node gauge\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"7e051f74-0f8f-4576-a482-cbe8ddd55249\",maintenance=\"false\",name=\"node-2\",power_state=\"power on\",provision_state=\"active\",resource_class=\"baremetal\"} 1\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"e3ea486b-5499-48a4-ad4d-3dbfd51169c3\",maintenance=\"false\",name=\"node-1\",power_state=\"power off\",provision_state=\"clean failed\",resource_class=\"baremetal\"} 1\r\n```\r\n\r\nAfter\r\n\r\n```bash\r\nstack@ip-172-31-12-57:~/openstack-exporter$ curl \"http://localhost:9180/metrics\" | grep openstack_ironic_node\r\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\r\n                                 Dload  Upload   Total   Spent    Left  Speed\r\n100  7215    0  7215    0     0    415      0 --:--:--  0:00:17 --:--:--  1795\r\n# HELP openstack_ironic_node node\r\n# TYPE openstack_ironic_node gauge\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"7e051f74-0f8f-4576-a482-cbe8ddd55249\",maintenance=\"false\",name=\"node-2\",power_state=\"power on\",provision_state=\"active\",resource_class=\"baremetal\",retired=\"false\",retired_reason=\"\"} 1\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"e3ea486b-5499-48a4-ad4d-3dbfd51169c3\",maintenance=\"false\",name=\"node-1\",power_state=\"power off\",provision_state=\"clean failed\",resource_class=\"baremetal\",retired=\"false\",retired_reason=\"\"} 1\r\n```\r\n\r\n## Testing Metrics being Filled\r\n\r\nChecking metrics before and after retiring a node.\r\n\r\n```bash\r\nstack@ip-172-31-12-57:~/openstack-exporter$ curl \"http://localhost:9180/metrics\" | grep openstack_ironic_node\r\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\r\n                                 Dload  Upload   Total   Spent    Left  Speed\r\n100  7215    0  7215    0     0    415      0 --:--:--  0:00:17 --:--:--  1795\r\n# HELP openstack_ironic_node node\r\n# TYPE openstack_ironic_node gauge\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"7e051f74-0f8f-4576-a482-cbe8ddd55249\",maintenance=\"false\",name=\"node-2\",power_state=\"power on\",provision_state=\"active\",resource_class=\"baremetal\",retired=\"false\",retired_reason=\"\"} 1\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"e3ea486b-5499-48a4-ad4d-3dbfd51169c3\",maintenance=\"false\",name=\"node-1\",power_state=\"power off\",provision_state=\"clean failed\",resource_class=\"baremetal\",retired=\"false\",retired_reason=\"\"} 1\r\nstack@ip-172-31-12-57:~/openstack-exporter$ OS_CLOUD=devstack-system-admin openstack baremetal node set --retired node-1 --retired-reason \"Testing\"\r\nstack@ip-172-31-12-57:~/openstack-exporter$ curl \"http://localhost:9180/metrics\" | grep openstack_ironic_node\r\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\r\n                                 Dload  Upload   Total   Spent    Left  Speed\r\n100  7221    0  7221    0     0    419      0 --:--:--  0:00:17 --:--:--  1878\r\n# HELP openstack_ironic_node node\r\n# TYPE openstack_ironic_node gauge\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"7e051f74-0f8f-4576-a482-cbe8ddd55249\",maintenance=\"false\",name=\"node-2\",power_state=\"power on\",provision_state=\"active\",resource_class=\"baremetal\",retired=\"false\",retired_reason=\"\"} 1\r\nopenstack_ironic_node{console_enabled=\"false\",deploy_kernel=\"\",deploy_ramdisk=\"\",id=\"e3ea486b-5499-48a4-ad4d-3dbfd51169c3\",maintenance=\"false\",name=\"node-1\",power_state=\"power off\",provision_state=\"clean failed\",resource_class=\"baremetal\",retired=\"true\",retired_reason=\"Testing\"} 1\r\n```",
+      "state": "closed",
+      "merged_at": "2025-01-03T11:19:28Z",
+      "base_branch": "main",
+      "base_commit": "add5ae7c707ee08006720a7a2cd914638a7c3cee",
+      "head_commit": "918792c446b9b831fef32f1df7c0b3efc0cd5538",
+      "merge_commit": "a9937703684bb7fc5eadbf805354b1903af5cce9",
+      "changed_files": 7,
+      "additions": 262,
+      "deletions": 121,
+      "changed_paths": [
+        "exporters/exporter.go",
+        "exporters/fixtures/ironic_nodes.json",
+        "exporters/ironic.go",
+        "exporters/ironic_test.go",
+        "exporters/utils.go",
+        "go.mod",
+        "go.sum"
+      ],
+      "test_paths": [
+        "exporters/ironic_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 377,
+          "title": "Support node.Retired and node.RetiredReason",
+          "body": "Issue that needs to be addressed first in gophercloud is here with an attached PR: https://github.com/gophercloud/gophercloud/pull/3136\r\n\r\nThe ironic code: https://github.com/openstack/ironic/blob/1e52143f07266b53ad47d49a5be04cbf85cccc8b/ironic/objects/node.py#L178\r\n\r\nI will work on this shortly. ",
+          "state": "closed",
+          "created_at": "2024-07-19T11:48:56Z",
+          "closed_at": "2025-01-03T11:19:29Z",
+          "url": "https://github.com/openstack-exporter/openstack-exporter/issues/377",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "openstack-exporter/openstack-exporter",
+      "number": 323,
+      "title": "Resolve #289 | Add `floating_ips` label to port",
+      "url": "https://github.com/openstack-exporter/openstack-exporter/pull/323",
+      "body": "Resolve #289\r\n* Added the 'floating_ips' label to the neutron-port metric\r\n* If a port has more than one fixed_ip, they are now joined into a comma-separated string",
+      "state": "closed",
+      "merged_at": "2024-02-20T11:03:16Z",
+      "base_branch": "main",
+      "base_commit": "132c31c6d17e68b138e559a1ef821f885bfaed8f",
+      "head_commit": "68fc441924cb1227816f8e9b076a91a54985537e",
+      "merge_commit": "1a2e1138ca951da736a974cbeba91fda4501afb0",
+      "changed_files": 3,
+      "additions": 21,
+      "deletions": 5,
+      "changed_paths": [
+        "exporters/fixtures/neutron_ports.json",
+        "exporters/neutron.go",
+        "exporters/neutron_test.go"
+      ],
+      "test_paths": [
+        "exporters/neutron_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 289,
+          "title": "[Feature Request] Add IP Address Label To Neutron Port",
+          "body": "Hello.\r\nI hope that we have fixed_ip_address label for neutron port metric, we really need it.\r\nThank you.",
+          "state": "closed",
+          "created_at": "2023-07-17T13:57:09Z",
+          "closed_at": "2024-02-20T11:03:17Z",
+          "url": "https://github.com/openstack-exporter/openstack-exporter/issues/289",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "mercuretechnologies/expo-open-ota",
+      "number": 71,
+      "title": "Fix dashboard update count to include only valid updates(#63)",
+      "url": "https://github.com/mercuretechnologies/expo-open-ota/pull/71",
+      "body": "Fixes #63.\r\n\r\nI originally reported this dashboard inconsistency after seeing it in a local Docker-based setup. Since the fix is small, I opened this PR with a minimal change.\r\n\r\nThe runtime version summary now only counts updates marked as valid with `.check`, matching the updates shown on the details page.\r\n\r\nTested with:\r\n\r\n- `go test ./...`\r\n- Local Docker verification with existing update data",
+      "state": "closed",
+      "merged_at": "2026-07-06T07:50:40Z",
+      "base_branch": "main",
+      "base_commit": "ce45f2d3fdf738888f5b435fe5e52b240fa943f7",
+      "head_commit": "a2b397b885ad3122ff60100a9ec8371ca78a4041",
+      "merge_commit": "89d1cdd6a3d9abf68edf1896bd59222c8059913b",
+      "changed_files": 4,
+      "additions": 33,
+      "deletions": 0,
+      "changed_paths": [
+        "internal/bucket/gcsBucket.go",
+        "internal/bucket/localBucket.go",
+        "internal/bucket/s3Bucket.go",
+        "test/dashboard_test.go"
+      ],
+      "test_paths": [
+        "test/dashboard_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 63,
+          "title": "Dashboard update count may include incomplete updates after failed publish attempts",
+          "body": "Hi! I\u2019m currently doing a POC for my company with this project in a local Docker-based setup, and I noticed what looks like a small dashboard inconsistency.\n\n## Summary\n\nI found a possible dashboard inconsistency after several failed publish attempts in a local Docker setup.\n\nFor one runtime version, the summary table showed `# Updates = 4`, but the details page only showed `1` update.\n\n## What I suspect\n\nIt seems failed/incomplete publish attempts may leave update directories behind.\n\nThe summary count may include those directories, while the details page only shows valid updates.\n\n## Expected behavior\n\nIt would be less confusing if the `# Updates` column only counted valid/published updates, so it stays consistent with the details page.\n\n## Offer\n\nIf this behavior should be considered a bug, I\u2019d be happy to open a small fix.",
+          "state": "closed",
+          "created_at": "2026-06-12T09:27:55Z",
+          "closed_at": "2026-07-02T09:52:04Z",
+          "url": "https://github.com/mercuretechnologies/expo-open-ota/issues/63",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "mercuretechnologies/expo-open-ota",
+      "number": 41,
+      "title": "fix: prevent cold-manifest 500s after OTA publish",
+      "url": "https://github.com/mercuretechnologies/expo-open-ota/pull/41",
+      "body": "## Summary\n\nBased on PR #35 by @isaacrowntree \u2014 fixes #19 (cold-manifest 500 errors after OTA publish).\n\n### Changes from #35\n- Remove premature cache invalidation in `RequestUploadUrlHandler`\n- Pre-warm manifest cache (ios + android) after `MarkUpdateAsChecked`\n- Cache Expo channel mapping with 60s TTL\n- Move `PreWarmManifestCache` into `MarkUpdateAsChecked` so rollback/republish also benefit\n\n### Additional fixes\n- **Fix missing cache invalidation** \u2014 `UpdateChannelBranchMappingHandler` now invalidates the channel mapping cache when updating a mapping (was missing, causing stale mappings for up to 60s)\n- **Add test for cache invalidation** \u2014 verifies the handler actually clears the cache by calling the endpoint via the router\n- **Add test for PreWarmManifestCache** \u2014 verifies all cache layers (lastUpdate, metadata, manifest) are populated\n\nCloses #19, supersedes #35.\n\n## Test plan\n\n- [x] All existing tests pass (`go test ./...`)\n- [x] `TestChannelMappingIsCached` \u2014 verifies channel mapping cache hit path\n- [x] `TestUpdateChannelBranchMappingInvalidatesChannelMappingCache` \u2014 verifies handler invalidates cache (calls endpoint via router, not manual `cache.Delete`)\n- [x] `TestPreWarmManifestCache` \u2014 verifies prewarm populates all cache layers\n- [ ] Manual: publish an update and verify the first `/manifest` request returns 200 without cold-start delay",
+      "state": "closed",
+      "merged_at": "2026-03-17T13:08:07Z",
+      "base_branch": "main",
+      "base_commit": "223108b95edc22f8c1430d563a0f7aed63edcf50",
+      "head_commit": "aba8ae5cea11daa42eff94346fbde4977783ac36",
+      "merge_commit": "d522f6f83be3a3b9db3947b2831560df228851d5",
+      "changed_files": 8,
+      "additions": 217,
+      "deletions": 12,
+      "changed_paths": [
+        "internal/handlers/dashboard_handler.go",
+        "internal/handlers/upload_handler.go",
+        "internal/services/expo.go",
+        "internal/update/prewarm.go",
+        "internal/update/updates.go",
+        "test/channel_mapping_cache_test.go",
+        "test/manifest_test.go",
+        "test/requestUpload_test.go"
+      ],
+      "test_paths": [
+        "test/channel_mapping_cache_test.go",
+        "test/manifest_test.go",
+        "test/requestUpload_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 19,
+          "title": "/manifest timing out (>9s) after releasing an update",
+          "body": "Hello, we've recently started using this package and when there are no updates released or if user has latest version, /manifest API responds in 150ms on average.\n\nHowever right after releasing an update, /manifest starts timing out (takes longer than 10s)\n\nIs this a known issue? Are we doing something wrong? \n\nLooking at the code seems like the only thing which could cause this is high response times from the eas graphql API?\n\nUsing Redis or not using still same issue.",
+          "state": "closed",
+          "created_at": "2025-10-20T19:15:46Z",
+          "closed_at": "2025-11-26T09:49:49Z",
+          "url": "https://github.com/mercuretechnologies/expo-open-ota/issues/19",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 100,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "shazow/wifitui",
+      "number": 178,
+      "title": "Default to empty theme when NO_COLOR is set",
+      "url": "https://github.com/shazow/wifitui/pull/178",
+      "body": "EmptyTheme removes the default emoji icon values.\r\n\r\nCustom theme still overrides this behaviour.\r\n\r\nFixes #176\r\n\r\n<img width=\"1277\" height=\"613\" alt=\"image\" src=\"https://github.com/user-attachments/assets/92218ac1-9f09-4b3c-9181-4a7d7daf2c68\" />\r\n",
+      "state": "closed",
+      "merged_at": "2026-04-12T19:07:54Z",
+      "base_branch": "main",
+      "base_commit": "111f53dee103724c0bbafd155cdcb51f8ab2a731",
+      "head_commit": "97e0735fd58c46067012a8ab21a531d9542b85c4",
+      "merge_commit": "26a03e8afa254c8fef43ec471ebdcb7175a309a6",
+      "changed_files": 2,
+      "additions": 24,
+      "deletions": 0,
+      "changed_paths": [
+        "internal/tui/theme.go",
+        "main.go"
+      ],
+      "test_paths": [],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 176,
+          "title": "feature: NO_COLOR support ",
+          "body": "Hi,\n\nI\u2019d like to suggest adding support for the NO_COLOR standard (https://no-color.org/).\n\nWhen the NO_COLOR environment variable is set, the application would disable colored output. This is a widely adopted convention across CLI tools and helps improve accessibility and scripting use cases.\n\n`NO_COLOR=1 wifitui`\n\nIt might also be interesting to integrate this behavior with the existing theme system, so users can explicitly opt for a colorless theme if desired.\n\nThanks!\n\nPS: already running wifitui 0.13.0 :) ",
+          "state": "closed",
+          "created_at": "2026-04-10T17:47:46Z",
+          "closed_at": "2026-04-12T19:07:56Z",
+          "url": "https://github.com/shazow/wifitui/issues/176",
+          "labels": [
+            "enhancement",
+            "soon"
+          ]
+        }
+      ],
+      "task_quality_score": 90,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "requires broader repository context"
+      ],
+      "concerns": [
+        "accepted patch has no obvious test change"
+      ]
+    },
+    {
+      "repository": "openstack-exporter/openstack-exporter",
+      "number": 541,
+      "title": "fix: use GaugeValue for agent_state metrics",
+      "url": "https://github.com/openstack-exporter/openstack-exporter/pull/541",
+      "body": "Fixes https://github.com/openstack-exporter/openstack-exporter/issues/427\r\n\r\n@MoonC432 tested this and confirmed the updated metrics typing.",
+      "state": "closed",
+      "merged_at": "2026-06-01T00:50:45Z",
+      "base_branch": "main",
+      "base_commit": "8da53eedc88e1c59433ce9f3aa3011bb1c36173d",
+      "head_commit": "f5b30c1b28380fe1d71430b27b60f3672cf62445",
+      "merge_commit": "956e35baaf0010f9cb23edc1bd84fd0a1c48573a",
+      "changed_files": 6,
+      "additions": 6,
+      "deletions": 6,
+      "changed_paths": [
+        "exporters/cinder.go",
+        "exporters/cinder_test.go",
+        "exporters/neutron.go",
+        "exporters/neutron_test.go",
+        "exporters/nova.go",
+        "exporters/nova_test.go"
+      ],
+      "test_paths": [
+        "exporters/cinder_test.go",
+        "exporters/neutron_test.go",
+        "exporters/nova_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 427,
+          "title": "There are some metrics defined `Counter` should be `Gauge`",
+          "body": "Within the metrics that represent instantaneous states and are not monotonically increasing, there are some defined as Counters. \n\nSince these metrics are annotated as TYPE: Counter in the exporter's output, certain scrape implementations automatically append suffixes like `_total`, leading to confusion regarding the metrics' names, and thus should be corrected.\n\nI found:\n\n* `neutron_agent_state`: https://github.com/openstack-exporter/openstack-exporter/blob/a9937703684bb7fc5eadbf805354b1903af5cce9/exporters/neutron.go#L168\n* `nova_agent_state`: https://github.com/openstack-exporter/openstack-exporter/blob/a9937703684bb7fc5eadbf805354b1903af5cce9/exporters/nova.go#L151\n* `cinder_agent_state`: https://github.com/openstack-exporter/openstack-exporter/blob/a9937703684bb7fc5eadbf805354b1903af5cce9/exporters/cinder.go#L254",
+          "state": "closed",
+          "created_at": "2025-01-30T07:49:47Z",
+          "closed_at": "2026-06-01T00:50:46Z",
+          "url": "https://github.com/openstack-exporter/openstack-exporter/issues/427",
+          "labels": [
+            "priority"
+          ]
+        }
+      ],
+      "task_quality_score": 90,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "crossplane-contrib/provider-sql",
+      "number": 379,
+      "title": "fix(postgresql): make schema optional and conditionally required in DefaultPrivileges",
+      "url": "https://github.com/crossplane-contrib/provider-sql/pull/379",
+      "body": "### Description of your changes\r\n\r\nFixes `objectType: schema` in `DefaultPrivileges`, which has never produced valid SQL. Previously, the controller unconditionally appended `IN SCHEMA <name>` to the generated query, but PostgreSQL does not permit `IN SCHEMA` when the object type is `SCHEMAS`. Any resource using `objectType: schema` would immediately and permanently fail with:\r\n\r\n> cannot create default privileges: pq: cannot use IN SCHEMA clause when using GRANT/REVOKE ON SCHEMAS\r\n\r\nThis PR fixes the issue without removing schema from the enum (so the valid use case - granting privileges on future schemas remains supported.\r\n\r\n- Makes `spec.forProvider.schema` optional in both the cluster-scoped and namespaced CRDs (previously it was required, making `objectType: schema` impossible to use correctly)\r\n- Adds controller-side validation in Observe enforcing the conditional constraint:\r\n  - `objectType` is `table`, `sequence`, `function`, or `type` -> `schema` is required\r\n  - `objectType` is `schema` -> `schema` must not be set\r\n- Fixes `inSchema` to never emit `IN SCHEMA` when `objectType` is `schema`\r\n- Expands examples to cover all `objectType` variants, with the `schema` variant correctly omitting the `schema` field\r\n\r\nFixes #378 \r\n\r\nI have:\r\n\r\n- [x] Read and followed Crossplane's [contribution process].\r\n- [x] Run `make reviewable` to ensure this PR is ready for review.\r\n\r\n### How has this code been tested\r\n\r\nUnit tests cover both new validation paths: `schema` required when `objectType` is not `schema`, and `schema` rejected when `objectType` is `schema`. Full suite passes with `go test ./...`\r\n\r\n[contribution process]: https://git.io/fj2m9\r\n\r\n<details>\r\n<summary>Original description</summary>\r\n<!--\r\nThank you for helping to improve Crossplane!\r\n\r\nPlease read through https://git.io/fj2m9 if this is your first time opening a\r\nCrossplane pull request. Find us in https://slack.crossplane.io/messages/dev if\r\nyou need any help contributing.\r\n-->\r\n\r\n### Description of your changes\r\n\r\n<!--\r\nBriefly describe what this pull request does. Be sure to direct your reviewers'\r\nattention to anything that needs special consideration.\r\n\r\nWe love pull requests that resolve an open Crossplane issue. If yours does, you\r\ncan uncomment the below line to indicate which issue your PR fixes, for example\r\n\"Fixes #500\":\r\n\r\n-->\r\n\r\nRemoves `schema` from the valid `objectType` enum in the `DefaultPrivileges` CRD spec (both `postgresql.sql.crossplane.io` and `postgresql.sql.m.crossplane.io` variants), as `objectType: schema` has never worked - the provider unconditionally includes an `IN SCHEMA` clause in the generated SQL, but PostgreSQL does not allow `IN SCHEMA` when the object type is `SCHEMAS`, causing any resource using this value to immediately and permanently fail with `cannot create default privileges: pq: cannot use IN SCHEMA clause when using GRANT/REVOKE ON SCHEMAS`. This is technically a breaking change to the CRD, but since `objectType: schema` has never produced valid SQL, no working resources can exist that rely on it (as far as I can tell).\r\n\r\nFixes #378 \r\n\r\nI have:\r\n\r\n- [x] Read and followed Crossplane's [contribution process].\r\n- [x] Run `make reviewable` to ensure this PR is ready for review.\r\n\r\n### How has this code been tested\r\n\r\n<!--\r\nBefore reviewers can be confident in the correctness of this pull request, it\r\nneeds to tested and shown to be correct. Briefly describe the testing that has\r\nalready been done or which is planned for this change.\r\n-->\r\n\r\nThe change removes an enum value - no new code paths are introduced. Existing unit tests pass with `go test ./...`\r\n\r\n[contribution process]: https://git.io/fj2m9\r\n</details>",
+      "state": "closed",
+      "merged_at": "2026-07-18T18:28:06Z",
+      "base_branch": "master",
+      "base_commit": "9665c434424129d54f2bc265f5921fa3dab29581",
+      "head_commit": "5f0214b0ea0a21933c3008a8ce0bc431ad8d6173",
+      "merge_commit": "7addde329901acd5306946a1e4c1eb2f9d2f7876",
+      "changed_files": 10,
+      "additions": 574,
+      "deletions": 28,
+      "changed_paths": [
+        "apis/cluster/postgresql/v1alpha1/default_privileges_types.go",
+        "apis/namespaced/postgresql/v1alpha1/default_privileges_types.go",
+        "examples/cluster/postgresql/defaultprivileges.yaml",
+        "examples/namespaced/postgresql/defaultprivileges.yaml",
+        "package/crds/postgresql.sql.crossplane.io_defaultprivileges.yaml",
+        "package/crds/postgresql.sql.m.crossplane.io_defaultprivileges.yaml",
+        "pkg/controller/cluster/postgresql/default_privileges/reconciler.go",
+        "pkg/controller/cluster/postgresql/default_privileges/reconciler_test.go",
+        "pkg/controller/namespaced/postgresql/default_privileges/reconciler.go",
+        "pkg/controller/namespaced/postgresql/default_privileges/reconciler_test.go"
+      ],
+      "test_paths": [
+        "pkg/controller/cluster/postgresql/default_privileges/reconciler_test.go",
+        "pkg/controller/namespaced/postgresql/default_privileges/reconciler_test.go"
+      ],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 378,
+          "title": "DefaultPrivileges: objectType: schema generates invalid SQL",
+          "body": "### What happened?\n<!--\nPlease let us know what behaviour you expected and how Crossplane diverged from\nthat behaviour.\n-->\n\nCreating a `DefaultPrivileges` resource with `objectType: schema` always fails. The provider generates an `ALTER DEFAULT PRIVILEGES ... IN SCHEMA ... GRANT/REVOKE ON SCHEMAS` statement, but PostgreSQL does not allow the `IN SCHEMA` clause when the object type is `SCHEMAS`.\n\nExpected: the resource reconciles successfully, and the role is granted the privilege on the schema\n\nActual error from the controller:\n`cannot create default privileges: pq: cannot use IN SCHEMA clause when using GRANT/REVOKE ON SCHEMAS`\n\nThe root cause is in `createDefaultPrivilegesQuery` and `deleteDefaultPrivilegesQuery` (pkg/controller/cluster/postgresql/default_privileges/reconciler.go, lines 193 and 210): `inSchema()` is called unconditionally regardless of objectType, but PostgreSQL only permits `IN SCHEMA` for table, sequence, function, and type - not for schema itself.\n\n### How can we reproduce it?\n<!--\nHelp us to reproduce your bug as succinctly and precisely as possible. Artifacts\nsuch as example manifests or a script that triggers the issue are highly\nappreciated!\n-->\n\nApply the following manifest:\n\n```yaml\napiVersion: postgresql.sql.m.crossplane.io/v1alpha1\nkind: DefaultPrivileges\nmetadata:\n  name: example-schema-usage\nspec:\n  forProvider:\n    databaseRef:\n      name: my-database\n    objectType: schema\n    privileges:\n      - USAGE\n    roleRef:\n      name: my-role\n    schema: public\n    targetRole: my-target-role\n  providerConfigRef:\n    kind: ClusterProviderConfig\n    name: my-provider-config\n```\n\n### What environment did it happen in?\nCrossplane version: `v2.2.0`\nprovider-sql version: `v0.14.0`\n\n<!--\nInclude at least the version or commit of Crossplane you were running. Consider\nalso including your:\n\n* Cloud provider or hardware configuration\n* Kubernetes version (use `kubectl version`)\n* Kubernetes distribution (e.g. Tectonic, GKE, OpenShift)\n* OS (e.g. from /etc/os-release)\n* Kernel (e.g. `uname -a`)\n-->\n\n---\n\n### Suggested fix\n\nRemove `schema` from the `objectType` enum in the `DefaultPrivileges` CRD spec.\n\nThis is technically a breaking change to the CRD, but since `objectType: schema` has never produced valid SQL, no working resources can exist that rely on it (as far as I can tell).",
+          "state": "closed",
+          "created_at": "2026-05-19T08:35:55Z",
+          "closed_at": "2026-07-18T18:28:07Z",
+          "url": "https://github.com/crossplane-contrib/provider-sql/issues/378",
+          "labels": [
+            "bug"
+          ]
+        },
+        {
+          "number": 500,
+          "error": "gh api repos/crossplane-contrib/provider-sql/issues/500 failed: gh: Not Found (HTTP 404)"
+        }
+      ],
+      "task_quality_score": 90,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": []
+    },
+    {
+      "repository": "openstack-exporter/openstack-exporter",
+      "number": 413,
+      "title": "Add feature to get password from Vault",
+      "url": "https://github.com/openstack-exporter/openstack-exporter/pull/413",
+      "body": "To use the feature put the following options in config root: \r\nuse_vault: true\r\nvault_address: http://<IP_ADDRESS:<IP_PORT>\r\nvault_role_id: <ROLE_ID>\r\nvault_secret_id: <SECRET_ID>\r\nvault_secret_path: <deployments/dev/user/passwords_yml>\r\nvault_secret_mount_path: <secret_v2>\r\ncredential_name_in_vault_secret: <keystone_admin_password>\r\n\r\nCloses https://github.com/openstack-exporter/openstack-exporter/issues/412",
+      "state": "closed",
+      "merged_at": "2026-03-03T00:41:03Z",
+      "base_branch": "main",
+      "base_commit": "6b5671234b4fbc6da47512b9623f42a1d97a13df",
+      "head_commit": "a630b80b828e442cd55c7a456db148ac24ca95fc",
+      "merge_commit": "5f2dafe2214a8862bef1f3ea4e54bc75fb5120b2",
+      "changed_files": 3,
+      "additions": 94,
+      "deletions": 1,
+      "changed_paths": [
+        "go.mod",
+        "go.sum",
+        "main.go"
+      ],
+      "test_paths": [],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 412,
+          "title": "Add feature to get  password from Vault, instead of config file.",
+          "body": "It would be nice to implement security feature to get some credentials from Vault, e.g. password.",
+          "state": "closed",
+          "created_at": "2024-10-16T11:45:24Z",
+          "closed_at": "2026-03-03T00:41:04Z",
+          "url": "https://github.com/openstack-exporter/openstack-exporter/issues/412",
+          "labels": [
+            "priority"
+          ]
+        }
+      ],
+      "task_quality_score": 80,
+      "strengths": [
+        "has original issue context",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "requires broader repository context"
+      ],
+      "concerns": [
+        "accepted patch has no obvious test change"
+      ]
+    },
+    {
+      "repository": "crossplane-contrib/provider-sql",
+      "number": 290,
+      "title": "fix: Namespaced PostgreSQL extension did not use namespaced database reference",
+      "url": "https://github.com/crossplane-contrib/provider-sql/pull/290",
+      "body": "### Description of your changes\n\nChange namespaced PostgreSQL extension to use namespaced database references.\n\nAdd e2e tests to cover this, without the fix, it fails with this\nerror:\n\n    Warning  CannotResolveResourceReferences  36s (x14 over 77s)  managed/extension.postgresql.sql.m.crossplane.io  cannot resolve references: spec.forProvider.database: cannot get referenced resource: Database.postgresql.sql.m.crossplane.io \"example\" not found\n\nFixes #285\n\nI have:\n\n- [x] Read and followed Crossplane's [contribution process].\n- [x] Run `make reviewable` to ensure this PR is ready for review.\n\n### How has this code been tested\n\ne2e tests\n\n[contribution process]: https://git.io/fj2m9\n",
+      "state": "closed",
+      "merged_at": "2025-11-28T13:59:46Z",
+      "base_branch": "master",
+      "base_commit": "57020959ab138fb2a0ebe0fe16e466855bf52b66",
+      "head_commit": "78027ae3fd924e965ba292388cb486c93b6b9d8c",
+      "merge_commit": "eca9a0d150b34478fc0bc3021858ad1006fc4775",
+      "changed_files": 6,
+      "additions": 90,
+      "deletions": 29,
+      "changed_paths": [
+        "apis/namespaced/postgresql/v1alpha1/extension_types.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.resolvers.go",
+        "cluster/local/postgresdb_functions.sh",
+        "examples/namespaced/postgresql/extension.yaml",
+        "package/crds/postgresql.sql.m.crossplane.io_extensions.yaml"
+      ],
+      "test_paths": [],
+      "generated_paths": [
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.resolvers.go"
+      ],
+      "issues": [
+        {
+          "number": 285,
+          "title": "postgresql: Namespaced Extensions are not properly resolving databaseRef",
+          "body": "### What happened?\n\nDuring testing of a namespaced Extension I was unable to get databaseRef to function as it did under a clustered Extension.  After a little digging it seems the namespaced Extension is not using the namespaced Reference [here](https://github.com/crossplane-contrib/provider-sql/blob/master/apis/namespaced/postgresql/v1alpha1/extension_types.go#L50-L58) when compared to the namespaced Grant [here](https://github.com/crossplane-contrib/provider-sql/blob/master/apis/namespaced/postgresql/v1alpha1/grant_types.go#L132-L140) which I believe to be the culprit as to why the referenced resource is not found.\n\n### What environment did it happen in?\n\nCrossplane version: 2.2.0\nSQL Provider version: 0.13.0\n",
+          "state": "closed",
+          "created_at": "2025-11-27T05:25:39Z",
+          "closed_at": "2025-11-28T13:59:47Z",
+          "url": "https://github.com/crossplane-contrib/provider-sql/issues/285",
+          "labels": [
+            "bug"
+          ]
+        }
+      ],
+      "task_quality_score": 80,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "reviewable implementation size",
+        "requires broader repository context"
+      ],
+      "concerns": [
+        "accepted patch has no obvious test change",
+        "generated-file churn may dominate the patch"
+      ]
+    },
+    {
+      "repository": "crossplane-contrib/provider-sql",
+      "number": 361,
+      "title": "feat(postgresql): support WITH INHERIT FALSE on role membership grants (PostgreSQL 16+)",
+      "url": "https://github.com/crossplane-contrib/provider-sql/pull/361",
+      "body": "Closes #359\r\n\r\n## What this does\r\n\r\nAdds a `withInherit` boolean field to `spec.forProvider` on the PostgreSQL `Grant` resource, enabling `WITH INHERIT FALSE` on role membership grants \u2014 a feature introduced in PostgreSQL 16.\r\n\r\n```yaml\r\napiVersion: postgresql.sql.crossplane.io/v1alpha1\r\nkind: Grant\r\nspec:\r\n  forProvider:\r\n    withInherit: false   # emits: GRANT admin TO master_user WITH INHERIT FALSE\r\n    roleRef:\r\n      name: master-user\r\n    memberOfRef:\r\n      name: admin-role\r\n```\r\n\r\nWhen `withInherit` is omitted, behaviour is unchanged. When combined with `withOption: ADMIN`, the emitted SQL is `WITH ADMIN OPTION, INHERIT FALSE`.\r\n\r\nThe field is only valid on `memberOf` grants \u2014 setting it on a privilege grant (`privileges` field) returns a validation error.\r\n\r\n## Motivation\r\n\r\nThe primary use case is RDS PostgreSQL with IAM database authentication. Without this field, granting a master user membership in an `admin` role that holds `rds_iam` creates a transitive chain (`master_user \u2192 admin \u2192 rds_iam`), which causes RDS to route all connections for that user through PAM/IAM token verification, breaking password authentication. `WITH INHERIT FALSE` grants membership (satisfying `ALTER DEFAULT PRIVILEGES FOR ROLE admin`) without inheriting `rds_iam`.\r\n\r\n## Changes\r\n\r\n| File | Change |\r\n|---|---|\r\n| `apis/cluster/postgresql/v1alpha1/grant_types.go` | Add `WithInherit *bool` field to `GrantParameters` |\r\n| `apis/cluster/postgresql/v1alpha1/zz_generated.deepcopy.go` | Regenerated |\r\n| `package/crds/postgresql.sql.crossplane.io_grants.yaml` | Regenerated \u2014 CRD schema updated |\r\n| `pkg/controller/cluster/postgresql/grant/reconciler.go` | New `membershipWithClauses` helper; `selectGrantQuery` filters `pg_auth_members.inherit_option` when set; `createGrantQueries` uses new helper; validation rejects `withInherit` on privilege grants |\r\n| `pkg/controller/cluster/postgresql/grant/reconciler_test.go` | 7 new test cases covering `WithInherit` nil/true/false for both `Observe` and `Create` |\r\n| `examples/cluster/postgresql/grant-with-inherit-false.yaml` | New example illustrating the RDS IAM pattern |\r\n| `Makefile` | Bump `GOLANGCILINT_VERSION` from `2.1.2` \u2192 `2.10.1` to match CI and support Go 1.26 |\r\n| `README.md` | Fix stale Go version (1.18\u21921.26.1), add mise recommendation, fix copy-paste \"Developing locally\" section (was provider-helm content), add `Schema` to PostgreSQL resource list, fix example paths |\r\n\r\n## Testing\r\n\r\n`make reviewable` passes (generate + lint + all 26 test packages).\r\n\r\nThe `inherit_option` column on `pg_auth_members` was added in PostgreSQL 16. Setting `withInherit` on an older cluster will result in a SQL error, which is the expected and documented behaviour.",
+      "state": "closed",
+      "merged_at": "2026-07-09T14:54:42Z",
+      "base_branch": "master",
+      "base_commit": "b0fd0dad529c6629be01792bdd765d4660d086d0",
+      "head_commit": "a30e415559243474dffc140658a5df18972fc502",
+      "merge_commit": "a76bde9446e13719cfee548bc2aefd47230c5550",
+      "changed_files": 11,
+      "additions": 704,
+      "deletions": 22,
+      "changed_paths": [
+        "apis/cluster/postgresql/v1alpha1/grant_types.go",
+        "apis/cluster/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/grant_types.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "examples/cluster/postgresql/grant-with-inherit-false.yaml",
+        "package/crds/postgresql.sql.crossplane.io_grants.yaml",
+        "package/crds/postgresql.sql.m.crossplane.io_grants.yaml",
+        "pkg/controller/cluster/postgresql/grant/reconciler.go",
+        "pkg/controller/cluster/postgresql/grant/reconciler_test.go",
+        "pkg/controller/namespaced/postgresql/grant/reconciler.go",
+        "pkg/controller/namespaced/postgresql/grant/reconciler_test.go"
+      ],
+      "test_paths": [
+        "pkg/controller/cluster/postgresql/grant/reconciler_test.go",
+        "pkg/controller/namespaced/postgresql/grant/reconciler_test.go"
+      ],
+      "generated_paths": [
+        "apis/cluster/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go"
+      ],
+      "issues": [
+        {
+          "number": 359,
+          "title": "feat(postgresql): support WITH INHERIT FALSE on role membership grants (PostgreSQL 16+)",
+          "body": "## Summary\n\nThe PostgreSQL `Grant` managed resource currently supports `withOption` for privilege grants (`WITH GRANT OPTION`), but has no way to express `WITH INHERIT FALSE` on role membership grants \u2014 a feature introduced in PostgreSQL 16.\n\n## Background\n\nPostgreSQL 16 added per-grant inheritance control:\n\n```sql\nGRANT some_role TO some_user WITH INHERIT FALSE;\n```\n\nThis grants membership (the grantee can `SET ROLE`) without inheriting the role's privileges automatically. It is distinct from `WITH GRANT OPTION` and cannot be expressed through the existing `withOption` field.\n\n## Use Case\n\nA common Crossplane pattern for RDS PostgreSQL with IAM database authentication:\n\n1. Create an `admin` role with `rds_iam` membership (so migration tools like Flyway/Liquibase/Atlas can connect via IAM tokens).\n2. Grant the RDS master user membership in `admin` so it can run `ALTER DEFAULT PRIVILEGES FOR ROLE admin`.\n\nOn PostgreSQL 15, step 2 creates a transitive chain: `master_user \u2192 admin \u2192 rds_iam`. This causes the master user's password authentication to break \u2014 RDS routes all connections for `rds_iam` members through PAM (IAM token verification), rejecting the regular password.\n\nOn PostgreSQL 16, `GRANT admin TO master_user WITH INHERIT FALSE` solves this cleanly: the master user has membership (satisfying the `ALTER DEFAULT PRIVILEGES` requirement) but does not inherit `rds_iam` and retains password authentication.\n\nWithout this field in the `Grant` CRD, the composition must either omit default privileges management entirely or work around the limitation in ways that push responsibility to the application layer.\n\n## Proposed Change\n\nAdd a `withInherit` boolean field to `spec.forProvider` on the PostgreSQL `Grant` resource:\n\n```yaml\napiVersion: postgresql.sql.m.crossplane.io/v1alpha1\nkind: Grant\nspec:\n  forProvider:\n    role: master_user\n    memberOf: admin\n    withInherit: false   # emits: GRANT admin TO master_user WITH INHERIT FALSE\n```\n\nWhen `withInherit` is omitted, behavior is unchanged (PostgreSQL defaults to `INHERIT TRUE`).\n\nThis field should only be applied when `memberOf` is set (role membership grants). It has no meaning for privilege grants (`privileges` field).\n\n## References\n\n- PostgreSQL 16 release notes: https://www.postgresql.org/docs/16/release-16.html\n- `GRANT` syntax: https://www.postgresql.org/docs/16/sql-grant.html\n- AWS RDS IAM database authentication: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html",
+          "state": "closed",
+          "created_at": "2026-04-24T19:54:04Z",
+          "closed_at": "2026-07-09T14:54:44Z",
+          "url": "https://github.com/crossplane-contrib/provider-sql/issues/359",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 80,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "bounded multi-file change",
+        "accepted patch changes tests",
+        "requires broader repository context"
+      ],
+      "concerns": [
+        "generated-file churn may dominate the patch"
+      ]
+    },
+    {
+      "repository": "mercuretechnologies/expo-open-ota",
+      "number": 60,
+      "title": "fix: cache expo auth to prevent ENHANCE_YOUR_CALM rate limit (#58)",
+      "url": "https://github.com/mercuretechnologies/expo-open-ota/pull/60",
+      "body": "Fixes #58\r\n\r\n## Problem\r\n`ValidateExpoAuth()` was making 2 GraphQL calls to api.expo.dev on \r\nevery `/uploadLocalFile` request with no caching. With 527 assets, \r\nthis results in 1054 rapid API calls, triggering Expo's rate limit.\r\n## Fix\r\nApplied the same caching pattern already used in `FetchExpoChannelMapping()` to:\r\n- `FetchSelfExpoUsername()` \u2014 cached indefinitely (never changes at runtime)\r\n- `FetchExpoUserAccountInformations()` \u2014 cached per token with a short TTL\r\n## Testing\r\nVerified fix resolves the rate-limit error with 527 assets on AWS EKS.",
+      "state": "closed",
+      "merged_at": "2026-05-10T18:11:25Z",
+      "base_branch": "main",
+      "base_commit": "60af6804573de2b94a14ca265b9a1fbf324c0b2e",
+      "head_commit": "dcc4a87f5bad73634e377886d4ee0cd757703ecf",
+      "merge_commit": "aab3ba6ec7195736a4a66fe5c32ad226d6515332",
+      "changed_files": 1,
+      "additions": 33,
+      "deletions": 0,
+      "changed_paths": [
+        "internal/services/expo.go"
+      ],
+      "test_paths": [],
+      "generated_paths": [],
+      "issues": [
+        {
+          "number": 58,
+          "title": "ENHANCE_YOUR_CALM rate limit from api.expo.dev on every /uploadLocalFile request due to missing auth caching",
+          "body": "**Problem**\nWhen publishing updates with a large number of assets using eoas publish, the server hits Expo's API rate limit (ENHANCE_YOUR_CALM) during file uploads, causing all uploads to fail with 401.\n**Error**\nError validating expo auth: Post \"https://api.expo.dev/graphql\": http2: server sent GOAWAY and closed the connection; LastStreamID=1677, ErrCode=ENHANCE_YOUR_CALM, debug=\"\"\n\n**Root Cause**\nValidateExpoAuth() in internal/services/expo.go makes 2 GraphQL calls to api.expo.dev on every single /uploadLocalFile request with no caching:\n\nFetchExpoUserAccountInformations() \u2014 validates the token\nFetchSelfExpoUsername() \u2014 fetches the server's own username (never changes)\nWith 527 assets, this results in 1054 API calls in rapid succession, triggering Expo's rate limit.\n\nNote: FetchExpoChannelMapping() already implements caching correctly \u2014 the same pattern is missing from the auth validation functions.\n\n**Environment**\nRunning on AWS EKS (Kubernetes)\n527 assets to upload\nWorks locally (residential IP) \u2014 fails on AWS datacenter IP due to stricter rate limiting\n\n**Expected Behavior**\nFetchSelfExpoUsername() result should be cached indefinitely (it never changes during runtime). FetchExpoUserAccountInformations() result should be cached per token for a short TTL (e.g. 5 minutes), similar to how FetchExpoChannelMapping() is already cached.\n\n**Suggested Fix**\nApply the same caching pattern already used in FetchExpoChannelMapping() to FetchSelfExpoUsername() and FetchExpoUserAccountInformations().",
+          "state": "closed",
+          "created_at": "2026-04-29T15:41:59Z",
+          "closed_at": "2026-05-10T18:11:26Z",
+          "url": "https://github.com/mercuretechnologies/expo-open-ota/issues/58",
+          "labels": []
+        }
+      ],
+      "task_quality_score": 68,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "reviewable implementation size"
+      ],
+      "concerns": [
+        "mostly localized task",
+        "accepted patch has no obvious test change"
+      ]
+    },
+    {
+      "repository": "crossplane-contrib/provider-sql",
+      "number": 377,
+      "title": "fix: add missing ownerRef+ownerSelector field",
+      "url": "https://github.com/crossplane-contrib/provider-sql/pull/377",
+      "body": "### Description of your changes\r\n\r\nImplements ownerRef+ownerSelector for PG Database resource.\r\nFixes #372\r\n\r\nI have:\r\n\r\n- [x] Read and followed Crossplane's [contribution process](https://git.io/fj2m9).\r\n- [x] Run make reviewable to ensure this PR is ready for review.\r\n\r\n### How has this code been tested\r\n\r\nAdded an integration test with ownerSelector matching labels for the owner.",
+      "state": "closed",
+      "merged_at": "2026-07-09T15:17:24Z",
+      "base_branch": "master",
+      "base_commit": "a76bde9446e13719cfee548bc2aefd47230c5550",
+      "head_commit": "32918fc9bfea3cc7777ebe37e68b7ca171382270",
+      "merge_commit": "d557e3b1df99f17f5a5c0c4d97a7153f7e62a55b",
+      "changed_files": 13,
+      "additions": 298,
+      "deletions": 0,
+      "changed_paths": [
+        "apis/cluster/postgresql/v1alpha1/database_types.go",
+        "apis/cluster/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/cluster/postgresql/v1alpha1/zz_generated.resolvers.go",
+        "apis/namespaced/postgresql/v1alpha1/database_types.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.resolvers.go",
+        "cluster/local/postgresdb_functions.sh",
+        "examples/cluster/postgresql/database.yaml",
+        "examples/cluster/postgresql/role.yaml",
+        "examples/namespaced/postgresql/database.yaml",
+        "examples/namespaced/postgresql/role.yaml",
+        "package/crds/postgresql.sql.crossplane.io_databases.yaml",
+        "package/crds/postgresql.sql.m.crossplane.io_databases.yaml"
+      ],
+      "test_paths": [],
+      "generated_paths": [
+        "apis/cluster/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/cluster/postgresql/v1alpha1/zz_generated.resolvers.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.deepcopy.go",
+        "apis/namespaced/postgresql/v1alpha1/zz_generated.resolvers.go"
+      ],
+      "issues": [
+        {
+          "number": 372,
+          "title": "Support ownerRef for postgres database",
+          "body": "### What problem are you facing?\nCurrently we expect the role name to be set in the `forProvider.owner` for a `Database.postgresql.sql` resource. It is not possible to reference by label, using the well-known *NameSelector or *NameRef patterns.\n\n### How could Crossplane help solve your problem?\nAdd support for referenced fields in the database owner role.",
+          "state": "closed",
+          "created_at": "2026-05-05T07:36:19Z",
+          "closed_at": "2026-07-09T15:17:25Z",
+          "url": "https://github.com/crossplane-contrib/provider-sql/issues/372",
+          "labels": [
+            "enhancement"
+          ]
+        }
+      ],
+      "task_quality_score": 60,
+      "strengths": [
+        "has original issue context",
+        "issue contains substantive reproduction or requirements",
+        "reviewable implementation size",
+        "requires broader repository context"
+      ],
+      "concerns": [
+        "accepted patch has no obvious test change",
+        "generated-file churn may dominate the patch"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "accepted_pr": "https://github.com/shazow/wifitui/pull/163",
+  "accepted_title": "TUI improvements: Width-aware List/Edit, fit to terminal",
+  "head_commit": "536da9e020e33f166285a2e0c5edd86a6399384b",
+  "merge_commit": "86e3912f192617d5cbbc001f0ca059f710ddbe3d",
+  "changed_paths": [
+    "internal/tui/edit.go",
+    "internal/tui/edit_test.go",
+    "internal/tui/focus_test.go",
+    "internal/tui/list.go",
+    "internal/tui/list_layout_test.go",
+    "internal/tui/list_test.go",
+    "internal/tui/scanschedule.go",
+    "internal/tui/stack.go",
+    "internal/tui/tui.go",
+    "internal/tui/tui_test.go",
+    "internal/tui/window.go",
+    "internal/tui/window_test.go"
+  ],
+  "test_paths": [
+    "internal/tui/edit_test.go",
+    "internal/tui/focus_test.go",
+    "internal/tui/list_layout_test.go",
+    "internal/tui/list_test.go",
+    "internal/tui/tui_test.go",
+    "internal/tui/window_test.go"
+  ],
+  "additions": 398,
+  "deletions": 52
+}

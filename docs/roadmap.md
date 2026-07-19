@@ -80,6 +80,12 @@ Free-form concept resolution is deterministic only when a request matches explic
 
 See the focused design document: [Deterministic Agent Context and Integrations](agent-context-and-integrations.md).
 
+Future evidence should compare paired historical tasks with and without Demon Docs context across repositories representing good/poor code and good/poor documentation. An intentionally constructed repository should validate the harness separately. This research is documented in [Context-Injection Benchmarking](context-injection-benchmarking.md) and is not a prerequisite for designing the deterministic core.
+
+### Phase 7 research gate
+
+Before claiming that agent context improves implementation work, develop the benchmark corpus and harness described in [Context-Injection Benchmarking](context-injection-benchmarking.md). This research is not required to begin deterministic context implementation and does not require immediate paid model trials. Corpus preparation, pinned historical tasks, control fixtures, and deterministic bundle inspection can proceed first.
+
 ## Phase 8: Operational Daemon
 
 The daemon remains a required/planned product feature, but that product commitment is separate from runtime correctness: users must not need it for static CLI operations, CI, rebuilds, recovery, or one-shot queries.

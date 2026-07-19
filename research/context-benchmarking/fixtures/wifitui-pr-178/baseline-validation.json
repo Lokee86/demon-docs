@@ -1,0 +1,9 @@
+{
+  "task": "shazow__wifitui-pr-178",
+  "verified_at": "2026-07-19T00:14:03.870668+00:00",
+  "environment": "WSL bash login shell",
+  "command": "go test ./...",
+  "exit_code": 0,
+  "stdout": "System Load Successful\nok  \tgithub.com/shazow/wifitui\t0.250s\n?   \tgithub.com/shazow/wifitui/internal/helpers\t[no test files]\nok  \tgithub.com/shazow/wifitui/internal/tui\t0.190s\n?   \tgithub.com/shazow/wifitui/qrwifi\t[no test files]\nok  \tgithub.com/shazow/wifitui/wifi\t0.004s\nok  \tgithub.com/shazow/wifitui/wifi/darwin\t0.005s\n?   \tgithub.com/shazow/wifitui/wifi/iwd\t[no test files]\nok  \tgithub.com/shazow/wifitui/wifi/mock\t0.006s\nok  \tgithub.com/shazow/wifitui/wifi/networkmanager\t0.006s\n",
+  "stderr": ""
+}

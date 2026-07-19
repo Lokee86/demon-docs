@@ -1,0 +1,13 @@
+{
+  "accepted_pr": "https://github.com/shazow/wifitui/pull/178",
+  "accepted_title": "Default to empty theme when NO_COLOR is set",
+  "head_commit": "97e0735fd58c46067012a8ab21a531d9542b85c4",
+  "merge_commit": "26a03e8afa254c8fef43ec471ebdcb7175a309a6",
+  "changed_paths": [
+    "internal/tui/theme.go",
+    "main.go"
+  ],
+  "test_paths": [],
+  "additions": 24,
+  "deletions": 0
+}

@@ -141,6 +141,18 @@ The daemon may watch repository and Git changes, coalesce events, trigger the sa
 - The LLM boundary is optional and outside graph, resolution, ranking, and delivery correctness.
 - No claim is made that every supported host has identical native hooks, lifecycle events, or plugin APIs.
 
+## Evaluation Boundary
+
+Context assembly correctness can be tested deterministically with fixtures, but claims that injected context improves agent implementation require a separate empirical benchmark. The future benchmark should compare matched no-context and context-injected runs across repositories with independently assessed code and documentation quality. Benchmark-specific oracle data must remain outside context generation and agent-visible inputs.
+
+See [Context-Injection Benchmarking](context-injection-benchmarking.md).
+
+## Benchmark and Validation Direction
+
+The context system should eventually be tested against authentic historical OSS tasks across independently assessed code-quality and documentation-quality quadrants. Each treatment run should be paired with the same repository snapshot and task without Demon Docs context, while a deliberately constructed repository validates the harness itself.
+
+The benchmark is future research rather than a current implementation gate. Corpus preparation, pinned task manifests, deterministic bundle inspection, leakage checks, and harness dry runs can proceed before repeated paid model trials. See [Context-Injection Benchmarking](context-injection-benchmarking.md).
+
 ## Initial Acceptance Criteria
 
 The design is ready for implementation planning when focused fixtures and adapter checks can demonstrate that:

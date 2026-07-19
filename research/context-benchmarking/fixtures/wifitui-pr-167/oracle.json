@@ -1,0 +1,19 @@
+{
+  "accepted_pr": "https://github.com/shazow/wifitui/pull/167",
+  "accepted_title": "list: (5 APs) -> \ud83d\udce1\u00d75",
+  "head_commit": "b729d4c6941d5673db37f7cb73919e6931e80a59",
+  "merge_commit": "f625e122912c67bcbd205fb9800eee09b223dadc",
+  "changed_paths": [
+    "internal/tui/list.go",
+    "internal/tui/list_test.go",
+    "internal/tui/theme.go",
+    "internal/tui/theme_test.go",
+    "theme.toml"
+  ],
+  "test_paths": [
+    "internal/tui/list_test.go",
+    "internal/tui/theme_test.go"
+  ],
+  "additions": 67,
+  "deletions": 1
+}
