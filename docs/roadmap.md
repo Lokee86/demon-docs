@@ -1,6 +1,6 @@
 # Demon Docs Roadmap
 
-This roadmap describes the planned product evolution in implementation order. Each phase builds on the deterministic repository model before adding broader projections, long-running operation, or optional assistance.
+This roadmap describes the planned product evolution in implementation order. The focused filesystem and Markdown-link reconciliation core comes first; broader repository, code, projection, and agent-context graphs build on it later.
 
 ## Current Foundation: Implemented
 
@@ -10,29 +10,42 @@ The current foundation is the stable, repository-native reconciliation layer:
 - Recursive folder indexes describe direct files, draft/stub files, and child folders.
 - Managed Markdown sections are the only generated regions; authored content outside them is preserved.
 - Parent navigation links keep folder indexes and configured indexed documents connected to their owning index.
-- `check`, `fix`, and `watch` provide reconciliation, verification, and local continuous maintenance.
-- Existing descriptions are preserved where entries remain stable or moves are unambiguous.
+- `check`, `fix`, and `watch` provide reconciliation, verification, and continuous local maintenance.
+- `-i` / `--indexes` and `-l` / `--links` select either subsystem independently.
+- A focused repository-root Markdown link graph tracks local links to Markdown, assets, directories, absolute filesystem paths, and accessible external targets.
+- Stable internal file IDs, path history, and fingerprints support deterministic move reconciliation without modifying source files to embed IDs.
+- Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
 
-This foundation establishes predictable filesystem synchronization without attempting to author semantic documentation.
+This foundation establishes predictable filesystem synchronization without attempting to author semantic documentation or requiring the later repository/context graph.
 
-## Phase 1: Repository Inventory and Typed Graph
+## Phase 1: Markdown Links, Moves, and Static Reconciliation
 
-Build a repository-wide inventory and typed graph covering:
+Complete and harden the focused Markdown-link subsystem independently of the broader repository graph:
 
-- folders and files;
-- Markdown documents, headings, and anchors;
-- links and indexes; and
-- explicit code-path references.
+- validate local inline links, images, and reference definitions;
+- track Markdown and non-Markdown targets;
+- detect broken links, case mismatches, moves, and ambiguous candidates;
+- preserve relative or absolute link style, labels, titles, queries, and fragments;
+- use stable file IDs and fingerprints when exact path evidence disappears;
+- keep first-scan baseline creation separate from later repair passes; and
+- expose identical behavior through `check`, `fix`, and `watch`.
 
-The inventory must respect Git tracked-file boundaries and `.gitignore` semantics where configured. The graph is a deterministic representation of observed repository structure and explicit references, not an inferred model of what the repository ought to mean.
+A unique deterministic candidate may be repaired automatically. Multiple plausible candidates remain unchanged and are reported for user resolution. The static CLI remains sufficient for rebuilding and reconciliation; `watch` provides continuous observation of the same core operations.
+
+See [Markdown Link Reconciliation](markdown-links.md).
+
+## Phase 2: Repository Inventory and Typed Graph
+
+Build the broader repository-wide typed graph needed for advanced reverse indexing, code analysis, projections, and agent context. It may cover:
+
+- folders and files beyond the focused link-state requirements;
+- Markdown documents, headings, anchors, concepts, and aliases;
+- indexes, ordinary link edges, and explicit code-path references; and
+- provenance required by later projections and queries.
+
+This graph is a deterministic representation of observed repository structure and explicit references, not an inferred model of what the repository ought to mean. It is deliberately sequenced after reliable static link updating rather than being required to implement it.
 
 See the focused design document: [Deterministic Typed Repository Graph](repository-graph.md).
-
-## Phase 2: Links, Moves, and Incremental Reconciliation
-
-Add deterministic Markdown link validation, including detection of broken links, ambiguous targets, and case mismatches. Add Git-aware move and rename detection so repository history and current tracked state can distinguish relocation from deletion where the evidence is available.
-
-Use that inventory and graph to repair body links deterministically when the target is known. A full rebuild remains available as a recovery and verification path, while normal updates become incremental and touch only affected state and files.
 
 ## Phase 3: Reverse Documentation Mapping and Code-Folder Indexes
 
@@ -86,13 +99,13 @@ Future evidence should compare paired historical tasks with and without Demon Do
 
 Before claiming that agent context improves implementation work, develop the benchmark corpus and harness described in [Context-Injection Benchmarking](context-injection-benchmarking.md). This research is not required to begin deterministic context implementation and does not require immediate paid model trials. Corpus preparation, pinned historical tasks, control fixtures, and deterministic bundle inspection can proceed first.
 
-## Phase 8: Operational Daemon
+## Phase 8: Watch/Daemon Operational Expansion
 
-The daemon remains a required/planned product feature, but that product commitment is separate from runtime correctness: users must not need it for static CLI operations, CI, rebuilds, recovery, or one-shot queries.
+`ddocs watch` is already the Demon Docs daemon: it runs the same static reconciliation core continuously in the foreground, observes relevant filesystem changes, coalesces events, and reruns selected index or link operations.
 
-The daemon automates and schedules static core capabilities: continuous Git/filesystem change handling, event coalescing, incremental reconciliation, and automatic maintenance. It may keep disposable caches of graph or projection state, but deleting those caches must not remove repository truth or require a separate recovery model. The daemon introduces no exclusive product capability; the static CLI remains the authoritative recovery, CI, rebuild, and debugging path and can validate or rebuild directly from repository inputs.
+Later operational work may improve lifecycle management, incremental scheduling, graph-cache reuse, status reporting, or service integration. Those enhancements must not create exclusive correctness behavior. The static CLI remains authoritative for CI, rebuilds, recovery, and debugging, and deleting disposable daemon caches must never remove repository truth.
 
-This phase is intentionally lower priority than the deterministic static core and its thin integrations. MCP and plugins are separate interfaces and need not be hosted by the daemon; they may use the core directly or connect to an available service. Building the daemon first would duplicate or obscure the underlying correctness model.
+MCP and plugins remain separate interfaces. They may call the deterministic core directly or connect to a running service, but they do not require a competing repository model.
 
 ## Phase 9: Optional LLM Assistance
 
@@ -107,24 +120,26 @@ LLM output remains a proposal: it must be reviewable, attributable to its inputs
 - **Authored intent remains the source of truth:** generated projections do not replace or silently reinterpret hand-authored prose.
 - **Projections are generated:** indexes, backlinks, maps, reports, and bundles are views of the underlying repository model.
 - **Explicit resolution only:** concept resolution is deterministic only against explicit repository vocabulary, aliases, paths, symbols, headings, active files, or Git changes; ambiguity yields candidates or waits for a concrete target.
-- **Daemon as an operational layer:** the daemon only automates or schedules static core capabilities and may retain disposable caches; it adds no exclusive product capability, and the static CLI remains authoritative.
+- **Watch is the daemon:** `ddocs watch` automates the same static core capabilities and may later retain disposable caches; it adds no exclusive product capability, and the static CLI remains authoritative.
 - **Thin integrations:** CLI, MCP, Hermes, Claude Code, plugins, and other adapters use the same deterministic core rather than creating parallel repository models.
 - **Optional adapters:** language-specific analysis is enabled deliberately and does not reduce baseline usability.
 - **No semantic prose generation in core:** core Demon Docs behavior maintains structure and explicit references, not guessed explanations.
 
 ## Dependency and Order
 
-The current foundation precedes all planned phases. Phase 1 supplies the inventory and typed graph required by Phases 2–6. Phase 2 establishes trustworthy links and incremental change handling before the distinct reverse mappings and code-folder indexes in Phase 3. Phase 4 adds optional, deterministic symbol nodes, and Phase 5 builds on the file/path/symbol model to add bounded code and dependency facts. Phase 6 consumes that completed deterministic graph for reproducible projections, including entanglement views and agent context bundles. Phase 7 then exposes those capabilities through thin adapters without creating a competing core.
+The current foundation and Phase 1 establish trustworthy static Markdown-link updating, file identity, and continuous watch operation without waiting for the advanced repository graph. Phase 2 then expands those bounded filesystem facts into the typed repository model required by later reverse mappings, code-folder indexes, symbols, dependencies, projections, and agent context.
 
-Phase 8 is lower priority than Phases 1–7: it operationalizes and schedules the completed deterministic graph, reconciliation, projection, and integration capabilities as a disposable service layer. It is sequenced after the static core rather than built independently first, because an early daemon would duplicate or obscure the correctness model, and it does not own MCP or plugin hosting. Phase 9 comes last because proposals must be constrained by deterministic graph and diff data; it remains optional and outside the correctness path.
+Phase 3 adds the distinct reverse documentation mappings and code-folder indexes. Phase 4 adds optional deterministic symbol nodes, and Phase 5 adds bounded code and dependency facts. Phase 6 consumes the broader deterministic graph for reproducible projections, including entanglement views and context bundles. Phase 7 exposes those capabilities through thin adapters without creating a competing core.
+
+Phase 8 improves the already-existing `watch` daemon's operational characteristics after the relevant static capabilities exist. Phase 9 comes last because proposals must be constrained by deterministic graph and diff data; it remains optional and outside the correctness path.
 
 ## Explicit Non-Goals
 
 - Replacing Git, Markdown, or the repository filesystem with a proprietary storage model.
 - Treating inferred semantic relationships as equivalent to explicit authored references.
 - Generating or rewriting semantic prose as part of deterministic core operations.
-- Requiring an always-running daemon for one-shot CLI recovery, CI, rebuilds, or correctness verification.
-- Making the daemon the source of repository truth, or giving it capabilities unavailable through the static core.
+- Requiring the `watch` daemon for one-shot CLI recovery, CI, rebuilds, or correctness verification.
+- Making `watch` the source of repository truth, or giving it capabilities unavailable through the static core.
 - Requiring MCP or plugins to be hosted by the daemon rather than exposing them as separate interfaces.
 - Requiring an LLM, a network connection, or a language adapter for baseline reconciliation.
 - Deterministically resolving an unconstrained free-form concept without an explicit vocabulary, alias, path, symbol, heading, active-file, or Git-change match.
