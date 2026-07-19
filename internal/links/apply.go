@@ -49,55 +49,93 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 }
 
 func refreshGeneratedSources(plan *Plan) error {
-	for _, rewrite := range plan.Rewrites {
-		document, err := textio.Read(rewrite.Path)
+	results := make([]sourceRefreshResult, len(plan.Rewrites))
+	errors := runLinkWorkers(len(plan.Rewrites), func(index int) error {
+		return refreshGeneratedSource(plan.Links.Links, plan.Rewrites[index], &results[index])
+	})
+	for _, err := range errors {
 		if err != nil {
-			return fmt.Errorf("read generated rewrite result %s: %w", rewrite.Path, err)
+			return err
 		}
-		occurrences := parseMarkdownLinks(document.Text)
-		indexes := sourceLinkIndexes(plan.Links.Links, rewrite.SourceFileID)
-		searchFrom := 0
-		for _, index := range indexes {
-			record := &plan.Links.Links[index]
-			foundIndex := -1
-			for occurrenceIndex := searchFrom; occurrenceIndex < len(occurrences); occurrenceIndex++ {
-				occurrence := occurrences[occurrenceIndex]
-				if occurrence.RawPath+occurrence.Suffix == record.Target {
-					foundIndex = occurrenceIndex
-					break
-				}
-			}
-			if foundIndex < 0 {
-				return fmt.Errorf("generated rewrite verification could not find link %s in %s", record.ID, rewrite.Path)
-			}
-			found := occurrences[foundIndex]
-			record.Start = found.Start
-			record.End = found.End
-			record.Line = found.Line
-			record.Column = found.Column
-			record.Syntax = found.Syntax
-			record.RawPath = found.RawPath
-			record.Suffix = found.Suffix
-			record.Angle = found.Angle
-			searchFrom = foundIndex + 1
-		}
-		fingerprint, err := fileFingerprint(rewrite.Path)
-		if err != nil {
-			return fmt.Errorf("fingerprint generated rewrite %s: %w", rewrite.Path, err)
-		}
-		info, err := os.Stat(rewrite.Path)
-		if err != nil {
-			return fmt.Errorf("stat generated rewrite %s: %w", rewrite.Path, err)
+	}
+
+	// Workers only produce detached copies. Merge in rewrite order so plan
+	// mutation remains deterministic and race-free.
+	for _, result := range results {
+		for _, link := range result.links {
+			plan.Links.Links[link.index] = link.record
 		}
 		for index := range plan.Files.Files {
-			if plan.Files.Files[index].ID == rewrite.SourceFileID {
-				plan.Files.Files[index].Fingerprint = fingerprint
-				plan.Files.Files[index].Size = info.Size()
-				plan.Files.Files[index].ModifiedUnixNano = info.ModTime().UnixNano()
+			if plan.Files.Files[index].ID == result.sourceFileID {
+				plan.Files.Files[index].Fingerprint = result.fingerprint
+				plan.Files.Files[index].Size = result.size
+				plan.Files.Files[index].ModifiedUnixNano = result.modifiedUnixNano
 				break
 			}
 		}
 	}
+	return nil
+}
+
+type sourceRefreshResult struct {
+	sourceFileID     string
+	fingerprint      string
+	size             int64
+	modifiedUnixNano int64
+	links            []refreshedLink
+}
+
+type refreshedLink struct {
+	index  int
+	record LinkRecord
+}
+
+func refreshGeneratedSource(records []LinkRecord, rewrite GeneratedRewrite, result *sourceRefreshResult) error {
+	document, err := textio.Read(rewrite.Path)
+	if err != nil {
+		return fmt.Errorf("read generated rewrite result %s: %w", rewrite.Path, err)
+	}
+	occurrences := parseMarkdownLinks(document.Text)
+	indexes := sourceLinkIndexes(records, rewrite.SourceFileID)
+	result.links = make([]refreshedLink, 0, len(indexes))
+	searchFrom := 0
+	for _, index := range indexes {
+		record := records[index]
+		foundIndex := -1
+		for occurrenceIndex := searchFrom; occurrenceIndex < len(occurrences); occurrenceIndex++ {
+			occurrence := occurrences[occurrenceIndex]
+			if occurrence.RawPath+occurrence.Suffix == record.Target {
+				foundIndex = occurrenceIndex
+				break
+			}
+		}
+		if foundIndex < 0 {
+			return fmt.Errorf("generated rewrite verification could not find link %s in %s", record.ID, rewrite.Path)
+		}
+		found := occurrences[foundIndex]
+		record.Start = found.Start
+		record.End = found.End
+		record.Line = found.Line
+		record.Column = found.Column
+		record.Syntax = found.Syntax
+		record.RawPath = found.RawPath
+		record.Suffix = found.Suffix
+		record.Angle = found.Angle
+		result.links = append(result.links, refreshedLink{index: index, record: record})
+		searchFrom = foundIndex + 1
+	}
+	fingerprint, err := fileFingerprint(rewrite.Path)
+	if err != nil {
+		return fmt.Errorf("fingerprint generated rewrite %s: %w", rewrite.Path, err)
+	}
+	info, err := os.Stat(rewrite.Path)
+	if err != nil {
+		return fmt.Errorf("stat generated rewrite %s: %w", rewrite.Path, err)
+	}
+	result.sourceFileID = rewrite.SourceFileID
+	result.fingerprint = fingerprint
+	result.size = info.Size()
+	result.modifiedUnixNano = info.ModTime().UnixNano()
 	return nil
 }
 
