@@ -24,7 +24,7 @@ func TestResolvedLinksFromDatasetFiltersAndNormalizes(t *testing.T) {
 	}
 }
 
-func TestSuggestionsFromEvidenceKeepsExplicitPathMentionsAsContext(t *testing.T) {
+func TestSuggestionsFromEvidenceKeepsUncorroboratedExplicitPathMentionsAsContext(t *testing.T) {
 	candidates := []evidence.Candidate{{
 		Path: "src/runtime.go",
 		Evidence: []evidence.Evidence{
@@ -35,6 +35,46 @@ func TestSuggestionsFromEvidenceKeepsExplicitPathMentionsAsContext(t *testing.T)
 	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
 	if len(suggestions) != 1 || suggestions[0].Score != 12 || suggestions[0].Document != "docs/runtime.md" || len(suggestions[0].Evidence) != 2 || suggestions[0].Tier != SuggestionTierContext {
 		t.Fatalf("unexpected suggestions: %#v", suggestions)
+	}
+}
+
+func TestSuggestionsFromEvidencePromotesCorroboratedRepeatedPathMentions(t *testing.T) {
+	candidates := []evidence.Candidate{
+		{
+			Path: "src/dependency.go",
+			Evidence: []evidence.Evidence{
+				{Kind: evidence.KindExactPathMention, Detail: "mentioned repeatedly", Count: 2},
+				{Kind: evidence.KindDependencyNeighbor, Source: "src/runtime.go", Detail: "outbound:go_import", Count: 1},
+			},
+		},
+		{
+			Path: "src/symbol.go",
+			Evidence: []evidence.Evidence{
+				{Kind: evidence.KindExactPathMention, Detail: "mentioned repeatedly", Count: 3},
+				{Kind: evidence.KindDeclaredSymbolMention, Detail: "RuntimeSymbol", Count: 1},
+			},
+		},
+		{
+			Path: "src/single.go",
+			Evidence: []evidence.Evidence{
+				{Kind: evidence.KindExactPathMention, Detail: "mentioned once", Count: 1},
+				{Kind: evidence.KindDependencyNeighbor, Source: "src/runtime.go", Detail: "outbound:go_import", Count: 1},
+			},
+		},
+	}
+
+	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
+	byTarget := make(map[string]Suggestion, len(suggestions))
+	for _, suggestion := range suggestions {
+		byTarget[suggestion.Target] = suggestion
+	}
+	for _, target := range []string{"src/dependency.go", "src/symbol.go"} {
+		if got := byTarget[target]; got.Tier != SuggestionTierHardLink {
+			t.Fatalf("%s tier = %q, want hard link: %#v", target, got.Tier, suggestions)
+		}
+	}
+	if got := byTarget["src/single.go"]; got.Tier != SuggestionTierContext {
+		t.Fatalf("single mention tier = %q, want context: %#v", got.Tier, suggestions)
 	}
 }
 

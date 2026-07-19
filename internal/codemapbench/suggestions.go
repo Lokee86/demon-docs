@@ -176,10 +176,12 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 }
 
 func (item rankedSuggestion) isHardLinkCandidate() bool {
-	// An exact path mention is already explicit document context. Keep it in the
-	// context tier rather than proposing the same relationship as a hard link.
+	// A single exact path mention is explicit document context, but repeated
+	// references plus independent semantic structure indicate that the document
+	// relies on the target enough to justify a permanent link.
 	if item.hasExactPathMention {
-		return false
+		return item.repeatedMentionCount >= RepeatedMentionMinimumCount &&
+			(item.hasDeclaredSymbolMention || item.hasDependencyNeighbor)
 	}
 	if item.hasDeclaredSymbolMention {
 		return true
