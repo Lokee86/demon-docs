@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/Lokee86/demon-docs/internal/config"
 )
 
 func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
@@ -27,7 +29,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		root := t.TempDir()
 		writeTestFile(t, filepath.Join(root, "page.md"), "# Page\n")
 		var stdout, stderr bytes.Buffer
-		if code := Run(context.Background(), []string{"fix", "--root", root, "--indexes"}, &stdout, &stderr); code != 0 {
+		if code := Run(context.Background(), []string{"fix", "--root", root, "--docs"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {
@@ -37,6 +39,18 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 			t.Fatalf("indexes-only run wrote link state: %v", err)
 		}
 	})
+}
+
+func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {
+	features := selectedFeatures(commonFlags{reverseRoots: stringsFlag{values: []string{"services"}}}, config.Default())
+	if !features.Indexes || !features.Links || !features.Reverse {
+		t.Fatalf("reverse root override did not enable reverse alongside default systems: %+v", features)
+	}
+
+	features = selectedFeatures(commonFlags{reverseOnly: true}, config.Default())
+	if features.Indexes || features.Links || !features.Reverse {
+		t.Fatalf("explicit reverse selector was not reverse-only: %+v", features)
+	}
 }
 
 func TestLinksOnlyDoesNotRequireDocsRoot(t *testing.T) {

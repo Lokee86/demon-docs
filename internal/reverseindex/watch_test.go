@@ -49,7 +49,7 @@ func TestWatchReloadsNestedDocignoreAndAddsVisibleDirectories(t *testing.T) {
 		done <- Watch(ctx, repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat(), 10*time.Millisecond, false, &output)
 	}()
 
-	waitFor(t, func() bool { return strings.Contains(output.String(), "watch watching") })
+	waitFor(t, func() bool { return strings.Contains(output.String(), "watch --reverse watching") })
 	if _, err := os.Stat(filepath.Join(generatedRoot, "README.md")); !os.IsNotExist(err) {
 		t.Fatal("ignored generated directory was indexed before .docignore changed")
 	}

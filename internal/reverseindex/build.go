@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/config"
@@ -31,6 +32,16 @@ func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, for
 	dataset, err := codemap.BuildDataset(repositoryRoot, docsRoot, format)
 	if err != nil {
 		return Plan{}, err
+	}
+	sectionCount := 0
+	for _, document := range dataset.Documents {
+		sectionCount += document.SectionCount
+	}
+	if sectionCount == 0 {
+		return Plan{}, fmt.Errorf("no codemap section found under %s; configured headings: %s", docsRoot, strings.Join(format.SectionHeadings, ", "))
+	}
+	if len(dataset.Entries) == 0 {
+		return Plan{}, fmt.Errorf("codemap section found under %s, but it contains no code targets", docsRoot)
 	}
 
 	plan := Plan{}

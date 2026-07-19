@@ -12,7 +12,7 @@ The current foundation is the stable, repository-native reconciliation layer:
 - Parent navigation links keep folder indexes and configured indexed documents connected to their owning index.
 - `check`, `fix`, and foreground `watch` provide reconciliation, verification, and explicit continuous local maintenance.
 - The repository demon provides single-owner detached watcher lifecycle while shell or agent feeders remain active, without becoming a correctness dependency.
-- `-i` / `--indexes` and `-l` / `--links` select either subsystem independently.
+- `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `-i` / `--indexes` remains a compatibility alias for `--docs`.
 - A focused repository-root Markdown link graph tracks local links to Markdown, assets, directories, absolute filesystem paths, and accessible external targets.
 - Stable internal file IDs, path history, and fingerprints support deterministic move reconciliation without modifying source files to embed IDs.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.

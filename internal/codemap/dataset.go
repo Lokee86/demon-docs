@@ -33,6 +33,7 @@ type DocumentRecord struct {
 	Path            string `json:"path"`
 	Size            int64  `json:"size"`
 	SHA256          string `json:"sha256"`
+	SectionCount    int    `json:"section_count"`
 	EntryCount      int    `json:"entry_count"`
 	DiagnosticCount int    `json:"diagnostic_count"`
 }
@@ -123,6 +124,7 @@ func BuildDataset(repositoryRoot, docsRoot string, format Format) (Dataset, erro
 			Path:            documentPath,
 			Size:            int64(len(source)),
 			SHA256:          digest(source),
+			SectionCount:    extracted.SectionCount,
 			EntryCount:      len(extracted.Entries),
 			DiagnosticCount: len(extracted.Diagnostics),
 		})

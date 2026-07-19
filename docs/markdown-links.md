@@ -89,23 +89,27 @@ ddocs watch
 Run only one subsystem with either the short or long selector:
 
 ```bash
-ddocs check -i
-ddocs check --indexes
+ddocs check -d
+ddocs check --docs
 ddocs check -l
 ddocs check --links
+ddocs check -r
+ddocs check --reverse
 
-ddocs fix -i
+ddocs fix -d
 ddocs fix -l
+ddocs fix -r
 
-ddocs watch -i
+ddocs watch -d
 ddocs watch -l
+ddocs watch -r
 ```
 
-Supplying both selectors runs both systems, the same as supplying neither.
+Supplying selectors runs only those systems. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
 
 `check` reports pending rewrites, broken links, ambiguous links, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events.
 
-When links are enabled, watch mode observes the repository root because moves of non-Markdown targets can require Markdown updates. It also watches the nearest existing parent directories of explicitly linked external targets, so an external rename or removal can trigger the same bounded reconciliation attempt. Index-only watch mode remains scoped to the configured docs root.
+When links are enabled, watch mode observes the repository root because moves of non-Markdown targets can require Markdown updates. It also watches the nearest existing parent directories of explicitly linked external targets, so an external rename or removal can trigger the same bounded reconciliation attempt. Documentation-only watch mode remains scoped to the configured docs root. Reverse-only watch mode remains scoped to configured or supplied reverse roots.
 
 ## Related Files
 

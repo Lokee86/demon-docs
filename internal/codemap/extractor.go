@@ -88,6 +88,7 @@ func Extract(documentPath, source string, format Format) Result {
 				}
 			} else if headings[strings.ToLower(title)] {
 				active, mapLevel, heading, context = true, level, title, ""
+				result.SectionCount++
 			}
 			continue
 		}

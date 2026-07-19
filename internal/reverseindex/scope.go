@@ -11,9 +11,9 @@ import (
 	"github.com/Lokee86/demon-docs/internal/repository"
 )
 
-// ResolveRoots selects positional command paths when provided, otherwise the
-// configured reverse-index roots. Positional relative paths are resolved from
-// cwd; configured relative paths are resolved from the repository root.
+// ResolveRoots selects command-line root overrides when provided, otherwise
+// the configured reverse-index roots. Command-line relative paths are resolved
+// from cwd; configured relative paths are resolved from the repository root.
 func ResolveRoots(repositoryRoot, docsRoot, cwd string, commandPaths, configuredRoots []string) ([]string, error) {
 	base := repositoryRoot
 	selected := configuredRoots
@@ -22,7 +22,7 @@ func ResolveRoots(repositoryRoot, docsRoot, cwd string, commandPaths, configured
 		selected = commandPaths
 	}
 	if len(selected) == 0 {
-		return nil, fmt.Errorf("no reverse-index roots configured; add [reverse_index].roots or pass a directory path")
+		return nil, fmt.Errorf("no reverse-index roots configured; add [reverse_index].roots or pass --reverse-root PATH")
 	}
 
 	hierarchy, err := ignorepolicy.LoadHierarchy(repositoryRoot)

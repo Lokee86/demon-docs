@@ -62,8 +62,9 @@ type Diagnostic struct {
 
 // Result contains every extracted entry and every unsupported authored entry.
 type Result struct {
-	Entries     []Entry
-	Diagnostics []Diagnostic
+	Entries      []Entry
+	Diagnostics  []Diagnostic
+	SectionCount int
 }
 
 type TargetBase string

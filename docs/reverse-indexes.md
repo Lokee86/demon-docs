@@ -99,19 +99,28 @@ roots = ["client", "services/game-server"]
 
 The selected roots are traversed recursively. Source files remain visible even when they have no documentation backlink, while resolved codemap targets add file- or folder-level backlinks. Nested `.docignore` files are loaded during traversal and apply relative to the directory containing them.
 
-The commands accept positional directory paths as a one-run override:
+Reverse indexes use the same `check`, `fix`, and `watch` command family as documentation indexes and links. Select them with `-r` / `--reverse`. `--reverse-root PATH` overrides configured roots for one invocation and may be repeated:
 
 ```bash
-ddocs reverse-index check services/game-server
-ddocs reverse-index fix /absolute/path/inside/the/repository/client
-ddocs reverse-index watch --once client
+ddocs check -r --reverse-root services/game-server
+ddocs fix -r --reverse-root /absolute/path/inside/the/repository/client
+ddocs watch -r --once --reverse-root client
 ```
 
-Relative positional paths resolve from the current working directory. Absolute paths must remain inside the repository. Repository root, documentation-root, ignored, and nested-worktree scopes are rejected.
+Relative override paths resolve from the current working directory. Absolute paths must remain inside the repository. Repository root, documentation-root, ignored, and nested-worktree scopes are rejected.
+
+Codemap section headings are configured separately:
+
+```toml
+[codemap]
+headings = ["Code map", "Implementation map"]
+```
+
+Reverse reconciliation fails rather than silently producing an ungrounded projection when no configured codemap section exists. A matching section with no code targets is reported as a distinct error.
 
 ## CLI and Daemon Boundary
 
-The static CLI can build, check, fix, and foreground-watch reverse indexes from repository inputs. Build and check must work without a running service. Fix may update only explicitly managed generated sections and must leave unresolved authored references as reviewable diagnostics or candidates.
+The static CLI can build, check, fix, and foreground-watch reverse indexes through `check -r`, `fix -r`, and `watch -r`. Check must work without a running service. Fix may update only explicitly managed generated sections and must leave unresolved authored references as reviewable diagnostics or candidates.
 
 A daemon only automates or schedules these same static operations. It may coalesce changes and retain disposable caches, but it does not own reverse-index correctness, repository truth, or a daemon-only recovery path. Removing its state must leave the CLI able to rebuild and check the projection. MCP, plugins, and other interfaces are separate adapters and need not be hosted by the daemon.
 

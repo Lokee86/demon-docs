@@ -15,6 +15,7 @@ import (
 type Features struct {
 	Indexes bool
 	Links   bool
+	Reverse bool
 }
 
 func modelResult(updates []model.FileUpdate) model.ReconcileResult {

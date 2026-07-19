@@ -27,7 +27,7 @@ func Watch(ctx context.Context, repositoryRoot, docsRoot string, roots []string,
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "ddocs reverse-index watch updated %d file(s), %d diagnostic(s)\n", changed, len(plan.Diagnostics))
+		fmt.Fprintf(out, "ddocs watch --reverse updated %d file(s), %d diagnostic(s)\n", changed, len(plan.Diagnostics))
 		return nil
 	}
 	if err := run(); err != nil {
@@ -90,7 +90,7 @@ func Watch(ctx context.Context, repositoryRoot, docsRoot string, roots []string,
 		default:
 		}
 	}
-	fmt.Fprintf(out, "ddocs reverse-index watch watching %d root(s) pid=%d\n", len(roots), os.Getpid())
+	fmt.Fprintf(out, "ddocs watch --reverse watching %d root(s) pid=%d\n", len(roots), os.Getpid())
 
 	var timer *time.Timer
 	var timerChannel <-chan time.Time

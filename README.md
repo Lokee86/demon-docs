@@ -168,15 +168,18 @@ Runs one reconciliation immediately, then watches for relevant filesystem change
 Select one subsystem explicitly when needed:
 
 ```bash
-ddocs check -i      # indexes only
+ddocs check -d      # documentation indexes only
 ddocs check -l      # links only
-ddocs fix --indexes
+ddocs check -r      # reverse indexes only
+ddocs fix --docs
 ddocs fix --links
-ddocs watch -i
+ddocs fix --reverse
+ddocs watch -d
 ddocs watch -l
+ddocs watch -r
 ```
 
-Using both selectors, or neither selector, runs both systems.
+Supplying selectors runs only those systems. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
 
 ```bash
 ddocs watch --root docs --once
