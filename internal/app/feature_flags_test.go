@@ -5,9 +5,11 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/demon"
 )
 
 func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
@@ -48,8 +50,16 @@ func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {
 	}
 
 	features = selectedFeatures(commonFlags{reverseOnly: true}, config.Default())
-	if features.Indexes || features.Links || !features.Reverse {
+	if features.Indexes || features.Links || features.TrackLinks || !features.Reverse {
 		t.Fatalf("explicit reverse selector was not reverse-only: %+v", features)
+	}
+
+	disabled := config.Default()
+	disabled.Index.Enabled = false
+	disabled.Links.Enabled = false
+	features = selectedFeatures(commonFlags{}, disabled)
+	if features.Indexes || features.Links || !features.TrackLinks {
+		t.Fatalf("disabled features did not preserve internal link tracking: %+v", features)
 	}
 }
 
@@ -78,6 +88,175 @@ func TestWatchOnceHonorsLinksOnly(t *testing.T) {
 		t.Fatalf("links-only watch created an index: %v", err)
 	}
 	assertDDocsState(t, root)
+}
+
+func TestFeatureToggleCommandsPersistRepositoryConfig(t *testing.T) {
+	root := t.TempDir()
+	configPath := filepath.Join(root, ".ddocs", "config.toml")
+	writeTestFile(t, configPath, "# preserve\ndocs_root = \"docs\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n")
+	if err := os.MkdirAll(filepath.Join(root, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	withWorkingDirectory(t, root, func(string) {
+		for _, command := range [][]string{{"index", "disable"}, {"links", "--false"}} {
+			var stdout, stderr bytes.Buffer
+			if code := Run(context.Background(), command, &stdout, &stderr); code != 0 {
+				t.Fatalf("command=%v code=%d stdout=%q stderr=%q", command, code, stdout.String(), stderr.String())
+			}
+		}
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"index", "status"}, &stdout, &stderr); code != 0 || stdout.String() != "index: disabled\n" {
+			t.Fatalf("status code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	loaded, err := config.Load(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Index.Enabled || loaded.Links.Enabled {
+		t.Fatalf("feature toggles were not persisted: %+v", loaded)
+	}
+	text, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(text), "# preserve") {
+		t.Fatalf("toggle rewrite discarded config text: %s", text)
+	}
+}
+
+func TestFeatureToggleRequestsRunningDemonReload(t *testing.T) {
+	root := t.TempDir()
+	configPath := filepath.Join(root, ".ddocs", "config.toml")
+	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	runtime := demon.New(root)
+	owner, claimed, err := runtime.Claim(os.Getpid())
+	if err != nil || !claimed {
+		t.Fatalf("claim owner: claimed=%t err=%v", claimed, err)
+	}
+	defer runtime.Release(owner)
+	withWorkingDirectory(t, root, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"index", "disable"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	if !runtime.ShutdownRequested() {
+		t.Fatal("feature toggle did not request a running demon reload")
+	}
+}
+
+func TestDisabledSelectedIndexWatchDoesNotFallBackToOtherSystems(t *testing.T) {
+	root := t.TempDir()
+	docsRoot := filepath.Join(root, "docs")
+	configPath := filepath.Join(root, ".ddocs", "config.toml")
+	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	if err := config.SetIndexEnabled(configPath, false); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
+	withWorkingDirectory(t, root, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"watch", "--docs", "--once"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	if _, err := os.Stat(filepath.Join(docsRoot, "README.md")); !os.IsNotExist(err) {
+		t.Fatalf("disabled index watch created an index: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".ddocs", "refs", "ddocs", "state")); !os.IsNotExist(err) {
+		t.Fatalf("disabled index-only watch unexpectedly tracked links: %v", err)
+	}
+}
+
+func TestDisabledIndexLeavesIndexOrdinaryAndLinkManaged(t *testing.T) {
+	root := t.TempDir()
+	docsRoot := filepath.Join(root, "docs")
+	configPath := filepath.Join(root, ".ddocs", "config.toml")
+	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	if err := config.SetIndexEnabled(configPath, false); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(docsRoot, "README.md"), "# Existing index\n\n[Page](page.md)\n")
+	writeTestFile(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
+	withWorkingDirectory(t, root, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"fix"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		if err := os.Rename(filepath.Join(docsRoot, "page.md"), filepath.Join(docsRoot, "moved.md")); err != nil {
+			t.Fatal(err)
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("repair code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	text, err := os.ReadFile(filepath.Join(docsRoot, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(text), "[Page](moved.md)") {
+		t.Fatalf("existing index was not treated as a normal link source: %s", text)
+	}
+	if strings.Contains(string(text), "doc-ledger") {
+		t.Fatalf("disabled indexing still inserted managed index content: %s", text)
+	}
+}
+
+func TestDisabledLinksKeepStateWithoutRewriting(t *testing.T) {
+	root := t.TempDir()
+	docsRoot := filepath.Join(root, "docs")
+	configPath := filepath.Join(root, ".ddocs", "config.toml")
+	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	if err := config.SetIndexEnabled(configPath, false); err != nil {
+		t.Fatal(err)
+	}
+	if err := config.SetLinksEnabled(configPath, false); err != nil {
+		t.Fatal(err)
+	}
+	readme := filepath.Join(docsRoot, "README.md")
+	writeTestFile(t, readme, "[Page](page.md)\n")
+	writeTestFile(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
+	withWorkingDirectory(t, root, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"fix"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		if err := os.Rename(filepath.Join(docsRoot, "page.md"), filepath.Join(docsRoot, "moved.md")); err != nil {
+			t.Fatal(err)
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("tracking code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		unchanged, err := os.ReadFile(readme)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(unchanged) != "[Page](page.md)\n" {
+			t.Fatalf("disabled links rewrote the document: %s", unchanged)
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"links", "enable"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("enable code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("repair code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	updated, err := os.ReadFile(readme)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(updated) != "[Page](moved.md)\n" {
+		t.Fatalf("re-enabled links did not use persistent tracking state: %s", updated)
+	}
 }
 
 func assertDDocsState(t *testing.T, root string) {

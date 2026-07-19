@@ -506,6 +506,7 @@ func (r *Runtime) Serve(ctx context.Context, owner Owner, enabled func() (bool, 
 				return nil
 			}
 			if r.ShutdownRequested() {
+				r.ClearShutdown()
 				return nil
 			}
 			on, err := enabled()

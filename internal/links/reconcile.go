@@ -22,19 +22,32 @@ type replacement struct {
 }
 
 func Reconcile(repositoryRoot string) (Plan, error) {
-	plan, _, err := reconcileWithTimings(repositoryRoot)
+	return reconcileWithOptions(repositoryRoot, true)
+}
+
+// Track refreshes persistent file and link identity without planning user-file
+// rewrites. It is used while automatic link maintenance is disabled.
+func Track(repositoryRoot string) (Plan, error) {
+	return reconcileWithOptions(repositoryRoot, false)
+}
+
+func reconcileWithOptions(repositoryRoot string, repair bool) (Plan, error) {
+	started := time.Now()
+	var timings ReconcileTimings
+	plan, err := reconcile(repositoryRoot, repair, &timings)
+	timings.Total = time.Since(started)
 	return plan, err
 }
 
 func reconcileWithTimings(repositoryRoot string) (Plan, ReconcileTimings, error) {
 	started := time.Now()
 	var timings ReconcileTimings
-	plan, err := reconcile(repositoryRoot, &timings)
+	plan, err := reconcile(repositoryRoot, true, &timings)
 	timings.Total = time.Since(started)
 	return plan, timings, err
 }
 
-func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
+func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (Plan, error) {
 	root, err := filepath.Abs(repositoryRoot)
 	if err != nil {
 		return Plan{}, err
@@ -69,9 +82,12 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 	previousBySource := previousLinkIndex(previousLinks)
 	previousByID := fileRecordIndex(previousFiles)
 	currentByID := fileRecordIndex(inventory.manifest)
-	internal, err := buildInternalMoveRewrites(root, previousBySource, previousByID, currentByID)
-	if err != nil {
-		return Plan{}, err
+	internal := map[string]internalRewritePlan{}
+	if repair {
+		internal, err = buildInternalMoveRewrites(root, previousBySource, previousByID, currentByID)
+		if err != nil {
+			return Plan{}, err
+		}
 	}
 
 	for _, source := range markdownSources(inventory) {
@@ -88,14 +104,14 @@ func reconcile(repositoryRoot string, timings *ReconcileTimings) (Plan, error) {
 		}
 		previousSource := previousByID[source.record.ID]
 		previousRecords := previousBySource[source.record.ID]
-		if initialized && sourceUnchanged(previousSource, source.record) && previousSource.LinkParserVersion == linkParserVersion && recordsReusable(previousRecords) {
+		if initialized && sourceUnchanged(previousSource, source.record) && previousSource.LinkParserVersion == linkParserVersion && recordsReusable(previousRecords) && !recordsReferenceChangedTarget(previousRecords, previousByID, currentByID) {
 			for _, record := range previousRecords {
 				record.SourcePath = source.record.Path
 				plan.Links.Links = append(plan.Links.Links, record)
 			}
 			continue
 		}
-		if err := reconcileMarkdownSource(&plan, inventory, source, previousRecords, initialized); err != nil {
+		if err := reconcileMarkdownSource(&plan, inventory, source, previousRecords, initialized, repair); err != nil {
 			return Plan{}, err
 		}
 	}
@@ -203,7 +219,7 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 	return result, nil
 }
 
-func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized bool) error {
+func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized, repair bool) error {
 	document, err := textio.Read(source.path)
 	if err != nil {
 		return fmt.Errorf("read Markdown source %s: %w", source.path, err)
@@ -261,7 +277,7 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			record.Status = "valid"
 			if targetCaseMismatch(found.Syntax, resolved, actualPath) {
 				record.Status = "case_mismatch"
-				if initialized {
+				if initialized && repair {
 					newPath := renderTargetForSyntax(found.Syntax, found.RawPath, style, source.path, actualPath)
 					replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
 					record.RawPath = newPath
@@ -305,10 +321,12 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 				record.Status = "valid"
 			} else {
 				record.Status = "moved"
-				replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
-				record.RawPath = newPath
-				record.Target = newPath + found.Suffix
-				plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+				if repair {
+					replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+					record.RawPath = newPath
+					record.Target = newPath + found.Suffix
+					plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+				}
 			}
 		default:
 			record.Status = "ambiguous"
@@ -343,7 +361,7 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 		plan.Messages = append(plan.Messages, fmt.Sprintf("Undefined reference label in %s:%d:%d: %s", source.record.Path, missing.Line, missing.Column, missing.Label))
 		plan.Links.Links = append(plan.Links.Links, record)
 	}
-	if initialized && len(replacements) > 0 {
+	if initialized && repair && len(replacements) > 0 {
 		updated := applyReplacements(document.Text, replacements)
 		if updated != document.Text {
 			rewrite, err := NewGeneratedRewrite(source.record.ID, source.path, document, transformationsFor(replacements))
@@ -385,6 +403,20 @@ func recordsHaveRewriteMetadata(records []LinkRecord) bool {
 		}
 	}
 	return true
+}
+
+func recordsReferenceChangedTarget(records []LinkRecord, previousByID, currentByID map[string]*FileRecord) bool {
+	for _, record := range records {
+		if record.TargetFileID == "" {
+			continue
+		}
+		previous := previousByID[record.TargetFileID]
+		current := currentByID[record.TargetFileID]
+		if previous == nil || current == nil || previous.Present != current.Present || previous.Scope != current.Scope || previous.Path != current.Path {
+			return true
+		}
+	}
+	return false
 }
 
 func recordsReusable(records []LinkRecord) bool {

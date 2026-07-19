@@ -50,15 +50,15 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 	if out == nil {
 		out = io.Discard
 	}
-	if !features.Indexes && !features.Links {
-		features = Features{Indexes: true, Links: true}
+	if features.Links {
+		features.TrackLinks = true
 	}
 	seconds := c.Watch.DebounceSeconds
 	if debounce != nil {
 		seconds = *debounce
 	}
 	watchRoot := docsRoot
-	if features.Links {
+	if features.TrackLinks {
 		watchRoot = repositoryRoot
 	}
 	fmt.Fprintf(out, "%s ddocs watch watching %s pid=%d\n", timestamp(), watchRoot, os.Getpid())
@@ -81,18 +81,28 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 			changed += count
 			diagnostics = append(diagnostics, result.Messages...)
 		}
-		if features.Links {
-			plan, err := links.Reconcile(repositoryRoot)
+		if features.TrackLinks {
+			var plan links.Plan
+			var err error
+			if features.Links {
+				plan, err = links.Reconcile(repositoryRoot)
+			} else {
+				plan, err = links.Track(repositoryRoot)
+			}
 			if err != nil {
 				return err
 			}
-			count, err := links.ApplyAndSave(&plan)
-			if err != nil {
+			if features.Links {
+				count, err := links.ApplyAndSave(&plan)
+				if err != nil {
+					return err
+				}
+				changed += count
+				diagnostics = append(diagnostics, plan.Messages...)
+				unresolved = plan.Unresolved
+			} else if err := links.Save(plan); err != nil {
 				return err
 			}
-			changed += count
-			diagnostics = append(diagnostics, plan.Messages...)
-			unresolved = plan.Unresolved
 			externalDirectories = externalWatchDirectories(plan.Files)
 			if watcher != nil {
 				if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
@@ -171,7 +181,7 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 					continue
 				}
 			}
-			isExternal := features.Links && externalEvent(event.Name, externalWatched)
+			isExternal := features.TrackLinks && externalEvent(event.Name, externalWatched)
 			if policy.IsControlFile(event.Name) {
 				updated, err := ignorepolicy.Load(repositoryRoot)
 				if err != nil {

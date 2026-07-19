@@ -13,9 +13,10 @@ import (
 )
 
 type Features struct {
-	Indexes bool
-	Links   bool
-	Reverse bool
+	Indexes    bool
+	Links      bool
+	TrackLinks bool
+	Reverse    bool
 }
 
 func modelResult(updates []model.FileUpdate) model.ReconcileResult {
@@ -26,7 +27,7 @@ func relevantSelectedWithPolicy(path string, c config.Config, policy ignorepolic
 	if policy.IsControlFile(path) {
 		return true
 	}
-	if features.Links && repository.Contains(repositoryRoot, path) {
+	if features.TrackLinks && repository.Contains(repositoryRoot, path) {
 		ignored, err := policy.Ignored(path, wasDirectory)
 		return err == nil && !ignored && !watchIgnored(path, c)
 	}

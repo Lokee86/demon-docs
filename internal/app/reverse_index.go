@@ -75,7 +75,7 @@ func runSelectedWatch(
 	if debounce != nil {
 		seconds = *debounce
 	}
-	if !features.Indexes && !features.Links {
+	if !features.Indexes && !features.Links && !features.TrackLinks {
 		return reverseindex.Watch(
 			ctx,
 			scope.RepositoryRoot,

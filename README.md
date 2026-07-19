@@ -70,7 +70,18 @@ ddocs check
 
 `init` creates `.ddocs/config.toml`, records `docs/` as the docs root, and makes the current directory the repository root.
 
-`fix` writes needed updates. The first link-enabled `fix` establishes the private `.ddocs/` object repository without repairing links; later passes can use that baseline to reconcile moves. `check` verifies the same reconciliation without writing files. Both commands can then be run from anywhere inside the repository.
+`fix` writes needed updates. The first link-tracking pass establishes the private `.ddocs/` object repository; later passes can use that baseline to reconcile moves. `check` verifies enabled reconciliation without writing document files. Both commands can then be run from anywhere inside the repository.
+
+Repository-local feature controls are available from any directory inside the repository:
+
+```bash
+ddocs index disable
+ddocs links disable
+ddocs index status
+ddocs links status
+```
+
+Disabled indexing leaves existing index files as ordinary documents. Disabled link maintenance stops document rewrites while private file and link tracking continues.
 
 ## Development
 
@@ -165,7 +176,7 @@ Reconciles indexes and links, writes repository-contained updates, and persists 
 ddocs check
 ```
 
-Verifies indexes and links without writing files. It returns non-zero for pending updates, broken or ambiguous links, or uninitialized link state.
+Verifies enabled indexes and link maintenance without writing document files. It returns non-zero for pending updates, broken or ambiguous links, or uninitialized link state. When automatic link maintenance is disabled, a check may still publish private tracking state under `.ddocs/` while leaving repository documents unchanged.
 
 ```bash
 ddocs watch
@@ -187,7 +198,20 @@ ddocs watch -l
 ddocs watch -r
 ```
 
-Supplying selectors runs only those systems. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
+Supplying selectors runs only those systems. Without selectors, documentation indexes and link tracking run; reverse indexes also run when reverse roots are configured or supplied. Repository feature toggles remain authoritative, so selectors do not temporarily re-enable disabled mutation.
+
+Persistent repository feature commands:
+
+```bash
+ddocs index enable
+ddocs index disable
+ddocs index status
+ddocs links enable
+ddocs links disable
+ddocs links status
+```
+
+`--true` and `--false` are accepted enable/disable aliases. A running repository demon is asked to restart cleanly so it reloads the changed config.
 
 ```bash
 ddocs watch --root docs --once
@@ -425,6 +449,12 @@ Minimal repository config:
 docs_root = "docs"
 index_file = "README.md"
 
+[index]
+enabled = true
+
+[links]
+enabled = true
+
 [parent_link]
 folder_indexes = true
 indexed_files = false
@@ -572,7 +602,7 @@ Watch mode is for local convenience. It is not a replacement for `check`.
 The watcher:
 
 - runs one reconciliation immediately on startup
-- watches the docs root for index-only operation, or the repository root when links are enabled
+- watches the docs root for index-only operation, or the repository root whenever link tracking is selected, including tracking-only mode
 - reacts to relevant file and directory events
 - debounces noisy event bursts
 - runs one reconciliation at a time

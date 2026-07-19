@@ -26,6 +26,8 @@ The supported keys are:
 - `docs_root`
 - `root` as a legacy standalone-config alias
 - `index_file`
+- `[index].enabled`
+- `[links].enabled`
 - `[reverse_index].roots`
 - `[reverse_index].folders` as a compatibility alias
 - `[codemap].headings`
@@ -54,6 +56,38 @@ The supported keys are:
 - `[template].include_related_docs`
 - `[template].include_notes`
 - `[demon].run`
+
+## Repository Feature Toggles
+
+Initialized repositories enable index management and automatic link maintenance by default:
+
+```toml
+[index]
+enabled = true
+
+[links]
+enabled = true
+```
+
+Use repository-local commands to change either setting from anywhere inside the repository:
+
+```bash
+ddocs index enable
+ddocs index disable
+ddocs index status
+
+ddocs links enable
+ddocs links disable
+ddocs links status
+```
+
+`--true` and `--false` are accepted aliases for `enable` and `disable`. These commands always update the nearest initialized repository's `.ddocs/config.toml`; they do not modify global configuration. When that repository has a running demon, the command requests a clean restart so the watcher reloads the changed settings.
+
+Disabling `[index].enabled` suspends folder-index creation, insertion, repair, and index-specific tracking. Existing index files are not ignored or given special treatment. They remain ordinary document files and can still participate in link scanning, codemap extraction, and other document behavior.
+
+Disabling `[links].enabled` suspends automatic link rewrites and user-visible link diagnostics. Demon Docs continues updating its private file identities, path history, and link graph in `.ddocs/`. Re-enabling link maintenance therefore resumes from retained state instead of rebuilding tracking from scratch.
+
+Selectors do not override a disabled repository feature. For example, `ddocs fix -d` remains a no-op while indexing is disabled, and `ddocs fix -l` refreshes internal link state without rewriting documents while link maintenance is disabled.
 
 ## Repository Demon
 
@@ -160,6 +194,12 @@ The defaults reflect the standalone repo behavior:
 docs_root = "docs"
 index_file = "README.md"
 
+[index]
+enabled = true
+
+[links]
+enabled = true
+
 [reverse_index]
 roots = []
 
@@ -226,6 +266,14 @@ include_notes = true
 - `--root` overrides the selected docs root for a single command, resolves relative to the repository root, and cannot escape it
 
 Legacy standalone config files may continue using `root`; both keys load into the same docs-root setting, with `docs_root` taking precedence when both are present.
+
+## `[index].enabled` and `[links].enabled`
+
+`[index].enabled` controls automatic folder-index management. It defaults to `true`. When disabled, Demon Docs does not create, insert, repair, or specially track folder indexes. A file whose name matches `index_file` remains visible as an ordinary document.
+
+`[links].enabled` controls automatic link maintenance. It defaults to `true`. When disabled, document contents are not rewritten, but persistent internal link tracking continues and is published to `.ddocs/`.
+
+The canonical mutation commands are `ddocs index enable|disable` and `ddocs links enable|disable`. `status` reports the current repository value without changing it.
 
 ## `index_file`
 
@@ -402,7 +450,7 @@ The following directory names are permanently excluded at any depth and cannot b
 - `.obsidian/`
 - `logseq/`
 
-Watch mode watches the repository root for the base `.docignore`. `ddocs watch -r` watches only the selected reverse roots plus their ancestor directories, detects nested `.docignore` changes, reloads the hierarchy, and adds watches for directories that become visible. Documentation-only watch mode otherwise remains scoped to the docs root; link-enabled watch mode observes the repository root.
+Watch mode watches the repository root for the base `.docignore`. `ddocs watch -r` watches only the selected reverse roots plus their ancestor directories, detects nested `.docignore` changes, reloads the hierarchy, and adds watches for directories that become visible. Documentation-only watch mode otherwise remains scoped to the docs root; any mode that selects link tracking observes the repository root, including tracking-only operation while automatic link maintenance is disabled.
 
 ## `[editable].parent_index_extensions`
 
@@ -560,9 +608,9 @@ In that setup:
 
 ## Link State
 
-Markdown link reconciliation has no required TOML keys. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing, but exposes no Git workflow for this state.
+Markdown link reconciliation is controlled by `[links].enabled`. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing, but exposes no Git workflow for this state.
 
-The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. `check -l` is read-only and reports uninitialized state rather than creating it. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
+The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. With link maintenance enabled, `check -l` is read-only and reports uninitialized state rather than creating it. With link maintenance disabled, selected and default reconciliation passes may publish tracking-only state while leaving every document unchanged. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 
 ## Code map
 
