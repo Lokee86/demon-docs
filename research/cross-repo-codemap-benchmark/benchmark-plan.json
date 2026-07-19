@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "algorithm_baseline": "aa6eb48c686b0423e104530418b4e9fd32e3aa78",
+  "algorithm_baseline": "b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1",
   "benchmarks": [
     {
       "id": "agent-orchestrator",

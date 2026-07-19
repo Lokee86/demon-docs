@@ -3,7 +3,9 @@ package codemapbench
 import (
 	"fmt"
 	"math"
+	"path"
 	"sort"
+	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/evidence"
 )
@@ -12,11 +14,12 @@ import (
 // The benchmark is intended to measure useful surfaced suggestions, not every
 // weak relationship that can be inferred from repository history.
 const (
-	DefaultSuggestionLimitPerDocument  = 30
-	HardLinkSuggestionLimitPerDocument = 5
-	HardLinkDependencyMinimumScore     = 16
-	RepeatedMentionReservePerDocument  = 2
-	RepeatedMentionMinimumCount        = 2
+	DefaultSuggestionLimitPerDocument             = 30
+	HardLinkSuggestionLimitPerDocument            = 5
+	HardLinkDependencyMinimumScore                = 18
+	HardLinkImplementationCounterpartMinimumScore = 20
+	RepeatedMentionReservePerDocument             = 2
+	RepeatedMentionMinimumCount                   = 2
 )
 
 type evidenceAtom struct {
@@ -28,9 +31,14 @@ type evidenceAtom struct {
 type rankedSuggestion struct {
 	suggestion               Suggestion
 	repeatedMentionCount     int
+	hasExactPathMention      bool
 	hasDeclaredSymbolMention bool
 	hasTestCounterpart       bool
 	hasDependencyNeighbor    bool
+	hasRelatedDocumentTarget bool
+	hasSiblingTarget         bool
+	hasGitDocumentCoChange   bool
+	targetIsTest             bool
 }
 
 // SuggestionsFromEvidence ranks deterministic evidence candidates. Repeated
@@ -46,11 +54,12 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 
 	ranked := make([]rankedSuggestion, 0, len(candidates))
 	for _, candidate := range candidates {
-		if !admitSuggestionCandidate(candidate) {
+		if rejectIncidentalSuggestionCandidate(candidate) || !admitSuggestionCandidate(candidate) {
 			continue
 		}
 		itemResult := rankedSuggestion{
-			suggestion: Suggestion{Link: Link{Document: document, Target: candidate.Path}},
+			suggestion:   Suggestion{Link: Link{Document: document, Target: candidate.Path}},
+			targetIsTest: isTestTarget(candidate.Path),
 		}
 		for _, item := range candidate.Evidence {
 			atom := suggestionEvidenceAtom(item)
@@ -82,12 +91,20 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 				itemResult.repeatedMentionCount = item.Count
 			}
 			switch item.Kind {
+			case evidence.KindExactPathMention:
+				itemResult.hasExactPathMention = true
 			case evidence.KindDeclaredSymbolMention:
 				itemResult.hasDeclaredSymbolMention = true
 			case evidence.KindTestCounterpart:
 				itemResult.hasTestCounterpart = true
 			case evidence.KindDependencyNeighbor:
 				itemResult.hasDependencyNeighbor = true
+			case evidence.KindRelatedDocumentTarget:
+				itemResult.hasRelatedDocumentTarget = true
+			case evidence.KindSiblingTarget:
+				itemResult.hasSiblingTarget = true
+			case evidence.KindGitDocumentCoChange:
+				itemResult.hasGitDocumentCoChange = true
 			}
 		}
 		sort.Strings(itemResult.suggestion.Evidence)
@@ -145,11 +162,13 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 	})
 
 	result := make([]Suggestion, 0, len(ordered))
-	for index, item := range ordered {
+	hardLinks := 0
+	for _, item := range ordered {
 		suggestion := item.suggestion
 		suggestion.Tier = SuggestionTierContext
-		if index < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
+		if hardLinks < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
 			suggestion.Tier = SuggestionTierHardLink
+			hardLinks++
 		}
 		result = append(result, suggestion)
 	}
@@ -157,10 +176,48 @@ func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
 }
 
 func (item rankedSuggestion) isHardLinkCandidate() bool {
-	if item.hasDeclaredSymbolMention || item.hasTestCounterpart {
+	// A single exact path mention is explicit document context, but repeated
+	// references plus independent semantic structure indicate that the document
+	// relies on the target enough to justify a permanent link.
+	if item.hasExactPathMention {
+		return item.repeatedMentionCount >= RepeatedMentionMinimumCount &&
+			(item.hasDeclaredSymbolMention || item.hasDependencyNeighbor)
+	}
+	if item.hasDeclaredSymbolMention {
 		return true
 	}
-	return item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore
+	// Filename-based test counterparts need independent semantic support so a
+	// similarly named test in another service cannot qualify by structure alone.
+	if item.hasTestCounterpart && (item.hasDependencyNeighbor || item.hasRelatedDocumentTarget || item.hasSiblingTarget) {
+		return item.targetIsTest || item.suggestion.Score >= HardLinkImplementationCounterpartMinimumScore
+	}
+	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
+		return true
+	}
+	// A target inherited through a related document becomes link-worthy when it
+	// also changed directly with the current document.
+	return item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
+}
+
+func isTestTarget(value string) bool {
+	value = strings.ReplaceAll(value, "\\", "/")
+	for _, segment := range strings.Split(strings.ToLower(path.Dir(value)), "/") {
+		if segment == "test" || segment == "tests" || segment == "spec" || segment == "specs" {
+			return true
+		}
+	}
+	base := strings.ToLower(strings.TrimSuffix(path.Base(value), path.Ext(value)))
+	for _, prefix := range []string{"test_", "spec_"} {
+		if strings.HasPrefix(base, prefix) {
+			return true
+		}
+	}
+	for _, suffix := range []string{"_test", "_spec", ".test", ".spec"} {
+		if strings.HasSuffix(base, suffix) {
+			return true
+		}
+	}
+	return false
 }
 
 func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {

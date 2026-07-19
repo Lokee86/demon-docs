@@ -20,6 +20,9 @@ The repository root [README](../README.md) is the product introduction and quick
 
 <!-- doc-ledger:files:start -->
 
+- [codemap-algorithm-development-log.md](codemap-algorithm-development-log.md) - Chronological codemap algorithm, benchmark, tuning, rejected-experiment, commit, and artifact record.
+- [codemap-evidence.md](codemap-evidence.md) - Current codemap evidence signals, suggestion tiers, negative-evidence rules, and safety contract.
+- [codemap-suggestion-algorithm.md](codemap-suggestion-algorithm.md) - Current codemap admission, scoring, ranking, tiering, measured baseline, and readiness contract.
 - [documentation-policy.md](documentation-policy.md) - Documentation ownership, taxonomy, required document shapes, indexing rules, and maintenance policy.
 - [documentation-procedure.md](documentation-procedure.md) - Standard process for creating, moving, updating, graduating, and removing documentation.
 <!-- doc-ledger:files:end -->

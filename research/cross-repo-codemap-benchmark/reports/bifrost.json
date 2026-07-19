@@ -147,7 +147,7 @@
         "dependency_neighbor:transports/bifrost-http/handlers/inference.go:outbound:go_import",
         "exact_path_mention:core/bifrost.go:x2"
       ],
-      "tier": "context"
+      "tier": "hard_link"
     },
     {
       "document": "AGENTS.md",
@@ -523,7 +523,7 @@
         "dependency_neighbor:core/schemas/provider.go:inbound:go_import",
         "dependency_neighbor:core/schemas/responses.go:inbound:go_import"
       ],
-      "tier": "hard_link"
+      "tier": "context"
     },
     {
       "document": "AGENTS.md",

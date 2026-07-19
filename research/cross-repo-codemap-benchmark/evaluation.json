@@ -1,6 +1,58 @@
 {
-  "schema_version": 1,
-  "algorithm_baseline": "aa6eb48c686b0423e104530418b4e9fd32e3aa78",
+  "schema_version": 2,
+  "algorithm_baseline": "b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1",
+  "calculation_policy": {
+    "included_modes": [
+      "diagnostic",
+      "primary"
+    ],
+    "excluded_modes": [
+      "stress"
+    ],
+    "reason": "monolithic per-file indexes test a different retrieval problem and are reported separately"
+  },
+  "aggregates": {
+    "calculation_corpus": {
+      "repository_count": 5,
+      "hidden_link_count": 18,
+      "recovered_link_count": 11,
+      "hard_recovered_count": 4,
+      "context_recovered_count": 7,
+      "unique_suggestion_count": 148,
+      "recall": 0.6111111111111112,
+      "positive_only_precision": 0.07432432432432433
+    },
+    "primary": {
+      "repository_count": 1,
+      "hidden_link_count": 8,
+      "recovered_link_count": 6,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 4,
+      "unique_suggestion_count": 24,
+      "recall": 0.75,
+      "positive_only_precision": 0.25
+    },
+    "diagnostic": {
+      "repository_count": 4,
+      "hidden_link_count": 10,
+      "recovered_link_count": 5,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 3,
+      "unique_suggestion_count": 124,
+      "recall": 0.5,
+      "positive_only_precision": 0.04032258064516129
+    },
+    "stress": {
+      "repository_count": 1,
+      "hidden_link_count": 10,
+      "recovered_link_count": 3,
+      "hard_recovered_count": 0,
+      "context_recovered_count": 3,
+      "unique_suggestion_count": 30,
+      "recall": 0.3,
+      "positive_only_precision": 0.1
+    }
+  },
   "benchmarks": [
     {
       "id": "agent-orchestrator",
@@ -72,8 +124,8 @@
       "unique_suggestion_count": 32,
       "recovered_link_count": 2,
       "missed_link_count": 1,
-      "hard_recovered_count": 1,
-      "context_recovered_count": 1,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 0,
       "precision": 0.0625,
       "recall": 0.6666666666666666
     },
@@ -144,8 +196,8 @@
       "unique_suggestion_count": 24,
       "recovered_link_count": 6,
       "missed_link_count": 2,
-      "hard_recovered_count": 0,
-      "context_recovered_count": 6,
+      "hard_recovered_count": 2,
+      "context_recovered_count": 4,
       "precision": 0.25,
       "recall": 0.75
     }

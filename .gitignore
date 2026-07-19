@@ -14,6 +14,8 @@ bin/
 .codex-hackathon/
 *.log
 *.pid
+__pycache__/
+*.pyc
 
 # Editor/OS noise
 .DS_Store

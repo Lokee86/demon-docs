@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "algorithm_baseline": "6ea39964a77919c3a6228b475904e9c530a16a4d",
+  "sample_count": 121,
+  "overall": {
+    "reviewed": 121,
+    "valid": 83,
+    "plausible": 34,
+    "incorrect": 4,
+    "strict_precision": 0.6859504132231405,
+    "relevance_precision": 0.9669421487603306
+  },
+  "by_tier": {
+    "hard_link": {
+      "reviewed": 3,
+      "valid": 3,
+      "plausible": 0,
+      "incorrect": 0,
+      "strict_precision": 1.0,
+      "relevance_precision": 1.0
+    },
+    "context": {
+      "reviewed": 118,
+      "valid": 80,
+      "plausible": 34,
+      "incorrect": 4,
+      "strict_precision": 0.6779661016949152,
+      "relevance_precision": 0.9661016949152542
+    }
+  },
+  "by_repository": {
+    "agent-orchestrator": {
+      "reviewed": 25,
+      "valid": 16,
+      "plausible": 9,
+      "incorrect": 0,
+      "strict_precision": 0.64,
+      "relevance_precision": 1.0
+    },
+    "beads-rust": {
+      "reviewed": 25,
+      "valid": 20,
+      "plausible": 4,
+      "incorrect": 1,
+      "strict_precision": 0.8,
+      "relevance_precision": 0.96
+    },
+    "bifrost": {
+      "reviewed": 28,
+      "valid": 19,
+      "plausible": 9,
+      "incorrect": 0,
+      "strict_precision": 0.6785714285714286,
+      "relevance_precision": 1.0
+    },
+    "genesis": {
+      "reviewed": 25,
+      "valid": 18,
+      "plausible": 4,
+      "incorrect": 3,
+      "strict_precision": 0.72,
+      "relevance_precision": 0.88
+    },
+    "render-claude-context": {
+      "reviewed": 18,
+      "valid": 10,
+      "plausible": 8,
+      "incorrect": 0,
+      "strict_precision": 0.5555555555555556,
+      "relevance_precision": 1.0
+    }
+  },
+  "by_split": {
+    "tuning": {
+      "reviewed": 93,
+      "valid": 64,
+      "plausible": 25,
+      "incorrect": 4,
+      "strict_precision": 0.6881720430107527,
+      "relevance_precision": 0.956989247311828
+    },
+    "validation": {
+      "reviewed": 28,
+      "valid": 19,
+      "plausible": 9,
+      "incorrect": 0,
+      "strict_precision": 0.6785714285714286,
+      "relevance_precision": 1.0
+    }
+  },
+  "by_evidence_family": {
+    "declared_symbol_mention": {
+      "reviewed": 8,
+      "valid": 6,
+      "plausible": 2,
+      "incorrect": 0,
+      "strict_precision": 0.75,
+      "relevance_precision": 1.0
+    },
+    "dependency_neighbor": {
+      "reviewed": 60,
+      "valid": 40,
+      "plausible": 20,
+      "incorrect": 0,
+      "strict_precision": 0.6666666666666666,
+      "relevance_precision": 1.0
+    },
+    "exact_path_mention": {
+      "reviewed": 31,
+      "valid": 19,
+      "plausible": 11,
+      "incorrect": 1,
+      "strict_precision": 0.6129032258064516,
+      "relevance_precision": 0.967741935483871
+    },
+    "sibling_of_existing_target": {
+      "reviewed": 43,
+      "valid": 32,
+      "plausible": 11,
+      "incorrect": 0,
+      "strict_precision": 0.7441860465116279,
+      "relevance_precision": 1.0
+    },
+    "test_counterpart": {
+      "reviewed": 9,
+      "valid": 3,
+      "plausible": 6,
+      "incorrect": 0,
+      "strict_precision": 0.3333333333333333,
+      "relevance_precision": 1.0
+    },
+    "unique_basename_mention": {
+      "reviewed": 27,
+      "valid": 23,
+      "plausible": 1,
+      "incorrect": 3,
+      "strict_precision": 0.8518518518518519,
+      "relevance_precision": 0.8888888888888888
+    }
+  }
+}

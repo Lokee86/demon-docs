@@ -390,7 +390,7 @@
         "exact_path_mention:package.json:x3",
         "sibling_of_existing_target:index.js:"
       ],
-      "tier": "context"
+      "tier": "hard_link"
     },
     {
       "document": "docs/project-overview.md",
@@ -403,7 +403,7 @@
         "sibling_of_existing_target:src/fileProcessor.js:",
         "sibling_of_existing_target:src/importResolver.js:"
       ],
-      "tier": "context"
+      "tier": "hard_link"
     }
   ],
   "missed_links": [

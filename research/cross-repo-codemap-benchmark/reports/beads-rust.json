@@ -178,15 +178,6 @@
     },
     {
       "document": "AGENTS.md",
-      "target": "Cargo.lock",
-      "score": 1.2920296742201793,
-      "evidence": [
-        "exact_path_mention:Cargo.lock:x2"
-      ],
-      "tier": "context"
-    },
-    {
-      "document": "AGENTS.md",
       "target": "Cargo.toml",
       "score": 1.2920296742201793,
       "evidence": [
@@ -263,6 +254,15 @@
       "score": 1.2920296742201793,
       "evidence": [
         "exact_path_mention:docs/SYNC_SAFETY.md"
+      ],
+      "tier": "context"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "rust-toolchain.toml",
+      "score": 1.2920296742201793,
+      "evidence": [
+        "exact_path_mention:rust-toolchain.toml"
       ],
       "tier": "context"
     },

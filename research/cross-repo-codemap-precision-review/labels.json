@@ -1,0 +1,1095 @@
+{
+  "schema_version": 1,
+  "sample_manifest": "sample-manifest.json",
+  "labels": [
+    {
+      "id": "CRP-001",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/apispec/parity_test.go",
+      "label": "valid",
+      "rationale": "The route/spec parity test directly enforces the API contract and generated-spec agreement described by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-002",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "label": "plausible",
+      "rationale": "The workflow directory contains the CI commands the guide tells maintainers to mirror, but it is operational support rather than an implementation owner.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-003",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "label": "plausible",
+      "rationale": "The documentation root is a useful starting point named by the guide, but it is too broad to be a direct implementation edge.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-004",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "test/cli/README.md",
+      "label": "plausible",
+      "rationale": "The CLI smoke-test guide supports fresh-install verification, but it is test documentation rather than runtime ownership.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-005",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/dto_drift_e2e_test.go",
+      "label": "valid",
+      "rationale": "This end-to-end test checks the mirrored CLI and HTTP DTO boundary that the API-contract section explicitly calls load-bearing.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-006",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/service/",
+      "label": "valid",
+      "rationale": "The service package owns the read/write boundary explicitly identified as a primary code entry point.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-007",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/imports_test.go",
+      "label": "plausible",
+      "rationale": "The imports controller test exercises a nearby HTTP concern, but imports are not a distinct responsibility described by the repository guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-008",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/queries/",
+      "label": "valid",
+      "rationale": "The query directory owns the SQLite sources that must be edited before regenerating the generated store code.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-009",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "CONTEXT.md",
+      "label": "plausible",
+      "rationale": "CONTEXT.md explains the mobile-listener decision referenced by the guide, but it is supporting design context rather than code ownership.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-010",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/mobile_restore.go",
+      "label": "valid",
+      "rationale": "mobile_restore.go implements the mobile restore behavior governed by the guide's opt-in LAN-listener rules.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-011",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/lifecycle/",
+      "label": "valid",
+      "rationale": "The lifecycle package owns the lifecycle and reaper boundary called out in the backend mental model.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-012",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/controllers/notifications_test.go",
+      "label": "plausible",
+      "rationale": "The notifications test covers one HTTP controller concern but is not a named architectural or contract boundary in the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-013",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "docs/adr/0001-lan-listener-for-mobile.md",
+      "label": "plausible",
+      "rationale": "The ADR is the authoritative explanation for the mobile listener rule, but it is a documentation dependency rather than an implementation file.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-014",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/api.go",
+      "label": "valid",
+      "rationale": "api.go assembles the daemon HTTP API and therefore directly implements the controller and route boundary described by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-015",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/",
+      "label": "valid",
+      "rationale": "The daemon package owns the loopback service behavior and lifecycle rules that dominate the repository guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-016",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/",
+      "label": "plausible",
+      "rationale": "The backend root is relevant to nearly every rule in the guide, but it is too broad to be a precise codemap edge.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-017",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/daemon/daemon.go",
+      "label": "valid",
+      "rationale": "daemon.go is a concrete daemon lifecycle entry point for the primary service boundary described by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-018",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/adapters/telemetry/",
+      "label": "plausible",
+      "rationale": "The telemetry adapter supports daemon control and diagnostics, but telemetry is secondary to the guide's main implementation boundaries.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-019",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/storage/sqlite/gen/",
+      "label": "valid",
+      "rationale": "The generated SQLite package is explicitly named as the output of the query and migration workflow and is essential reading when tracing storage behavior.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-020",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/router.go",
+      "label": "valid",
+      "rationale": "router.go registers the daemon's HTTP surface and enforces the routing boundary described throughout the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-021",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/domain/",
+      "label": "valid",
+      "rationale": "The domain package owns the vocabulary and durable facts that the guide says service reads must derive status from.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-022",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "frontend/",
+      "label": "valid",
+      "rationale": "The frontend root implements the thin Electron and React supervisor boundary explicitly described in the repository layout.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-023",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/httpd/mobile_routes_test.go",
+      "label": "valid",
+      "rationale": "The mobile route tests directly verify the opt-in LAN listener and protected route behavior specified as a hard rule.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-024",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/preview/",
+      "label": "valid",
+      "rationale": "The preview package implements the ao preview behavior the guide requires for demonstrating frontend changes.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-025",
+      "repository": "agent-orchestrator",
+      "document": "AGENTS.md",
+      "target": "backend/internal/cli/",
+      "label": "valid",
+      "rationale": "The CLI package is the explicit entry point for the thin Cobra client and its command and test patterns.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-026",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/sync/",
+      "label": "valid",
+      "rationale": "The sync package owns the JSONL import, export, merge, conflict, and history behavior described as a core subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-027",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/config/",
+      "label": "valid",
+      "rationale": "The config package owns layered file, environment, and CLI configuration described in the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-028",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "tests/snapshots/mod.rs",
+      "label": "plausible",
+      "rationale": "The snapshot helper supports integration testing, but it is generic test infrastructure rather than a documented subsystem owner.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-029",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "benches/storage_perf.rs",
+      "label": "valid",
+      "rationale": "The storage benchmark is explicitly named as the performance test for the storage subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-030",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/config/routing.rs",
+      "label": "valid",
+      "rationale": "routing.rs implements the project-aware configuration resolution explicitly identified in the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-031",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "tests/common/mod.rs",
+      "label": "valid",
+      "rationale": "tests/common contains the reusable fixtures and harness helpers the testing section directs maintainers to use.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-032",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": ".github/workflows/",
+      "label": "valid",
+      "rationale": "The workflow directory is governed by the repository's detailed CI and supply-chain policy and is a direct maintenance surface.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-033",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/cli/",
+      "label": "valid",
+      "rationale": "The CLI package owns argument parsing, dispatch, and output-mode detection in the documented architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-034",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "tests/",
+      "label": "valid",
+      "rationale": "The tests directory owns the integration, conformance, property, regression, and storage suites enumerated by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-035",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/format/syntax.rs",
+      "label": "valid",
+      "rationale": "syntax.rs is a concrete formatter named by the format subsystem and directly implements syntax-highlighted output.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-036",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "docs/",
+      "label": "plausible",
+      "rationale": "The documentation root contains several authoritative policies, but the directory as a whole is broader than a direct implementation edge.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-037",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/error/",
+      "label": "valid",
+      "rationale": "The error package owns BeadsError, structured errors, and deterministic exit codes described as a core subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-038",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "docs/AGENT_INTEGRATION.md",
+      "label": "valid",
+      "rationale": "AGENT_INTEGRATION.md defines the stable robot-output behavior the guide requires coding agents to use.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-039",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/format/text.rs",
+      "label": "valid",
+      "rationale": "text.rs implements the plain-text formatter explicitly listed in the output architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-040",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "docs/SYNC_MAINTENANCE_CHECKLIST.md",
+      "label": "valid",
+      "rationale": "The sync maintenance checklist is the required procedure for every sync-related change and is directly tied to that subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-041",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/util/time.rs",
+      "label": "valid",
+      "rationale": "time.rs implements timestamp parsing and formatting identified as a concrete utility responsibility.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-042",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/",
+      "label": "plausible",
+      "rationale": "The source root contains all implementation modules, but it is too broad to identify a useful ownership boundary by itself.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-043",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/format/output.rs",
+      "label": "valid",
+      "rationale": "output.rs implements the output helpers named in the format subsystem map.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-044",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "docs/CI_SUPPLY_CHAIN.md",
+      "label": "valid",
+      "rationale": "CI_SUPPLY_CHAIN.md is the canonical policy for modifying workflows and therefore a direct maintenance dependency.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-045",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/format/",
+      "label": "valid",
+      "rationale": "The format package owns rich, plain, CSV, Markdown, syntax, themes, and output helpers described in the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-046",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "docs/E2E_SYNC_TESTS.md",
+      "label": "valid",
+      "rationale": "E2E_SYNC_TESTS.md is the execution guide explicitly linked by the sync-safety maintenance section.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-047",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/storage/",
+      "label": "valid",
+      "rationale": "The storage package owns the SQLite engine, schema, events, and query behavior that form the core persistence subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-048",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "benches/",
+      "label": "plausible",
+      "rationale": "The benchmarks root is relevant to performance work but is broader and less precise than the named storage benchmark.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-049",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "src/format/markdown.rs",
+      "label": "valid",
+      "rationale": "markdown.rs implements the Markdown output mode explicitly listed in the format subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-050",
+      "repository": "beads-rust",
+      "document": "AGENTS.md",
+      "target": "Cargo.lock",
+      "label": "incorrect",
+      "rationale": "Cargo.lock is only dependency lock state and an incidental scanner exclusion; it does not own any responsibility documented by AGENTS.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-051",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/validation_presets.go",
+      "label": "valid",
+      "rationale": "validation_presets.go defines BasicChatExpectations and ToolCallExpectations, which the LLM testing section explicitly tells maintainers to use.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-052",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/internal/llmtests/account.go",
+      "label": "valid",
+      "rationale": "account.go defines ComprehensiveTestConfig, the central configuration type named by the live-provider testing workflow.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-053",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/agent_test_helpers.go",
+      "label": "valid",
+      "rationale": "agent_test_helpers.go defines SetupAgentTest and AgentTestConfig, the exact MCP test setup API shown in the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-054",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/internal/mcptests/fixtures.go",
+      "label": "valid",
+      "rationale": "fixtures.go provides DynamicLLMMocker and the declarative MCP fixtures described by the testing section.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-055",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/main.go",
+      "label": "valid",
+      "rationale": "The HTTP transport main file is the executable entry point for the gateway transport described in the repository layout and request flow.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-056",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/handlers/governance_test.go",
+      "label": "plausible",
+      "rationale": "The governance handler test validates an important plugin surface, but the handler implementation is the more direct ownership edge.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-057",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/count_tokens.go",
+      "label": "valid",
+      "rationale": "count_tokens.go owns schema support for CountTokens, one of the Provider interface operations explicitly enumerated by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-058",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "config.json",
+      "label": "plausible",
+      "rationale": "The root config is a useful concrete configuration example, but transports/config.schema.json is the documented source of truth.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-059",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "framework/streaming/responses_test.go",
+      "label": "plausible",
+      "rationale": "The responses streaming test verifies one path through the streaming subsystem, while the accumulator and response implementation files are the direct owners.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-060",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/trace.go",
+      "label": "valid",
+      "rationale": "trace.go defines the tracing interface used as the context access path to managers, a pattern explicitly explained in the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-061",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/providers/openai/responses_test.go",
+      "label": "plausible",
+      "rationale": "The OpenAI responses test is useful provider coverage, but it is one implementation-specific test rather than a primary architecture owner.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-062",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_test.go",
+      "label": "valid",
+      "rationale": "context_test.go directly validates the mutable, restricted-write BifrostContext semantics given a dedicated architecture section.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-063",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "framework/mcp_headers/main.go",
+      "label": "plausible",
+      "rationale": "The MCP headers provider is a real MCP authentication storage component, but that specific per-user credential flow is not described by the guide.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-064",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/server.go",
+      "label": "valid",
+      "rationale": "server.go owns HTTP server lifecycle and route assembly for the gateway transport described in the request flow.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-065",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "framework/streaming/accumulator_test.go",
+      "label": "valid",
+      "rationale": "The accumulator test validates the load-bearing stream manager that the guide names as the reference for keeping buffers out of context.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-066",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/duration.go",
+      "label": "valid",
+      "rationale": "duration.go implements flexible duration parsing and serialization behavior directly related to the guide's duration-encoding gotcha.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-067",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/providers/",
+      "label": "valid",
+      "rationale": "The providers directory contains the 20-plus provider implementations and patterns that occupy a major architecture section.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-068",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/bifrost_test.go",
+      "label": "plausible",
+      "rationale": "The broad core Bifrost test supports the central engine but is less precise than the main implementation and focused subsystem tests.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-069",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/lib/middleware.go",
+      "label": "valid",
+      "rationale": "middleware.go implements ChainMiddlewares, which is explicitly positioned in the HTTP request flow and plugin ordering rules.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-070",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "transports/bifrost-http/server/plugins.go",
+      "label": "valid",
+      "rationale": "plugins.go wires plugins into the HTTP server, directly implementing the documented plugin pipeline boundary.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-071",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/account.go",
+      "label": "valid",
+      "rationale": "account.go defines provider key, alias, whitelist, and account configuration types central to provider selection and routing.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-072",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "examples/plugins/hello-world/main.go",
+      "label": "plausible",
+      "rationale": "The hello-world plugin is a useful implementation example, but it is not a core plugin-system owner or required workflow file.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-073",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/containers.go",
+      "label": "valid",
+      "rationale": "containers.go owns the Container and ContainerFile operation schemas explicitly listed in the Provider interface.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-074",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/providers/gemini/types.go",
+      "label": "valid",
+      "rationale": "Gemini types implement the provider-specific API shape used as a named non-OpenAI-compatible provider pattern.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-075",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_wasm.go",
+      "label": "plausible",
+      "rationale": "context_wasm.go is a platform-specific BifrostContext implementation detail; context.go remains the primary documented owner.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-076",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/batch.go",
+      "label": "valid",
+      "rationale": "batch.go owns the batch operation types explicitly enumerated as part of the Provider interface.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-077",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/embedding.go",
+      "label": "valid",
+      "rationale": "embedding.go owns embedding request and response types named in the provider operation surface.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-078",
+      "repository": "bifrost",
+      "document": "AGENTS.md",
+      "target": "core/schemas/context_native.go",
+      "label": "plausible",
+      "rationale": "context_native.go is a platform-specific implementation companion, while the guide identifies context.go as the canonical context boundary.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-079",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/__init__.py",
+      "label": "valid",
+      "rationale": "options/__init__.py exposes the public options namespace that the architecture uses for solver and scene configuration.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-080",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/",
+      "label": "valid",
+      "rationale": "The assets directory is explicitly part of the project structure and owns built-in meshes, URDFs, and textures used by the engine.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-081",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/",
+      "label": "valid",
+      "rationale": "The engine directory is the documented core simulation subsystem containing scenes, simulation, entities, solvers, materials, and couplers.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-082",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/__init__.py",
+      "label": "plausible",
+      "rationale": "The solvers package initializer exposes solver modules but does not itself implement the solver behavior described by the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-083",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/chopping-board/source/",
+      "label": "incorrect",
+      "rationale": "A single chopping-board mesh source is incidental content and has no architectural relationship to the simulation components described by the document.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-084",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/options.py",
+      "label": "valid",
+      "rationale": "options.py defines the base Options model underpinning the configuration classes described in the options subsystem.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-085",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/",
+      "label": "valid",
+      "rationale": "The materials directory directly owns the physical material definitions mapped to each solver in the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-086",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/",
+      "label": "valid",
+      "rationale": "The options directory owns the Pydantic configuration classes for morphs, solvers, surfaces, and other scene components.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-087",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/sensors/__init__.py",
+      "label": "valid",
+      "rationale": "The sensors initializer exposes the camera, IMU, contact, tactile, and other sensor systems named by the project structure.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-088",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/assets/meshes/camera/",
+      "label": "incorrect",
+      "rationale": "The camera mesh asset is incidental model data, not the camera or sensor implementation described by the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-089",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/misc.py",
+      "label": "plausible",
+      "rationale": "misc.py contributes configuration types but is not one of the option modules or responsibilities identified by the architecture document.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-090",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/",
+      "label": "valid",
+      "rationale": "The entities directory owns the physical entity types given a dedicated architecture section and solver mapping.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-091",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/options/surfaces.py",
+      "label": "valid",
+      "rationale": "surfaces.py is explicitly named as the owner of surface-property options.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-092",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/couplers/__init__.py",
+      "label": "valid",
+      "rationale": "The couplers initializer is the entry point for inter-solver coupling, a subsystem explicitly shown in the engine structure.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-093",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/FEM/",
+      "label": "valid",
+      "rationale": "The FEM materials package owns material definitions for the FEM solver and directly supports the documented FEM entity and solver path.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-094",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "examples/",
+      "label": "valid",
+      "rationale": "The examples directory is explicitly part of the project structure and demonstrates use of the documented simulation API.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-095",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/states/solvers.py",
+      "label": "plausible",
+      "rationale": "states/solvers.py represents dynamic solver state, but state serialization is not a primary component described by the architecture overview.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-096",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": ".github/workflows/scripts/",
+      "label": "incorrect",
+      "rationale": "Workflow helper scripts are release and CI infrastructure and do not implement the simulation architecture described by the document.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-097",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/",
+      "label": "valid",
+      "rationale": "The solvers directory owns all physics solver implementations and is a central node in the documented core flow.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-098",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/solvers/base_solver.py",
+      "label": "valid",
+      "rationale": "base_solver.py defines shared solver behavior beneath the solver subsystem described by the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-099",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/MPM/",
+      "label": "valid",
+      "rationale": "The MPM materials package directly supports the documented MPM solver and deformable-material entity path.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-100",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/",
+      "label": "plausible",
+      "rationale": "The genesis source root contains the entire package, but it is broader than a useful component-level codemap edge.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-101",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/entities/__init__.py",
+      "label": "valid",
+      "rationale": "The entities initializer exposes the entity types that the architecture maps to the different solver families.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-102",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "genesis/engine/materials/SPH/",
+      "label": "valid",
+      "rationale": "The SPH materials package directly supports the documented SPH liquid and fluid simulation path.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-103",
+      "repository": "genesis",
+      "document": ".github/contributing/ARCHITECTURE.md",
+      "target": "tests/",
+      "label": "valid",
+      "rationale": "The tests directory is explicitly included in the project structure and owns validation of the simulation system.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-104",
+      "repository": "render-claude-context",
+      "document": "docs/architecture.md",
+      "target": "src/commands/create.js",
+      "label": "valid",
+      "rationale": "create.js is explicitly identified as the command that routes output modes and creates generated context files.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-105",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/utils/validation.js",
+      "label": "plausible",
+      "rationale": "validation.js supports CLI filename safety, but the older CLAUDE.md focuses on collection and import processing rather than command validation.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-106",
+      "repository": "render-claude-context",
+      "document": "docs/architecture.md",
+      "target": "index.js",
+      "label": "valid",
+      "rationale": "index.js is the documented CLI entry point and command-registration owner for the architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-107",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/fileCollector.js",
+      "label": "valid",
+      "rationale": "fileCollector.js directly implements the upward CLAUDE.md discovery process described by CLAUDE.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-108",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/commands/cleanup.js",
+      "label": "plausible",
+      "rationale": "cleanup.js manages generated output removal, a real lifecycle concern not described by the older CLAUDE.md architecture.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-109",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/fileProcessor.js",
+      "label": "valid",
+      "rationale": "fileProcessor.js implements content assembly, reverse ordering, command insertion, and output generation described by CLAUDE.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-110",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/utils/targetValidator.js",
+      "label": "plausible",
+      "rationale": "targetValidator.js supports newer AI-tool target selection, but target validation is outside the responsibilities described by CLAUDE.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-111",
+      "repository": "render-claude-context",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/setup.js",
+      "label": "valid",
+      "rationale": "setup.js implements the setup workflow and AI-tool auto-loading integration explicitly described by the project overview.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-112",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/commands/teardown.js",
+      "label": "plausible",
+      "rationale": "teardown.js removes AI-tool configuration, a real newer workflow not covered by the older CLAUDE.md guidance.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-113",
+      "repository": "render-claude-context",
+      "document": "docs/project-overview.md",
+      "target": "CLAUDE.md",
+      "label": "plausible",
+      "rationale": "CLAUDE.md supplies project guidance and historical architecture context, but it is not an implementation owner for the project overview.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-114",
+      "repository": "render-claude-context",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/teardown.js",
+      "label": "valid",
+      "rationale": "teardown.js implements one of the end-to-end context lifecycle commands explicitly named by the project overview.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-115",
+      "repository": "render-claude-context",
+      "document": "docs/project-overview.md",
+      "target": "src/commands/cleanup.js",
+      "label": "valid",
+      "rationale": "cleanup.js implements the cleanup command explicitly named by the project overview's lifecycle workflow.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-116",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/importResolver.js",
+      "label": "valid",
+      "rationale": "importResolver.js directly implements recursive path resolution, tilde expansion, and circular protection described by CLAUDE.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-117",
+      "repository": "render-claude-context",
+      "document": "docs/architecture.md",
+      "target": "src/utils/nestedProperties.js",
+      "label": "plausible",
+      "rationale": "nestedProperties.js supports setup and teardown settings updates, but it is an internal utility rather than a primary architecture component.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-118",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/utils/targets.js",
+      "label": "plausible",
+      "rationale": "targets.js supports newer AI-tool integration, while the older CLAUDE.md does not describe target configuration.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-119",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/commands/create.js",
+      "label": "valid",
+      "rationale": "create.js is the modular command implementation for the output-generation behavior described by CLAUDE.md.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-120",
+      "repository": "render-claude-context",
+      "document": "CLAUDE.md",
+      "target": "src/commands/setup.js",
+      "label": "plausible",
+      "rationale": "setup.js implements newer automatic configuration integration that is useful but absent from the older CLAUDE.md scope.",
+      "reviewer": "GPT-5.6 Thinking"
+    },
+    {
+      "id": "CRP-121",
+      "repository": "render-claude-context",
+      "document": "docs/files.md",
+      "target": "src/utils/nestedProperties.js",
+      "label": "valid",
+      "rationale": "nestedProperties.js is a real utility module omitted from the Files Catalog and should be represented because setup and teardown directly depend on it.",
+      "reviewer": "GPT-5.6 Thinking"
+    }
+  ]
+}

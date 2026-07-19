@@ -157,6 +157,18 @@ See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon]
 
 Current behavior, future work, and benchmark evidence are intentionally separated. The [Roadmap](docs/planning/roadmap.md) summarizes sequencing but is not the canonical reference for shipped behavior.
 
+## Experimental Codemap Suggestions
+
+Demon Docs includes a deterministic codemap missing-link research pipeline. It collects repository evidence, ranks targets, and separates a bounded `hard_link` review surface from broader `context` relationships.
+
+The current baseline is suitable for early implementation testing and dogfooding. Suggestions remain reviewable evidence: the tool does not automatically insert permanent codemap links, does not recommend removing existing links, and does not treat a candidate as semantic truth.
+
+See:
+
+- [Codemap Suggestion Algorithm](docs/codemap-suggestion-algorithm.md) for current behavior and measured readiness;
+- [Codemap Algorithm Development Log](docs/codemap-algorithm-development-log.md) for the full benchmark and tuning history; and
+- [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for the evidence and safety boundary.
+
 ## Development
 
 Run the complete local release gate:
