@@ -111,11 +111,12 @@ func runSelectedWatch(
 	defer cancel()
 	errors := make(chan error, 2)
 	safeOut := &synchronizedWriter{writer: out}
+	runLock := &sync.Mutex{}
 	go func() {
-		errors <- watch.RootSelected(watchContext, scope.DocsRoot, scope.RepositoryRoot, c, baseFeatures, debounce, false, safeOut)
+		errors <- watch.RootSelectedWithRunLock(watchContext, scope.DocsRoot, scope.RepositoryRoot, c, baseFeatures, debounce, false, safeOut, runLock)
 	}()
 	go func() {
-		errors <- reverseindex.Watch(
+		errors <- reverseindex.WatchWithRunLock(
 			watchContext,
 			scope.RepositoryRoot,
 			scope.DocsRoot,
@@ -125,6 +126,7 @@ func runSelectedWatch(
 			time.Duration(seconds*float64(time.Second)),
 			false,
 			safeOut,
+			runLock,
 		)
 	}()
 	first := <-errors

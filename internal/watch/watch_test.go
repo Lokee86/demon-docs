@@ -6,11 +6,29 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/config"
 )
+
+type blockingLocker struct {
+	entered chan struct{}
+	release chan struct{}
+	once    sync.Once
+}
+
+func newBlockingLocker() *blockingLocker {
+	return &blockingLocker{entered: make(chan struct{}), release: make(chan struct{})}
+}
+
+func (l *blockingLocker) Lock() {
+	l.once.Do(func() { close(l.entered) })
+	<-l.release
+}
+
+func (l *blockingLocker) Unlock() {}
 
 func TestSchedulerDebouncesAndRunsFollowup(t *testing.T) {
 	now := time.Unix(0, 0)
@@ -39,6 +57,47 @@ func TestSchedulerDebouncesAndRunsFollowup(t *testing.T) {
 	}
 	if runs != 2 {
 		t.Fatalf("runs=%d", runs)
+	}
+}
+
+func TestRootSelectedWithRunLockSerializesReconciliation(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "page.md"), []byte("# Page\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	locker := newBlockingLocker()
+	done := make(chan error, 1)
+	go func() {
+		done <- RootSelectedWithRunLock(context.Background(), root, root, config.Default(), Features{Indexes: true}, nil, true, nil, locker)
+	}()
+
+	select {
+	case <-locker.entered:
+	case <-time.After(2 * time.Second):
+		close(locker.release)
+		t.Fatal("watch reconciliation did not acquire the shared run lock")
+	}
+	index := filepath.Join(root, "README.md")
+	_, statErr := os.Stat(index)
+	wroteBeforeRelease := statErr == nil
+	if statErr != nil && !os.IsNotExist(statErr) {
+		close(locker.release)
+		t.Fatal(statErr)
+	}
+	close(locker.release)
+	select {
+	case err := <-done:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("watch reconciliation did not finish after the run lock was released")
+	}
+	if wroteBeforeRelease {
+		t.Fatal("watch reconciliation wrote files before the shared run lock was released")
+	}
+	if _, err := os.Stat(index); err != nil {
+		t.Fatalf("watch reconciliation did not write the index after release: %v", err)
 	}
 }
 

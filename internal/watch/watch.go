@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/config"
@@ -47,6 +48,10 @@ func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.C
 }
 
 func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer) error {
+	return RootSelectedWithRunLock(ctx, docsRoot, repositoryRoot, c, features, debounce, once, out, nil)
+}
+
+func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer, runLock sync.Locker) error {
 	if out == nil {
 		out = io.Discard
 	}
@@ -66,6 +71,10 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 	externalWatched := map[string]bool{}
 	var externalDirectories []string
 	run := func() error {
+		if runLock != nil {
+			runLock.Lock()
+			defer runLock.Unlock()
+		}
 		changed := 0
 		var diagnostics []string
 		unresolved := 0
