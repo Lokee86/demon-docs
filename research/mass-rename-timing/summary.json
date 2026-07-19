@@ -1,0 +1,320 @@
+{
+  "iterations": 5,
+  "all_valid": true,
+  "corpus": {
+    "total_files": 346,
+    "markdown_files": 341,
+    "rewritten_source_files_per_pass": 340,
+    "link_repairs_per_pass": 3717
+  },
+  "stages": {
+    "copy_ms": {
+      "samples_ms": [
+        328.376,
+        391.302,
+        438.915,
+        425.203,
+        412.875
+      ],
+      "mean_ms": 399.334,
+      "median_ms": 412.875,
+      "p95_ms": 436.172,
+      "min_ms": 328.376,
+      "max_ms": 438.915,
+      "stddev_ms": 38.778
+    },
+    "init_ms": {
+      "samples_ms": [
+        37.491,
+        21.144,
+        31.906,
+        21.096,
+        23.263
+      ],
+      "mean_ms": 26.98,
+      "median_ms": 23.263,
+      "p95_ms": 36.374,
+      "min_ms": 21.096,
+      "max_ms": 37.491,
+      "stddev_ms": 6.592
+    },
+    "baseline_initialize_ms": {
+      "samples_ms": [
+        4878.456,
+        3684.105,
+        3845.304,
+        3687.14,
+        3843.909
+      ],
+      "mean_ms": 3987.783,
+      "median_ms": 3843.909,
+      "p95_ms": 4671.826,
+      "min_ms": 3684.105,
+      "max_ms": 4878.456,
+      "stddev_ms": 450.978
+    },
+    "baseline_repair_ms": {
+      "samples_ms": [
+        518.081,
+        525.836,
+        530.986,
+        624.163,
+        663.149
+      ],
+      "mean_ms": 572.443,
+      "median_ms": 530.986,
+      "p95_ms": 655.351,
+      "min_ms": 518.081,
+      "max_ms": 663.149,
+      "stddev_ms": 59.579
+    },
+    "baseline_idempotent_ms": {
+      "samples_ms": [
+        314.578,
+        326.175,
+        308.286,
+        334.567,
+        323.901
+      ],
+      "mean_ms": 321.501,
+      "median_ms": 323.901,
+      "p95_ms": 332.888,
+      "min_ms": 308.286,
+      "max_ms": 334.567,
+      "stddev_ms": 9.175
+    },
+    "baseline_check_ms": {
+      "samples_ms": [
+        170.199,
+        157.816,
+        163.839,
+        173.743,
+        208.763
+      ],
+      "mean_ms": 174.872,
+      "median_ms": 170.199,
+      "p95_ms": 201.759,
+      "min_ms": 157.816,
+      "max_ms": 208.763,
+      "stddev_ms": 17.801
+    },
+    "first_filesystem_rename_ms": {
+      "samples_ms": [
+        257.702,
+        278.851,
+        269.778,
+        293.021,
+        279.551
+      ],
+      "mean_ms": 275.781,
+      "median_ms": 278.851,
+      "p95_ms": 290.327,
+      "min_ms": 257.702,
+      "max_ms": 293.021,
+      "stddev_ms": 11.694
+    },
+    "first_precheck_ms": {
+      "samples_ms": [
+        1128.484,
+        1196.365,
+        1129.864,
+        1112.708,
+        1275.22
+      ],
+      "mean_ms": 1168.528,
+      "median_ms": 1129.864,
+      "p95_ms": 1259.449,
+      "min_ms": 1112.708,
+      "max_ms": 1275.22,
+      "stddev_ms": 60.618
+    },
+    "first_fix_ms": {
+      "samples_ms": [
+        1992.457,
+        1992.919,
+        1922.802,
+        1928.29,
+        1883.071
+      ],
+      "mean_ms": 1943.908,
+      "median_ms": 1928.29,
+      "p95_ms": 1992.826,
+      "min_ms": 1883.071,
+      "max_ms": 1992.919,
+      "stddev_ms": 42.777
+    },
+    "first_postcheck_ms": {
+      "samples_ms": [
+        1047.306,
+        1109.287,
+        1075.63,
+        1050.577,
+        1042.105
+      ],
+      "mean_ms": 1064.981,
+      "median_ms": 1050.577,
+      "p95_ms": 1102.556,
+      "min_ms": 1042.105,
+      "max_ms": 1109.287,
+      "stddev_ms": 24.979
+    },
+    "first_idempotent_ms": {
+      "samples_ms": [
+        1250.602,
+        1186.342,
+        1185.218,
+        1350.349,
+        1191.803
+      ],
+      "mean_ms": 1232.863,
+      "median_ms": 1191.803,
+      "p95_ms": 1330.399,
+      "min_ms": 1185.218,
+      "max_ms": 1350.349,
+      "stddev_ms": 63.62
+    },
+    "second_filesystem_rename_ms": {
+      "samples_ms": [
+        247.729,
+        246.799,
+        240.088,
+        257.673,
+        252.44
+      ],
+      "mean_ms": 248.946,
+      "median_ms": 247.729,
+      "p95_ms": 256.627,
+      "min_ms": 240.088,
+      "max_ms": 257.673,
+      "stddev_ms": 5.881
+    },
+    "second_precheck_ms": {
+      "samples_ms": [
+        1117.493,
+        1191.791,
+        1171.154,
+        1220.245,
+        1176.859
+      ],
+      "mean_ms": 1175.509,
+      "median_ms": 1176.859,
+      "p95_ms": 1214.554,
+      "min_ms": 1117.493,
+      "max_ms": 1220.245,
+      "stddev_ms": 33.625
+    },
+    "second_fix_ms": {
+      "samples_ms": [
+        1967.426,
+        1979.776,
+        1970.178,
+        2000.176,
+        2015.903
+      ],
+      "mean_ms": 1986.692,
+      "median_ms": 1979.776,
+      "p95_ms": 2012.758,
+      "min_ms": 1967.426,
+      "max_ms": 2015.903,
+      "stddev_ms": 18.584
+    },
+    "second_postcheck_ms": {
+      "samples_ms": [
+        1017.633,
+        1051.612,
+        1061.343,
+        1094.588,
+        1021.598
+      ],
+      "mean_ms": 1049.355,
+      "median_ms": 1051.612,
+      "p95_ms": 1087.939,
+      "min_ms": 1017.633,
+      "max_ms": 1094.588,
+      "stddev_ms": 28.184
+    },
+    "second_idempotent_ms": {
+      "samples_ms": [
+        1185.551,
+        1328.647,
+        1279.358,
+        1193.489,
+        1140.133
+      ],
+      "mean_ms": 1225.436,
+      "median_ms": 1193.489,
+      "p95_ms": 1318.789,
+      "min_ms": 1140.133,
+      "max_ms": 1328.647,
+      "stddev_ms": 68.481
+    },
+    "first_rename_cycle_ms": {
+      "samples_ms": [
+        5676.551,
+        5763.763,
+        5583.293,
+        5734.944,
+        5671.751
+      ],
+      "mean_ms": 5686.06,
+      "median_ms": 5676.551,
+      "p95_ms": 5758.0,
+      "min_ms": 5583.293,
+      "max_ms": 5763.763,
+      "stddev_ms": 62.103
+    },
+    "second_rename_cycle_ms": {
+      "samples_ms": [
+        5535.832,
+        5798.626,
+        5722.121,
+        5766.172,
+        5606.934
+      ],
+      "mean_ms": 5685.937,
+      "median_ms": 5722.121,
+      "p95_ms": 5792.135,
+      "min_ms": 5535.832,
+      "max_ms": 5798.626,
+      "stddev_ms": 99.216
+    },
+    "two_rename_cycles_ms": {
+      "samples_ms": [
+        11212.382,
+        11562.389,
+        11305.414,
+        11501.116,
+        11278.684
+      ],
+      "mean_ms": 11371.997,
+      "median_ms": 11305.414,
+      "p95_ms": 11550.135,
+      "min_ms": 11212.382,
+      "max_ms": 11562.389,
+      "stddev_ms": 135.306
+    },
+    "total_ms": {
+      "samples_ms": [
+        17459.758,
+        16668.926,
+        16624.808,
+        16767.175,
+        16754.679
+      ],
+      "mean_ms": 16855.069,
+      "median_ms": 16754.679,
+      "p95_ms": 17321.241,
+      "min_ms": 16624.808,
+      "max_ms": 17459.758,
+      "stddev_ms": 306.96
+    }
+  },
+  "throughput_from_medians": {
+    "first_fix_files_per_second": 176.32,
+    "first_fix_links_per_second": 1927.61,
+    "second_fix_files_per_second": 171.74,
+    "second_fix_links_per_second": 1877.49,
+    "two_cycles_renamed_files_per_second": 60.33,
+    "two_cycles_link_repairs_per_second": 657.56
+  }
+}

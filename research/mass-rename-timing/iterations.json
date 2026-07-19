@@ -1,0 +1,677 @@
+[
+  {
+    "iteration": 1,
+    "sandbox": "C:\\tmp\\ddocs-mass-rename-timing-01-1fsto52l",
+    "valid": true,
+    "stages_ms": {
+      "copy_ms": 328.3764,
+      "init_ms": 37.4914,
+      "baseline_initialize_ms": 4878.4563,
+      "baseline_repair_ms": 518.0809,
+      "baseline_idempotent_ms": 314.5784,
+      "baseline_check_ms": 170.1991,
+      "first_filesystem_rename_ms": 257.7025,
+      "first_precheck_ms": 1128.4835,
+      "first_fix_ms": 1992.4567,
+      "first_postcheck_ms": 1047.3064,
+      "first_idempotent_ms": 1250.6016,
+      "second_filesystem_rename_ms": 247.729,
+      "second_precheck_ms": 1117.4932,
+      "second_fix_ms": 1967.426,
+      "second_postcheck_ms": 1017.6327,
+      "second_idempotent_ms": 1185.5506,
+      "first_rename_cycle_ms": 5676.5507,
+      "second_rename_cycle_ms": 5535.8315,
+      "two_rename_cycles_ms": 11212.3822,
+      "total_ms": 17459.7576
+    },
+    "observations": {
+      "init": {
+        "exit_code": 0,
+        "updated": null,
+        "repairs": 0,
+        "broken": 0,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_initialize": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 34,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_repair": {
+        "exit_code": 1,
+        "updated": 10,
+        "repairs": 29,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_check": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "first_files_renamed": 341,
+      "first_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_files_renamed": 341,
+      "second_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      }
+    }
+  },
+  {
+    "iteration": 2,
+    "sandbox": "C:\\tmp\\ddocs-mass-rename-timing-02-p1argcx_",
+    "valid": true,
+    "stages_ms": {
+      "copy_ms": 391.3021,
+      "init_ms": 21.1437,
+      "baseline_initialize_ms": 3684.1046,
+      "baseline_repair_ms": 525.8363,
+      "baseline_idempotent_ms": 326.1748,
+      "baseline_check_ms": 157.8158,
+      "first_filesystem_rename_ms": 278.8507,
+      "first_precheck_ms": 1196.3654,
+      "first_fix_ms": 1992.9187,
+      "first_postcheck_ms": 1109.2871,
+      "first_idempotent_ms": 1186.3416,
+      "second_filesystem_rename_ms": 246.7988,
+      "second_precheck_ms": 1191.7914,
+      "second_fix_ms": 1979.7763,
+      "second_postcheck_ms": 1051.612,
+      "second_idempotent_ms": 1328.6471,
+      "first_rename_cycle_ms": 5763.763499999999,
+      "second_rename_cycle_ms": 5798.6256,
+      "two_rename_cycles_ms": 11562.3891,
+      "total_ms": 16668.9262
+    },
+    "observations": {
+      "init": {
+        "exit_code": 0,
+        "updated": null,
+        "repairs": 0,
+        "broken": 0,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_initialize": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 34,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_repair": {
+        "exit_code": 1,
+        "updated": 10,
+        "repairs": 29,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_check": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "first_files_renamed": 341,
+      "first_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_files_renamed": 341,
+      "second_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      }
+    }
+  },
+  {
+    "iteration": 3,
+    "sandbox": "C:\\tmp\\ddocs-mass-rename-timing-03-g__nvvm1",
+    "valid": true,
+    "stages_ms": {
+      "copy_ms": 438.9147,
+      "init_ms": 31.9064,
+      "baseline_initialize_ms": 3845.3038,
+      "baseline_repair_ms": 530.9863,
+      "baseline_idempotent_ms": 308.2856,
+      "baseline_check_ms": 163.8385,
+      "first_filesystem_rename_ms": 269.7782,
+      "first_precheck_ms": 1129.8643,
+      "first_fix_ms": 1922.8022,
+      "first_postcheck_ms": 1075.6302,
+      "first_idempotent_ms": 1185.2185,
+      "second_filesystem_rename_ms": 240.0875,
+      "second_precheck_ms": 1171.1543,
+      "second_fix_ms": 1970.1785,
+      "second_postcheck_ms": 1061.3426,
+      "second_idempotent_ms": 1279.3581,
+      "first_rename_cycle_ms": 5583.2934,
+      "second_rename_cycle_ms": 5722.120999999999,
+      "two_rename_cycles_ms": 11305.414399999998,
+      "total_ms": 16624.8083
+    },
+    "observations": {
+      "init": {
+        "exit_code": 0,
+        "updated": null,
+        "repairs": 0,
+        "broken": 0,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_initialize": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 34,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_repair": {
+        "exit_code": 1,
+        "updated": 10,
+        "repairs": 29,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_check": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "first_files_renamed": 341,
+      "first_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_files_renamed": 341,
+      "second_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      }
+    }
+  },
+  {
+    "iteration": 4,
+    "sandbox": "C:\\tmp\\ddocs-mass-rename-timing-04-rku4_w5f",
+    "valid": true,
+    "stages_ms": {
+      "copy_ms": 425.2034,
+      "init_ms": 21.0958,
+      "baseline_initialize_ms": 3687.1404,
+      "baseline_repair_ms": 624.1625,
+      "baseline_idempotent_ms": 334.5667,
+      "baseline_check_ms": 173.7427,
+      "first_filesystem_rename_ms": 293.021,
+      "first_precheck_ms": 1112.7079,
+      "first_fix_ms": 1928.2897,
+      "first_postcheck_ms": 1050.5769,
+      "first_idempotent_ms": 1350.3487,
+      "second_filesystem_rename_ms": 257.6735,
+      "second_precheck_ms": 1220.2449,
+      "second_fix_ms": 2000.1762,
+      "second_postcheck_ms": 1094.5884,
+      "second_idempotent_ms": 1193.489,
+      "first_rename_cycle_ms": 5734.9442,
+      "second_rename_cycle_ms": 5766.1720000000005,
+      "two_rename_cycles_ms": 11501.1162,
+      "total_ms": 16767.1754
+    },
+    "observations": {
+      "init": {
+        "exit_code": 0,
+        "updated": null,
+        "repairs": 0,
+        "broken": 0,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_initialize": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 34,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_repair": {
+        "exit_code": 1,
+        "updated": 10,
+        "repairs": 29,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_check": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "first_files_renamed": 341,
+      "first_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_files_renamed": 341,
+      "second_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      }
+    }
+  },
+  {
+    "iteration": 5,
+    "sandbox": "C:\\tmp\\ddocs-mass-rename-timing-05-5ob0zjf1",
+    "valid": true,
+    "stages_ms": {
+      "copy_ms": 412.8752,
+      "init_ms": 23.2627,
+      "baseline_initialize_ms": 3843.9085,
+      "baseline_repair_ms": 663.1487,
+      "baseline_idempotent_ms": 323.9007,
+      "baseline_check_ms": 208.7635,
+      "first_filesystem_rename_ms": 279.5511,
+      "first_precheck_ms": 1275.2204,
+      "first_fix_ms": 1883.0713,
+      "first_postcheck_ms": 1042.1047,
+      "first_idempotent_ms": 1191.8032,
+      "second_filesystem_rename_ms": 252.4398,
+      "second_precheck_ms": 1176.8593,
+      "second_fix_ms": 2015.9032,
+      "second_postcheck_ms": 1021.598,
+      "second_idempotent_ms": 1140.1332,
+      "first_rename_cycle_ms": 5671.7507000000005,
+      "second_rename_cycle_ms": 5606.9335,
+      "two_rename_cycles_ms": 11278.6842,
+      "total_ms": 16754.6788
+    },
+    "observations": {
+      "init": {
+        "exit_code": 0,
+        "updated": null,
+        "repairs": 0,
+        "broken": 0,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_initialize": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 34,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "baseline_repair": {
+        "exit_code": 1,
+        "updated": 10,
+        "repairs": 29,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "baseline_check": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 1,
+        "ambiguous": 4,
+        "errors": []
+      },
+      "first_files_renamed": 341,
+      "first_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "first_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_files_renamed": 341,
+      "second_precheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_fix": {
+        "exit_code": 1,
+        "updated": 340,
+        "repairs": 3717,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_postcheck": {
+        "exit_code": 1,
+        "updated": null,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      },
+      "second_idempotent": {
+        "exit_code": 1,
+        "updated": 0,
+        "repairs": 0,
+        "broken": 5,
+        "ambiguous": 0,
+        "errors": []
+      }
+    }
+  }
+]
