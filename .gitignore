@@ -1,6 +1,7 @@
 # Build/package output
 build/
 bin/
+dist/
 /ddocs
 /ddocs.exe
 /demon

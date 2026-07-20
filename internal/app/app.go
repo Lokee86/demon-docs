@@ -28,7 +28,8 @@ import (
 	"github.com/Lokee86/demon-docs/internal/watch"
 )
 
-const Version = "0.2.0"
+// Version is the source-build fallback and is overridden for tagged release binaries.
+var Version = "0.3.0"
 
 type stringsFlag struct{ values []string }
 

@@ -29,7 +29,42 @@ It does not silently rewrite prose outside explicit managed regions, choose amon
 
 ## Installation
 
-Go is the supported implementation and runtime.
+### Prebuilt release
+
+The recommended judge and end-user path does not require Go or repository compilation.
+
+Download the latest release from [GitHub Releases](https://github.com/Lokee86/demon-docs/releases/latest):
+
+- `demon-docs_windows_amd64.zip` for 64-bit Windows 10 or 11;
+- `demon-docs_linux_amd64.tar.gz` for 64-bit Linux; and
+- `checksums.txt` to verify the downloaded archive.
+
+Extract the archive, then either run the binaries from that directory or place them on your `PATH`.
+
+Windows PowerShell verification:
+
+```powershell
+.\ddocs.exe --version
+.\ddocs.exe --help
+.\demon.exe --help
+```
+
+Linux installation and verification:
+
+```bash
+tar -xzf demon-docs_linux_amd64.tar.gz
+sudo install demon-docs_linux_amd64/ddocs /usr/local/bin/ddocs
+sudo install demon-docs_linux_amd64/demon /usr/local/bin/demon
+ddocs --version
+ddocs --help
+demon --help
+```
+
+The release workflow runs the complete Go test suite on Windows and Linux, executes the Windows and Linux command-line artifacts, runs the vet gate, builds both archives with `CGO_ENABLED=0`, and publishes SHA-256 checksums. macOS does not currently have a prebuilt release asset.
+
+### Build from source
+
+Go 1.26.5 or newer is required to build the current source tree.
 
 ```bash
 git clone https://github.com/Lokee86/demon-docs.git
@@ -43,14 +78,6 @@ Or build repository-local binaries:
 ```bash
 go build -o bin/ddocs ./cmd/ddocs
 go build -o bin/demon ./cmd/demon
-```
-
-Verify installation:
-
-```bash
-ddocs --version
-ddocs --help
-demon --help
 ```
 
 `ddocs` is the canonical executable. `demon` is an alias backed by the same application implementation.

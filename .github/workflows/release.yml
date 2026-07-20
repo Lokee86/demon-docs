@@ -1,0 +1,146 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the leading v
+        required: true
+        default: "0.3.0"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  windows-smoke:
+    name: Windows release smoke test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Test and smoke-test Windows binaries
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $version = "${{ inputs.version }}"
+          } else {
+            $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          }
+          if ($version -notmatch '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$') {
+            throw "Invalid release version: $version"
+          }
+
+          go test ./... -count=1
+          $ldflags = "-s -w -X github.com/Lokee86/demon-docs/internal/app.Version=$version"
+          go build -trimpath -ldflags $ldflags -o ddocs.exe ./cmd/ddocs
+          go build -trimpath -ldflags $ldflags -o demon.exe ./cmd/demon
+
+          if ((.\ddocs.exe --version) -ne "ddocs $version") {
+            throw "Unexpected ddocs version output"
+          }
+          .\ddocs.exe --help | Out-Null
+          .\demon.exe --help | Out-Null
+
+  release:
+    name: Build and publish release
+    needs: windows-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve release metadata
+        id: release
+        shell: bash
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            version="${{ inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME}"
+          fi
+          version="${version#v}"
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release version: ${version}" >&2
+            exit 1
+          fi
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify source
+        run: |
+          go test ./... -count=1
+          go vet ./...
+
+      - name: Build release binaries
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          rm -rf build package dist
+          mkdir -p package/demon-docs_linux_amd64 package/demon-docs_windows_amd64 dist
+          ldflags="-s -w -X github.com/Lokee86/demon-docs/internal/app.Version=${VERSION}"
+
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_linux_amd64/ddocs ./cmd/ddocs
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_linux_amd64/demon ./cmd/demon
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_windows_amd64/ddocs.exe ./cmd/ddocs
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_windows_amd64/demon.exe ./cmd/demon
+
+          cp LICENSE README.md package/demon-docs_linux_amd64/
+          cp LICENSE README.md package/demon-docs_windows_amd64/
+
+          ./package/demon-docs_linux_amd64/ddocs --version | grep -Fx "ddocs ${VERSION}"
+          ./package/demon-docs_linux_amd64/ddocs --help >/dev/null
+          ./package/demon-docs_linux_amd64/demon --help >/dev/null
+          go version -m package/demon-docs_windows_amd64/ddocs.exe
+          go version -m package/demon-docs_windows_amd64/demon.exe
+
+      - name: Package release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -C package -czf dist/demon-docs_linux_amd64.tar.gz demon-docs_linux_amd64
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZIP_DEFLATED, ZipFile
+
+          root = Path("package/demon-docs_windows_amd64")
+          output = Path("dist/demon-docs_windows_amd64.zip")
+          with ZipFile(output, "w", ZIP_DEFLATED) as archive:
+              for path in sorted(root.iterdir()):
+                  archive.write(path, Path(root.name) / path.name)
+          PY
+          cd dist
+          sha256sum demon-docs_linux_amd64.tar.gz demon-docs_windows_amd64.zip > checksums.txt
+
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" dist/* --clobber
+          else
+            gh release create "${TAG}" dist/* \
+              --target "${GITHUB_SHA}" \
+              --title "Demon Docs ${VERSION}" \
+              --generate-notes
+          fi
