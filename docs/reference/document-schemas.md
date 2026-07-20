@@ -30,7 +30,7 @@ Generated, human-editable document-specific schemas live in:
 .ddocs/document-schemas/<document-id>.toml
 ```
 
-`ddocs init` writes Space Rocks-derived starter schemas for `general`, `service`, `planning`, and `index`. `ddocs schema init` adds missing starter schemas to an initialized repository; `--force` replaces existing starter files.
+`ddocs init` writes Space Rocks-derived starter schemas for `general`, `service`, `planning`, and `index`. `ddocs schema init` adds missing starter schemas to an initialized repository; `--force` replaces existing starter files. This initialization requirement belongs to the schema installer, not to ordinary index, link, health, move, or foreground-watch operations.
 
 ## Schema Selection
 

@@ -108,11 +108,11 @@ Only non-empty shards need entries. Every root entry must:
 
 Any other entry name or mode makes the root invalid and causes transaction start to fail.
 
-## Repository initialization
+## Private object-store initialization
 
 `ddrepo.Init` accepts either a repository root or a path already ending in `.ddocs`.
 
-Initialization performs this sequence:
+Private object-store initialization performs this sequence:
 
 ```text
 resolve .ddocs path
@@ -124,7 +124,7 @@ resolve .ddocs path
 
 An empty state therefore has a valid reference and root object even though it has no shard entries.
 
-Initialization does not write product configuration, runtime ownership files, review history, or consumer records. Those are owned by their respective application layers.
+Private object-store initialization does not write product configuration, runtime ownership files, review history, or consumer records. Those are owned by their respective application layers.
 
 ## Repository opening
 
@@ -249,7 +249,7 @@ When the state reference exists, beginning a transaction:
 
 Shard contents remain lazy. A shard blob is decoded only when a transaction operation needs it.
 
-When the state reference is missing, `Begin` creates an empty transaction with no base reference. This permits a caller to publish a replacement state into an otherwise opened object database, although normal initialization creates the empty reference first.
+When the state reference is missing, `Begin` creates an empty transaction with no base reference. This permits a caller to publish a replacement state into an otherwise opened object database, although normal private object-store initialization creates the empty reference first.
 
 Errors reading the root tree or validating entries abort transaction creation.
 

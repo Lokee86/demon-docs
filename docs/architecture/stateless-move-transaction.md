@@ -194,7 +194,7 @@ Rollback is best effort, not a filesystem transaction. It can fail because a rew
 
 The move planner uses a fresh filesystem inventory and `FilesManifest{}` rather than persistent link identity state. Neither dry-run nor apply creates `.ddocs/`; the move command does not publish identities, incoming-link groups, fingerprints, review events, or applied-change history.
 
-Statelessness does not mean read-only: a non-dry-run changes the requested filesystem location and affected Markdown sources. It means the command has no durable Demon Docs transaction to commit or recover. In an initialized repository, a later watcher or link-enabled reconciliation pass can refresh persistent state after the explicit move.
+Statelessness does not mean read-only: a non-dry-run changes the requested filesystem location and affected Markdown sources. It means the command has no durable Demon Docs transaction to commit or recover. A later standalone or initialized watcher or link-enabled reconciliation pass can refresh persistent state after the explicit move.
 
 ## Invariants and safety boundaries
 

@@ -16,7 +16,7 @@ This document describes the implemented single-owner repository demon, feeder le
 
 ## Overview
 
-The repository demon is an optional lifecycle owner around the normal watcher. It keeps one fresh repository-local watcher active while shell or agent feeders remain registered. It does not replace static `check` or `fix` correctness.
+The repository demon is an optional lifecycle owner around the normal watcher. It keeps one fresh repository-local watcher active while shell or agent feeders remain registered. Unlike foreground `ddocs watch`, it requires an initialized repository with `.ddocs/config.toml`. It does not replace static `check` or `fix` correctness.
 
 ## Operating model
 
@@ -34,9 +34,9 @@ The repository demon is the self-managing background lifecycle around the existi
 
 The static commands remain authoritative:
 
-- `ddocs check` verifies repository state without requiring the demon;
-- `ddocs fix` rebuilds or repairs state without requiring the demon; and
-- `ddocs watch` runs the watcher explicitly in the foreground.
+- `ddocs check` verifies standalone or initialized scope state without requiring the demon;
+- `ddocs fix` rebuilds or repairs standalone or initialized scope state without requiring the demon; and
+- `ddocs watch` runs the watcher explicitly in the foreground without requiring repository initialization.
 
 The repository demon exists only to keep that watcher available while shells or agents are actively working in a repository.
 

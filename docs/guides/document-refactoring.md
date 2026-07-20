@@ -77,7 +77,7 @@ The command:
 - uses same-directory atomic Markdown replacement; and
 - attempts best-effort restoration of original content and location if a rewrite fails.
 
-In an initialized repository, the watcher or next link-enabled reconciliation refreshes persistent identity state after the explicit move.
+A later standalone or initialized watcher or link-enabled reconciliation pass refreshes persistent identity state after the explicit move.
 
 ## Expected result
 

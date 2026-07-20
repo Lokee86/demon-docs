@@ -4,14 +4,14 @@ created: "2026-07-19"
 document_id: 019f7e4d-9000-7243-ba61-27a3b45d912b
 document_type: general
 policy_exempt: false
-summary: Adopt Demon Docs in a small existing repository, from initialization and indexes through link health, safe moves, reverse indexes, codemap suggestions, and schema-backed document creation.
+summary: Adopt Demon Docs in a small existing repository, distinguishing standalone operation from optional initialization before indexes, link health, safe moves, reverse indexes, codemap suggestions, and schema-backed creation.
 ---
 # Product Walkthrough
 Parent index: [Guides](./INDEX.md)
 ## Purpose
 This walkthrough shows the main Demon Docs workflow in a small existing repository. It introduces each managed surface separately so the resulting changes remain reviewable.
 ## Overview
-The sequence covers repository initialization, staged adoption, generated indexes, link state, orphan health, link-aware moves, reverse indexes, codemap execution, suggestion review, and schema-backed document creation. The command outputs were reproduced against the current CLI; paths and generated identifiers vary.
+The sequence distinguishes standalone operation from initialized-repository operation, then covers staged adoption, generated indexes, link-state baselining, orphan health, link-aware moves, reverse indexes, codemap execution, suggestion review, and schema-backed document creation. The command outputs were reproduced against the current CLI; paths and generated identifiers vary.
 ### Starting fixture
 ```text
 docs/
@@ -34,13 +34,21 @@ The runtime package owns service startup and shutdown.
 - `internal/runtime/service.go`
 ```
 Demon Docs treats that target as authored evidence. It does not infer ownership from arbitrary prose.
-### 1. Initialize
-Run from the repository root:
+### 1. Choose the scope
+Core docs-scoped behavior does not require initialization. A narrow standalone adoption could begin with:
+```bash
+ddocs fix --root docs --docs
+ddocs fix --root docs --links
+ddocs watch --root docs --once
+```
+In that mode, `docs/` is both the managed docs root and the scope boundary, and link history is stored under `docs/.ddocs/`.
+
+This full walkthrough intentionally initializes because later steps project documentation onto `internal/`, use installed starter schemas, and demonstrate repository-level configuration:
 ```bash
 ddocs init --root docs
 ddocs status
 ```
-Initialization creates `.ddocs/config.toml` and starter schemas. `status` confirms the repository root, docs root, config path, and `.docignore` path. Authored documentation remains normal Markdown; private identities and history live beneath `.ddocs/`.
+Initialization creates repository-root `.ddocs/config.toml`, starter schemas, and a repository-wide scope boundary. `status` confirms the repository root, docs root, config path, and `.docignore` path. Authored documentation remains normal Markdown; private identities and history live beneath the repository-root `.ddocs/`.
 ### 2. Stage adoption for existing docs
 A new config enables indexes, links, frontmatter, format policy, and repository-demon eligibility. Existing documentation may not match the starter metadata or body schemas.
 
@@ -225,7 +233,7 @@ ddocs check --reverse --reverse-root internal
 ```
 The documentation and reverse checks report `ddocs check passed`. The explicit codemap check reports `ddocs codemaps check passed`.
 
-Repository-visible changes are limited to managed index regions, rewritten link destinations from the explicit move, one schema-created Markdown file, one managed codemap, and one managed reverse-index file. Private link, review, identity, and transaction state remains under `.ddocs/`.
+Repository-visible changes are limited to managed index regions, rewritten link destinations from the explicit move, one schema-created Markdown file, one managed codemap, and one managed reverse-index file. Because this walkthrough chose initialized mode, private link, review, identity, and transaction state remains under the repository-root `.ddocs/`; standalone link reconciliation would place that state beneath the standalone docs root.
 
 Demon Docs does not replace Markdown, silently choose ambiguous targets, infer semantic ownership from arbitrary prose, or run codemap generation in the background.
 ## Related docs
@@ -239,4 +247,4 @@ Demon Docs does not replace Markdown, silently choose ambiguous targets, infer s
 - [CLI Reference](../reference/cli.md)
 - [Configuration Reference](../reference/configuration.md)
 ## Notes
-The safest adoption order is narrow and reviewable: initialize, select one managed surface, inspect the diff, establish state, and widen enforcement only after the repository's conventions are represented explicitly.
+The safest adoption order is narrow and reviewable: choose standalone or initialized scope deliberately, select one managed surface, inspect the diff, establish link state, and widen enforcement only after the repository's conventions are represented explicitly.

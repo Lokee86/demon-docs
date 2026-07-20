@@ -207,14 +207,14 @@ Reverse planning occurs before link planning in the current application code. Th
 documentation-index updates are pending
 frontmatter diagnostics remain unresolved
 document-format diagnostics remain unresolved
-link plan reports initialization, unresolved links, updates, or rewrites
+link plan reports a missing baseline, unresolved links, updates, or rewrites
 reverse-index plan reports failure
 orphan documents exist
 ```
 
 `links.Plan.Failed` includes:
 
-- uninitialized link state;
+- missing link-state baseline;
 - unresolved link records;
 - pending link-related file updates; and
 - pending generated rewrites.

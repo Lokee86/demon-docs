@@ -78,7 +78,7 @@ The private `.ddocs` state reference provides:
 - fingerprints, sizes, modification times, and parser versions; and
 - target identities used to recognize later moves.
 
-If repository-backed state is absent, legacy `files.json` and `links.json` manifests may be read for migration. If neither state form exists, the repository is uninitialized for links.
+If repository-backed state is absent, legacy `files.json` and `links.json` manifests may be read for migration. If neither state form exists, the active scope has no link-state baseline. This is independent of whether `.ddocs/config.toml` exists.
 
 ### Current inventory
 
@@ -179,7 +179,7 @@ When an exact target is absent, the prior occurrence's target file ID is preferr
 
 ### Candidate discovery
 
-If no preferred identity is available, candidate discovery uses syntax-aware rules. Ordinary path syntax searches after link state is initialized. Wiki syntax may use its repository-wide resolution rules during initial observation because a bare wiki target is not necessarily relative to the source directory.
+If no preferred identity is available, candidate discovery uses syntax-aware rules. Ordinary path syntax searches after a link-state baseline has been established. Wiki syntax may use its repository-wide resolution rules during initial observation because a bare wiki target is not necessarily relative to the source directory.
 
 Candidate discovery can use:
 
@@ -198,8 +198,8 @@ Candidate lists are normalized and sorted before they are stored or displayed.
 | Status | Meaning | Rewrite eligibility | Unresolved |
 | --- | --- | --- | --- |
 | `valid` | The authored destination resolves exactly under current syntax rules. | None required. | No |
-| `case_mismatch` | The destination resolves, but authored casing differs from the actual path. | Automatic after initialization unless blocked. | No unless blocked |
-| `moved` | One deterministic target exists at a different rendered destination. | Automatic after initialization unless blocked. | No |
+| `case_mismatch` | The destination resolves, but authored casing differs from the actual path. | Automatic after the link-state baseline unless blocked. | No unless blocked |
+| `moved` | One deterministic target exists at a different rendered destination. | Automatic after the link-state baseline unless blocked. | No |
 | `broken` | No exact target or candidate exists. | None. | Yes |
 | `ambiguous` | Multiple candidate targets exist. | Requires review selection. | Yes |
 | `blocked` | A deterministic repair exactly matches an active repair block. | Suppressed until unblocked or evidence changes. | Yes |
@@ -260,13 +260,13 @@ deterministic repair
 
 An undefined explicit or collapsed reference becomes a stored `reference_use` record with `undefined_reference`. It has no target identity or repair candidate. Adding the missing definition changes the parsed document and causes normal reconciliation on the next pass.
 
-## Initialization behavior
+## Link-state baseline behavior
 
-The first link-enabled `fix` or `watch` pass creates the baseline and publishes current identities. It does not apply generated repair rewrites. The plan reports that link state is uninitialized.
+The first link-enabled `fix` or `watch` pass creates the baseline and publishes current identities. It does not apply generated repair rewrites. The plan reports that link state has no baseline.
 
-A read-only `check -l` reports initialization as required and fails without publishing state.
+A read-only `check -l` reports the missing link-state baseline and fails without publishing state. Running `ddocs init` is not required; a mutating link-enabled `fix` or `watch` pass establishes the baseline in standalone or initialized mode.
 
-Baseline parsing still records exact targets, broken links, ambiguity, undefined references, and syntax-specific observations. Automatic path repair begins only after initialized state can provide a trusted prior identity baseline.
+Baseline parsing still records exact targets, broken links, ambiguity, undefined references, and syntax-specific observations. Automatic path repair begins only after persisted state can provide a trusted prior identity baseline.
 
 ## Generated rewrite construction
 

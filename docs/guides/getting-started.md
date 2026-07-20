@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-73e8-b9e0-df6ed92de6e5
 document_type: general
 policy_exempt: false
-summary: This guide installs Demon Docs, initializes an existing repository, establishes deterministic index and link state, and reaches a clean ddocs check result.
+summary: This guide installs Demon Docs, explains standalone and initialized operation, establishes deterministic index and link state, and reaches a clean ddocs check result.
 ---
 # Getting Started
 
@@ -12,11 +12,11 @@ Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 
-This guide installs Demon Docs, initializes an existing repository, establishes deterministic index and link state, and reaches a clean `ddocs check` result.
+This guide installs Demon Docs, explains when repository initialization is optional or required, establishes deterministic index and link state, and reaches a clean `ddocs check` result.
 
 ## Overview
 
-Demon Docs has a static reconciliation core. `fix` applies deterministic repository-contained updates, while `check` verifies the same plan without writing. Watch and daemon automation are optional conveniences layered over those commands.
+Demon Docs has a static reconciliation core. `fix` applies deterministic scope-contained updates, while `check` verifies the same plan without writing. Core reconciliation and foreground `watch` work without `ddocs init`; the detached repository demon is an optional initialized-repository convenience.
 
 ## Prerequisites
 
@@ -46,27 +46,47 @@ demon --help
 
 `ddocs` is the canonical command. `demon` is an alias backed by the same application implementation.
 
-## Initialize a repository
+## Choose an operating mode
 
-From the repository root:
+### Standalone reconciliation
+
+Core index, link, health, move, and foreground-watch operations can run without initialization:
+
+```bash
+ddocs fix --root docs --docs
+ddocs fix --root docs --links
+ddocs watch --root docs --once
+ddocs check --root docs --docs --links
+```
+
+Without a selected config, built-in defaults apply. The resolved docs root is also the standalone scope boundary, so repository-wide targets outside that root are not part of normal link or reverse-index scope. Link-enabled mutating passes create private state under `docs/.ddocs/`, but no `.ddocs/config.toml` is created.
+
+### Initialized repository
+
+Initialize from the repository root when the project needs a stable repository-wide boundary, repository-local configuration, starter schemas, persistent feature toggles, linked-worktree demon bootstrap, reverse projections outside the docs root, or the detached repository demon:
 
 ```bash
 ddocs init --root docs/
 ```
 
-The documentation root must already exist. Initialization writes repository-local configuration under `.ddocs/` and records the repository and documentation boundaries.
+The documentation root must already exist. Initialization writes `.ddocs/config.toml`, installs starter schemas, and makes the directory above `.ddocs/` the repository boundary.
 
-Inspect the selected paths:
+Inspect initialized-repository paths with:
 
 ```bash
 ddocs status
+```
+
+Inspect configuration selection in either mode with:
+
+```bash
 ddocs config paths
 ddocs config show
 ```
 
 ## Review ignore rules
 
-Create or update `.docignore` at the repository root when generated, private, vendor, or scratch paths should be excluded.
+Create or update `.docignore` at the active scope root when generated, private, vendor, or scratch paths should be excluded. That is the docs root in standalone mode and the repository root in initialized mode.
 
 Demon Docs always prunes `.git/`, `.ddocs/`, `.obsidian/`, and `logseq/`. Additional repository-specific exclusions belong in `.docignore`, not in global assumptions.
 
@@ -74,9 +94,13 @@ See [Configuration Reference](../reference/configuration.md) for syntax and prec
 
 ## Establish the initial state
 
-Run:
+Run a link-enabled mutating pass in the selected mode:
 
 ```bash
+# Standalone
+ddocs fix --root docs --links
+
+# Initialized repository
 ddocs fix
 ```
 
@@ -113,9 +137,9 @@ Without selectors, configured documentation indexes, frontmatter, document-body 
 
 A successful adoption leaves:
 
-- repository-local configuration selected consistently;
+- a consistent standalone scope or initialized repository boundary;
 - documentation folder indexes in deterministic managed blocks;
-- local Markdown link state initialized;
+- a private local Markdown link-state baseline;
 - no unresolved or ambiguous links requiring user decisions;
 - a clean second `fix`; and
 - a successful `ddocs check`.
@@ -124,7 +148,7 @@ A successful adoption leaves:
 
 ### The documentation root does not exist
 
-Create or select the intended root before running `init`. Demon Docs does not invent the product's documentation taxonomy.
+Create or select the intended docs root before running reconciliation or `init`. Demon Docs does not invent the product's documentation taxonomy.
 
 ### The first link pass reports issues but does not repair moves
 
@@ -140,7 +164,7 @@ Stop and inspect configuration selection, `docs_root`, include/exclude patterns,
 
 ### Runtime state appears stale
 
-Stop foreground watchers or the repository demon, then use the recovery guidance in [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md). The private `.ddocs/` state is rebuildable, but deleting it discards link history and should be a deliberate last resort.
+Stop foreground watchers and, for initialized repositories, the repository demon. Then use the recovery guidance in [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md). Private `.ddocs/` state is rebuildable, but deleting it discards link history and should be a deliberate last resort.
 
 ## Related docs
 
@@ -155,4 +179,4 @@ Stop foreground watchers or the repository demon, then use the recovery guidance
 
 ## Notes
 
-Run the first adoption on a branch or clean working tree. Deterministic behavior makes review repeatable, but it does not replace reviewing repository changes.
+Run the first adoption on a branch or clean working tree. Start standalone when docs-scoped defaults are sufficient; initialize only when repository-level configuration or daemon ownership is useful. Deterministic behavior makes review repeatable, but it does not replace reviewing repository changes.

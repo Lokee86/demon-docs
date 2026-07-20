@@ -23,6 +23,8 @@ Demon Docs exposes the same watcher through two operational surfaces:
 
 Both surfaces call the same deterministic reconciliation core. Neither is required for `ddocs check` or `ddocs fix`.
 
+Foreground `ddocs watch` does not require repository initialization. Without `.ddocs/config.toml`, it uses the standalone docs-root scope and may create link state beneath that root. The detached repository demon is different: it requires an initialized repository because its configuration, ownership lease, feeders, shutdown state, and logs are repository-local.
+
 ## Operating model
 
 Foreground watch performs one reconciliation immediately, observes relevant filesystem locations, debounces noisy event bursts, and runs one reconciliation at a time. Changes arriving during a pass schedule one follow-up pass.
@@ -70,9 +72,9 @@ Generated Markdown rewrites record their expected content hash and affected link
 
 ## Foreground Watch versus Repository Demon
 
-Use foreground `watch` when you deliberately want the process attached to the current terminal, its output visible directly, or its lifetime controlled manually.
+Use foreground `watch` when you want standalone operation, a process attached to the current terminal, directly visible output, or manually controlled lifetime.
 
-Use the repository demon for normal self-managed local operation. Do not wrap `ddocs watch` in an additional PID-file, `setsid`, scheduled-task, or shell-startup daemonization script when the repository demon is enabled. A second lifecycle wrapper can create competing watchers and misleading status.
+Use the repository demon for self-managed local operation only after initializing the repository. Do not wrap `ddocs watch` in an additional PID-file, `setsid`, scheduled-task, or shell-startup daemonization script when the repository demon is enabled. A second lifecycle wrapper can create competing watchers and misleading status.
 
 The repository demon owns detached process startup, single-owner coordination, feeder heartbeats, shutdown grace, stale-owner recovery, and bounded repository-local logs. See [Repository Demon](./repository-demon.md).
 

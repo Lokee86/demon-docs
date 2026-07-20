@@ -114,7 +114,7 @@ Configured reverse-index roots may receive generated documentation projections. 
 
 ## `.docignore`
 
-`.docignore` lives at the repository root and uses Git ignore syntax. It applies to index scanning, frontmatter enforcement, link scanning, reverse-index traversal, and watcher event filtering as implemented by each subsystem.
+`.docignore` lives at the active scope root and uses Git ignore syntax. In standalone mode that is the resolved docs root; in initialized mode it is the repository root beside `.ddocs/`. It applies to index scanning, frontmatter enforcement, link scanning, reverse-index traversal, and watcher event filtering as implemented by each subsystem.
 
 These directories are always pruned at every depth:
 
@@ -129,7 +129,7 @@ Repository-specific exclusions belong in `.docignore`.
 
 ## `.ddocs/` private state
 
-The initialized repository stores private Demon Docs state under `.ddocs/`.
+Demon Docs stores private state under the active scope's `.ddocs/` directory. In standalone reconciliation, the docs root is also the scope root, so link-enabled mutating passes may create `<docs-root>/.ddocs/` without creating a repository config. In initialized mode, repository-root `.ddocs/` also contains `config.toml`, schemas, feature settings, review state, transactions, and demon runtime ownership.
 
 State families include:
 
@@ -160,7 +160,7 @@ Delete or reset `.ddocs/` only as a deliberate recovery action after stopping ac
 
 ## Stateless moves
 
-`ddocs mv` does not require, create, or update `.ddocs/`. It performs one explicit repository-contained move and rewrites affected Markdown directly. In an initialized repository, a later watcher or link reconciliation pass refreshes persistent identity state.
+`ddocs mv` does not require, create, or update `.ddocs/`. It performs one explicit boundary-contained move and rewrites affected Markdown directly. A later standalone or initialized link reconciliation pass can refresh persistent identity state.
 
 ## Mutation boundaries
 

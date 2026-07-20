@@ -30,23 +30,33 @@ Help is scoped to the requested command. For example, `ddocs suggestions select 
 
 Commands either inspect state, plan without writing, apply deterministic repository changes, run foreground automation, or manage the repository demon lifecycle.
 
+## Standalone and initialized modes
+
+`ddocs init` is not a prerequisite for ordinary reconciliation.
+
+Without an initialized repository, `check`, `fix`, and foreground `watch` use the selected config or built-in defaults. The resolved docs root becomes both the managed docs root and the standalone scope boundary. Link-enabled mutating passes may create private state under `<docs-root>/.ddocs/`; they do not create `.ddocs/config.toml` or make `ddocs status` and the detached demon available.
+
+`ddocs mv` is independently stateless. It uses the detected initialized repository root when available, otherwise the current directory or explicit `--root`, and never creates or updates `.ddocs/`.
+
+Initialize when a stable repository-wide boundary, repository-local configuration, feature toggles, starter schemas, linked-worktree demon bootstrap, reverse projections outside the docs root, or detached demon ownership is required.
+
 ## Global commands
 
 ### `ddocs init --root PATH`
 
-Initializes the current repository boundary and writes repository-local configuration. The documentation root must already exist inside the repository.
+Optionally establishes an initialized repository boundary and writes repository-local configuration. The documentation root must already exist inside the repository. Core `check`, `fix`, `watch`, and `mv` behavior does not require this command.
 
 Mutation scope: repository-local Demon Docs configuration and state initialization.
 
 ### `ddocs status`
 
-Displays selected repository root, documentation root, config path, and repository `.docignore` path.
+Displays the initialized repository root, documentation root, config path, and repository `.docignore` path. It fails when no initialized repository is discoverable.
 
 Mutation scope: none.
 
 ### `ddocs mv [--root PATH] [--dry-run] SOURCE DESTINATION`
 
-Moves one repository-contained file or directory and rewrites affected incoming links and relative links inside moved Markdown sources. It does not require, create, or update `.ddocs/` state.
+Moves one repository-contained file or directory and rewrites affected incoming links and relative links inside moved Markdown sources. It does not require, create, or update `.ddocs/` state. There is no separate `ddocs rename` command; use `ddocs mv SOURCE DESTINATION` for both moves and renames.
 
 Mutation scope: the requested filesystem source and affected repository Markdown files inside the selected boundary. `--dry-run` is read-only.
 
@@ -82,7 +92,7 @@ Mutation scope: managed documentation indexes, configured Markdown frontmatter a
 
 ### `ddocs watch`
 
-Runs one reconciliation immediately, watches relevant filesystem paths, debounces events, and serializes subsequent reconciliation passes.
+Runs one reconciliation immediately, watches relevant filesystem paths, debounces events, and serializes subsequent reconciliation passes. Foreground watch works in standalone and initialized modes.
 
 Mutation scope: the same selected authored surfaces as `fix`, plus watcher runtime activity.
 
@@ -142,7 +152,7 @@ ddocs config init --global
 
 `paths` reports configuration locations. `show` displays the resolved configuration. `init` writes a local or global standalone configuration template.
 
-Repository-local `.ddocs/config.toml` remains the preferred initialized-repository configuration.
+Repository-local `.ddocs/config.toml` is the initialized-repository configuration. It is optional when built-in defaults or a standalone local/global config are sufficient.
 
 ## Codemap commands
 
@@ -273,7 +283,7 @@ Configuration can override these conventions.
 
 ## Diagnostics and failure behavior
 
-`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including frontmatter violations, broken or ambiguous links, uninitialized link state, and orphan managed Markdown documents when links are selected.
+`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including frontmatter violations, broken or ambiguous links, a missing link-state baseline, and orphan managed Markdown documents when links are selected.
 
 `fix` does not guess among multiple plausible targets. Ambiguous sources remain unchanged and are exposed through `ddocs suggestions`.
 
@@ -286,7 +296,12 @@ Use [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md) for the be
 ## Examples
 
 ```bash
-# Initialize and reconcile the default docs root.
+# Reconcile the default docs root without repository initialization.
+ddocs fix --root docs --docs
+ddocs fix --root docs --links
+ddocs check --root docs --docs --links
+
+# Optionally initialize a repository-wide configuration and state boundary.
 ddocs init --root docs/
 ddocs fix
 ddocs check

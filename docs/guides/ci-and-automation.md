@@ -20,8 +20,8 @@ This guide adds Demon Docs verification to CI and explains when to use foregroun
 
 ## Prerequisites
 
-- Demon Docs is initialized for the repository.
-- A local `ddocs fix` followed by `ddocs check` succeeds.
+- The intended standalone scope or initialized repository configuration is selected consistently.
+- A local link-enabled `ddocs fix` has established the required link-state baseline, followed by a successful `ddocs check`.
 - CI can install or build the Go command.
 - Repository configuration and `.docignore` are committed when they are intended project policy.
 
@@ -67,10 +67,10 @@ Use a temporary narrow check only while introducing the tool. The intended stead
 
 ## Local foreground watch
 
-Use foreground watch when one terminal should visibly own automation:
+Use foreground watch when one terminal should visibly own automation. Repository initialization is not required:
 
 ```bash
-ddocs watch
+ddocs watch --root docs
 ```
 
 The watcher performs one immediate reconciliation, observes relevant filesystem events, debounces bursts, and serializes reconciliation passes.
@@ -79,7 +79,7 @@ Use `Ctrl+C` or the terminal's normal process control to stop it.
 
 ## Repository demon
 
-Use the repository demon when shell or agent activity should keep one repository-local watcher alive without dedicating a terminal:
+After initializing the repository, use the repository demon when shell or agent activity should keep one repository-local watcher alive without dedicating a terminal:
 
 ```bash
 demon run
@@ -104,9 +104,9 @@ Do not run an additional detached wrapper around `ddocs watch` when the reposito
 
 Compare configuration selection, working directory, case sensitivity, ignored paths, generated files, and platform-specific path behavior. Run `ddocs config paths` and `ddocs config show` in both environments.
 
-### CI reports uninitialized link state
+### CI reports a missing link-state baseline
 
-Establish and commit the intended authored repository changes locally. Private `.ddocs/` runtime/object state is repository-local but normally not a portable CI artifact; CI should not be expected to infer pre-baseline move history.
+This is not a request to run `ddocs init`. A mutating link-enabled `fix` or `watch` pass establishes the baseline in standalone or initialized mode. Establish and preserve the intended baseline strategy locally; CI should not be expected to infer pre-baseline move history.
 
 ### A watcher appears to undo manual work
 

@@ -20,13 +20,15 @@ Demon Docs is configured with TOML. The primary config model lives in `internal/
 
 CLI help is available with `ddocs --help`, and each subcommand also supports `--help`.
 Top-level version output is available with `ddocs -v` or `ddocs --version`.
-Initialize a repository from its root directory:
+Repository initialization is optional for ordinary reconciliation. Without it, `check`, `fix`, and foreground `watch` use a standalone scope based on the selected or built-in docs root.
+
+Initialize from the repository root when repository-local configuration, a repository-wide boundary, starter schemas, feature toggles, linked-worktree daemon bootstrap, or the detached demon is needed:
 
 ```bash
 ddocs init --root docs/
 ```
 
-This creates `.ddocs/config.toml`. Commands run anywhere below that directory search upward for `.ddocs/`, treat its parent as the repository root, and resolve the configured docs root from there. `ddocs status` prints the resolved repository, docs root, config, and `.docignore` paths.
+This creates `.ddocs/config.toml`. Commands run anywhere below that directory search upward for `.ddocs/`, treat its parent as the repository root, and resolve the configured docs root from there. `ddocs status` reports only this initialized-repository scope.
 
 The `config` subcommand provides:
 
@@ -346,7 +348,7 @@ ddocs fix --root docs --no-parent-link-indexed-files
 
 ## Default Configuration
 
-The defaults reflect the standalone repo behavior:
+The following block is the initialized-repository starter configuration written by `ddocs init`; it is not identical to no-config standalone behavior. With built-in standalone defaults, indexes and links are enabled, the docs root is `docs`, frontmatter and body-format enforcement are disabled, reverse roots are empty, and the detached demon is unavailable because no initialized repository exists:
 
 ```toml
 docs_root = "docs"
@@ -673,7 +675,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, frontmatter enforcement, document-body format enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
+An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. A standalone scope instead uses `.docignore` at its resolved docs root. It excludes paths from index traversal, frontmatter enforcement, document-body format enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -856,9 +858,9 @@ In that setup:
 
 ## Link State
 
-Markdown link reconciliation is controlled by `[links].enabled`. Its persistent, schema-versioned state is stored in the initialized repository's private `.ddocs/` object repository. Demon Docs uses internal go-git object and reference plumbing. Link state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither ref creates commits in the user's normal Git history or exposes a user-facing Git workflow for private state.
+Markdown link reconciliation is controlled by `[links].enabled`. Its persistent, schema-versioned state is stored in the active scope's private `.ddocs/` object repository: beneath the docs root in standalone mode or beneath the repository root in initialized mode. Demon Docs uses internal go-git object and reference plumbing. Link state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither ref creates commits in the user's normal Git history or exposes a user-facing Git workflow for private state.
 
-The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. With link maintenance enabled, `check -l` is read-only and reports uninitialized state rather than creating it. With link maintenance disabled, selected and default reconciliation passes may publish tracking-only state while leaving every document unchanged. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
+The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. With link maintenance enabled, `check -l` is read-only and reports a missing link-state baseline rather than creating it. With link maintenance disabled, selected and default reconciliation passes may publish tracking-only state while leaving every document unchanged. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 
 ## Code map
 

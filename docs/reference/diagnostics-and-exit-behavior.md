@@ -52,11 +52,11 @@ More than one candidate could satisfy a missing or moved target.
 
 The source remains unchanged. User selection is required.
 
-### Uninitialized state
+### Missing baseline
 
-A stateful subsystem lacks the baseline needed to infer history safely.
+A stateful subsystem lacks the persisted baseline needed to infer history safely. This is not equivalent to an uninitialized Demon Docs repository.
 
-The first link-enabled mutating pass records current state rather than pretending to know earlier moves.
+The first link-enabled mutating pass records current state rather than pretending to know earlier moves. It can do so in standalone or initialized mode.
 
 ### Orphan document
 
@@ -118,7 +118,7 @@ These commands should succeed when repository and configuration selection can be
 
 ### `check`
 
-Returns success only when every selected subsystem is clean and sufficiently initialized for verification.
+Returns success only when every selected subsystem is clean and has the baseline or state required for verification.
 
 Returns non-zero for pending work, unresolved selected-system conditions, frontmatter or document-format violations, orphan documents when links are selected, or reverse-index orphans when reverse indexes are selected. Frontmatter warnings may be printed while the command still succeeds.
 

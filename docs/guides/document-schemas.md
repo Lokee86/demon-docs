@@ -32,13 +32,15 @@ Demon Docs does not rewrite prose to force a schema match. Deterministic structu
 
 ## Prerequisites
 
-Initialize the repository and confirm scope:
+This schema workflow intentionally uses an initialized repository because `ddocs schema init` installs repository-local starter policy under `.ddocs/schemas/`:
 
 ```bash
 ddocs init --root docs
 ddocs status
 ddocs config show
 ```
+
+Initialization is not required for ordinary index, link, health, move, or foreground-watch operations. It is required here for the schema installer and the repository-local schema paths used by the examples.
 
 The documentation root must exist inside the selected repository. Shared schemas are human-authored project policy; review them before applying body-format enforcement across an existing documentation tree.
 

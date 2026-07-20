@@ -18,11 +18,11 @@ This guide configures and verifies code-folder reverse indexes so code directori
 
 Reverse indexes project existing codemap targets back into selected code folders. They do not infer ownership. A documentation page must contain an explicit target under a configured codemap heading before it can appear as a backlink.
 
-Use `check --reverse` to preview required generated changes, `fix --reverse` to apply them, and `watch --reverse` only as optional local automation.
+Use `check --reverse` to preview required generated changes, `fix --reverse` to apply them, and `watch --reverse` only as optional local automation. Reverse reconciliation can operate in a standalone scope, but targets and outputs must remain inside that scope; the repository-wide layout in this guide therefore uses initialization.
 
 ## Prerequisites
 
-- Demon Docs is initialized for the repository.
+- Demon Docs is initialized because this guide places reverse-index outputs in code roots outside the docs root; initialization establishes the wider repository boundary.
 - The configured documentation root exists.
 - At least one documentation page contains a configured codemap section with file or folder targets.
 - The intended code roots are inside the repository and outside the documentation root.

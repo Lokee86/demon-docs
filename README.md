@@ -15,7 +15,7 @@ Demon Docs can:
 - validate and repair supported Markdown, wiki, reference, image, and local HTML targets;
 - report managed Markdown documents with no meaningful inbound links;
 - move a repository-contained file or directory and rewrite affected links without initialization;
-- retain stable file identities and path history in a private `.ddocs/` repository;
+- retain stable file identities and path history in private `.ddocs/` state, under the standalone docs root or the initialized repository root;
 - expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
 - record applied normal repairs with bounded, hash-guarded undo and repair blocks;
 - explicitly inspect, preview, update, and verify unified managed codemap sections;
@@ -57,14 +57,20 @@ demon --help
 
 ## Quick start
 
-Use the stateless refactoring command without initializing a repository:
+Run index, link, health, move, and foreground-watch operations without initializing a repository:
 
 ```bash
+ddocs fix --root docs --docs
+ddocs fix --root docs --links
+ddocs watch --root docs --once
 ddocs mv --dry-run docs/old.md docs/new.md
 ddocs mv docs/old.md docs/new.md
+ddocs check --root docs --docs --links
 ```
 
-For persistent indexes, link history, health checks, review history, reverse indexes, and automation, initialize the repository:
+In standalone mode, the resolved docs root is also the scope boundary. The first link-enabled mutating pass creates private identity and history state beneath `docs/.ddocs/`; it does not create `.ddocs/config.toml`.
+
+Initialize only when repository-level configuration or lifecycle features are needed:
 
 ```bash
 ddocs init --root docs/
@@ -73,22 +79,16 @@ ddocs fix
 ddocs check
 ```
 
-The first link-enabled mutating pass establishes private identity and history state. A second `fix` verifies idempotence before the read-only `check` gate.
+Initialization establishes a stable repository-wide boundary and enables repository discovery, `ddocs status`, feature toggles, starter schemas, linked-worktree bootstrap, reverse projections outside the docs root, and the detached repository demon. A second `fix` verifies idempotence before the read-only `check` gate.
 
-Inspect repository selection at any time:
-
-```bash
-ddocs status
-ddocs config paths
-ddocs config show
-```
+Inspect configuration selection at any time with `ddocs config paths` and `ddocs config show`. `ddocs status` specifically reports an initialized repository.
 
 See [Getting Started](docs/guides/getting-started.md) for adoption, ignore rules, subsystem selection, and recovery guidance.
 
 ## Primary commands
 
 ```text
-ddocs init         initialize repository-local configuration
+ddocs init         optionally initialize repository-local configuration and daemon scope
 ddocs status       show selected repository and documentation paths
 ddocs mv           move a file or directory and rewrite affected links
 ddocs new          create a document from a configured document schema
@@ -148,23 +148,23 @@ demon --status
 demon --logs
 ```
 
-Watch and demon modes are convenience layers. `ddocs check` remains the authoritative normal reconciliation CI and recovery surface. Codemap-generation convergence requires the separate read-only `ddocs codemaps check --root ...` command.
+Foreground `ddocs watch` works in standalone or initialized mode. The detached repository demon requires an initialized repository because its configuration, ownership, feeders, and logs are repository-local. Both are convenience layers: `ddocs check` remains the authoritative normal reconciliation CI and recovery surface. Codemap-generation convergence requires the separate read-only `ddocs codemaps check --root ...` command.
 
 See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon](docs/operations/repository-demon.md).
 
 ## Documentation
 
-- [Documentation index](docs/README.md)
+- [Documentation index](docs/INDEX.md)
 - [Documentation policy](docs/documentation-policy.md)
-- [Agent guidance](docs/agent/README.md)
-- [Guides](docs/guides/README.md)
-- [Reference](docs/reference/README.md)
-- [Architecture](docs/architecture/README.md)
-- [Operations](docs/operations/README.md)
-- [Current limitations](docs/limits/README.md)
-- [Research](docs/research/README.md)
-- [Planning](docs/planning/README.md)
-- [Development](docs/development/README.md)
+- [Agent guidance](docs/agent/INDEX.md)
+- [Guides](docs/guides/INDEX.md)
+- [Reference](docs/reference/INDEX.md)
+- [Architecture](docs/architecture/INDEX.md)
+- [Operations](docs/operations/INDEX.md)
+- [Current limitations](docs/limits/INDEX.md)
+- [Research](docs/research/INDEX.md)
+- [Planning](docs/planning/INDEX.md)
+- [Development](docs/development/INDEX.md)
 
 Current behavior, future work, and benchmark evidence are intentionally separated. The [Roadmap](docs/planning/roadmap.md) summarizes sequencing but is not the canonical reference for shipped behavior.
 

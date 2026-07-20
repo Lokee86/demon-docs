@@ -92,7 +92,7 @@ The state is implementation-owned and schema-versioned. Source files are not mod
 
 The first link-enabled `fix` or `watch` pass establishes the baseline state and does not repair links. Existing broken links are reported.
 
-`check -l` remains read-only. When link state has not been initialized, it reports that initialization is required and exits non-zero.
+`check -l` remains read-only. When no link-state baseline exists, it reports the missing baseline and exits non-zero. This does not mean `ddocs init` is required; a mutating link-enabled `fix` or `watch` pass establishes the baseline in standalone or initialized mode.
 
 After the baseline exists, later passes can repair links using recorded identity and current filesystem evidence.
 
