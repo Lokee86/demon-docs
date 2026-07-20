@@ -260,7 +260,8 @@ func TestDisabledLinksKeepStateWithoutRewriting(t *testing.T) {
 }
 
 func starterWithoutFrontmatter(root string) string {
-	return strings.Replace(config.RepositoryStarterText(root), "[frontmatter]\nenabled = true", "[frontmatter]\nenabled = false", 1)
+	text := strings.Replace(config.RepositoryStarterText(root), "[frontmatter]\nenabled = true", "[frontmatter]\nenabled = false", 1)
+	return strings.Replace(text, "[format]\nenabled = true", "[format]\nenabled = false", 1)
 }
 
 func assertDDocsState(t *testing.T, root string) {

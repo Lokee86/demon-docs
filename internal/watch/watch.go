@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/documentpolicy"
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/links"
@@ -45,7 +46,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 }
 
 func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.Config, debounce *float64, once bool, out io.Writer) error {
-	return RootSelected(ctx, root, ignoreRoot, c, Features{Indexes: true, Frontmatter: c.Frontmatter.Enabled}, debounce, once, out)
+	return RootSelected(ctx, root, ignoreRoot, c, Features{Indexes: true, Frontmatter: c.Frontmatter.Enabled, Format: c.Format.Enabled}, debounce, once, out)
 }
 
 func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer) error {
@@ -85,6 +86,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		var diagnostics []string
 		unresolved := 0
 		frontmatterUnresolved := 0
+		formatUnresolved := 0
 		if features.Indexes {
 			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
 			if err != nil {
@@ -111,6 +113,23 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				diagnostics = append(diagnostics, frontmatterDiagnostic(diagnostic))
 				if !diagnostic.Warning && !diagnostic.Resolved {
 					frontmatterUnresolved++
+				}
+			}
+		}
+		if features.Format {
+			plan, err := documentpolicy.Build(repositoryRoot, docsRoot, c, true)
+			if err != nil {
+				return err
+			}
+			count, err := documentpolicy.Apply(plan, docsRoot)
+			if err != nil {
+				return err
+			}
+			changed += count
+			for _, diagnostic := range plan.Diagnostics {
+				diagnostics = append(diagnostics, formatDiagnostic(diagnostic))
+				if !diagnostic.Warning && !diagnostic.Resolved {
+					formatUnresolved++
 				}
 			}
 		}
@@ -153,6 +172,9 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		if frontmatterUnresolved > 0 {
 			fmt.Fprintf(out, "%s ddocs watch unresolved frontmatter issue(s): %d\n", timestamp(), frontmatterUnresolved)
 		}
+		if formatUnresolved > 0 {
+			fmt.Fprintf(out, "%s ddocs watch unresolved document-format issue(s): %d\n", timestamp(), formatUnresolved)
+		}
 		return nil
 	}
 	if err := run(); err != nil {
@@ -172,6 +194,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 	watcher = w
 	defer w.Close()
 	watchedDirs := map[string]bool{}
+	formatWatched := map[string]bool{}
 	if filepath.Clean(repositoryRoot) != filepath.Clean(watchRoot) {
 		if err := w.Add(repositoryRoot); err != nil {
 			return fmt.Errorf("watch repository root %s: %w", repositoryRoot, err)
@@ -182,6 +205,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 	}
 	if err := addExternalWatches(w, externalDirectories, externalWatched); err != nil {
 		return fmt.Errorf("watch external link targets: %w", err)
+	}
+	if features.Format {
+		if err := addFormatWatches(w, repositoryRoot, c, formatWatched); err != nil {
+			return fmt.Errorf("watch document schemas: %w", err)
+		}
 	}
 	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
 	interval := 100 * time.Millisecond
@@ -230,6 +258,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				scheduler.MarkChanged()
 				continue
 			}
+			if features.Format && event.Op&fsnotify.Create != 0 && formatSchemaEvent(event.Name, repositoryRoot, c, false) {
+				if err := addFormatWatches(w, repositoryRoot, c, formatWatched); err != nil {
+					return fmt.Errorf("watch document schemas: %w", err)
+				}
+			}
 			if event.Op&fsnotify.Create != 0 && repository.Contains(watchRoot, event.Name) {
 				if st, err := os.Stat(event.Name); err == nil && st.IsDir() {
 					ignored, err := policy.Ignored(event.Name, true)
@@ -243,13 +276,16 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 					}
 				}
 			}
-			wasDirectory := watchedDirs[event.Name]
+			wasDirectory := watchedDirs[event.Name] || formatWatched[event.Name]
 			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 {
 				if wasDirectory {
 					delete(watchedDirs, event.Name)
 				}
 				if externalWatched[event.Name] {
 					delete(externalWatched, event.Name)
+				}
+				if formatWatched[event.Name] {
+					delete(formatWatched, event.Name)
 				}
 			}
 			relevant := isExternal || relevantSelectedWithPolicy(event.Name, c, policy, docsRoot, repositoryRoot, features, wasDirectory)
@@ -353,6 +389,20 @@ func frontmatterDiagnostic(diagnostic frontmatter.Diagnostic) string {
 		status = "repaired"
 	}
 	return fmt.Sprintf("Frontmatter %s at %s: %s", status, location, diagnostic.Message)
+}
+
+func formatDiagnostic(diagnostic documentpolicy.Diagnostic) string {
+	location := diagnostic.Path
+	if diagnostic.Section != "" {
+		location += ":" + diagnostic.Section
+	}
+	status := "issue"
+	if diagnostic.Warning {
+		status = "warning"
+	} else if diagnostic.Resolved {
+		status = "repaired"
+	}
+	return fmt.Sprintf("Document format %s at %s: %s", status, location, diagnostic.Message)
 }
 
 func timestamp() string { return time.Now().Format("2006-01-02T15:04:05") }

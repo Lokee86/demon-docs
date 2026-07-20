@@ -21,6 +21,7 @@ Exact public contracts for commands, configuration, managed files, private state
 - [compatibility-and-migrations.md](compatibility-and-migrations.md) - Supported legacy names, automatic state migrations, schema refusal, and upgrade compatibility boundaries.
 - [configuration.md](configuration.md) - Configuration selection, defaults, keys, examples, and repository scope rules.
 - [diagnostics-and-exit-behavior.md](diagnostics-and-exit-behavior.md) - Diagnostic classes, non-zero conditions, ambiguity behavior, and output expectations.
+- [document-schemas.md](document-schemas.md) - TOML document templates, Markdown body-format enforcement, document-specific exceptions, and schema migrations.
 - [frontmatter.md](frontmatter.md) - YAML/TOML front matter schemas, field rules, immutable values, conditional requirements, and repair behavior.
 - [managed-files-and-state.md](managed-files-and-state.md) - Managed Markdown blocks, `.docignore`, `.ddocs/` state, source-preservation guarantees, and mutation boundaries.
 - [supported-link-syntax.md](supported-link-syntax.md) - Exact recognized Markdown, reference, wiki, image, and local HTML link forms, preservation rules, and exclusions.

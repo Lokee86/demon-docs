@@ -50,6 +50,24 @@ Moves one repository-contained file or directory and rewrites affected incoming 
 
 Mutation scope: the requested filesystem source and affected repository Markdown files inside the selected boundary. `--dry-run` is read-only.
 
+### `ddocs new [--force] DOCUMENT_TYPE PATH`
+
+Creates a Markdown document from `.ddocs/schemas/<document-type>.toml`. The schema name becomes `document_type`; configured frontmatter and Markdown sections are created together. Existing files require interactive confirmation or `--force`.
+
+Mutation scope: the requested new document only.
+
+### `ddocs format ignore|merge|delete ...`
+
+Resolves one document-body format conflict explicitly. `ignore` creates or updates the document-specific TOML schema, `merge` combines duplicate sibling sections, and `delete` removes one selected occurrence.
+
+Mutation scope: the selected document and, for `ignore`, `.ddocs/document-schemas/<document-id>.toml`.
+
+### `ddocs schema init [--force]`
+
+Writes the provided Space Rocks-derived starter TOML schemas. Existing schema files are preserved unless `--force` is supplied.
+
+Mutation scope: the configured shared schema directory.
+
 ### `ddocs check`
 
 Computes reconciliation without writing authored repository files or frontmatter state. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
@@ -60,7 +78,7 @@ Mutation scope: no authored-file writes. Internal read/cache behavior remains im
 
 Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation.
 
-Mutation scope: managed documentation indexes, configured Markdown frontmatter beneath the docs root, recognized repository Markdown link paths, configured reverse-index outputs, and private `.ddocs/` state.
+Mutation scope: managed documentation indexes, configured Markdown frontmatter and body structure beneath the docs root, recognized repository Markdown link paths, configured reverse-index outputs, and private `.ddocs/` state.
 
 ### `ddocs watch`
 
@@ -71,13 +89,16 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
 ## Subsystem selectors
 
 ```text
--d, --docs     documentation indexes, parent navigation, and configured frontmatter
+-d, --docs     documentation indexes, configured frontmatter, and document-body format
+    --frontmatter
+               configured frontmatter only
+    --format   document-body format only
 -l, --links    repository-local Markdown link inventory and reconciliation
 -r, --reverse  code-folder reverse indexes
 -i, --indexes  compatibility alias for --docs
 ```
 
-When any selector is supplied, only selected systems run. Without selectors, documentation indexes, configured frontmatter, and links run; reverse indexes also run when reverse roots are configured or supplied.
+When any selector is supplied, only selected systems run. Without selectors, documentation indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when reverse roots are configured or supplied.
 
 Selectors apply to `check`, `fix`, and `watch` where supported.
 
@@ -209,8 +230,16 @@ ddocs check --links
 ddocs suggestions
 ddocs changes
 
-# Reconcile documentation indexes and configured frontmatter.
+# Reconcile documentation indexes, frontmatter, and body format.
 ddocs fix --docs
+
+# Run the policy operations independently.
+ddocs check --frontmatter
+ddocs fix --format
+
+# Create and explicitly resolve a document.
+ddocs new service docs/services/new-service.md
+ddocs format ignore --heading "Appendix" docs/guide.md
 
 # Run one watcher-path pass and exit.
 ddocs watch --root docs --once
@@ -230,6 +259,7 @@ ddocs config show
 - [Evaluating Codemap Suggestions](../guides/evaluating-codemap-suggestions.md)
 - [Supported Link Syntax](supported-link-syntax.md)
 - [Configuration Reference](configuration.md)
+- [Document Schemas And Format Enforcement](document-schemas.md)
 - [Compatibility and Migrations](compatibility-and-migrations.md)
 - [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md)
 - [Managed Files and State](managed-files-and-state.md)

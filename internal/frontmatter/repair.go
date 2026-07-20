@@ -33,7 +33,7 @@ func replacementValue(field config.FrontmatterField, schema config.Frontmatter, 
 	}
 	switch kind {
 	case "uuid":
-		value, err := newUUIDv7(now.UTC())
+		value, err := NewUUIDv7(now.UTC())
 		if err != nil {
 			return nil, false, fmt.Errorf("generate UUID: %w", err)
 		}

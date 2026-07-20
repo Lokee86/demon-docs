@@ -34,6 +34,12 @@ A Markdown file beneath the configured docs root has missing, invalid, immutable
 
 Warning-mode unknown fields are preserved and reported without failing solely because of the warning.
 
+### Document-format violation
+
+A Markdown document does not match its selected TOML document schema. Violations include missing sections, incorrect order or nesting, incorrect heading levels, unresolved unknown human-authored sections, duplicate sections, invalid aliases, invalid document-specific schemas, and invalidated document-specific exceptions.
+
+`check` reports without writing. `fix` applies deterministic structure changes, but an unresolved unknown or duplicate section blocks all body-format mutation for that document during the run. Diagnostics list the explicit actions available through `ddocs format`: ignore into the document-specific schema, merge, delete an occurrence, or repair manually.
+
 ### Broken target
 
 A recognized local reference resolves to no current target.
@@ -90,7 +96,7 @@ These commands should succeed when repository and configuration selection can be
 
 Returns success only when every selected subsystem is clean and sufficiently initialized for verification.
 
-Returns non-zero for pending work, unresolved selected-system conditions, frontmatter violations, orphan documents when links are selected, or reverse-index orphans when reverse indexes are selected. Frontmatter warnings may be printed while the command still succeeds.
+Returns non-zero for pending work, unresolved selected-system conditions, frontmatter or document-format violations, orphan documents when links are selected, or reverse-index orphans when reverse indexes are selected. Frontmatter warnings may be printed while the command still succeeds.
 
 ### `mv`
 
@@ -98,7 +104,7 @@ Returns success after the explicit move and every planned rewrite complete. Dry-
 
 ### `fix`
 
-Returns success when safe planned mutations are applied and no unresolved selected-system condition remains. Frontmatter repair may apply deterministic fields and still return non-zero when authored input is required. Ambiguous link items remain unchanged and non-zero.
+Returns success when safe planned mutations are applied and no unresolved selected-system condition remains. Frontmatter repair may apply deterministic fields and still return non-zero when authored input is required. Body-format repair may apply safe changes to some documents while returning non-zero for documents blocked by unresolved human-authored sections. Ambiguous link items remain unchanged and non-zero.
 
 ### `suggestions` and `changes`
 
@@ -131,7 +137,7 @@ Machine-readable output is not implied unless a command explicitly documents suc
 
 Demon Docs should fail without broad mutation when:
 
-- configuration or the selected frontmatter schema cannot be validated safely;
+- configuration, the selected frontmatter schema, or the effective document schema cannot be validated safely;
 - a root escapes repository scope;
 - expected source content changed after planning;
 - atomic replacement cannot complete;
@@ -167,6 +173,7 @@ ddocs config show
 - [CLI Reference](cli.md)
 - [Managed Files and State](managed-files-and-state.md)
 - [Configuration Reference](configuration.md)
+- [Document Schemas And Format Enforcement](document-schemas.md)
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)
 - [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)

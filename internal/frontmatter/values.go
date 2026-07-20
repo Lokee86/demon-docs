@@ -67,7 +67,7 @@ func validateValue(kind string, value any) (any, error) {
 	return value, nil
 }
 
-func newUUIDv7(now time.Time) (string, error) {
+func NewUUIDv7(now time.Time) (string, error) {
 	var raw [16]byte
 	if _, err := rand.Read(raw[:]); err != nil {
 		return "", err
