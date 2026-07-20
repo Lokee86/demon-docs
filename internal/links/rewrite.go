@@ -1,15 +1,13 @@
 package links
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"sort"
 
+	"github.com/Lokee86/demon-docs/internal/filetxn"
 	"github.com/Lokee86/demon-docs/internal/review"
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
@@ -27,8 +25,8 @@ type LinkTransformation struct {
 }
 
 // GeneratedRewrite is a complete, content-addressed rewrite for one source
-// Markdown file. Its unexported data is populated by NewGeneratedRewrite so
-// callers cannot accidentally apply text with a different line-ending style.
+// Markdown file. Its unexported transaction is populated by the constructors so
+// callers cannot apply text with a different line-ending style.
 type GeneratedRewrite struct {
 	SourceFileID       string                `json:"source_file_id"`
 	Path               string                `json:"path"`
@@ -39,8 +37,7 @@ type GeneratedRewrite struct {
 	Selection          review.SelectionMode  `json:"selection,omitempty"`
 	OriginSuggestionID string                `json:"origin_suggestion_id,omitempty"`
 
-	oldData []byte
-	newData []byte
+	transaction filetxn.Rewrite
 }
 
 // Suppression describes a generated write that a watcher can suppress when it
@@ -90,110 +87,50 @@ func NewGeneratedRewriteBytes(sourceFileID, path string, oldData, newData []byte
 }
 
 func newGeneratedRewriteBytes(sourceFileID, path string, oldData, newData []byte, transformations []LinkTransformation) GeneratedRewrite {
+	transaction := filetxn.New(path, oldData, newData)
 	return GeneratedRewrite{
 		SourceFileID:      sourceFileID,
-		Path:              filepath.Clean(path),
-		ExpectedOldSHA256: sha256Digest(oldData),
-		ExpectedNewSHA256: sha256Digest(newData),
+		Path:              transaction.Path(),
+		ExpectedOldSHA256: transaction.ExpectedOldSHA256(),
+		ExpectedNewSHA256: transaction.ExpectedNewSHA256(),
 		Transformations:   append([]LinkTransformation(nil), transformations...),
 		Kind:              review.SuggestionLinkRepair,
 		Selection:         review.SelectionAutomatic,
-		oldData:           append([]byte(nil), oldData...),
-		newData:           append([]byte(nil), newData...),
+		transaction:       transaction,
 	}
 }
 
-func (r GeneratedRewrite) OldData() []byte { return append([]byte(nil), r.oldData...) }
-func (r GeneratedRewrite) NewData() []byte { return append([]byte(nil), r.newData...) }
+func (rewrite GeneratedRewrite) OldData() []byte { return rewrite.transaction.OldData() }
+func (rewrite GeneratedRewrite) NewData() []byte { return rewrite.transaction.NewData() }
 
-// ApplyGenerated applies a batch only after every source file's expected old
-// hash has been verified. Each write uses a same-directory temporary file and
-// an OS-specific atomic replacement, then verifies the resulting new hash.
+// ApplyGenerated delegates filesystem safety to the shared content-addressed
+// transaction while retaining link-specific suppression metadata.
 func ApplyGenerated(rewrites []GeneratedRewrite) ([]Suppression, error) {
-	pending := make([]pendingRewrite, 0, len(rewrites))
-	seen := make(map[string]struct{}, len(rewrites))
+	transactions := make([]filetxn.Rewrite, len(rewrites))
 	for index, rewrite := range rewrites {
 		if rewrite.Path == "" {
 			return nil, fmt.Errorf("generated rewrite %d has an empty path", index)
 		}
-		path := filepath.Clean(rewrite.Path)
-		key := pathKey(path)
-		if _, exists := seen[key]; exists {
-			return nil, fmt.Errorf("generated rewrite batch contains duplicate path: %s", path)
+		if !rewrite.transaction.Prepared() {
+			return nil, fmt.Errorf("generated rewrite %s was not created by NewGeneratedRewrite", rewrite.Path)
 		}
-		seen[key] = struct{}{}
-		if rewrite.ExpectedOldSHA256 == "" || rewrite.ExpectedNewSHA256 == "" {
-			return nil, fmt.Errorf("generated rewrite %s is missing an expected hash", path)
+		if filepath.Clean(rewrite.Path) != rewrite.transaction.Path() ||
+			rewrite.ExpectedOldSHA256 != rewrite.transaction.ExpectedOldSHA256() ||
+			rewrite.ExpectedNewSHA256 != rewrite.transaction.ExpectedNewSHA256() {
+			return nil, fmt.Errorf("generated rewrite %s does not match its prepared transaction", rewrite.Path)
 		}
-		if rewrite.oldData == nil || rewrite.newData == nil {
-			return nil, fmt.Errorf("generated rewrite %s was not created by NewGeneratedRewrite", path)
-		}
-		if actual := sha256Digest(rewrite.oldData); actual != rewrite.ExpectedOldSHA256 {
-			return nil, fmt.Errorf("generated rewrite %s has inconsistent old hash: expected %s, got %s", path, rewrite.ExpectedOldSHA256, actual)
-		}
-		if actual := sha256Digest(rewrite.newData); actual != rewrite.ExpectedNewSHA256 {
-			return nil, fmt.Errorf("generated rewrite %s has inconsistent new hash: expected %s, got %s", path, rewrite.ExpectedNewSHA256, actual)
-		}
-		pending = append(pending, pendingRewrite{rewrite: rewrite, path: path})
+		transactions[index] = rewrite.transaction
 	}
 
-	// Preflight every source before allowing any worker to replace a file.
-	// This preserves the batch's all-files concurrency check as a barrier.
-	preflightErrors := runLinkWorkers(len(pending), func(index int) error {
-		return preflightGeneratedRewrite(&pending[index])
-	})
-	for _, err := range preflightErrors {
-		if err != nil {
-			return nil, err
-		}
+	applied, err := filetxn.Apply(transactions)
+	if err != nil {
+		return nil, err
 	}
-
-	suppressions := make([]Suppression, len(pending))
-	attempted := make([]int, 0, len(pending))
-	for index := range pending {
-		item := &pending[index]
-		if err := preflightGeneratedRewrite(item); err != nil {
-			return nil, generatedApplyFailure(pending, attempted, err)
-		}
-		attempted = append(attempted, index)
-		if err := replaceGenerated(item.path, item.rewrite.newData, item.mode); err != nil {
-			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("apply generated rewrite %s: %w", item.path, err))
-		}
-		current, err := os.ReadFile(item.path)
-		if err != nil {
-			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("verify generated rewrite %s: %w", item.path, err))
-		}
-		if actual := sha256Digest(current); actual != item.rewrite.ExpectedNewSHA256 {
-			return nil, generatedApplyFailure(pending, attempted, fmt.Errorf("generated rewrite new hash mismatch %s: expected %s, got %s", item.path, item.rewrite.ExpectedNewSHA256, actual))
-		}
-		suppressions[index] = suppressionFor(item.rewrite)
+	suppressions := make([]Suppression, len(applied))
+	for index := range applied {
+		suppressions[index] = suppressionFor(rewrites[index])
 	}
 	return suppressions, nil
-}
-
-type pendingRewrite struct {
-	rewrite GeneratedRewrite
-	path    string
-	mode    fs.FileMode
-}
-
-func preflightGeneratedRewrite(item *pendingRewrite) error {
-	info, err := os.Stat(item.path)
-	if err != nil {
-		return fmt.Errorf("stat generated rewrite source %s: %w", item.path, err)
-	}
-	if !info.Mode().IsRegular() {
-		return fmt.Errorf("generated rewrite source is not a regular file: %s", item.path)
-	}
-	current, err := os.ReadFile(item.path)
-	if err != nil {
-		return fmt.Errorf("read generated rewrite source %s: %w", item.path, err)
-	}
-	if actual := sha256Digest(current); actual != item.rewrite.ExpectedOldSHA256 {
-		return fmt.Errorf("generated rewrite source changed before apply %s: expected %s, got %s", item.path, item.rewrite.ExpectedOldSHA256, actual)
-	}
-	item.mode = info.Mode()
-	return nil
 }
 
 func rewriteText(source string, transformations []LinkTransformation) (string, error) {
@@ -242,39 +179,9 @@ func suppressionFor(rewrite GeneratedRewrite) Suppression {
 }
 
 func sha256Digest(data []byte) string {
-	digest := sha256.Sum256(data)
-	return "sha256:" + hex.EncodeToString(digest[:])
+	return filetxn.Digest(data)
 }
 
-func replaceGenerated(path string, data []byte, mode fs.FileMode) (err error) {
-	temporary, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".ddocs-*")
-	if err != nil {
-		return err
-	}
-	temporaryPath := temporary.Name()
-	defer func() {
-		if temporaryPath != "" {
-			_ = os.Remove(temporaryPath)
-		}
-	}()
-	if err := temporary.Chmod(mode.Perm()); err != nil {
-		_ = temporary.Close()
-		return fmt.Errorf("preserve permissions: %w", err)
-	}
-	if _, err := temporary.Write(data); err != nil {
-		_ = temporary.Close()
-		return err
-	}
-	if err := temporary.Sync(); err != nil {
-		_ = temporary.Close()
-		return err
-	}
-	if err := temporary.Close(); err != nil {
-		return err
-	}
-	if err := atomicReplace(temporaryPath, path); err != nil {
-		return err
-	}
-	temporaryPath = ""
-	return nil
+func replaceGenerated(path string, data []byte, mode fs.FileMode) error {
+	return filetxn.Replace(path, data, mode)
 }

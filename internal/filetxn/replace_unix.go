@@ -1,6 +1,6 @@
 //go:build !windows
 
-package links
+package filetxn
 
 import "os"
 

@@ -88,7 +88,7 @@ func rollbackMove(plan MovePlan) error {
 			}
 			continue
 		}
-		if err := replaceGenerated(item.rewrite.Path, item.rewrite.oldData, item.mode); err != nil {
+		if err := replaceGenerated(item.rewrite.Path, item.rewrite.OldData(), item.mode); err != nil {
 			failures = append(failures, fmt.Sprintf("restore %s: %v", item.rewrite.Path, err))
 		}
 	}

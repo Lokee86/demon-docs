@@ -98,6 +98,40 @@ func TestBuildApplyIsIdempotentPreservesCRLFAndKeepsIDAcrossMove(t *testing.T) {
 	}
 }
 
+func TestApplyRejectsLineEndingOnlyChangesAfterPlanning(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(docs, "guide.md")
+	if err := os.WriteFile(path, []byte("# Guide\r\n\r\nBody\r\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Default()
+	cfg.Frontmatter = schema()
+	field := cfg.Frontmatter.Fields["summary"]
+	field.Default = "Guide summary"
+	cfg.Frontmatter.Fields["summary"] = field
+	plan, err := Build(repo, docs, cfg, true, time.Date(2026, 7, 20, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte("# Guide\n\nBody\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Apply(repo, docs, plan); err == nil {
+		t.Fatal("expected exact-byte preflight failure")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != "# Guide\n\nBody\n" {
+		t.Fatalf("stale plan overwrote newer bytes: %q", data)
+	}
+}
+
 func TestBuildStaysInsideDocsRootAndDetectsDuplicateIDs(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")

@@ -31,6 +31,7 @@ Each surface has a strong local publication boundary. They do not form one share
 ## Code root
 
 ```text
+internal/filetxn/
 internal/links/rewrite.go
 internal/links/rewrite_transaction.go
 internal/links/apply.go
@@ -42,9 +43,11 @@ internal/ddrepo/
 
 ## Responsibilities
 
+The shared `internal/filetxn` boundary owns the content-addressed filesystem transaction used by both link and frontmatter rewrites. Link publication layers review history, graph refresh, and durable link suppressions on top of it.
+
 This boundary owns:
 
-- validating the internal consistency of generated rewrites;
+- validating the internal consistency of prepared rewrites;
 - checking every source before the first replacement;
 - checking each source again immediately before its replacement;
 - preserving source permissions and exact newline-encoded bytes;
@@ -137,7 +140,7 @@ Preparation opens the review store and validates enough metadata to build the ba
 
 ## Source-batch preflight
 
-`ApplyGenerated` validates the batch structure before reading current source files.
+`links.ApplyGenerated` validates link-specific metadata, then delegates the prepared byte transitions to `filetxn.Apply`. Frontmatter plans build the same `filetxn.Rewrite` values and call the same apply path.
 
 It rejects:
 
@@ -341,12 +344,13 @@ Do not undo the authored change merely because private state is stale. The revie
 
 ## Code map
 
-- `internal/links/rewrite.go` — rewrite model, transformation validation, batch preflight, replacement, verification, and suppression construction.
-- `internal/links/rewrite_transaction.go` — guarded rollback and rollback-error composition.
+- `internal/filetxn/` — shared rewrite model, parallel batch preflight, atomic replacement, verification, and guarded rollback.
+- `internal/links/rewrite.go` — link transformation validation, adaptation to the shared transaction, and link-specific suppression construction.
+- `internal/links/rewrite_transaction.go` — link-facing guarded rollback adapter.
 - `internal/links/apply.go` — publication sequence, review-failure compensation, refresh, and state handoff.
 - `internal/links/review_record.go` — run/change/transformation construction and review append requests.
 - `internal/links/state.go` — desired link-state projection and suppression records.
-- `internal/links/replace_unix.go` and `replace_windows.go` — platform replacement seam.
+- `internal/filetxn/replace_unix.go` and `replace_windows.go` — shared platform replacement seam.
 - `internal/review/store_batch.go` — review event preparation, commit-chain creation, compare-and-swap, and retries.
 - `internal/ddrepo/transaction.go` — sharded state-root transaction and conflict detection.
 - `internal/watch/` and `internal/links/suppression.go` — later suppression consumption; not publication ownership.
@@ -355,6 +359,7 @@ Do not undo the authored change merely because private state is stale. The revie
 
 Focused coverage includes:
 
+- `internal/filetxn/apply_test.go` — shared batch preflight, apply, rollback, and newer-content refusal.
 - `internal/links/rewrite_test.go` — transformation ranges, exact bytes, and source preservation.
 - `internal/links/rewrite_concurrency_test.go` — complete preflight barrier and suppression order.
 - `internal/links/rewrite_transaction_test.go` — rollback after write failure and refusal over changed content.
@@ -367,7 +372,7 @@ Focused coverage includes:
 Run:
 
 ```bash
-go test ./internal/links ./internal/review ./internal/ddrepo -count=1
+go test ./internal/filetxn ./internal/links ./internal/frontmatter ./internal/review ./internal/ddrepo -count=1
 ```
 
 ## Related docs

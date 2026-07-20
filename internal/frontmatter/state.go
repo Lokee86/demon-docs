@@ -18,24 +18,55 @@ type immutableRecord struct {
 	Values     map[string]any `json:"values"`
 }
 
-func readImmutable(repoRoot, relative string, values map[string]any, allowID bool) map[string]any {
+type immutableIndex struct {
+	byID   map[string]immutableRecord
+	byPath map[string]immutableRecord
+}
+
+func loadImmutableIndex(repoRoot string) immutableIndex {
+	index := immutableIndex{
+		byID:   make(map[string]immutableRecord),
+		byPath: make(map[string]immutableRecord),
+	}
 	repository, err := ddrepo.Open(filepath.Join(repoRoot, ".ddocs"))
 	if err != nil {
-		return nil
+		return index
 	}
 	tx, err := repository.Begin()
 	if err != nil {
-		return nil
+		return index
 	}
+	idNames, err := tx.Names("frontmatter-immutable-id-")
+	if err == nil {
+		for _, name := range idNames {
+			record := readImmutableRecord(tx, name)
+			if record != nil && record.DocumentID != "" {
+				index.byID[strings.ToLower(strings.TrimSpace(record.DocumentID))] = *record
+			}
+		}
+	}
+	pathNames, err := tx.Names("frontmatter-immutable-path-")
+	if err == nil {
+		for _, name := range pathNames {
+			record := readImmutableRecord(tx, name)
+			if record != nil && record.Path != "" {
+				index.byPath[filepath.ToSlash(record.Path)] = *record
+			}
+		}
+	}
+	return index
+}
+
+func (index immutableIndex) values(relative string, values map[string]any, allowID bool) map[string]any {
 	if allowID {
 		if id := documentID(values); id != "" {
-			if record := readImmutableRecord(tx, idRecordName(id)); record != nil && record.DocumentID == id {
+			if record, ok := index.byID[id]; ok && strings.EqualFold(record.DocumentID, id) {
 				return normalizeMap(record.Values)
 			}
 		}
 	}
-	record := readImmutableRecord(tx, pathRecordName(relative))
-	if record == nil || filepath.ToSlash(record.Path) != filepath.ToSlash(relative) {
+	record, ok := index.byPath[filepath.ToSlash(relative)]
+	if !ok || filepath.ToSlash(record.Path) != filepath.ToSlash(relative) {
 		return nil
 	}
 	return normalizeMap(record.Values)
