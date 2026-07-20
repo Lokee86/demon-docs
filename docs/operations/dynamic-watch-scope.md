@@ -18,7 +18,7 @@ This document explains which filesystem locations Demon Docs observes, how watch
 
 Demon Docs computes watch scope from the selected features rather than watching every reachable filesystem path.
 
-Forward-index-only watch is bounded to the documentation root. Link-enabled watch observes the repository root because changes to non-Markdown local targets can require Markdown link repair. Reverse-index watch observes configured code roots and the ancestor directories needed to discover new scope folders. Explicit external link targets may add bounded watches outside the repository at their nearest existing parent directories.
+Documentation-index, frontmatter, and document-format watch modes are bounded to the documentation root. Document-format selection also observes the configured shared and document-specific schema directories. Link-enabled watch observes the repository root because changes to non-Markdown local targets can require Markdown link repair. Reverse-index watch observes configured code roots and the ancestor directories needed to discover new scope folders. Explicit external link targets may add bounded watches outside the repository at their nearest existing parent directories.
 
 Watch scope is dynamic. New repository directories can be added while the watcher runs, `.docignore` changes can reveal previously excluded directories, deleted or renamed watched directories are removed from internal tracking, and link reconciliation can discover new external target parents.
 
@@ -26,9 +26,9 @@ Dynamic observation changes which events can schedule future reconciliation. It 
 
 ## Scope by selected feature
 
-### Forward indexes only
+### Documentation policy only
 
-When only forward indexes are selected, the base watcher observes the documentation root.
+When indexes, frontmatter, or document format are selected without links, the base watcher observes the documentation root. When document format is selected, it additionally watches the configured schema directories and their nearest existing ancestors.
 
 Relevant content is limited by:
 
@@ -39,6 +39,8 @@ Relevant content is limited by:
 - configured ignored filename suffixes;
 - temporary editor-file filtering; and
 - indexable document rules.
+
+Frontmatter and document-format selection use their own non-ignored Markdown policy; they are not limited by index include/exclude membership.
 
 Directory removal and rename events remain relevant because they can change a parent index even after the directory no longer exists.
 

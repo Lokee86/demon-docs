@@ -4,6 +4,8 @@ Demon Docs is a deterministic documentation maintenance engine for repository-ow
 
 It maintains folder indexes, validates and repairs local links, reports orphan documents, supports explicit link-aware moves, manages configured codemap sections, projects codemap references back onto code folders, and records reviewable repairs while limiting ownership to explicit managed surfaces.
 
+Configured repositories can also enforce frontmatter fields and document-body structure, create documents from TOML document schemas, and resolve explicit format conflicts without rewriting authored prose.
+
 ## Core behavior
 
 Demon Docs can:
@@ -89,6 +91,9 @@ See [Getting Started](docs/guides/getting-started.md) for adoption, ignore rules
 ddocs init         initialize repository-local configuration
 ddocs status       show selected repository and documentation paths
 ddocs mv           move a file or directory and rewrite affected links
+ddocs new          create a document from a configured document schema
+ddocs format       resolve an explicit document-body format conflict
+ddocs schema       install starter document schemas
 ddocs check        verify selected systems and report document-health failures
 ddocs fix          apply safe deterministic reconciliation
 ddocs watch        run reconciliation after relevant filesystem changes
@@ -102,7 +107,9 @@ ddocs demon        manage repository-local watcher lifecycle
 Subsystem selectors:
 
 ```text
---docs     documentation folder indexes and parent navigation
+--docs         documentation indexes, configured frontmatter, and document-body format
+--frontmatter  configured frontmatter enforcement only
+--format       document-body format enforcement only
 --links    repository-local link validation, repair, and orphan checking
 --reverse  code-folder reverse indexes
 ```
@@ -174,7 +181,7 @@ ddocs codemaps check --root docs/architecture/example.md
 
 The command adopts the complete configured section as one managed artifact, preserves existing valid links by default, automatically adds selected non-declined `hard_link` and `context` recommendations, and uses content-addressed transactional writes. Persisted declines suppress unchanged future additions. Confidence pruning is separately configurable and disabled by default.
 
-Existing configured sections are supported now. When the effective document schema requires a codemap section, the public command uses schema-defined placement to create it deterministically; documents without that schema authority remain unchanged.
+Existing configured sections are supported. When the selected effective document schema requires a codemap section, the public command creates it at the schema-defined deterministic position; documents without that schema authority remain unchanged.
 
 Codemap generation never runs through generic `fix`, generic `check`, watch, or the repository demon.
 
@@ -204,7 +211,7 @@ See [Testing and Fixtures](docs/development/testing-and-fixtures.md) and [Reposi
 
 ## Project status
 
-Repository indexing, frontmatter and document-schema enforcement, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, production codemap execution, schema-driven missing-section placement, and codemap research tooling are implemented. Broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
+Repository indexing, frontmatter enforcement, document-body format enforcement, schema-based creation, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, schema-aware codemap execution with schema-driven missing-section placement, and codemap research tooling are implemented. Broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
 
 See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 

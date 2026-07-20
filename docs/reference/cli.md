@@ -70,7 +70,7 @@ Mutation scope: the configured shared schema directory.
 
 ### `ddocs check`
 
-Computes reconciliation without writing authored repository files or frontmatter state. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
+Computes reconciliation without writing selected authored surfaces or frontmatter/document-format state. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When link maintenance is disabled but link tracking is selected, it may persist the tracking baseline; enabled link checks do not publish a replacement baseline. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
 
 Mutation scope: no authored-file writes. Internal read/cache behavior remains implementation-owned.
 
@@ -324,6 +324,7 @@ ddocs config show
 ## Related docs
 
 - [Getting Started](../guides/getting-started.md)
+- [Using Document Schemas](../guides/document-schemas.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)

@@ -18,6 +18,10 @@ The maintained description of current behavior lives in [Codemap Suggestion Algo
 
 The work was developed on July 18–19, 2026. The final algorithm baseline covered by this log is `b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1`.
 
+## Overview
+
+This is a historical development record, not the current codemap command contract. Current extraction, ranking, managed execution, and evaluation behavior belongs to the linked architecture, reference, and research owners below; retained measurements remain tied to their stated repositories and pinned artifacts.
+
 ## Fixed Design Decisions
 
 The development program began with several constraints that remained unchanged:
@@ -375,3 +379,16 @@ The algorithm is accepted for early implementation testing.
 The next work should implement the review workflow, persistent declines, and real repository dogfooding. The system must continue to present suggestions as reviewable evidence rather than automatic truth.
 
 Another tuning pass should begin only after collecting materially new evidence from additional repositories or actual user accept/decline outcomes.
+
+## Related docs
+
+- [Codemap Suggestion Algorithm](codemap-suggestion-algorithm.md)
+- [Codemap Missing-Link Evidence](codemap-evidence.md)
+- [Codemap Managed Execution](architecture/codemap-managed-execution.md)
+- [Codemap Pipeline](architecture/codemap-pipeline.md)
+- [Codemap Benchmark Methodology](research/codemap-benchmark-methodology.md)
+- [Codemap Precision Governance](research/codemap-precision-governance.md)
+
+## Notes
+
+This log preserves development history and rejected experiments. It must not be used as the sole authority for current product behavior or as a universal quality guarantee.

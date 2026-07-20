@@ -16,10 +16,12 @@ This document defines how `ddocs check`, `ddocs fix`, and `ddocs watch` resolve 
 
 ## Overview
 
-The reconciliation commands coordinate three independently owned systems:
+The reconciliation commands coordinate five independently owned systems:
 
 ```text
 documentation indexes
+configured frontmatter
+document-body format
 repository-local links and orphan health
 reverse indexes
 ```
@@ -46,6 +48,7 @@ The application boundary owns:
 - repository and docs-root scope resolution;
 - feature-selector defaults;
 - reverse-root and codemap-heading option resolution;
+- frontmatter and document-format configuration validation;
 - precondition checks before subsystem planning;
 - planner and applier ordering;
 - diagnostic and update-path rendering;
@@ -58,6 +61,8 @@ The application boundary does not own:
 
 - documentation-tree scanning or managed-block transformation;
 - link parsing, target resolution, generated rewrites, or link-state publication;
+- frontmatter parsing, field evaluation, immutable-value state, or frontmatter publication;
+- document-schema loading, Markdown body classification, format enforcement, or schema-history publication;
 - orphan relationship semantics;
 - reverse-index inventory or rendering;
 - watcher debounce and concurrency mechanics;
@@ -122,7 +127,7 @@ The resulting scope owns the repository root, docs root, repository config, and 
 
 ### Preconditions
 
-If documentation indexes or reverse indexes are selected, the docs root must exist before planning begins.
+If documentation indexes, frontmatter, document-body format, or reverse indexes are selected, the docs root must exist before planning begins.
 
 Link-only operation can run without an existing docs root because repository-local links are scoped to the repository and may target Markdown outside the configured documentation tree. Orphan projection is skipped when the docs root does not exist.
 
@@ -134,29 +139,41 @@ The selectors are:
 
 ```text
 -d, --docs, -i, --indexes
+    documentation indexes, frontmatter, and document-body format
+    --frontmatter
+    frontmatter only
+    --format
+    document-body format only
 -l, --links
+    link tracking and, when enabled in configuration, link reconciliation
 -r, --reverse
+    reverse indexes only
 ```
 
-When any selector is supplied, only explicitly selected systems run.
+When any selector is supplied, only the explicitly selected systems run. `--docs` selects all three documentation-policy systems, while `--frontmatter` and `--format` select their individual owners without also selecting indexes.
 
 When no selector is supplied:
 
 ```text
-documentation indexes = enabled
-links = enabled
-reverse indexes = enabled only when reverse roots or codemap-heading overrides are present
+documentation indexes = selected, then gated by [index].enabled
+frontmatter = selected, then gated by [frontmatter].enabled
+document-body format = selected, then gated by [format].enabled
+link tracking = selected
+link reconciliation = gated by [links].enabled
+reverse indexes = selected only when reverse roots or codemap-heading overrides are present
 ```
 
-The compatibility aliases `-i` and `--indexes` select the same documentation-index system as `-d` and `--docs`.
+The compatibility aliases `-i` and `--indexes` select the same three documentation-policy systems as `-d` and `--docs`; they no longer mean indexes alone.
 
 Feature selection is command-scoped. It does not mutate repository configuration.
 
 ## Shared planning model
 
-The three subsystem plans are independent values:
+The selected subsystem plans are independent values:
 
 - `model.ReconcileResult` for documentation indexes;
+- `frontmatter.Plan` for configured frontmatter;
+- `documentpolicy.Plan` for document-body format;
 - `links.Plan` for links; and
 - `reverseindex.Plan` for reverse indexes.
 
@@ -166,16 +183,18 @@ The exact planning order differs between read-only and mutating commands because
 
 ## `check` lifecycle
 
-`check` is read-only with respect to authored files and private reconciliation state.
+`check` is read-only with respect to authored files and the selected frontmatter, document-format, index, and reverse-index outputs. When link maintenance is disabled but link tracking is selected, the implementation may save the tracking baseline without rewriting authored links; an enabled link reconciliation check does not publish a new baseline.
 
 ### Planning order
 
 ```text
 1. build documentation-index plan when selected
 2. build reverse-index plan when selected
-3. build link plan when selected
-4. derive orphan documents from current link plan when links are selected and docs root exists
-5. aggregate failure state
+3. build frontmatter plan when selected
+4. build document-format plan when selected
+5. build link plan when selected
+6. derive orphan documents from current link plan when links are selected and docs root exists
+7. aggregate failure state
 ```
 
 Reverse planning occurs before link planning in the current application code. The plans are independent, so this ordering does not grant either subsystem ownership of the other.
@@ -186,6 +205,8 @@ Reverse planning occurs before link planning in the current application code. Th
 
 ```text
 documentation-index updates are pending
+frontmatter diagnostics remain unresolved
+document-format diagnostics remain unresolved
 link plan reports initialization, unresolved links, updates, or rewrites
 reverse-index plan reports failure
 orphan documents exist
@@ -208,12 +229,14 @@ pending documentation-index paths
 pending link-update paths
 pending reverse-index paths
 documentation-index messages
+frontmatter diagnostics
+document-format diagnostics
 link messages
 orphan messages
 reverse-index diagnostics
 ```
 
-A passing check prints only `ddocs check passed`.
+A passing check prints any non-failing frontmatter or document-format diagnostics first, then `ddocs check passed`.
 
 ### Exit behavior
 
@@ -221,7 +244,7 @@ A passing check prints only `ddocs check passed`.
 - `1` — reconciliation or health work is pending, but planning completed normally.
 - `2` — argument, configuration, scope, planner, or I/O error prevented a valid check result.
 
-The read-only command may load private state, but it does not publish a baseline or save a new link-state projection.
+The read-only command may load private state. Enabled link checks do not publish a new baseline or link-state projection; the disabled-link tracking path may save current tracking state so later enablement has a baseline.
 
 ## `fix` lifecycle
 
@@ -229,25 +252,22 @@ The read-only command may load private state, but it does not publish a baseline
 
 ### Pre-apply planning
 
-Before the first authored write:
+Before the first authored write, `fix` builds only the documentation-index plan when indexes are selected.
 
-```text
-1. build documentation-index plan when selected
-2. build reverse-index plan when selected
-```
-
-The link plan is not built yet.
+Frontmatter and document-format plans are built immediately before their respective applies so they see any earlier index changes. The link plan is built after those writes. The reverse-index plan is deliberately deferred until every earlier selected subsystem has finished, so reverse inventory and rendering observe the final post-policy and post-link repository state.
 
 ### Mutation order
 
 ```text
 1. apply documentation-index updates
-2. reconcile links against the resulting repository contents
-3. apply generated link rewrites and publish link/review state
-4. apply the previously built reverse-index plan
+2. build and apply frontmatter updates and immutable state
+3. build and apply document-format updates and schema history
+4. reconcile links against the resulting repository contents
+5. apply generated link rewrites and publish link/review state
+6. build and apply the reverse-index plan
 ```
 
-This order gives link reconciliation the current post-index Markdown content. It also keeps reverse-index application last.
+This order gives each later planner the current post-index and post-policy Markdown content. It also keeps reverse-index application last.
 
 ### Changed-file count
 
@@ -255,6 +275,8 @@ The reported `updated N file(s)` count is the sum returned by each selected appl
 
 ```text
 index files changed
++ frontmatter Markdown files changed
++ document-format Markdown files and invalidated schema files changed
 + Markdown sources rewritten by link repair
 + reverse-index files changed
 ```
@@ -269,6 +291,8 @@ After all selected applies succeed, `fix` prints:
 ddocs fix updated N file(s)
 documentation-index messages
 link messages
+frontmatter diagnostics
+document-format diagnostics
 reverse-index diagnostics
 ```
 
@@ -280,6 +304,8 @@ ddocs fix unresolved N link(s)
 
 and returns exit code `1` even though safe deterministic writes may already have been applied successfully.
 
+The same exit result is used when frontmatter or document-format diagnostics remain unresolved after safe changes.
+
 ### Partial-completion boundaries
 
 There is no command-wide rollback across the three systems.
@@ -288,9 +314,13 @@ There is no command-wide rollback across the three systems.
 
 Documentation-index writes remain. The command returns an error. A later `check` or `fix` sees the new index contents.
 
-#### Index and link apply succeed, reverse apply fails
+#### Frontmatter or document-format apply fails
 
-Documentation-index writes, authored link rewrites, review events, and published link state remain. Reverse-index files may remain unchanged or partially governed by their own apply guarantees. The command returns an error.
+Earlier documentation-index writes remain. Frontmatter and document-format applies use their own guarded file/state publication boundaries; a later subsystem is not attempted after the failing apply. A later `check` or `fix` rebuilds the affected plan from current files and private state.
+
+#### Index, policy, and link apply succeed, reverse apply fails
+
+Documentation-index writes, frontmatter/document-format writes and state, authored link rewrites, review events, and published link state remain. Reverse-index files may remain unchanged or partially governed by their own apply guarantees. The command returns an error.
 
 #### Link apply fails inside its own publication lifecycle
 
@@ -302,8 +332,8 @@ Unresolved link conditions are not application errors. Deterministic repairs and
 
 ### Exit behavior
 
-- `0` — selected writes and publications succeeded and no unresolved links remain.
-- `1` — selected writes succeeded, but unresolved link conditions remain.
+- `0` — selected writes and publications succeeded and no unresolved link, frontmatter, or document-format condition remains.
+- `1` — safe selected writes succeeded, but unresolved link, frontmatter, or document-format conditions remain.
 - `2` — argument, configuration, scope, planning, application, or I/O error interrupted the command.
 
 ## `watch` handoff lifecycle
@@ -354,7 +384,10 @@ The application layer stores no durable reconciliation graph.
 | Data | Owner |
 | --- | --- |
 | Managed index plans and file updates | `internal/reconcile` and `internal/model` |
+| Frontmatter plans, diagnostics, and immutable values | `internal/frontmatter` and `internal/ddrepo` |
+| Document schemas, body-format plans, and schema history | `internal/documentpolicy` and `internal/ddrepo` |
 | Link identities, statuses, rewrites, and private state | `internal/links` |
+| Shared content-addressed file replacement and guarded rollback | `internal/filetxn` |
 | Review events and controls | `internal/review` |
 | Reverse-index inventory and updates | `internal/reverseindex` |
 | Orphan projection | `internal/app/orphans.go` using link and docs-scope inputs |
@@ -363,9 +396,10 @@ The application layer stores no durable reconciliation graph.
 
 ## Invariants and safety boundaries
 
-- `check` never calls subsystem authored-file appliers.
+- `check` never calls authored-file appliers for indexes, frontmatter, document format, links, or reverse indexes; the disabled-link tracking path may persist its baseline as noted above.
 - Any supplied selector disables unselected default systems.
-- Link reconciliation during `fix` observes successful documentation-index writes from the same command.
+- Frontmatter and document-format reconciliation during `fix` observe successful documentation-index writes from the same command.
+- Link reconciliation during `fix` observes successful documentation-index and policy writes from the same command.
 - Reverse-index application remains after link application.
 - No subsystem failure is hidden by aggregate success output.
 - Unresolved link conditions are distinguished from fatal command errors.
@@ -391,7 +425,7 @@ Repository discovery, root containment, or docs-root resolution failure returns 
 
 ### Planner failure
 
-The first planner error aborts the command. For `check`, no authored writes have occurred. For `fix`, a later planner such as link reconciliation can fail after documentation-index writes have completed.
+The first planner error aborts the command. For `check`, no authored writes have occurred. For `fix`, a later planner such as frontmatter, document format, link reconciliation, or reverse indexes can fail after earlier documentation-index or policy writes have completed.
 
 ### Apply failure
 
@@ -428,6 +462,9 @@ Do not imply a command-wide transaction unless implementation provides rollback 
 - `internal/app/reverse_index_test.go` — reverse selection across check, fix, and watch.
 - `internal/app/orphans_integration_test.go` — link-enabled health integration.
 - `internal/reconcile/` — documentation-index planning and apply owner.
+- `internal/frontmatter/` — frontmatter planning, diagnostics, repair, and immutable-value state.
+- `internal/documentpolicy/` — document-schema selection, body-format enforcement, schema-specific operations, and schema history.
+- `internal/filetxn/` — shared content-addressed file replacement and guarded rollback.
 - `internal/links/` — link plan, generated rewrite, review event, and link-state owner.
 - `internal/reverseindex/` — reverse-index plan and apply owner.
 - `internal/watch/` — scheduler and foreground watch owner.
@@ -447,13 +484,15 @@ Focused command-lifecycle coverage includes:
 Subsystem guarantees remain covered by their package tests.
 
 ```bash
-go test ./internal/app ./internal/reconcile ./internal/links ./internal/reverseindex ./internal/watch -count=1
+go test ./internal/app ./internal/reconcile ./internal/frontmatter ./internal/documentpolicy ./internal/filetxn ./internal/links ./internal/reverseindex ./internal/watch -count=1
 ```
 
 ## Related docs
 
 - [Application Orchestration](application-orchestration.md)
 - [Reconciliation Pipeline](reconciliation-pipeline.md)
+- [Front Matter Schemas](../reference/frontmatter.md)
+- [Document Schemas And Format Enforcement](../reference/document-schemas.md)
 - [Link Reconciliation State Machine](link-reconciliation-state-machine.md)
 - [Generated Rewrite Publication](generated-rewrite-publication.md)
 - [Reverse Indexes](reverse-indexes.md)

@@ -57,7 +57,7 @@ ddocs status
 ddocs config show
 ```
 
-The public command updates existing configured sections and resolves the selected document's effective schema when the section is absent. A required schema codemap section is created at its deterministic configured position. A document whose effective schema does not declare a codemap section is skipped rather than receiving an invented placement.
+The public command updates existing configured sections and can create a missing section when the selected effective document schema declares a required codemap placement. A file whose schema is absent, optional, or has no codemap section is reported as `missing` and remains unchanged; heading configuration alone never invents placement.
 
 ## Configure recognized headings
 
@@ -373,7 +373,7 @@ Select the Markdown document that owns the codemap. Directory traversal may cont
 
 ### Section is reported missing
 
-Confirm that the heading is configured or supply `--heading`. If the document should receive a new section, ensure its effective shared or document-specific schema declares a required codemap section and deterministic placement. Heading recognition alone does not authorize Demon Docs to invent a section.
+Confirm that the heading is configured or supply `--heading`. If the section is still reported as `missing`, inspect the selected `document_type`, matching `format.path_rules`, and document-specific schema. Add a required codemap section to the effective schema when automatic placement is intended; heading recognition alone does not authorize Demon Docs to invent a section.
 
 ### More than one configured section exists
 

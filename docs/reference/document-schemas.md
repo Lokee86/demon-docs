@@ -16,7 +16,7 @@ This document defines TOML document schemas, schema selection, document creation
 
 ## Overview
 
-A document schema is both the creation template and the ongoing Markdown structure policy for one `document_type`. Frontmatter enforcement and document-body format enforcement remain separate reconciliation operations, but both belong to the document-policy system.
+A document schema is both the creation template and the ongoing Markdown structure policy for one `document_type`. Frontmatter enforcement and document-body format enforcement remain separate reconciliation operations, but both belong to the document-policy system. The same effective schema can authorize explicit codemap execution to create a missing required codemap section at a deterministic position; it does not authorize heading invention when no codemap section is declared.
 
 Shared, human-authored schemas live in:
 
@@ -221,11 +221,13 @@ Document-specific sections extend matching shared section IDs or add local IDs. 
 - `internal/documentpolicy/merge.go` — duplicate-section merge and list-only exact deduplication.
 - `internal/documentpolicy/plan.go` — invalidation, check/fix planning, and transactional application.
 - `internal/documentpolicy/resolve.go` — explicit ignore, merge, and delete operations.
+- `internal/documentpolicy/codemap.go` — effective-schema codemap placement for explicit codemap execution.
 - `internal/documentpolicy/create.go` — schema-based document creation.
 - `internal/documentpolicy/files.go` — starter-schema publication and transactional writes.
 
 ## Related docs
 
+- [Using Document Schemas](../guides/document-schemas.md)
 - [CLI Reference](cli.md)
 - [Demon Docs Configuration](configuration.md)
 - [Frontmatter](frontmatter.md)

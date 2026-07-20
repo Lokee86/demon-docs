@@ -146,7 +146,7 @@ Performs an immediate reconciliation, then reports later passes. Fatal startup c
 
 `codemap fix --dry-run` reports the same production plan without writing. `codemap fix` applies prepared rewrites through batch hash preflight and atomic replacement. A clean plan succeeds with zero updated files.
 
-A missing section is currently a no-op rather than a failure. Multiple matching sections, malformed markers, roots outside the docs tree, non-Markdown file roots, and concurrent source changes fail.
+A missing section is a no-op rather than a failure when the selected effective schema does not require a codemap section. A schema-required missing section is planned as `schema-created` and may be created at its declared position. Multiple matching sections, malformed markers, roots outside the docs tree, non-Markdown file roots, and concurrent source changes fail.
 
 ### Codemap research commands
 

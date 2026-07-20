@@ -39,17 +39,21 @@ The default policy is additive and conservative. Existing valid links remain eve
 
 Existing configured codemap sections are fully supported by the public execution commands.
 
-When a selected document has no matching section, the application resolves its effective document-policy schema and supplies any required codemap placement through `codemaprun.Options.Schema`. The command then creates the missing section at the schema-defined position before adopting and reconciling it. A document whose effective schema does not require a codemap section remains unchanged.
+When a selected document has no matching section, the application supplies `documentpolicy.CodemapSchemaProvider` through `codemaprun.Options.Schema`. The provider resolves the effective shared or document-specific schema from metadata and path rules, then returns a validated required placement when that schema declares a codemap section. The command creates the section at that deterministic position before adopting and reconciling it.
+
+This distinction is important:
 
 ```text
 implemented now
 = recognize, adopt, inspect, check, and update existing configured sections
-= resolve shared or document-specific schemas for selected documents
+= resolve the selected effective schema for a document
 = create a required missing section at its deterministic schema position
-= leave documents without schema placement authority unchanged
+
+not created automatically
+= a missing section whose effective schema is absent, optional, or does not declare a codemap section
 ```
 
-See [Document Schemas](../reference/document-schemas.md) and [Current Product Limitations](../limits/current-limitations.md) for the public ownership boundary.
+The remaining boundary is intentional: heading configuration recognizes existing sections, while an effective document schema is required to authorize a new heading and placement. See [Document Schemas](../reference/document-schemas.md) for the schema contract.
 
 ## Code root
 
@@ -495,6 +499,7 @@ A new renderer or schema provider must preserve complete-section ownership, dete
 - `internal/codemap/managed_section.go` — Markdown-aware section location and schema insertion validation.
 - `internal/codemap/managed_render.go` — marker validation, fence/bullet rendering, line removal, normalization.
 - `internal/codemaprecommend/` — production ranking and evidence filters.
+- `internal/documentpolicy/codemap.go` — effective-schema selection and deterministic placement for required missing codemap sections.
 - `internal/review/` — shared decline and reconsideration replay.
 - `internal/filetxn/` — batch preflight, atomic replacement, verification, and guarded rollback.
 - `internal/textio/` — source encoding and newline preservation.
@@ -508,6 +513,9 @@ internal/app/codemap_execute_test.go
   help and singular compatibility alias
   required roots
   single-file check/dry-run/fix convergence
+
+internal/documentpolicy/documentpolicy_test.go
+  required schema placement and no-placement behavior
 
 internal/codemap/managed_test.go
   complete-section adoption

@@ -37,6 +37,8 @@ Codemap generation is not a watcher feature. Neither foreground watch nor the re
 ddocs watch --root docs
 ddocs watch --root docs --once
 ddocs watch -i
+ddocs watch --frontmatter
+ddocs watch --format
 ddocs watch -l
 ```
 
@@ -44,20 +46,21 @@ ddocs watch -l
 
 `--once` runs one reconciliation pass and exits. Regular watch mode runs one reconciliation immediately and then observes relevant filesystem changes until the foreground process is stopped.
 
-Index-only mode watches the docs root. Link-enabled mode watches the repository root so changes and moves involving non-Markdown targets can trigger link reconciliation.
+Documentation-index, frontmatter-only, and document-format-only modes watch the docs root. Link-enabled mode watches the repository root so changes and moves involving non-Markdown targets can trigger link reconciliation.
 
 ## What the Watcher Does
 
 The watcher reruns the same selected operations used by `fix` when relevant repository content changes.
 
 - It starts with an immediate reconciliation pass.
-- It watches the docs root for `-i`, or the repository root when links are enabled.
+- It watches the docs root for indexes, frontmatter, or document format, or the repository root when links are enabled.
 - It reacts to relevant file events and directory create, delete, and move events.
 - It debounces event bursts.
 - It runs one reconciliation at a time.
 - If changes arrive during a run, it schedules one follow-up pass.
 - It applies `.docignore`, configured ignored directories, ignored suffixes, and index include/exclude rules.
 - It observes Markdown source changes and changes to non-ignored local link targets.
+- It observes configured shared and document-specific schema directories when document format is selected, so schema edits trigger a new plan.
 - Explicit external targets add watches on their nearest existing parent directories.
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories.
 - Observer errors are surfaced rather than silently terminating observation.

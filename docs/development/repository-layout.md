@@ -48,9 +48,12 @@ Executable packages should remain thin. Command mechanics belong in `internal/ap
 internal/app/             CLI coordination and command groups
 internal/config/          configuration defaults, selection, and behavior
 internal/repository/      repository scope, discovery, and worktrees
+internal/frontmatter/     frontmatter parsing, repair, and immutable-value state
+internal/documentpolicy/  document schemas, body-format enforcement, and schema history
 internal/scan/            documentation-tree inventory
 internal/markdown/        managed Markdown parsing and source-preserving edits
 internal/reconcile/       forward documentation index planning/application
+internal/filetxn/         shared content-addressed file replacement and rollback
 internal/links/           local link inventory, evidence, state, and rewrites
 internal/ddrepo/          private object repository and transactions
 internal/reverseindex/    code-folder reverse-index projection
@@ -62,6 +65,8 @@ internal/evidence/        deterministic missing-link evidence collection
 internal/codemapbench/    holdout, ranking, tiering, and reports
 internal/codemapcorpus/   repository fact collection for codemap analysis
 internal/codemapprecision/ curated precision evaluation
+internal/codemaprecommend/ production evidence admission, ranking, and tiers
+internal/codemaprun/       explicit managed codemap planning and publication
 ```
 
 Shared utility packages such as `internal/pathutil`, `internal/textio`, `internal/model`, and `internal/ignore` should remain small and concrete.

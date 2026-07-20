@@ -161,31 +161,6 @@ Removal condition:
 
 This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, repository-specific evaluation, and improved evidence providers.
 
-## Codemap section creation requires an explicit document schema
-
-Production codemap execution creates a missing section only when the selected effective document schema declares a required codemap section and deterministic placement.
-
-Impact:
-
-- existing configured codemap sections can be adopted and updated regardless of schema;
-- a selected document whose effective schema requires a codemap section can report `schema-created` and receive the section automatically;
-- a document whose effective schema has no codemap section is reported as `missing` and left unchanged; and
-- heading configuration alone does not authorize Demon Docs to invent a new section.
-
-Workaround:
-
-Add a required codemap section to the appropriate shared schema or document-specific schema, then run `codemaps inspect`, dry-run, fix, and check.
-
-Owning docs:
-
-- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
-- [Managing Codemaps](../guides/managing-codemaps.md)
-- [Configuration Reference](../reference/configuration.md)
-
-Removal condition:
-
-This is a deliberate ownership boundary rather than an incomplete connection. Any broader creation policy still requires an explicit deterministic schema authority; heading recognition alone must not become placement authority.
-
 ## Agent context delivery is not implemented
 
 The repository demon exposes lifecycle feeders for agents, but it does not currently build or deliver deterministic task-context bundles.
