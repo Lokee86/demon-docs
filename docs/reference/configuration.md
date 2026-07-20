@@ -805,6 +805,7 @@ Use `ddocs config paths` to inspect selection and `ddocs config show` to inspect
 
 ## Related docs
 
+- [Front Matter Schemas](frontmatter.md)
 - [Reference](README.md)
 - [Getting Started](../guides/getting-started.md)
 - [CLI Reference](cli.md)

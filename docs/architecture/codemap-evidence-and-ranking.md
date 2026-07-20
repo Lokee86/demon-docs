@@ -273,6 +273,7 @@ Pinned validation cases live under `internal/evidence/testdata/` and research ev
 
 ## Related docs
 
+- [Codemap Missing-Link Evidence](../codemap-evidence.md)
 - [Codemap Pipeline](codemap-pipeline.md)
 - [Codemap Corpus and Adapters](codemap-corpus-adapters.md)
 - [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md)
