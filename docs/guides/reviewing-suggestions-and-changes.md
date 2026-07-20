@@ -16,9 +16,11 @@ This guide reviews unresolved repair suggestions, records accept or decline deci
 
 ## Overview
 
-Demon Docs separates unresolved choices from concrete repairs. Ambiguous link targets and codemap missing-link candidates appear as suggestions. Selecting a candidate converts it into the normal hash-guarded repair path. Applied repairs are recorded as changes in the private review ledger.
+Demon Docs separates unresolved choices, persisted decisions, and concrete repairs. Ambiguous link targets and codemap missing-link candidates appear as suggestions. Selecting a candidate converts it into the compatibility hash-guarded repair path and records the applied repair in the private review ledger.
 
-Deterministic single-target link repairs remain automatic, but they are still recorded and inspectable.
+Production `codemap fix` uses the same current codemap suggestions and persisted decline policy but does not require a prior selection. It automatically adds selected non-declined recommendations through the codemap managed-section transaction. Those foreground codemap rewrites are reviewed through Git and command output rather than being published as ordinary `ddocs changes` events.
+
+Deterministic single-target link repairs remain automatic and are recorded through the normal generated-repair lifecycle.
 
 ## Prerequisites
 
@@ -51,7 +53,9 @@ ddocs suggestions select SUGGESTION [CANDIDATE]
 
 A candidate may be identified by its displayed number or target path. The candidate may be omitted when only one choice exists.
 
-Selection immediately creates and applies the concrete repair. There is no permanent accepted-suggestion state.
+Selection immediately creates and applies the concrete compatibility repair. There is no permanent accepted-suggestion state.
+
+Codemap generation does not require selection. Use selection only when deliberately applying one candidate through the recorded repair lifecycle instead of running the unified codemap command.
 
 ## Decline or reconsider
 
@@ -61,6 +65,8 @@ ddocs suggestions reconsider SUGGESTION
 ```
 
 Declining a candidate suppresses only that candidate. Declining without a candidate suppresses the whole issue.
+
+For codemap generation, an unchanged declined candidate is filtered before managed-section reconciliation. A decline does not remove a link already present in the codemap, and manual deletion does not automatically create a decline.
 
 Decisions are keyed by stable relationship and evidence fingerprint. Unchanged evidence remains suppressed. Materially changed evidence becomes stale and is shown for review rather than silently reappearing or remaining permanently hidden.
 
@@ -107,7 +113,8 @@ A block prevents the exact repair fingerprint from being applied again. Changed 
 
 - Ambiguous choices remain explicit until selected.
 - Declines remain suppressed while evidence is unchanged.
-- Every applied generated repair is inspectable.
+- Every applied normal generated repair is inspectable in `ddocs changes`.
+- Explicit codemap fix output and Git history remain the audit surface for unified codemap rewrites.
 - Undo creates a new history event rather than deleting prior audit history.
 - Later authored edits are never overwritten by historical undo.
 
@@ -134,9 +141,11 @@ Use `--block` during undo or add a separate repair block when the exact determin
 - [CLI Reference](../reference/cli.md)
 - [Review Ledger Architecture](../architecture/review-ledger.md)
 - [Codemap Missing-Link Evidence](../research/codemap-evidence.md)
+- [Managing Codemaps](managing-codemaps.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 
 ## Notes
 
-Existing authored codemap links are never presented as removal or irrelevance suggestions.
+Missing-link suggestions never present an existing codemap entry as irrelevant. Optional confidence pruning is a separate explicit codemap execution policy and remains disabled by default.

@@ -43,7 +43,7 @@ The application boundary owns:
 - explicit stateless move command integration;
 - suggestion selection/decline and applied-change inspection/undo command integration;
 - foreground watch startup;
-- codemap export, benchmark, and precision command integration;
+- explicit codemap fix, check, inspect, export, benchmark, and precision command integration;
 - repository-demon public and hidden commands; and
 - compatibility aliases such as `--indexes` and the `demon` executable.
 
@@ -83,6 +83,10 @@ executable main
 
 `watch` performs one normal reconciliation before entering event-driven scheduling. The repository demon eventually owns a watcher process, but its lifecycle commands still enter through the application boundary.
 
+Codemap generation is a separate foreground command family. Canonical `ddocs codemaps fix|check|inspect`, with singular `codemap` retained as a compatibility alias, resolves a contained file-or-directory scope, builds one production codemap plan, and either inspects, compares, or applies it. They do not enter normal reconciliation, watch scheduling, or repository-demon execution. This exclusion is structural rather than a runtime feature flag.
+
+The application currently supplies configured headings, marker prefix, and removal policy to the codemap planner. It does not yet supply the repository file-type schema provider required to create a missing schema-defined section, so current public execution adopts existing sections only.
+
 ## State ownership
 
 The application layer holds command-scoped options and aggregate results. Durable repository identity and history belong to `internal/ddrepo` and link/reverse-index state packages. Runtime demon ownership belongs to `internal/demon`.
@@ -99,6 +103,8 @@ Command parsing must not become an alternative source of repository truth. Resol
 - Bare `demon` and `demon --help` resolve to repository-demon help; `demon --version` remains the shared product version.
 - Nested help must describe the requested subcommand rather than falling back to its parent summary.
 - Help text and documentation must change with public command behavior.
+- Production codemap execution remains explicit and cannot be enabled indirectly through normal reconciliation or daemon configuration.
+- A missing codemap section remains unchanged until a file-type schema provider supplies an explicit placement.
 
 ## Code map
 
@@ -115,6 +121,10 @@ Primary files and packages:
 - `internal/app/move.go` - stateless refactoring command integration.
 - `internal/app/orphans.go` - orphan-document health computation.
 - `internal/app/review_*.go` - suggestion, change, undo, and repair-control command integration.
+- `internal/app/codemap_execute.go` - explicit codemap fix/check/inspect parsing, configuration, and dispatch.
+- `internal/app/codemap_execute_scope.go` - codemap root containment, Markdown file validation, traversal, ignore, symlink, and worktree exclusions.
+- `internal/app/codemap_execute_output.go` - codemap summary and evidence-oriented inspection output.
+- `internal/app/codemap_execute_test.go` - help, alias, required-root, dry-run, apply, and convergence coverage.
 - `internal/app/codemap_benchmark.go` - benchmark command contract.
 - `internal/app/codemap_precision.go` - precision command contract.
 - `internal/repository/` - repository and worktree discovery used by the application.
@@ -128,7 +138,7 @@ Important non-ownership boundaries:
 - `internal/watch/` owns watcher scheduling.
 - `internal/demon/` owns runtime leases and lifecycle.
 - `internal/review/` owns review history, decision replay, undo construction, and repair controls.
-- `internal/codemap*` and `internal/evidence/` own codemap analysis.
+- `internal/codemap/`, `internal/codemaprecommend/`, `internal/codemaprun/`, and `internal/evidence/` own codemap analysis and foreground execution.
 
 ## Tests
 
@@ -141,6 +151,7 @@ Relevant coverage includes:
 - `cmd/demon/main_test.go`
 - `internal/app/demon_test.go`
 - `internal/app/feature_flags_test.go`
+- `internal/app/codemap_execute_test.go`
 - `internal/app/codemap_export_test.go`
 - `internal/app/codemap_benchmark_test.go`
 - `internal/app/codemap_precision_test.go`
@@ -166,6 +177,8 @@ go test ./internal/app -count=1
 - [Stateless Document Refactoring](../guides/document-refactoring.md)
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Reverse Indexes](reverse-indexes.md)
+- [Codemap Managed Execution](codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 - [Repository Demon](../operations/repository-demon.md)
 
 ## Notes

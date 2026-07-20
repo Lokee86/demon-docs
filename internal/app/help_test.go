@@ -14,7 +14,7 @@ func TestCommandHelpContract(t *testing.T) {
 		args []string
 		want []string
 	}{
-		{[]string{"--help"}, []string{"ddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.", "mv                  move a file or directory", "ddocs mv --dry-run", "reconciliation selectors:", "-d, --docs", "-l, --links", "-r, --reverse", "ddocs check --help", "ddocs check -r", "ddocs demon --help", "ddocs config paths", "ddocs --version"}},
+		{[]string{"--help"}, []string{"ddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, manages codemap sections, and projects codemap references onto code folders.", "mv                  move a file or directory", "ddocs mv --dry-run", "reconciliation selectors:", "-d, --docs", "-l, --links", "-r, --reverse", "ddocs check --help", "ddocs check -r", "ddocs demon --help", "ddocs config paths", "ddocs --version"}},
 		{[]string{"init", "--help"}, []string{"Initialize a Demon Docs repository", "--root PATH", ".ddocs/config.toml", "must already exist", "[demon].run = true"}},
 		{[]string{"status", "--help"}, []string{"Show the Demon Docs repository", "usage: ddocs status"}},
 		{[]string{"mv", "--help"}, []string{"Move one file or directory", "--root PATH", "--dry-run", "SOURCE and DESTINATION", "does not create .ddocs/ state"}},

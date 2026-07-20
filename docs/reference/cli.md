@@ -26,7 +26,7 @@ demon --help
 demon <command> --help
 ```
 
-Help is scoped to the requested command. For example, `ddocs suggestions select --help` describes candidate selection rather than repeating the parent suggestions summary, and `ddocs codemap precision sample --help` lists the required report input and sampling flags.
+Help is scoped to the requested command. For example, `ddocs suggestions select --help` describes candidate selection rather than repeating the parent suggestions summary, and `ddocs codemaps precision sample --help` lists the required report input and sampling flags.
 
 Commands either inspect state, plan without writing, apply deterministic repository changes, run foreground automation, or manage the repository demon lifecycle.
 
@@ -125,17 +125,89 @@ Repository-local `.ddocs/config.toml` remains the preferred initialized-reposito
 
 ## Codemap commands
 
+### Production execution
+
 ```bash
-ddocs codemap export --output PATH
-ddocs codemap benchmark ...
-ddocs codemap precision source ...
-ddocs codemap precision sample ...
-ddocs codemap precision evaluate ...
+ddocs codemaps fix [--root FILE_OR_DIRECTORY] [--dry-run]
+ddocs codemaps check --root FILE_OR_DIRECTORY
+ddocs codemaps inspect --root FILE_OR_DIRECTORY
 ```
 
-`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision source` generates current suggestions without hiding authored links, `precision sample` creates a deterministic unlabeled review set, and `precision evaluate` compares a labeled benchmark with its deterministic suggestion report. The legacy flag-only precision form remains equivalent to `evaluate`.
+`ddocs codemap ...` remains accepted as a singular compatibility alias. Help and current examples render the canonical plural `ddocs codemaps ...` form.
 
-These commands do not silently modify authored codemap sections.
+Common execution flags are:
+
+```text
+--root PATH        existing Markdown file or directory beneath the configured docs root
+--config PATH      explicit configuration file
+--no-local-config  skip local configuration discovery
+--no-global-config skip global configuration discovery
+--heading TEXT     replace configured codemap headings; repeatable
+--dry-run          fix only; report the plan without writing
+```
+
+A file root must already exist and have the `.md` extension. A directory root selects regular `.md` files recursively, honors `.docignore`, skips symbolic-link entries, and prunes `.worktrees/` and `.workingtrees/`. Every explicit root must remain beneath the configured documentation root.
+
+`codemap fix` may omit `--root`; it then targets the configured documentation root. It adopts the complete matching section as one managed unit, filters deterministic recommendations through shared decline policy, preserves existing valid links by default, applies configured removals, and publishes changed files through the shared content-addressed transaction layer.
+
+`--dry-run` builds the same plan and prints:
+
+```text
+ddocs codemaps fix would update N file(s)
+PATH: added=N removed=N adopted=true|false created=true|false
+```
+
+Dry-run performs no document or review-state writes.
+
+A successful mutating run prints the corresponding `updated N file(s)` summary. A clean plan reports zero updated files.
+
+`codemap check` requires `--root`. It builds the production plan without writing. Exit behavior is:
+
+```text
+0  no selected document would change
+1  one or more selected documents would change
+2  command-line usage failure
+non-zero configuration, scope, read, extraction, or planning failure
+```
+
+When stale, it prints `ddocs codemaps check failed` followed by changed document paths. When clean, it prints `ddocs codemaps check passed`.
+
+`codemap inspect` requires `--root` and writes nothing. For every selected document it reports:
+
+```text
+section: missing | existing | schema-created
+changed: true | false
+add TARGET score=SCORE tier=TIER
+declined TARGET score=SCORE tier=TIER
+evidence lines
+remove TARGET
+```
+
+Configured heading matching is case-insensitive and ignores heading-like lines inside fenced code blocks. Multiple matching sections are an error. Malformed or duplicated codemap ownership markers are an error.
+
+Existing configured sections are processed regardless of file-type schema. The internal schema-placement interface is implemented, but the public application does not yet connect a repository file-type schema provider. Therefore a selected document without a configured codemap section is currently reported as `missing` and left unchanged rather than receiving a new section automatically.
+
+The complete section body is adopted between codemap-specific markers derived from `[markers].prefix`. Existing and newly generated links are not split into provenance groups. Fenced path lists remain fenced; bullet maps retain their first recognized bullet prefix. All selected non-declined `hard_link` and `context` recommendations are eligible for addition.
+
+Confidence-based removal is disabled by default and controlled by `[codemap].remove_undiscovered_links` and `[codemap].remove_low_score_links`. Declines suppress proposed additions only; they do not remove existing links.
+
+Codemap execution is intentionally excluded from generic `ddocs fix`, `ddocs check`, `ddocs watch`, and every repository-demon path.
+
+See [Managing Codemaps](../guides/managing-codemaps.md) for the task workflow and [Codemap Managed Execution](../architecture/codemap-managed-execution.md) for the complete ownership, planning, rendering, transaction, and failure lifecycle.
+
+### Dataset and evaluation commands
+
+```bash
+ddocs codemaps export --output PATH
+ddocs codemaps benchmark ...
+ddocs codemaps precision source ...
+ddocs codemaps precision sample ...
+ddocs codemaps precision evaluate ...
+```
+
+`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision source` generates current recommendations without hiding authored links, `precision sample` creates a deterministic unlabeled review set, and `precision evaluate` compares a labeled benchmark with its deterministic recommendation report.
+
+The evaluation commands and production CLI consume the same `internal/codemaprecommend` ranking implementation.
 
 ## Repository demon commands
 

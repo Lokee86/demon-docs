@@ -55,6 +55,36 @@ When `[frontmatter].enabled` is true, Demon Docs validates every non-ignored `.m
 
 The Markdown body, newline convention, and final-newline behavior remain preserved during frontmatter replacement.
 
+## Managed codemap sections
+
+Explicit codemap execution adopts the complete configured codemap section under one marker pair derived from `[markers].prefix`:
+
+```markdown
+## Code Map
+
+<!-- doc-ledger:codemap:start -->
+- `src/runtime.go`
+- `src/runtime_test.go`
+<!-- doc-ledger:codemap:end -->
+```
+
+The heading remains outside the marker pair. Everything in the section body, including existing links and explanatory prose, becomes part of the unified managed region. Demon Docs does not preserve separate authored and generated provenance groups inside the section.
+
+On first adoption, a prior partial generated block is expanded to cover the whole section. Existing marker lines are removed and one canonical pair is rendered. Malformed or duplicated codemap markers are an error rather than an automatically guessed repair.
+
+Supported rendering behavior is:
+
+- a complete fenced path list remains fenced and receives new targets before its closing fence;
+- a bullet map retains the first recognized bullet prefix and indentation;
+- additions are normalized, deduplicated, and sorted;
+- existing section content is not globally re-sorted;
+- selected removal deletes only the extracted entry line; and
+- source line endings, final-newline state, and file mode are preserved through the shared text and transaction layers.
+
+Existing valid links are retained by default. `[codemap].remove_undiscovered_links` and `[codemap].remove_low_score_links` permit confidence-based pruning only when explicitly enabled. Declined recommendations suppress additions but do not remove an existing entry.
+
+The public command currently adopts existing configured sections only. The internal schema-placement seam exists, but no repository file-type schema provider is yet connected to the CLI, so a missing section is left unchanged.
+
 ## Local link rewrites
 
 Link reconciliation may rewrite the resolved path portion of recognized local links in repository Markdown sources.
@@ -133,8 +163,9 @@ Demon Docs does not:
 - edit external target files;
 - traverse symbolic-link entries as owned repository trees;
 - choose among ambiguous targets;
-- remove existing codemap links as allegedly irrelevant; or
-- treat research candidates as authored relationships.
+- remove existing codemap links based on algorithm confidence unless the repository explicitly enables that pruning policy;
+- treat a decline as an instruction to remove an already-present codemap link; or
+- run codemap generation through normal reconciliation, watch, or daemon paths.
 
 ## Diagnostics
 
@@ -172,6 +203,8 @@ The label and fragment remain unchanged.
 - [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
 - [Review Ledger](../architecture/review-ledger.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 - [Repository State and Transactions](../architecture/repository-state-and-transactions.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 

@@ -73,8 +73,8 @@ A parent summary is not acceptable output for a requested nested command. For ex
 ```bash
 ddocs suggestions --help
 ddocs suggestions select --help
-ddocs codemap precision --help
-ddocs codemap precision sample --help
+ddocs codemaps precision --help
+ddocs codemaps precision sample --help
 ```
 
 ## Fixture Regression Matrix
@@ -152,26 +152,50 @@ Daemon tests cover:
 
 ## Codemap Tests and Benchmarks
 
-Codemap package tests cover syntax extraction, target normalization, target-root handling, deterministic datasets, evidence signals, holdout orchestration, report formats, ranking, tier assignment, precision sampling, and curated-label evaluation.
+Codemap coverage now spans four distinct responsibilities:
 
-The committed Space Rocks precision sample contains 150 labels. Its recorded evaluation is used as a tuning regression baseline:
+```text
+extraction and target resolution
+production evidence admission and ranking
+explicit managed-section execution
+controlled benchmark and precision evaluation
+```
 
-- precision at rank 1: **60.0%**;
-- precision at rank 3: **54.7%**;
-- precision at rank 5: **52.8%**;
-- `hard_link` strict precision: **64.2%**;
-- `hard_link` non-junk acceptance: **95.1%**; and
-- `hard_link` sample recall of valid links: **74.3%**.
+Focused production tests cover configured heading recognition, fenced-heading exclusion, duplicate-section failure, whole-section adoption, legacy partial-region unification, Space Rocks-style fenced rendering, bullet-prefix preservation, schema-gated creation, missing-section skip, idempotency, shared decline suppression, opt-in pruning, file/directory CLI scope, dry-run, check, transaction publication, and fix convergence.
+
+The production ranker lives in `internal/codemaprecommend`. Benchmark packages import that same implementation, preventing a separate benchmark-only scoring path.
+
+The committed Space Rocks precision sample contains 150 labels. The current retained baseline is:
+
+- `hard_link` recommendations: **68**;
+- `hard_link` strict precision: **75.00%** (51/68);
+- `hard_link` relevance: **98.53%** (67/68);
+- labeled-valid `hard_link` recovery: **72.86%** (51/70);
+- `context` recommendations: **82**; and
+- canonical hidden-link holdout: **10/10 recovered**.
+
+The ordinary cross-repository holdout recovers **11/18** links (**61.11%**). The frozen cross-repository precision review retains **83** valid missing links and **34** plausible context links while suppressing all **4** demonstrated incorrect candidates, producing **70.94%** strict precision and **100%** relevance for that fixed reviewed sample only.
 
 Run repository holdouts with:
 
 ```bash
-ddocs codemap benchmark --repo /path/to/repository --format json
+ddocs codemaps benchmark --repo /path/to/repository --format json
 ```
 
-Use `ddocs codemap precision --help` for generation, sampling, and evaluation commands. Benchmark reports must retain the repository, revision or dataset, seed, holdout rules, labels, and command inputs needed to reproduce them.
+Use `ddocs codemaps precision --help` for generation, sampling, and evaluation commands. Benchmark reports must retain the repository, revision or dataset, seed, holdout rules, labels, and command inputs needed to reproduce them.
 
-Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, and deterministic holdout tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
+Verify production managed execution separately:
+
+```bash
+ddocs codemaps inspect --root docs/architecture/example.md
+ddocs codemaps fix --root docs/architecture/example.md --dry-run
+ddocs codemaps fix --root docs/architecture/example.md
+ddocs codemaps check --root docs/architecture/example.md
+```
+
+The second `fix` must be a no-op. Inspect, check, and dry-run must not write. A normal `ddocs check` does not include codemap-generation convergence.
+
+Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, deterministic holdouts, and production execution tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
 
 ## Behavioral Contract Verification
 
@@ -261,12 +285,19 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `internal/app/move_test.go` — stateless move CLI coverage.
 - `internal/app/orphans_test.go` and `orphans_integration_test.go` — document-health rules and command behavior.
 - `internal/app/review_cli_test.go` — suggestion and applied-change CLI coverage.
-- `internal/codemap/insert_test.go` — selected codemap insertion coverage.
+- `internal/codemap/insert_test.go` — compatibility selected-candidate insertion coverage.
+- `internal/codemap/managed_test.go` — unified section adoption, schema gating, rendering preservation, removal, and idempotency.
+- `internal/codemaprecommend/suggestions_test.go` — production ranker behavior after benchmark extraction.
+- `internal/codemaprun/build_test.go` — production plans, decline suppression, additions, pruning, and rewrite construction.
+- `internal/app/codemap_execute_test.go` — command aliases, required roots, dry-run, check, fix, and convergence.
+- `internal/filetxn/apply_test.go` — shared batch preflight, atomic replacement, digest verification, and guarded rollback.
 - `internal/watch/*_test.go` — watcher filters, scheduling, and filesystem events.
 - `internal/demon/runtime_test.go` — owner and feeder lifecycle coverage.
 - `internal/app/demon_test.go` — daemon CLI and shell integration coverage.
-- `internal/codemap/*_test.go` — codemap extraction and deterministic dataset coverage.
-- `internal/codemapbench/*_test.go` — benchmark, ranking, report, and tier coverage.
+- `internal/codemap/*_test.go` — extraction, deterministic datasets, and managed-section reconciliation coverage.
+- `internal/codemaprecommend/*_test.go` — production ranking, tier, and negative-evidence coverage.
+- `internal/codemaprun/*_test.go` — production execution planning coverage.
+- `internal/codemapbench/*_test.go` — holdout, compatibility, classification, and report coverage using the production ranker.
 - `internal/codemapprecision/*_test.go` — curated precision evaluation coverage.
 - `research/codemap-precision/` — pinned labels and evaluation artifacts.
 - `research/context-benchmarking/` — historical-task and harness research artifacts.
@@ -291,6 +322,8 @@ Repository-wide tests must exclude nested `.worktrees/` and local generated outp
 - [Review Ledger](../architecture/review-ledger.md)
 - [Link Performance](../research/link-performance.md)
 - [Codemap Evidence](../research/codemap-evidence.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 - [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)
 
 ## Notes

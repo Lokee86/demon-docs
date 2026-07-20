@@ -20,7 +20,7 @@ The roadmap is a sequencing and status document. Current product summaries link 
 
 ## Current status
 
-Active roadmap. Stateless refactoring, orphan health checks, and the review ledger are implemented on `main`. Codemap tuning and broader corpus validation continue in isolated worktrees, while polyglot code intelligence and context delivery remain back-burnered or later work.
+Active roadmap. The current feature branch includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, reverse-index health, and explicit production codemap execution for existing configured sections. Missing-section creation from file-type schemas remains incomplete until the public schema provider is connected. Polyglot code intelligence and context delivery remain back-burnered or later work.
 
 ## Ownership boundary
 
@@ -28,7 +28,7 @@ This roadmap owns project sequencing and status summaries. It does not own exact
 
 This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active tuning work, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
 
-## Current Product: Implemented on `main`
+## Current Product: Implemented in the Current Branch
 
 ### Documentation-tree reconciliation
 
@@ -83,25 +83,32 @@ See [Code-Folder Reverse Indexes](../architecture/reverse-indexes.md).
 
 See [Repository Demon](../operations/repository-demon.md).
 
-### Codemap extraction and deterministic missing-link research
+### Managed codemap execution and deterministic missing-link research
 
-- Authored codemap sections can be exported as a deterministic JSON dataset.
+- Existing configured codemap sections can be inspected, dry-run, updated, and checked through an explicit foreground command family.
+- Demon Docs adopts the complete section as one managed artifact rather than separating authored and generated links.
+- Existing valid links remain by default; independent undiscovered-link and low-score pruning settings are available but disabled by default.
+- Selected non-declined `hard_link` and `context` recommendations are added automatically.
+- Shared review fingerprints suppress unchanged declined additions, while materially changed evidence may be reconsidered.
+- Fenced Space Rocks-style maps remain fenced and bullet maps retain their local prefix.
+- File and directory scopes are contained beneath the docs root and publish through content-addressed transactional rewrites.
+- Generic reconciliation, watch, and repository-demon paths never invoke codemap generation.
 - The repository corpus adapter collects paths, dependency neighbours, declared symbols, source/test relationships, related-document targets, and bounded Git co-change evidence.
-- Holdout benchmarking measures whether known authored targets are recovered.
-- Precision tooling generates, samples, and evaluates ranked candidate links.
-- Suggestions are divided into `hard_link` and `context` tiers.
-- Existing links are never returned as missing-link candidates, and there is no removal or irrelevance signal.
+- Holdout and precision tooling consume the same production ranker used by the explicit writer.
+- The internal schema-placement seam is implemented, but the public file-type schema provider required to create a missing section is not yet connected.
 
-The current curated Space Rocks sample contains 150 labeled suggestions. The recorded baseline has 60% precision at rank 1, 64.2% valid-link precision for the `hard_link` tier, 95.1% non-junk acceptance for that tier, and 74.3% sample recall of valid links. These numbers describe the pinned labeled sample, not a universal quality claim.
+The current curated Space Rocks sample contains 150 labeled recommendations. The retained baseline has 68 hard-link recommendations, 75.00% hard-link strict precision, 98.53% hard-link relevance, 72.86% labeled-valid hard-link recovery, 82 context recommendations, and 10/10 canonical hidden-link recovery. The ordinary cross-repository holdout recovers 11/18 links. These numbers describe pinned samples, not universal quality.
 
-See [Codemap Missing-Link Evidence](../research/codemap-evidence.md).
+See [Managing Codemaps](../guides/managing-codemaps.md), [Codemap Managed Execution](../architecture/codemap-managed-execution.md), and [Codemap Missing-Link Evidence](../research/codemap-evidence.md).
 
 ### Suggestions, applied changes, and undo history
 
 - Ambiguous link repairs and codemap missing-link candidates are exposed through `ddocs suggestions`.
-- Selecting a candidate converts it into the same hash-guarded repair path used by deterministic link updates.
+- Selecting a candidate remains a compatibility path that converts one candidate into the normal hash-guarded recorded repair lifecycle.
+- Production `codemap fix` does not require selection; it replays shared decline policy and applies the unified managed-section transaction directly.
 - Declined issues and candidates persist by stable relationship and evidence fingerprint; materially changed evidence becomes stale rather than silently reappearing or remaining permanently hidden.
-- Every generated rewrite records a Git-backed applied-change event under `.ddocs`, including before/after blobs, per-repair transformations, source identity, related targets, and reconciliation run.
+- Normal generated rewrites record Git-backed applied-change events under `.ddocs`, including before/after blobs, per-repair transformations, source identity, related targets, and reconciliation run.
+- Unified codemap fix rewrites currently use command output and Git history as their audit surface rather than ordinary `ddocs changes` events.
 - `ddocs changes` supports inspection, related-target queries, file-level undo, individual-repair undo, and whole-run undo.
 - Undo refuses to overwrite later edits and may block the exact repair from being reapplied. Changed repair evidence produces a stale block that remains reviewable.
 - Undo eligibility is configurable by depth and age while audit history remains inspectable.
@@ -110,15 +117,17 @@ See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions
 
 ## Active Work
 
-### Codemap tuning and broader corpus validation
+### Codemap execution hardening and broader corpus validation
 
-The current tuning work is isolated from `main`. Near-term goals are:
+Near-term goals are:
 
-- compare each scoring change against the pinned precision sample;
-- preserve deterministic output and evidence fingerprints;
-- expand evaluation beyond one repository without treating unlabeled output as ground truth;
-- use Demon Docs' own refreshed code maps as a development corpus, not as an independent benchmark; and
-- merge only changes that demonstrate a measured improvement or a clearly safer candidate surface.
+- connect the repository file-type schema provider so schema-required missing sections can be placed through the existing seam;
+- add end-to-end schema-placement command tests and diagnostics;
+- dogfood explicit generation on representative Demon Docs and Space Rocks sections;
+- compare each scoring change against pinned precision and holdout samples;
+- preserve deterministic output, evidence fingerprints, whole-section ownership, and default no-pruning behavior;
+- expand evaluation beyond one repository without treating unlabeled output as ground truth; and
+- use Demon Docs' own refreshed code maps as a development corpus, not as an independent benchmark.
 
 ### Daemon host adapters
 
@@ -179,9 +188,9 @@ Optional LLM assistance may eventually propose documentation changes from determ
 ## Principles
 
 - **Deterministic first:** identical repository inputs and configuration produce stable facts, plans, diagnostics, and ordering.
-- **Authored intent remains authoritative:** generated indexes, reverse indexes, candidates, and projections do not silently replace hand-authored meaning.
-- **Only suggest missing relationships:** the codemap system never recommends that an existing link is irrelevant or should be removed.
-- **Remember declines:** unchanged declined suggestions remain suppressed; materially changed evidence may be reconsidered.
+- **Managed ownership is explicit:** generated indexes, reverse indexes, and adopted codemap sections own only their declared managed surfaces.
+- **Missing-link generation remains one-directional:** it does not label an existing link irrelevant; confidence pruning is a separate opt-in execution policy disabled by default.
+- **Remember declines:** unchanged declined additions remain suppressed; materially changed evidence may be reconsidered.
 - **Polyglot seams before language implementations:** future code-intelligence providers normalize into one contract rather than becoming core-specific special cases.
 - **Reuse existing analysis:** Demon Docs should not rebuild a general parser, compiler, call-graph platform, or graph database when an adapter can consume an existing deterministic source.
 - **Static core remains authoritative:** watchers, daemons, MCP, and plugins automate or expose the same rebuildable core.
@@ -204,9 +213,11 @@ Optional LLM assistance may eventually propose documentation changes from determ
 - `internal/app/move.go` — explicit repository-bounded document refactoring CLI.
 - `internal/demon/` — repository-local owner, feeder, heartbeat, shutdown, and log state.
 - `internal/app/demon.go` — daemon CLI and shell integration.
-- `internal/codemap/` — authored codemap extraction and deterministic datasets.
+- `internal/codemap/` — codemap extraction, deterministic datasets, unified managed sections, rendering, and schema placement seam.
 - `internal/evidence/` — missing-link evidence collection.
-- `internal/codemapbench/` — holdout orchestration, ranking, tiers, and reports.
+- `internal/codemaprecommend/` — production admission, scoring, filtering, bounds, and tiers.
+- `internal/codemaprun/` — production decline replay, pruning evaluation, plans, and transaction publication.
+- `internal/codemapbench/` — holdout orchestration and reports using the production ranker.
 - `internal/codemapcorpus/` — repository fact adapters used by codemap analysis.
 - `internal/codemapprecision/` — curated precision evaluation.
 - `internal/review/` — suggestion decisions, repair controls, applied-change history, and undo data.
@@ -224,6 +235,9 @@ Near-term work should prioritize bounded document-engine capabilities, reviewabl
 - [Architecture](../architecture/README.md)
 - [Operations](../operations/README.md)
 - [Codemap Evidence](../research/codemap-evidence.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
+- [Current Product Limitations](../limits/current-limitations.md)
 - [Planned Code Intelligence](code-intelligence/README.md)
 - [Planned Agent Context and Integrations](agent-context-and-integrations.md)
 

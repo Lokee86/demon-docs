@@ -1,4 +1,4 @@
-package codemapbench
+package codemaprecommend
 
 import (
 	"fmt"
@@ -11,8 +11,9 @@ import (
 )
 
 // DefaultSuggestionLimitPerDocument bounds the ranked list returned per document.
-// The benchmark is intended to measure useful surfaced suggestions, not every
-// weak relationship that can be inferred from repository history.
+// The recommendation surface is intended to measure useful surfaced
+// suggestions, not every weak relationship that can be inferred from
+// repository history.
 const (
 	DefaultSuggestionLimitPerDocument             = 30
 	HardLinkSuggestionLimitPerDocument            = 5
@@ -59,7 +60,7 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 		}
 		itemResult := rankedSuggestion{
 			suggestion:   Suggestion{Link: Link{Document: document, Target: candidate.Path}},
-			targetIsTest: isTestTarget(candidate.Path),
+			targetIsTest: IsTestTarget(candidate.Path),
 		}
 		for _, item := range candidate.Evidence {
 			atom := suggestionEvidenceAtom(item)
@@ -199,7 +200,8 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	return item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
 }
 
-func isTestTarget(value string) bool {
+// IsTestTarget reports whether a target follows a common test/spec naming convention.
+func IsTestTarget(value string) bool {
 	value = strings.ReplaceAll(value, "\\", "/")
 	for _, segment := range strings.Split(strings.ToLower(path.Dir(value)), "/") {
 		if segment == "test" || segment == "tests" || segment == "spec" || segment == "specs" {

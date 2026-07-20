@@ -74,6 +74,30 @@ A codemap or reverse-index input is missing, empty, unresolved, or unsupported.
 
 The gap is reported. It is not silently converted into a semantic conclusion.
 
+### Codemap section missing
+
+A selected Markdown document contains no configured codemap heading.
+
+The current public codemap commands report the section as `missing` and leave the document unchanged because the repository file-type schema provider is not yet connected. This condition is not treated as permission to invent a heading or placement.
+
+### Multiple codemap sections
+
+A document contains more than one heading matching the active configured codemap heading set.
+
+Planning fails. Demon Docs does not choose one section or merge them automatically.
+
+### Malformed codemap ownership markers
+
+A codemap section contains duplicated or unbalanced configured codemap marker lines.
+
+Planning fails before publication. The ownership range must be made unambiguous manually.
+
+### Codemap source changed before apply
+
+A selected document no longer matches the source digest used to build the rewrite plan.
+
+The transaction fails rather than overwriting the intervening edit. Rebuild the plan against current content.
+
 ### Runtime ownership problem
 
 The repository demon may report stale ownership, missing feeder activity, shutdown, or log/runtime-state problems.
@@ -108,6 +132,16 @@ Inspection commands fail when requested identifiers cannot be resolved. Selectio
 
 Performs an immediate reconciliation, then reports later passes. Fatal startup configuration or ownership errors prevent normal watching. Individual filesystem bursts are debounced and serialized.
 
+### Production codemap commands
+
+`codemap inspect` is read-only and returns the computed section status, byte-change status, additions, declines, evidence, tiers, and configured removals.
+
+`codemap check` returns zero when no selected document would change and one when the production plan contains one or more rewrites. Usage errors return two. Configuration, scope, read, extraction, marker, section, schema, and planning failures return non-zero.
+
+`codemap fix --dry-run` reports the same production plan without writing. `codemap fix` applies prepared rewrites through batch hash preflight and atomic replacement. A clean plan succeeds with zero updated files.
+
+A missing section is currently a no-op rather than a failure. Multiple matching sections, malformed markers, roots outside the docs tree, non-Markdown file roots, and concurrent source changes fail.
+
 ### Codemap research commands
 
 Export, benchmark, and precision commands report extraction, dataset, or evaluation failures. They do not mutate authored codemap relationships as a side effect of successful analysis.
@@ -134,6 +168,8 @@ Demon Docs should fail without broad mutation when:
 - configuration or the selected frontmatter schema cannot be validated safely;
 - a root escapes repository scope;
 - expected source content changed after planning;
+- a codemap has multiple configured sections or malformed ownership markers;
+- a codemap target root escapes the configured documentation tree;
 - atomic replacement cannot complete;
 - multiple targets are plausible;
 - required state cannot be decoded; or
@@ -170,6 +206,8 @@ ddocs config show
 - [Document Health Checks](../guides/document-health-checks.md)
 - [Stateless Document Refactoring](../guides/document-refactoring.md)
 - [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
 

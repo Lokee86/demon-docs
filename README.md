@@ -2,7 +2,7 @@
 
 Demon Docs is a deterministic documentation maintenance engine for repository-owned Markdown.
 
-It maintains folder indexes, validates and repairs local links, reports orphan documents, supports explicit link-aware moves, projects authored codemaps back onto code folders, and records reviewable repairs without taking ownership of authored prose.
+It maintains folder indexes, validates and repairs local links, reports orphan documents, supports explicit link-aware moves, manages configured codemap sections, projects codemap references back onto code folders, and records reviewable repairs while limiting ownership to explicit managed surfaces.
 
 ## Core behavior
 
@@ -14,14 +14,16 @@ Demon Docs can:
 - report managed Markdown documents with no meaningful inbound links;
 - move a repository-contained file or directory and rewrite affected links without initialization;
 - retain stable file identities and path history in a private `.ddocs/` repository;
-- expose ambiguous repairs and codemap candidates for accept, decline, or reconsider decisions;
-- record applied repairs with bounded, hash-guarded undo and repair blocks;
-- project authored codemap references onto configured code folders and files;
+- expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
+- record applied normal repairs with bounded, hash-guarded undo and repair blocks;
+- explicitly inspect, preview, update, and verify unified managed codemap sections;
+- preserve existing codemap links by default while supporting opt-in confidence pruning;
+- project codemap references onto configured code folders and files;
 - export deterministic codemap datasets and run benchmark or precision research;
 - watch relevant filesystem changes in the foreground; and
 - run one optional repository-local watcher through the repository demon and feeder lifecycle.
 
-It does not silently rewrite prose, choose among ambiguous targets, recommend removing existing codemap links as irrelevant, or treat inferred research candidates as authored relationships.
+It does not silently rewrite prose outside explicit managed regions, choose among ambiguous targets, remove codemap links by confidence unless configured to do so, or invoke codemap generation through normal watch or daemon automation.
 
 ## Installation
 
@@ -93,7 +95,7 @@ ddocs watch        run reconciliation after relevant filesystem changes
 ddocs suggestions  inspect and decide unresolved repair suggestions
 ddocs changes      inspect, undo, block, or unblock applied repairs
 ddocs config       inspect or initialize configuration
-ddocs codemap      export and evaluate codemap evidence
+ddocs codemaps      manage codemap sections and run codemap research
 ddocs demon        manage repository-local watcher lifecycle
 ```
 
@@ -115,7 +117,8 @@ Demon Docs owns only explicit deterministic surfaces:
 - configured parent-index navigation lines;
 - the path portion of a recognized local link when one destination is deterministic;
 - explicitly requested repository-contained moves;
-- configured generated reverse-index regions; and
+- configured generated reverse-index regions;
+- the complete body of an adopted configured codemap section; and
 - private identity, review, and runtime state under `.ddocs/`.
 
 Labels, titles, aliases, queries, fragments, surrounding prose, source newline style, and final-newline state are preserved during supported link rewrites.
@@ -138,7 +141,7 @@ demon --status
 demon --logs
 ```
 
-Watch and demon modes are convenience layers. `ddocs check` remains the authoritative CI and recovery surface.
+Watch and demon modes are convenience layers. `ddocs check` remains the authoritative normal reconciliation CI and recovery surface. Codemap-generation convergence requires the separate read-only `ddocs codemaps check --root ...` command.
 
 See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon](docs/operations/repository-demon.md).
 
@@ -157,17 +160,30 @@ See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon]
 
 Current behavior, future work, and benchmark evidence are intentionally separated. The [Roadmap](docs/planning/roadmap.md) summarizes sequencing but is not the canonical reference for shipped behavior.
 
-## Experimental Codemap Suggestions
+## Managed Codemaps
 
-Demon Docs includes a deterministic codemap missing-link research pipeline. It collects repository evidence, ranks targets, and separates a bounded `hard_link` review surface from broader `context` relationships.
+Demon Docs includes an explicit foreground codemap workflow:
 
-The current baseline is suitable for early implementation testing and dogfooding. Suggestions remain reviewable evidence: the tool does not automatically insert permanent codemap links, does not recommend removing existing links, and does not treat a candidate as semantic truth.
+```bash
+ddocs codemaps inspect --root docs/architecture/example.md
+ddocs codemaps fix --root docs/architecture/example.md --dry-run
+ddocs codemaps fix --root docs/architecture/example.md
+ddocs codemaps check --root docs/architecture/example.md
+```
+
+The command adopts the complete configured section as one managed artifact, preserves existing valid links by default, automatically adds selected non-declined `hard_link` and `context` recommendations, and uses content-addressed transactional writes. Persisted declines suppress unchanged future additions. Confidence pruning is separately configurable and disabled by default.
+
+Existing configured sections are supported now. The internal file-type schema placement seam exists, but the public application does not yet connect the provider needed to create a missing schema-required section.
+
+Codemap generation never runs through generic `fix`, generic `check`, watch, or the repository demon.
 
 See:
 
-- [Codemap Suggestion Algorithm](docs/codemap-suggestion-algorithm.md) for current behavior and measured readiness;
-- [Codemap Algorithm Development Log](docs/codemap-algorithm-development-log.md) for the full benchmark and tuning history; and
-- [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for the evidence and safety boundary.
+- [Managing Codemaps](docs/guides/managing-codemaps.md) for the operational workflow;
+- [Codemap Managed Execution](docs/architecture/codemap-managed-execution.md) for ownership, planning, rendering, transactions, and failure behavior;
+- [Codemap Missing-Link Algorithm](docs/codemap-suggestion-algorithm.md) for ranking and measured readiness;
+- [Codemap Algorithm Development Log](docs/codemap-algorithm-development-log.md) for benchmark and tuning history; and
+- [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for the evidence boundary.
 
 ## Development
 
@@ -187,7 +203,7 @@ See [Testing and Fixtures](docs/development/testing-and-fixtures.md) and [Reposi
 
 ## Project status
 
-Repository indexing, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, and codemap research tooling are implemented. Broader diagnostics, polyglot code intelligence, and deterministic agent context remain active or planned work.
+Repository indexing, frontmatter enforcement, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, production codemap execution for existing sections, and codemap research tooling are implemented. Public file-type-schema placement for missing codemap sections, broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
 
 See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 

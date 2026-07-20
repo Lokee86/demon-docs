@@ -1,38 +1,24 @@
 package codemapbench
 
-import "context"
+import (
+	"context"
+
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
+)
 
 // DefaultSeed keeps the default holdout stable across runs.
 const DefaultSeed = "demon-docs-codemap-benchmark-v1"
 
 // Link is one authored relationship from a document to a code target.
-type Link struct {
-	Document string `json:"document"`
-	Target   string `json:"target"`
-}
-
-type SuggestionTier string
+type Link = codemaprecommend.Link
+type SuggestionTier = codemaprecommend.SuggestionTier
 
 const (
-	SuggestionTierHardLink SuggestionTier = "hard_link"
-	SuggestionTierContext  SuggestionTier = "context"
+	SuggestionTierHardLink = codemaprecommend.SuggestionTierHardLink
+	SuggestionTierContext  = codemaprecommend.SuggestionTierContext
 )
 
-// Valid accepts the two current tiers and the empty legacy value. Consumers
-// normalize an empty tier to context when evaluating older schema-1 reports.
-func (tier SuggestionTier) Valid() bool {
-	return tier == "" || tier == SuggestionTierHardLink || tier == SuggestionTierContext
-}
-
-// Suggestion is one candidate missing link produced by an evidence source.
-// Tier separates link-worthy recommendations from weaker relationships that
-// remain useful when assembling bounded agent context.
-type Suggestion struct {
-	Link
-	Score    float64        `json:"score,omitempty"`
-	Evidence []string       `json:"evidence,omitempty"`
-	Tier     SuggestionTier `json:"tier,omitempty"`
-}
+type Suggestion = codemaprecommend.Suggestion
 
 // Request is the information exposed to a suggestion generator. Hidden links
 // are deliberately absent so the benchmark cannot leak its answers.

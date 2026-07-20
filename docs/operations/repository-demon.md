@@ -40,6 +40,8 @@ The static commands remain authoritative:
 
 The repository demon exists only to keep that watcher available while shells or agents are actively working in a repository.
 
+It never invokes production codemap generation. Codemap fix, check, inspect, managed-section adoption, recommendation planning, and pruning remain explicit foreground commands. The demon may observe a Markdown write produced by one of those commands and refresh normal watcher-owned state, but it does not regenerate the codemap or schedule another codemap pass.
+
 ## One Demon per Repository
 
 An initialized repository owns its demon state below its local `.ddocs/` directory. One fresh owner lease may exist for that repository at a time, regardless of how many shells or agents are using it.
@@ -232,6 +234,8 @@ go test ./internal/demon ./internal/app -count=1
 - [Watcher and Automation](watcher-and-automation.md)
 - [Dynamic Watch Scope](dynamic-watch-scope.md)
 - [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 
 ## Notes
 

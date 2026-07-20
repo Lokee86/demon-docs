@@ -134,29 +134,57 @@ Removal condition:
 
 The language-neutral provider seam, symbol identity contract, authored syntax, resolution diagnostics, tests, and projections are implemented.
 
-## Codemap suggestion quality is corpus-dependent
+## Codemap generation quality is corpus-dependent
 
-The deterministic evidence pipeline is implemented, but recorded precision and recall measurements come from pinned labeled samples. They are not universal guarantees for arbitrary repositories, languages, naming styles, or documentation conventions.
+The deterministic evidence pipeline and explicit production writer are implemented, but recorded precision and recall measurements come from pinned labeled samples. They are not universal guarantees for arbitrary repositories, languages, naming styles, or documentation conventions.
 
 Impact:
 
-- a strong tier still requires human review;
+- explicit codemap execution automatically adds selected non-declined candidates from both tiers;
+- a repository may receive plausible but unnecessary `context` links;
 - new repository populations need independent labels;
 - self-authored Demon Docs codemaps are not an independent benchmark; and
 - low-quality or sparse code maps reduce useful supervision.
 
 Workaround:
 
-Review evidence, retain declined decisions, and evaluate new corpora before changing thresholds or automating broader exposure.
+Start with one representative file, use `codemap inspect` and `fix --dry-run`, retain conservative no-pruning defaults, record declines for unwanted additions, and evaluate new corpora before changing thresholds.
 
 Owning docs:
 
-- [Codemap Missing-Link Evidence](../research/codemap-evidence.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
+- [Codemap Missing-Link Evidence](../codemap-evidence.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)
 
 Removal condition:
 
-This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, and repository-specific evaluation.
+This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, repository-specific evaluation, and improved evidence providers.
+
+## Missing codemap sections are not yet created from file-type schemas
+
+The internal codemap layer implements and tests a `SectionSchema` placement seam, but the public application does not yet connect a repository file-type schema provider to production codemap execution.
+
+Impact:
+
+- existing configured codemap sections can be adopted and updated;
+- a selected document without a configured section is reported as `missing` and left unchanged;
+- `section: schema-created` is an internal reachable state but not currently produced by normal CLI configuration; and
+- repositories must add the schema-defined heading manually before production generation can manage that document.
+
+Workaround:
+
+Define the intended heading in `[codemap].headings`, add the correctly placed section to the document, then run `codemap inspect`, dry-run, fix, and check.
+
+Owning docs:
+
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
+- [Configuration Reference](../reference/configuration.md)
+
+Removal condition:
+
+A repository file-type schema model, configuration loader, document-type resolver, placement provider, CLI integration, diagnostics, and end-to-end tests are connected to `codemaprun.Options.Schema`.
 
 ## Agent context delivery is not implemented
 

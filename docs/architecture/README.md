@@ -20,7 +20,8 @@ Implemented ownership boundaries, state models, reconciliation pipelines, and in
 - [codemap-corpus-adapters.md](codemap-corpus-adapters.md) - Repository file, dependency, symbol, related-document, and bounded-history facts supplied to codemap analysis.
 - [codemap-evidence-and-ranking.md](codemap-evidence-and-ranking.md) - Candidate evidence, fingerprints, admission, scoring, fan-out discounting, output bounds, and suggestion tiers.
 - [codemap-extraction-and-dataset.md](codemap-extraction-and-dataset.md) - Authored code-map syntax, target normalization and resolution, deterministic datasets, holdout stripping, and selected insertion.
-- [codemap-pipeline.md](codemap-pipeline.md) - End-to-end codemap ownership from authored extraction through repository corpus facts, ranking, evaluation, and review-selected insertion.
+- [codemap-managed-execution.md](codemap-managed-execution.md) - Explicit codemap scope, unified section ownership, decline filtering, optional pruning, syntax-preserving rendering, transaction safety, and daemon exclusion.
+- [codemap-pipeline.md](codemap-pipeline.md) - End-to-end codemap ownership from extraction through production ranking, unified managed-section generation, shared decline policy, and research evaluation.
 - [generated-rewrite-publication.md](generated-rewrite-publication.md) - Authored-source preflight, atomic replacement, review publication, rollback, metadata refresh, and private-state convergence.
 - [ignore-and-traversal.md](ignore-and-traversal.md) - Repository-root and nested `.docignore` domains, permanent exclusions, traversal pruning, and consumer boundaries.
 - [link-reconciliation-state-machine.md](link-reconciliation-state-machine.md) - Link identity reuse, target resolution, repair statuses, review controls, generated rewrites, and graph convergence.

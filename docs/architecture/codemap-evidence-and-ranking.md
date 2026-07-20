@@ -27,13 +27,14 @@ Corpus facts + visible authored targets
 -> suggestion tier
 ```
 
-Evidence explains why a target may be relevant. Ranking decides which candidates are surfaced first. Neither establishes semantic truth or authorizes automatic insertion.
+Evidence explains why a target may be relevant. Ranking decides which candidates are surfaced first. Neither establishes universal semantic truth. The explicit production codemap command automatically adds selected non-declined candidates from both tiers; mutation ownership remains in `internal/codemaprun` and `internal/codemap`, not in the ranker.
 
 ## Code root
 
 ```text
 internal/evidence/
-internal/codemapbench/suggestions.go
+internal/codemaprecommend/
+internal/codemaprun/
 internal/codemapbench/adapters.go
 internal/codemapbench/current.go
 ```
@@ -62,7 +63,8 @@ It does not own:
 - holdout answer selection;
 - human validity labels;
 - review decline persistence;
-- automatic document mutation; or
+- managed-section rendering or transactional document mutation;
+- shared decline persistence and replay; or
 - removal or irrelevance judgments for existing links.
 
 ## Evidence input
@@ -210,27 +212,31 @@ The reserve may include high-count exact-path candidates outside the normal top 
 
 All selected suggestions default to `context`.
 
-Only the first five ordered suggestions are eligible for `hard_link`. Eligibility requires:
+At most five ordered suggestions receive `hard_link`. Eligibility requires one of the implemented paths:
 
-- declared-symbol evidence;
-- test-counterpart evidence; or
-- dependency-neighbor evidence with total score at least 16.
+- a declared-symbol mention;
+- an exact path mentioned at least twice and independently corroborated by declared-symbol or dependency evidence;
+- a test counterpart independently supported by dependency, related-document, or sibling evidence, with non-test implementation counterparts additionally requiring score 20 or greater;
+- dependency-neighbor evidence with total score at least 18; or
+- related-document evidence reinforced by direct Git co-change with the current document.
 
-The tier distinguishes the current permanent-link review surface from weaker context relationships. It does not alter authored files and does not make a candidate true.
+The tier distinguishes stronger relationships from the broader context set. Both tiers are eligible for automatic addition by explicit codemap execution after decline-policy filtering. The tier does not make a candidate universally true and does not imply that an existing link should be removed.
 
 An empty legacy tier in schema-1 reports is interpreted as `context` by current consumers.
 
 ## Current-suggestion flow
 
-`SuggestCurrent` treats all exact authored links supplied by the corpus as visible. It asks for only additional candidates and returns the same ranked suggestion model used by review and precision-source commands.
+`SuggestCurrent` and production execution treat all current codemap links supplied by the corpus as visible. They ask for only additional candidates and return the same ranked suggestion model used by explicit codemap execution, review commands, precision-source commands, and controlled evaluation.
 
-Current suggestions are not holdout answers. Their validity requires review or labeled evaluation.
+Production execution strips the codemap section from document text before collecting mention evidence, filters the result through shared decline policy, and passes every remaining tier to unified section reconciliation. Current recommendations are not holdout answers, and measured validity still requires repository-specific review or labeled evaluation.
 
 ## State and data ownership
 
 - `internal/evidence` owns candidate evidence and fingerprints.
-- `internal/codemapbench` owns admission, score, ordering, limits, and tier.
-- Ranked suggestions are rebuildable analysis output.
+- `internal/codemaprecommend` owns production admission, score, ordering, limits, negative-evidence filtering, and tier.
+- `internal/codemaprun` owns production recommendation planning, decline replay, and optional pruning evaluation.
+- `internal/codemapbench` owns holdouts and reports while importing the production ranker.
+- Ranked recommendations are rebuildable analysis output.
 - Persisted decline, selection, and block state belongs to `internal/review`.
 
 ## Invariants and safety boundaries
@@ -243,8 +249,9 @@ Current suggestions are not holdout answers. Their validity requires review or l
 - Broad evidence fan-out is discounted.
 - Ordering is deterministic for identical inputs.
 - Per-document output is bounded.
-- Tier is metadata, not mutation authorization.
-- A selected write still passes through review and source hash guards.
+- Tier is confidence and policy metadata, not a mandatory per-run approval gate.
+- Explicit production generation adds both tiers after persisted decline filtering.
+- A planned write still passes through managed-section reconciliation and source-hash guards.
 
 ## Failure behavior
 
@@ -257,22 +264,26 @@ A ranking change can pass unit tests while reducing real precision. Such changes
 - `internal/evidence/model.go` — evidence kinds, normalized inputs, candidates, and fingerprints.
 - `collect.go` — candidate aggregation and exclusions.
 - `mentions.go`, `structure.go`, `symbols.go`, and `history.go` — current signal collectors.
-- `internal/codemapbench/suggestions.go` — weights, admission, fan-out discount, bounds, and tiers.
-- `adapters.go` — conversion between dataset/evidence/report models.
-- `current.go` — non-holdout current suggestion flow.
+- `internal/codemaprecommend/suggestions.go` — weights, admission, fan-out discount, bounds, and tiers.
+- `internal/codemaprecommend/suggestion_negative_evidence.go` — narrow incidental-target filtering.
+- `internal/codemaprun/build.go` — production recommendation, decline, and pruning planning.
+- `internal/codemapbench/adapters.go` — conversion between dataset/evidence/report models.
+- `internal/codemapbench/current.go` — current recommendation compatibility flow.
 
 ## Tests
 
 Focused tests cover every evidence signal, token boundaries, repeated mentions, unique basenames, symbol ambiguity, existing-target exclusion, fingerprints, weights, caps, weak-signal rejection, fan-out discount, hard-link limits, and deterministic ordering.
 
 ```bash
-go test ./internal/evidence ./internal/codemapbench -count=1
+go test ./internal/evidence ./internal/codemaprecommend ./internal/codemaprun ./internal/codemapbench -count=1
 ```
 
 Pinned validation cases live under `internal/evidence/testdata/` and research evaluation artifacts.
 
 ## Related docs
 
+- [Codemap Missing-Link Evidence](../codemap-evidence.md)
+- [Codemap Managed Execution](codemap-managed-execution.md)
 - [Codemap Pipeline](codemap-pipeline.md)
 - [Codemap Corpus and Adapters](codemap-corpus-adapters.md)
 - [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md)

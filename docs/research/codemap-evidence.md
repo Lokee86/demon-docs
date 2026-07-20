@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-752b-b343-5d1994112f29
 document_type: general
 policy_exempt: false
-summary: This document records retained codemap evidence findings, current measured baselines, corpus provenance, and safety interpretation. Implemented extraction, corpus, ranking, benchmark methodology, precision governance, and report...
+summary: This document records retained codemap evidence findings, measured baselines, corpus provenance, and the limits on interpreting production missing-link generation quality.
 ---
 # Codemap Missing-Link Evidence
 
@@ -12,196 +12,280 @@ Parent index: [Research](./README.md)
 
 ## Purpose
 
-This document records retained codemap evidence findings, current measured baselines, corpus provenance, and safety interpretation. Implemented extraction, corpus, ranking, benchmark methodology, precision governance, and report contracts are owned by the focused architecture, research, and reference documents linked below.
+This document records retained codemap evidence findings, measured baselines, corpus provenance, and the limits on interpreting production missing-link generation quality.
 
 ## Overview
 
-Demon Docs has implemented a deterministic missing-link analysis pipeline and review surface. This page retains the evidence interpretation and recorded sample results rather than serving as the canonical implementation specification.
+Demon Docs has implemented a deterministic missing-link analysis pipeline and an explicit foreground managed-section writer. This page owns research evidence and interpretation, not the exact production command or implementation contract.
 
-The system only suggests potentially missing relationships. It never recommends that an existing codemap link is irrelevant or should be removed.
+The missing-link ranker returns targets absent from the current codemap. Production execution automatically adds selected non-declined candidates from both confidence tiers. Existing links remain by default; optional confidence-based pruning belongs to a separate execution policy and is disabled by default.
 
-Current implementation owners:
+Current implementation owners are:
 
+- [Codemap Missing-Link Algorithm](../codemap-suggestion-algorithm.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)
 - [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Codemap Benchmark Methodology](codemap-benchmark-methodology.md)
 - [Codemap Precision Governance](codemap-precision-governance.md)
 - [Codemap Report Formats](../reference/codemap-report-formats.md)
 
 ## Research status
 
-Implemented research tooling with an actively tuned scoring model. Recorded metrics describe pinned labeled samples and must not be interpreted as universal repository performance.
+Implemented research tooling with a production-owned scoring model. Recorded metrics describe pinned labeled samples and must not be interpreted as universal repository performance.
+
+The ranker moved from `internal/codemapbench` into `internal/codemaprecommend`. Benchmarks now import the same implementation used by production execution.
 
 ## Research question
 
-Can deterministic repository facts rank potentially missing documentation-to-code links with enough precision to support human review while never recommending removal of existing authored links?
+Can deterministic repository facts identify missing documentation-to-code links with enough useful relevance to support explicit managed codemap generation, while preserving conservative existing-link retention and auditable decline policy?
 
-## Commands
+This question has separate components:
 
-### Export authored codemaps
+```text
+recovery
+= can the model rediscover known authored links when they are hidden?
 
-```bash
-ddocs codemap export --output .ddocs/codemap.json
+strict precision
+= how often is a surfaced candidate a valid missing permanent link?
+
+relevance
+= how often is a surfaced candidate useful non-junk context even when not necessary as a permanent link?
+
+operational safety
+= can generation remain deterministic, bounded, inspectable, suppressible, idempotent, and non-daemonized?
 ```
 
-`codemap export` scans Markdown documents below the selected docs root and emits a deterministic JSON dataset containing:
+## Method
+
+### Export current codemaps
+
+```bash
+ddocs codemaps export --output .ddocs/codemap.json
+```
+
+The export records:
 
 - document paths and content hashes;
 - configured codemap headings;
-- normalized folder, file, glob, placeholder, and unresolved targets;
+- normalized target forms;
 - descriptions and source locations;
 - target-resolution diagnostics; and
-- stable ordering suitable for fixtures and later analysis.
+- stable ordering suitable for fixtures and analysis.
 
-Useful overrides include repeated `--heading`, `--target-root`, `--target-base repository|document`, and the normal config-selection flags. JSON is written to stdout when `--output` is omitted.
-
-### Run a holdout benchmark
+### Run controlled holdouts
 
 ```bash
-ddocs codemap benchmark --repo /path/to/repository --format json
+ddocs codemaps benchmark --repo /path/to/repository --format json
 ```
 
-The benchmark removes a deterministic subset of known authored links and asks the suggestion engine to recover them. It supports a fixed seed, exact holdout count or fraction, a prebuilt dataset, a reviewed trusted-link set, JSON or text reports, and optional minimum precision or recall thresholds.
+The benchmark hides a deterministic subset of trusted exact links and removes answer leakage from visible map text, current targets, and related-document facts before asking the production ranker to recover them.
 
-Holdout recovery measures whether the algorithm can rediscover authored links. It does not prove that every authored link is semantically necessary or that every unheld suggestion is correct.
+Holdout recovery measures rediscovery. It does not prove that every authored link is necessary or every unheld recommendation is correct.
 
 ### Generate and evaluate precision samples
 
 ```bash
-ddocs codemap precision --help
+ddocs codemaps precision --help
 ```
 
-The precision workflow generates ranked candidates, produces deterministic review samples, and evaluates curated labels. Review labels distinguish:
+Review labels distinguish:
 
 - `valid_missing_link`;
 - `plausible_but_unnecessary`; and
 - `incorrect`.
 
-This separates strict permanent-link precision from the broader question of whether a candidate is useful non-junk context.
+This separates strict permanent-link precision from broader retained relevance.
 
-## Current Architecture
+## Evidence inputs
 
-Current architecture has been decomposed into focused owners. See [Codemap Pipeline](../architecture/codemap-pipeline.md) for the end-to-end boundary and its links to extraction, corpus, evidence/ranking, benchmark, precision, and report documents.
-
-This research page records observed quality and interpretation. It is not authoritative for current weights, adapter support, schema fields, or command behavior.
-
-## Evidence Signals
-
-The current deterministic signals are:
+The deterministic evidence population includes:
 
 - exact repository-relative path mentions;
 - unique basename mentions;
 - declared-symbol mentions;
-- direct siblings of accepted targets;
+- direct siblings of current targets;
 - source/test counterparts;
 - direct observed dependency neighbours;
-- document/code and accepted-target/code Git co-change counts; and
-- accepted targets shared by related documents.
+- document/code and current-target/code Git co-change counts; and
+- current targets shared by related documents.
 
-Each candidate retains its evidence kind, source, detail, count, and deterministic evidence fingerprint. Scoring, tiering, human acceptance, and authored link mutation are separate layers.
+Each candidate retains evidence kind, source, detail, count, and a deterministic fingerprint.
 
-## Suggestion Tiers
+Production execution strips the current codemap section from the document text before mention evidence is collected. This prevents a current map entry from becoming evidence for itself.
 
-Ranked candidates are separated without discarding the broader relationship set:
+## Confidence tiers
 
-- `hard_link` is the bounded, high-confidence surface intended for permanent-link review. It is limited to the top five candidates per document and currently requires strong evidence such as a declared-symbol mention, a source/test counterpart, or sufficiently strong dependency-neighbour evidence.
-- `context` contains weaker or indirect relationships that may still be useful for bounded task context but are not strong enough to recommend as permanent documentation links.
+The production ranker retains a bounded relationship set:
 
-A useful context candidate is not automatically a valid codemap link. Future code-graph evidence and agent-context ranking must preserve this distinction.
+- `hard_link` is the stronger-confidence tier, capped at five candidates per document;
+- `context` is the broader weaker or indirect set that still passed admission and negative-evidence filtering.
 
-## Recorded Precision Baseline
+Both tiers are eligible for automatic addition by explicit codemap execution after persisted decline filtering.
 
-The pinned Space Rocks evaluation contains 150 manually labeled suggestions across 25 documents. The committed report records:
+The tier remains useful for:
 
-- overall strict precision: **46.7%**;
-- precision at rank 1: **60.0%**;
-- precision at rank 3: **54.7%**;
-- precision at rank 5: **52.8%**;
-- `hard_link` strict precision: **64.2%**;
-- `hard_link` non-junk acceptance: **95.1%**; and
-- `hard_link` sample recall of valid links: **74.3%**.
+- human inspection;
+- subgroup precision measurement;
+- review-policy explanation;
+- compatibility reports; and
+- optional `remove_low_score_links` evaluation for existing targets.
 
-These metrics apply only to the pinned sample and its curation rules. They are useful for regression and tuning, not a claim that the algorithm has the same quality on unrelated repositories.
+A context candidate is not a failed hard link. It may be plausible and useful while still unnecessary as a permanent relationship.
 
-The evidence breakdown in that sample shows the strongest strict precision from declared-symbol mentions, source/test counterparts, and dependency neighbours. Exact path mentions have high non-junk acceptance but low strict permanent-link precision, which is why path presence alone should not qualify a candidate as a hard link.
+## Current measured baseline
 
-## Development and Evaluation Corpora
+### Space Rocks labeled sample
 
-Space Rocks remains the curated labeled benchmark because its codemaps have been manually reviewed and the committed sample has stable labels.
+The manually reviewed Space Rocks sample contains 150 recommendations across 25 documents.
 
-Demon Docs' own documentation now includes implementation code maps. Those maps are useful for:
+| Metric | Current result |
+|---|---:|
+| Hard-link recommendations | 68 |
+| Hard-link strict precision | 75.00% (51/68) |
+| Hard-link relevance | 98.53% (67/68) |
+| Labeled-valid hard-link recovery | 72.86% (51/70) |
+| Context recommendations | 82 |
+| Full source pool | 4,493 |
+| Full-pool hard links | 621 |
+| Full-pool context links | 3,872 |
+| Canonical hidden-link holdout | 10/10 recovered |
 
-- testing polyglot-independent extraction on a second repository shape;
-- exposing parser and corpus assumptions that were accidentally Space Rocks-specific;
-- adding deterministic holdout cases during development; and
-- evaluating whether recent documentation changes produce stable exports.
+### Cross-repository recovery
 
-They must not be treated as an independent precision benchmark when the same development process authored both the docs and the algorithm adjustments. Self-authored links are development evidence, not unbiased ground truth.
+The ordinary calculation corpus contains five repositories. A monolithic per-file index is retained separately as a stress case.
 
-Broader cross-repository work should preserve repository identity, pinned revisions, labels, and provenance rather than pooling unlabeled suggestions into a misleading aggregate metric.
+| Metric | Current result |
+|---|---:|
+| Hidden links | 18 |
+| Recovered links | 11 |
+| Hard recoveries | 4 |
+| Context recoveries | 7 |
+| Recall | 61.11% |
+| Separate index-stress recovery | 3/10, all context |
 
-## Decision Persistence
+### Frozen cross-repository precision review
 
-The public review lifecycle is:
+The fixed sample contains 121 unmatched recommendations.
 
-1. generate a candidate and evidence fingerprint;
-2. show the document, target, tier, score, and evidence with `ddocs suggestions`;
-3. allow a human to select or decline it;
-4. convert a selection into a normal hash-guarded repair;
-5. persist declines by document relationship, target, and evidence fingerprint;
-6. suppress the same declined fingerprint on later runs; and
-7. show a stale decision when materially changed evidence produces a new fingerprint.
+Before the final incidental-target pass:
 
-Use `ddocs suggestions declined`, `ddocs suggestions log`, and `ddocs suggestions reconsider` to inspect or change persisted decisions. Applied codemap insertions appear in `ddocs changes` and support the same bounded undo history as link repairs. See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md).
+| Label | Count |
+|---|---:|
+| Valid missing link | 83 |
+| Plausible but unnecessary | 34 |
+| Incorrect | 4 |
+| Strict precision | 68.60% |
+| Relevance | 96.69% |
 
-## Safety Contract
+After the pass:
 
-- Existing codemap targets are never returned as missing-link candidates.
-- There is no removal, irrelevance, or automatic cleanup recommendation.
-- Evidence creates a reviewable suggestion, never documentation coverage or an authored graph edge.
-- A candidate tier is not an automatic write decision.
-- Declines remain suppressible through stable fingerprints.
-- Identical inputs produce byte-stable candidate ordering, evidence ordering, counts, fingerprints, and reports.
-- Unresolved, ambiguous, placeholder, or ignored targets remain explicit diagnostics rather than guessed matches.
+- all 83 valid recommendations remain;
+- all 34 plausible context recommendations remain;
+- all four demonstrated incorrect recommendations are suppressed;
+- retained strict precision is 70.94%; and
+- retained relevance is 100% for this fixed sample.
 
-## Research Artifacts
+The 100% result is not a universal guarantee. It states only that the four reviewed errors in that frozen sample were removed without losing another reviewed useful candidate.
 
-- `research/codemap-audit/` records the initial dataset-quality audit.
-- `research/codemap-inventory/` contains codemap syntax fixtures and extraction findings.
-- `research/codemap-review/` contains reviewed trusted-link artifacts.
-- `research/codemap-precision/` contains the pinned labeled sample, curation inputs, evaluation, helper tools, and the Demon Docs self-corpus development comparison.
-- `research/codemap-evidence-validation/` documents signal validation work.
+## Interpretation
 
-## Code map
+The measurements support these conclusions:
 
-- `internal/codemap/` — authored codemap parsing, target normalization, diagnostics, and dataset export.
-- `internal/codemapcorpus/` — repository paths, dependency facts, symbols, tests, related documents, and Git history adapters.
-- `internal/evidence/` — deterministic evidence collection and fingerprints.
-- `internal/codemapbench/` — holdout orchestration, ranking, tier assignment, and report export.
-- `internal/codemapprecision/` — curated-label evaluation and metric aggregation.
-- `internal/review/` — persisted suggestion decisions, applied changes, fingerprints, and history.
-- `internal/codemap/insert.go` — selected codemap-candidate insertion.
-- `internal/app/codemap_benchmark.go` — benchmark CLI contract.
-- `internal/app/codemap_precision.go` — precision CLI contract.
-- `research/codemap-precision/` — pinned precision benchmark artifacts.
+- declared symbols, supported counterparts, and dependency evidence remain the strongest strict-link signals;
+- exact path mentions often indicate relevant context but do not independently prove permanent codemap membership;
+- broader context retention improves relevance coverage but increases plausible-unnecessary output;
+- narrow negative-evidence rules can remove demonstrated noise without broad file-class suppression;
+- the current model is suitable for explicit dogfooding with inspection, dry-run, and persisted declines; and
+- repositories with different languages, naming conventions, or document shapes require independent evaluation.
+
+The measurements do not support:
+
+- universal precision claims;
+- daemon-triggered unattended generation;
+- default removal of links the algorithm cannot reconstruct;
+- treating self-authored Demon Docs links as an unbiased benchmark; or
+- assuming context-tier additions are always necessary permanent links.
+
+## Decision persistence
+
+The shared review lifecycle records decisions by document, target, relationship kind, and evidence fingerprint.
+
+Production behavior is:
+
+1. generate a current recommendation and fingerprint;
+2. replay persisted decline policy;
+3. suppress unchanged declined relationships;
+4. automatically pass remaining recommendations to managed-section reconciliation;
+5. allow materially changed evidence to produce a new current fingerprint; and
+6. expose decline and reconsideration through `ddocs suggestions`.
+
+A decline suppresses a future addition. It does not remove an already-present codemap entry. Manual deletion does not create a decline.
+
+## Operational evidence
+
+Production execution adds safety requirements beyond ranking quality:
+
+- one explicit file or directory scope;
+- configured heading recognition;
+- complete-section managed ownership;
+- deterministic syntax-preserving rendering;
+- default existing-link retention;
+- read-only inspect, check, and dry-run modes;
+- source hash preflight;
+- atomic replacement and guarded rollback;
+- idempotent second execution; and
+- no call path from normal reconciliation, watch, or the repository demon.
+
+These contracts are documented in [Codemap Managed Execution](../architecture/codemap-managed-execution.md) and protected in the [Behavioral Contract Matrix](../development/behavioral-contract-matrix.md).
 
 ## Limitations
 
-The primary curated baseline is repository- and sample-specific. Self-authored Demon Docs codemaps are useful development data but not an independent benchmark. Cross-repository corpora improve coverage but require curated labels before precision claims are valid.
+- Quality remains repository- and sample-dependent.
+- The cross-repository precision review has one reviewer.
+- Most non-Space-Rocks evaluation documents are broad repository guidance rather than narrowly scoped feature documents.
+- Few unmatched hard-tier recommendations were available outside Space Rocks.
+- Ordinary cross-repository holdout recovery remains 11/18.
+- Thresholds are empirical defaults rather than universal constants.
+- Production currently auto-adds both selected tiers after decline filtering.
+- The public file-type schema provider for creating missing codemap sections is not connected.
+- Continued tuning on the same frozen errors risks overfitting.
+
+## Retained artifacts
+
+- `research/codemap-audit/` — initial dataset-quality audit.
+- `research/codemap-inventory/` — syntax fixtures and extraction findings.
+- `research/codemap-review/` — reviewed trusted-link artifacts.
+- `research/codemap-precision/` — Space Rocks labeled sample and evaluation.
+- `research/codemap-evidence-validation/` — signal validation work.
+- `research/cross-repo-codemap-benchmark/` — pinned multi-repository holdout corpus.
+- `research/cross-repo-codemap-precision-review/` — frozen cross-repository manual sample and tuning summary.
+
+## Code map
+
+- `internal/codemap/` — extraction, target normalization, datasets, authored-section stripping, and managed reconciliation.
+- `internal/codemapcorpus/` — repository paths, dependencies, symbols, related documents, and Git history adapters.
+- `internal/evidence/` — deterministic evidence collection and fingerprints.
+- `internal/codemaprecommend/` — production admission, ranking, negative evidence, bounds, and tiers.
+- `internal/codemaprun/` — production decline filtering, pruning evaluation, and rewrite planning.
+- `internal/codemapbench/` — holdout orchestration and reports using the production ranker.
+- `internal/codemapprecision/` — curated-label sampling and metric aggregation.
+- `internal/review/` — persisted decision replay.
+- `internal/app/codemap_execute*.go` — production fix/check/inspect integration.
 
 ## Related docs
 
 - [Research](README.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
+- [Codemap Missing-Link Algorithm](../codemap-suggestion-algorithm.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)
 - [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Codemap Benchmark Methodology](codemap-benchmark-methodology.md)
 - [Codemap Precision Governance](codemap-precision-governance.md)
 - [Codemap Report Formats](../reference/codemap-report-formats.md)
-- [Reverse Indexes](../architecture/reverse-indexes.md)
-- [Roadmap](../planning/roadmap.md)
-- [Planned Code Intelligence](../planning/code-intelligence/README.md)
-- [Testing and Fixtures](../development/testing-and-fixtures.md)
+- [Current Product Limitations](../limits/current-limitations.md)
 
 ## Notes
 
-The product rule remains one-directional: suggest potentially missing links, never suggest that an existing authored relationship is irrelevant or should be removed.
+Research results govern confidence and future tuning. They do not override the production safety contract: explicit foreground execution, persisted declines, deterministic output, and conservative existing-link retention by default.

@@ -49,7 +49,7 @@ All current JSON schemas use version 1 but have separate owners and meanings.
 Produced by:
 
 ```bash
-ddocs codemap export
+ddocs codemaps export
 ```
 
 Current schema version: `1`.
@@ -82,7 +82,7 @@ The dataset is rebuildable analysis input. It is not review history and does not
 Produced by:
 
 ```bash
-ddocs codemap benchmark --format json
+ddocs codemaps benchmark --format json
 ```
 
 Current schema version: `1`.
@@ -141,7 +141,7 @@ Text formatting is deterministic but is not intended as a substitute for schema-
 Created by:
 
 ```bash
-ddocs codemap precision sample
+ddocs codemaps precision sample
 ```
 
 and completed through human review.
@@ -221,7 +221,7 @@ Audit metadata binds the judgment to repository content and supports later stale
 Produced by:
 
 ```bash
-ddocs codemap precision evaluate --format json
+ddocs codemaps precision evaluate --format json
 ```
 
 Current schema version: `1`.
@@ -295,26 +295,26 @@ Threshold failure after a completed holdout run is distinct from invalid input o
 Generate a deterministic dataset:
 
 ```bash
-ddocs codemap export --output codemap-dataset.json
+ddocs codemaps export --output codemap-dataset.json
 ```
 
 Generate a holdout report:
 
 ```bash
-ddocs codemap benchmark --seed demon-docs-codemap-benchmark-v1 --format json --output holdout.json
+ddocs codemaps benchmark --seed demon-docs-codemap-benchmark-v1 --format json --output holdout.json
 ```
 
 Generate current suggestions and a review sample:
 
 ```bash
-ddocs codemap precision source --output source-report.json
-ddocs codemap precision sample --suggestions source-report.json --seed review-v1 --output labels.json
+ddocs codemaps precision source --output source-report.json
+ddocs codemaps precision sample --suggestions source-report.json --seed review-v1 --output labels.json
 ```
 
 Evaluate completed labels:
 
 ```bash
-ddocs codemap precision evaluate --benchmark labels.json --suggestions source-report.json --format json --output evaluation.json
+ddocs codemaps precision evaluate --benchmark labels.json --suggestions source-report.json --format json --output evaluation.json
 ```
 
 ## Related docs

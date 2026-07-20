@@ -52,7 +52,7 @@ func (f *optionalFloat) Set(value string) error {
 }
 
 func codemapBenchmarkHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap benchmark [-h] [--repo PATH] [--dataset PATH]\n                                [--trusted-links PATH] [--seed TEXT]\n                                [--holdout-count N | --holdout-fraction FLOAT]\n                                [--format {text,json}] [--output PATH]\n                                [--min-precision FLOAT] [--min-recall FLOAT]\n\nRun the deterministic missing-link benchmark. By default, the current directory is the target repository and 20% of known links are held out.\n\noptions:\n  -h, --help            show this help message and exit\n  --repo PATH           repository to benchmark (default current directory)\n  --dataset PATH        use a prebuilt codemap dataset\n  --trusted-links PATH  restrict ground truth to a reviewed link set\n  --seed TEXT           deterministic holdout seed\n  --holdout-count N     hide exactly N known links\n  --holdout-fraction FLOAT\n                        hide this fraction of known links (default 0.2)\n  --format {text,json}  report format (default text)\n  --output PATH         write the report to a file instead of stdout\n  --min-precision FLOAT return exit code 1 below this precision\n  --min-recall FLOAT    return exit code 1 below this recall\n\nExit codes:\n  0  benchmark completed and thresholds passed\n  1  benchmark completed but a requested threshold failed\n  2  invalid arguments or benchmark execution failed")
+	fmt.Fprintln(w, "usage: ddocs codemaps benchmark [-h] [--repo PATH] [--dataset PATH]\n                                [--trusted-links PATH] [--seed TEXT]\n                                [--holdout-count N | --holdout-fraction FLOAT]\n                                [--format {text,json}] [--output PATH]\n                                [--min-precision FLOAT] [--min-recall FLOAT]\n\nRun the deterministic missing-link benchmark. By default, the current directory is the target repository and 20% of known links are held out.\n\noptions:\n  -h, --help            show this help message and exit\n  --repo PATH           repository to benchmark (default current directory)\n  --dataset PATH        use a prebuilt codemap dataset\n  --trusted-links PATH  restrict ground truth to a reviewed link set\n  --seed TEXT           deterministic holdout seed\n  --holdout-count N     hide exactly N known links\n  --holdout-fraction FLOAT\n                        hide this fraction of known links (default 0.2)\n  --format {text,json}  report format (default text)\n  --output PATH         write the report to a file instead of stdout\n  --min-precision FLOAT return exit code 1 below this precision\n  --min-recall FLOAT    return exit code 1 below this recall\n\nExit codes:\n  0  benchmark completed and thresholds passed\n  1  benchmark completed but a requested threshold failed\n  2  invalid arguments or benchmark execution failed")
 }
 
 func runCodemapBenchmark(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -60,7 +60,7 @@ func runCodemapBenchmark(ctx context.Context, args []string, out, errOut io.Writ
 		codemapBenchmarkHelp(out)
 		return 0
 	}
-	fs := flag.NewFlagSet("ddocs codemap benchmark", flag.ContinueOnError)
+	fs := flag.NewFlagSet("ddocs codemaps benchmark", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	var repo, dataset, trusted, output optionalString
 	var fraction optionalFloat
@@ -78,11 +78,11 @@ func runCodemapBenchmark(ctx context.Context, args []string, out, errOut io.Writ
 	fs.Float64Var(&minPrecision, "min-precision", -1, "minimum precision")
 	fs.Float64Var(&minRecall, "min-recall", -1, "minimum recall")
 	if err := fs.Parse(args); err != nil {
-		fmt.Fprintf(errOut, "ddocs codemap benchmark: error: %v\n", err)
+		fmt.Fprintf(errOut, "ddocs codemaps benchmark: error: %v\n", err)
 		return 2
 	}
 	if fs.NArg() != 0 {
-		fmt.Fprintf(errOut, "ddocs codemap benchmark: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
+		fmt.Fprintf(errOut, "ddocs codemaps benchmark: error: unrecognized arguments: %s\n", strings.Join(fs.Args(), " "))
 		return 2
 	}
 	if code := validateBenchmarkFlags(count, fraction, format, minPrecision, minRecall, errOut); code != 0 {
@@ -122,7 +122,7 @@ func runCodemapBenchmark(ctx context.Context, args []string, out, errOut io.Writ
 		return fail(errOut, err)
 	}
 	if minPrecision >= 0 && result.Precision < minPrecision || minRecall >= 0 && result.Recall < minRecall {
-		fmt.Fprintf(errOut, "ddocs codemap benchmark: thresholds failed (precision %.4f, recall %.4f)\n", result.Precision, result.Recall)
+		fmt.Fprintf(errOut, "ddocs codemaps benchmark: thresholds failed (precision %.4f, recall %.4f)\n", result.Precision, result.Recall)
 		return 1
 	}
 	return 0
@@ -130,23 +130,23 @@ func runCodemapBenchmark(ctx context.Context, args []string, out, errOut io.Writ
 
 func validateBenchmarkFlags(count int, fraction optionalFloat, format string, minPrecision, minRecall float64, errOut io.Writer) int {
 	if count < 0 {
-		fmt.Fprintln(errOut, "ddocs codemap benchmark: error: --holdout-count cannot be negative")
+		fmt.Fprintln(errOut, "ddocs codemaps benchmark: error: --holdout-count cannot be negative")
 		return 2
 	}
 	if count > 0 && fraction.set {
-		fmt.Fprintln(errOut, "ddocs codemap benchmark: error: set --holdout-count or --holdout-fraction, not both")
+		fmt.Fprintln(errOut, "ddocs codemaps benchmark: error: set --holdout-count or --holdout-fraction, not both")
 		return 2
 	}
 	if fraction.set && (fraction.value <= 0 || fraction.value > 1) {
-		fmt.Fprintln(errOut, "ddocs codemap benchmark: error: --holdout-fraction must be greater than zero and at most one")
+		fmt.Fprintln(errOut, "ddocs codemaps benchmark: error: --holdout-fraction must be greater than zero and at most one")
 		return 2
 	}
 	if format != "text" && format != "json" {
-		fmt.Fprintf(errOut, "ddocs codemap benchmark: error: invalid --format %q; expected text or json\n", format)
+		fmt.Fprintf(errOut, "ddocs codemaps benchmark: error: invalid --format %q; expected text or json\n", format)
 		return 2
 	}
 	if !validBenchmarkThreshold(minPrecision) || !validBenchmarkThreshold(minRecall) {
-		fmt.Fprintln(errOut, "ddocs codemap benchmark: error: precision and recall thresholds must be between zero and one")
+		fmt.Fprintln(errOut, "ddocs codemaps benchmark: error: precision and recall thresholds must be between zero and one")
 		return 2
 	}
 	return 0
