@@ -8,7 +8,7 @@ summary: Future, unresolved, proposed, partially implemented, or back-burnered w
 ---
 # Planning
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Future, unresolved, proposed, partially implemented, or back-burnered work. Planning pages are not canonical references for shipped behavior.
 
@@ -24,7 +24,7 @@ Future, unresolved, proposed, partially implemented, or back-burnered work. Plan
 
 <!-- doc-ledger:folders:start -->
 
-- [Code Intelligence](code-intelligence/README.md) - Back-burnered polyglot provider, graph, dependency, and symbol-reference architecture.
+- [Code Intelligence](code-intelligence/INDEX.md) - Back-burnered polyglot provider, graph, dependency, and symbol-reference architecture.
 <!-- doc-ledger:folders:end -->
 
 ## Stub Files

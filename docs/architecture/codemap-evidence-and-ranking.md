@@ -8,7 +8,7 @@ summary: This document describes how normalized repository facts become determin
 ---
 # Codemap Evidence and Ranking
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

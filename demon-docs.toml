@@ -1,5 +1,5 @@
 docs_root = "docs"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [parent_link]
 folder_indexes = true

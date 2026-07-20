@@ -8,7 +8,7 @@ summary: This document defines the implemented watcher scheduling, debounce, sin
 ---
 # Watch Scheduler and Reconciliation Serialization
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

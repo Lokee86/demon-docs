@@ -8,7 +8,7 @@ summary: This document routes common Demon Docs extensions to the correct owners
 ---
 # Safe Extension Procedures
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

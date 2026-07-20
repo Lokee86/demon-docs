@@ -13,7 +13,7 @@ func TestCheckFailsForOrphanDocumentsWithoutCountingIndexOrDraftLinks(t *testing
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")
 	files := map[string]string{
-		"README.md":      "# Docs\n\n[Orphan](orphan.md)\n",
+		"INDEX.md":       "# Docs\n\n[Orphan](orphan.md)\n",
 		"source.md":      "# Source\n\n[Linked](linked.md)\n",
 		"linked.md":      "# Linked\n\n[Source](source.md)\n",
 		"orphan.md":      "# Orphan\n",
@@ -49,7 +49,7 @@ func TestCheckFailsForOrphanDocumentsWithoutCountingIndexOrDraftLinks(t *testing
 		if !strings.Contains(out.String(), "message: Orphan document: docs/orphan.md") {
 			t.Fatalf("missing orphan diagnostic: %q", out.String())
 		}
-		for _, unexpected := range []string{"docs/source.md", "docs/linked.md", "docs/stubs/draft.md", "docs/README.md"} {
+		for _, unexpected := range []string{"docs/source.md", "docs/linked.md", "docs/stubs/draft.md", "docs/INDEX.md"} {
 			if strings.Contains(out.String(), "Orphan document: "+unexpected) {
 				t.Fatalf("unexpected orphan %s: %q", unexpected, out.String())
 			}

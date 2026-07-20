@@ -8,7 +8,7 @@ summary: Demon Docs can validate and repair a configurable front matter schema f
 ---
 # Front Matter Schemas
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

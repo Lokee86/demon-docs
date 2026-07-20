@@ -8,7 +8,7 @@ summary: This document describes the implemented reverse-index projection from a
 ---
 # Code-Folder Reverse Indexes
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
@@ -208,7 +208,7 @@ go test ./internal/reverseindex ./internal/app -count=1
 - [Codemap Pipeline](codemap-pipeline.md)
 - [Ignore and Traversal](ignore-and-traversal.md)
 - [Codemap Missing-Link Evidence](../research/codemap-evidence.md)
-- [Planned Code Intelligence](../planning/code-intelligence/README.md)
+- [Planned Code Intelligence](../planning/code-intelligence/INDEX.md)
 
 ## Notes
 

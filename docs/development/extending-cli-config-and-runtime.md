@@ -8,7 +8,7 @@ summary: This document defines the safe workflow for adding public commands, nes
 ---
 # Extending CLI, Configuration, and Runtime
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

@@ -8,7 +8,7 @@ summary: This document describes the implemented ignore policy and filesystem tr
 ---
 # Ignore and Traversal
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
@@ -191,7 +191,7 @@ go test ./internal/ignore ./internal/scan ./internal/links ./internal/reverseind
 
 ## Related docs
 
-- [Architecture](README.md)
+- [Architecture](INDEX.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Reconciliation Model](reconciliation-pipeline.md)

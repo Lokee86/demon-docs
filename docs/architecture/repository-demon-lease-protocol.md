@@ -8,7 +8,7 @@ summary: This document defines the implemented repository-demon ownership claim,
 ---
 # Repository Demon Lease Protocol
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

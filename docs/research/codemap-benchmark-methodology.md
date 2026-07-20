@@ -8,7 +8,7 @@ summary: This document defines the controlled-holdout methodology used to measur
 ---
 # Codemap Benchmark Methodology
 
-Parent index: [Research](./README.md)
+Parent index: [Research](./INDEX.md)
 
 ## Purpose
 

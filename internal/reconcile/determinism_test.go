@@ -13,8 +13,8 @@ import (
 
 func TestPlanningAndStaleMessagesAreDeterministic(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "docs")
-	write(t, filepath.Join(root, "b", "README.md"), staleIndex("B", "z.md", "Z stale."))
-	write(t, filepath.Join(root, "a", "README.md"), staleIndex("A", "y.md", "Y stale."))
+	write(t, filepath.Join(root, "b", "INDEX.md"), staleIndex("B", "z.md", "Z stale."))
+	write(t, filepath.Join(root, "a", "INDEX.md"), staleIndex("A", "y.md", "Y stale."))
 	write(t, filepath.Join(root, "page.md"), "# Page\n")
 	c := config.Default()
 
@@ -31,7 +31,7 @@ func TestPlanningAndStaleMessagesAreDeterministic(t *testing.T) {
 			t.Fatalf("planning order changed on iteration %d\nwant:\n%s\ngot:\n%s", iteration, want, got)
 		}
 	}
-	if strings.Index(want, filepath.Join("a", "README.md")) > strings.Index(want, filepath.Join("b", "README.md")) {
+	if strings.Index(want, filepath.Join("a", "INDEX.md")) > strings.Index(want, filepath.Join("b", "INDEX.md")) {
 		t.Fatalf("stale messages not path-sorted:\n%s", want)
 	}
 }

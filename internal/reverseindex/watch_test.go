@@ -67,7 +67,7 @@ func TestWatchWithRunLockSerializesReconciliation(t *testing.T) {
 		close(locker.release)
 		t.Fatal("reverse-index reconciliation did not acquire the shared run lock")
 	}
-	index := filepath.Join(apiRoot, "README.md")
+	index := filepath.Join(apiRoot, "INDEX.md")
 	_, statErr := os.Stat(index)
 	wroteBeforeRelease := statErr == nil
 	if statErr != nil && !os.IsNotExist(statErr) {
@@ -111,14 +111,14 @@ func TestWatchReloadsNestedDocignoreAndAddsVisibleDirectories(t *testing.T) {
 	}()
 
 	waitFor(t, func() bool { return strings.Contains(output.String(), "watch --reverse watching") })
-	if _, err := os.Stat(filepath.Join(generatedRoot, "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(generatedRoot, "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatal("ignored generated directory was indexed before .docignore changed")
 	}
 	if err := os.WriteFile(filepath.Join(apiRoot, ".docignore"), nil, 0o644); err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool {
-		_, err := os.Stat(filepath.Join(generatedRoot, "README.md"))
+		_, err := os.Stat(filepath.Join(generatedRoot, "INDEX.md"))
 		return err == nil
 	})
 	cancel()

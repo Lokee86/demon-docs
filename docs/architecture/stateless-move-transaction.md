@@ -8,7 +8,7 @@ summary: 'This document describes the implemented architecture of ddocs mv: its 
 ---
 # Stateless Move Transaction
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

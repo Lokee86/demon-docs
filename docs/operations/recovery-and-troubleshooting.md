@@ -8,7 +8,7 @@ summary: This document provides a safe diagnostic and recovery sequence for conf
 ---
 # Recovery and Troubleshooting
 
-Parent index: [Operations](./README.md)
+Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 

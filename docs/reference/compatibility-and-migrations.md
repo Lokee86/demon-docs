@@ -8,7 +8,7 @@ summary: This document defines the current compatibility inputs, automatic migra
 ---
 # Compatibility and Migrations
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

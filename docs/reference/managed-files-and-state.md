@@ -8,7 +8,7 @@ summary: This document defines which repository files Demon Docs may manage, whi
 ---
 # Managed Files and State
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

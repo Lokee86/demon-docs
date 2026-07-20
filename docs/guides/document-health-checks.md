@@ -8,7 +8,7 @@ summary: This guide explains the orphan-document health check performed by ddocs
 ---
 # Document Health Checks
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

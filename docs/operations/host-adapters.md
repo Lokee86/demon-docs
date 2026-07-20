@@ -8,7 +8,7 @@ summary: This document defines the current host-neutral feeder workflow for MCP 
 ---
 # Host Adapter Feeder Integration
 
-Parent index: [Operations](./README.md)
+Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 

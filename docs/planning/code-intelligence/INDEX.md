@@ -8,7 +8,7 @@ summary: Back-burnered architecture for a language-neutral provider seam, normal
 ---
 # Planned Code Intelligence
 
-Parent index: [Planning](../README.md)
+Parent index: [Planning](../INDEX.md)
 
 Back-burnered architecture for a language-neutral provider seam, normalized code facts, symbol references, and bounded graph projections.
 

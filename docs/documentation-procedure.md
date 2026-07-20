@@ -8,7 +8,7 @@ summary: This document defines the standard process for creating, updating, movi
 ---
 # Documentation Procedure
 
-Parent index: [Demon Docs Documentation](./README.md)
+Parent index: [Demon Docs Documentation](./INDEX.md)
 
 ## Purpose
 
@@ -262,7 +262,7 @@ Run the project documentation checks and normal test gate after structural chang
 ## Related docs
 
 - [Documentation Policy](documentation-policy.md)
-- [Demon Docs Documentation](README.md)
+- [Demon Docs Documentation](INDEX.md)
 - [Testing and Fixtures](development/testing-and-fixtures.md)
 - [Behavioral Contract Matrix](development/behavioral-contract-matrix.md)
 - [Safe Extension Procedures](development/safe-extension-procedures.md)
@@ -270,4 +270,4 @@ Run the project documentation checks and normal test gate after structural chang
 
 ## Notes
 
-Demon Docs uses its own default `README.md` index convention. Reconciliation-generated index changes should be reviewed like any other documentation edit because descriptions and authored guidance remain human-owned.
+This repository follows the product default and uses `INDEX.md` for folder indexes. Reconciliation-generated index changes should be reviewed like any other documentation edit because descriptions and authored guidance remain human-owned.

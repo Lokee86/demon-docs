@@ -8,7 +8,7 @@ summary: This document defines TOML document schemas, schema selection, document
 ---
 # Document Schemas And Format Enforcement
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

@@ -8,7 +8,7 @@ summary: Create schema-backed documents, enforce frontmatter and Markdown struct
 ---
 # Using Document Schemas
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

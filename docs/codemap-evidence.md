@@ -8,7 +8,7 @@ summary: This document defines the deterministic evidence boundary that identifi
 ---
 # Codemap Missing-Link Evidence
 
-Parent index: [Demon Docs Documentation](./README.md)
+Parent index: [Demon Docs Documentation](./INDEX.md)
 
 ## Purpose
 

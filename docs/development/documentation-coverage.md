@@ -8,7 +8,7 @@ summary: This document maps every current production package, public command fam
 ---
 # Documentation Coverage Map
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

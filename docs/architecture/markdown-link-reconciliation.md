@@ -8,7 +8,7 @@ summary: This document describes the implemented repository-local link graph, su
 ---
 # Markdown Link Reconciliation
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
@@ -186,7 +186,7 @@ go test ./internal/links -count=1
 
 ## Related docs
 
-- [Architecture](README.md)
+- [Architecture](INDEX.md)
 - [Link Reconciliation State Machine](link-reconciliation-state-machine.md)
 - [Generated Rewrite Publication](generated-rewrite-publication.md)
 - [Review Lifecycles](review-lifecycles.md)

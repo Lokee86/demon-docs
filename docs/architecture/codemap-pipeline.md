@@ -8,7 +8,7 @@ summary: This document provides the implemented end-to-end ownership map for aut
 ---
 # Codemap Pipeline
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

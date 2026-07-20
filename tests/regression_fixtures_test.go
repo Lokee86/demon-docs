@@ -62,51 +62,51 @@ parent_index_extensions = [".md", ".mdx"]
 
 func setupDirectToStub(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/README.md", managedIndex("Docs", "- [report.md](report.md) - Carefully written report.", "", ""))
+	writeFixtureText(t, project, "docs/INDEX.md", managedIndex("Docs", "- [report.md](report.md) - Carefully written report.", "", ""))
 	writeFixtureText(t, project, "docs/stubs/report.md", "# Report\n")
 }
 
 func setupStubGraduation(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/README.md", managedIndex("Docs", "", "- [report.md](stubs/report.md) - Stub: Carefully written report.", ""))
+	writeFixtureText(t, project, "docs/INDEX.md", managedIndex("Docs", "", "- [report.md](stubs/report.md) - Stub: Carefully written report.", ""))
 	writeFixtureText(t, project, "docs/report.md", "# Report\n")
 }
 
 func setupUniqueFileMove(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/old/README.md", managedIndex("Old", "- [report.md](report.md) - Unique moved report.", "", ""))
+	writeFixtureText(t, project, "docs/old/INDEX.md", managedIndex("Old", "- [report.md](report.md) - Unique moved report.", "", ""))
 	writeFixtureText(t, project, "docs/new/report.md", "# Report\n")
 }
 
 func setupAmbiguousFileMove(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/a/README.md", managedIndex("A", "- [report.md](report.md) - First stale report.", "", ""))
-	writeFixtureText(t, project, "docs/b/README.md", managedIndex("B", "- [report.md](report.md) - Second stale report.", "", ""))
+	writeFixtureText(t, project, "docs/a/INDEX.md", managedIndex("A", "- [report.md](report.md) - First stale report.", "", ""))
+	writeFixtureText(t, project, "docs/b/INDEX.md", managedIndex("B", "- [report.md](report.md) - Second stale report.", "", ""))
 	writeFixtureText(t, project, "docs/c/report.md", "# Report\n")
 }
 
 func setupUniqueFolderMove(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/old/README.md", managedIndex("Old", "", "", "- [team](team/README.md) - Unique team description."))
+	writeFixtureText(t, project, "docs/old/INDEX.md", managedIndex("Old", "", "", "- [team](team/INDEX.md) - Unique team description."))
 	writeFixtureText(t, project, "docs/new/team/topic.md", "# Topic\n")
 }
 
 func setupAmbiguousFolderMove(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/a/README.md", managedIndex("A", "", "", "- [team](team/README.md) - First stale team."))
-	writeFixtureText(t, project, "docs/b/README.md", managedIndex("B", "", "", "- [team](team/README.md) - Second stale team."))
+	writeFixtureText(t, project, "docs/a/INDEX.md", managedIndex("A", "", "", "- [team](team/INDEX.md) - First stale team."))
+	writeFixtureText(t, project, "docs/b/INDEX.md", managedIndex("B", "", "", "- [team](team/INDEX.md) - Second stale team."))
 	writeFixtureText(t, project, "docs/c/team/topic.md", "# Topic\n")
 }
 
 func setupStaleEntryRemoval(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/README.md", managedIndex("Docs", "- [gone.md](gone.md) - Removed page.\n- [keep.md](keep.md) - Kept page.", "", "- [gone](gone/README.md) - Removed folder."))
+	writeFixtureText(t, project, "docs/INDEX.md", managedIndex("Docs", "- [gone.md](gone.md) - Removed page.\n- [keep.md](keep.md) - Kept page.", "", "- [gone](gone/INDEX.md) - Removed folder."))
 	writeFixtureText(t, project, "docs/keep.md", "# Keep\n")
 }
 
 func setupMalformedManagedBlock(t *testing.T, project string) {
 	writeFixtureText(t, project, ".demon-docs.toml", "root = \"docs\"\n")
-	writeFixtureText(t, project, "docs/README.md", "# Docs\n\nIntro stays.\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n- [old.md](old.md) - Old.\n\n## Notes\n\nFollowing content must survive.")
+	writeFixtureText(t, project, "docs/INDEX.md", "# Docs\n\nIntro stays.\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n- [old.md](old.md) - Old.\n\n## Notes\n\nFollowing content must survive.")
 	writeFixtureText(t, project, "docs/page.md", "# Page\n")
 }
 

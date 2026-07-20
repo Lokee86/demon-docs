@@ -75,7 +75,7 @@ func TestCheckReportsDriftWithoutWriting(t *testing.T) {
 	if code := Run(context.Background(), []string{"check", "-i", "--root", root}, &out, &errOut); code != 1 {
 		t.Fatalf("code=%d out=%s err=%s", code, out.String(), errOut.String())
 	}
-	if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatal("check wrote index")
 	}
 }
@@ -120,7 +120,7 @@ func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
 		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 1 || !strings.Contains(out.String(), "unresolved") || !strings.Contains(out.String(), "frontmatter issue") {
 			t.Fatalf("fix code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
-		rootIndex := filepath.Join(docsRoot, "README.md")
+		rootIndex := filepath.Join(docsRoot, "INDEX.md")
 		if _, err := os.Stat(rootIndex); err != nil {
 			t.Fatal(err)
 		}
@@ -138,7 +138,7 @@ func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
 		if string(outsideAfter) != outsideText {
 			t.Fatalf("outside file changed: %q", outsideAfter)
 		}
-		if _, err := os.Stat(filepath.Join(repoRoot, "README.md")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(repoRoot, "INDEX.md")); !os.IsNotExist(err) {
 			t.Fatal("repository root was reconciled instead of docs root")
 		}
 		out.Reset()
@@ -194,7 +194,7 @@ func TestConfigInitAndShow(t *testing.T) {
 		t.Fatalf("%d %s", code, errOut.String())
 	}
 	out.Reset()
-	if code := Run(context.Background(), []string{"config", "show"}, &out, &errOut); code != 0 || !strings.Contains(out.String(), "index_file = 'README.md'") {
+	if code := Run(context.Background(), []string{"config", "show"}, &out, &errOut); code != 0 || !strings.Contains(out.String(), "index_file = 'INDEX.md'") {
 		t.Fatalf("code=%d out=%s err=%s", code, out.String(), errOut.String())
 	}
 }

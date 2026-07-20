@@ -8,7 +8,7 @@ summary: This document guides agents editing Demon Docs documentation under the 
 ---
 # Documentation Editing
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

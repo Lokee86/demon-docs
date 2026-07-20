@@ -8,7 +8,7 @@ summary: This document plans bounded deterministic context bundles and thin host
 ---
 # Deterministic Agent Context and Integrations
 
-Parent index: [Planning](./README.md)
+Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
@@ -117,7 +117,7 @@ Context may refresh after concrete agent activity such as selecting a candidate,
 Names and final schemas are open, but the static CLI may expose operations shaped like:
 
 ```text
-ddocs context --mode orientation --path docs/README.md --format json
+ddocs context --mode orientation --path docs/INDEX.md --format json
 ddocs context --mode implementation --symbol src/ledger/index.go::Reconcile --budget 12000
 ddocs context --mode change-impact --git-range HEAD~1..HEAD --format json
 ddocs context --mode documentation --concept "reverse index" --candidates
@@ -224,9 +224,9 @@ stabilize repository/code fact provider contracts
 
 ## Related docs
 
-- [Planning](README.md)
+- [Planning](INDEX.md)
 - [Roadmap](roadmap.md)
-- [Planned Code Intelligence](code-intelligence/README.md)
+- [Planned Code Intelligence](code-intelligence/INDEX.md)
 - [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)
 - [Repository Demon](../operations/repository-demon.md)
 

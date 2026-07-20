@@ -10,7 +10,7 @@ import (
 
 func TestNestedPatternsDraftsAndIndexExclusion(t *testing.T) {
 	root := t.TempDir()
-	for _, rel := range []string{"README.md", "root.md", "guide/README.md", "guide/deep/setup.md", "ignored/deep/skip.md", "stubs/draft.md", "stubs/nested/not-direct.md"} {
+	for _, rel := range []string{"INDEX.md", "root.md", "guide/INDEX.md", "guide/deep/setup.md", "ignored/deep/skip.md", "stubs/draft.md", "stubs/nested/not-direct.md"} {
 		path := filepath.Join(root, rel)
 		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 			t.Fatal(err)
@@ -51,7 +51,7 @@ func TestIndexablePatternCases(t *testing.T) {
 	cases := []struct {
 		rel  string
 		want bool
-	}{{"page.md", true}, {"deep/page.md", true}, {"README.md", false}, {"page.txt", false}}
+	}{{"page.md", true}, {"deep/page.md", true}, {"INDEX.md", false}, {"page.txt", false}}
 	for _, tc := range cases {
 		got, err := IsIndexable(root, filepath.Join(root, filepath.FromSlash(tc.rel)), c)
 		if err != nil {

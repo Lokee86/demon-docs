@@ -126,7 +126,7 @@ func TestInvalidFrontmatterSchemaFailsBeforeIndexMutation(t *testing.T) {
 			t.Fatalf("fix code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 	})
-	if _, err := os.Stat(filepath.Join(repo, "docs", "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(repo, "docs", "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatalf("invalid schema allowed index mutation: %v", err)
 	}
 }
@@ -144,7 +144,7 @@ func TestGeneratedIndexesReceiveFrontmatterInSameFix(t *testing.T) {
 		}
 	})
 
-	index, err := os.ReadFile(filepath.Join(docs, "README.md"))
+	index, err := os.ReadFile(filepath.Join(docs, "INDEX.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestGeneratedIndexesReceiveFrontmatterInSameFix(t *testing.T) {
 
 func frontmatterTestConfig(indexEnabled bool, defaultFormat string) string {
 	return `docs_root = "docs"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [index]
 enabled = ` + boolText(indexEnabled) + `

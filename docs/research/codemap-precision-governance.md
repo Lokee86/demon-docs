@@ -8,7 +8,7 @@ summary: This document defines how codemap suggestions are sampled, manually aud
 ---
 # Codemap Precision Governance
 
-Parent index: [Research](./README.md)
+Parent index: [Research](./INDEX.md)
 
 ## Purpose
 

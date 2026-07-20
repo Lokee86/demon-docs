@@ -8,7 +8,7 @@ summary: This document records current Demon Docs limitations that materially af
 ---
 # Current Product Limitations
 
-Parent index: [Limits](./README.md)
+Parent index: [Limits](./INDEX.md)
 
 ## Purpose
 
@@ -128,7 +128,7 @@ Target the narrowest current file or folder and use prose to name the declaratio
 Owning docs:
 
 - [Reverse Index Architecture](../architecture/reverse-indexes.md)
-- [Planned Code Intelligence](../planning/code-intelligence/README.md)
+- [Planned Code Intelligence](../planning/code-intelligence/INDEX.md)
 
 Removal condition:
 
@@ -234,7 +234,7 @@ A complete cross-platform symlink ownership and containment policy is implemente
 
 ## Related docs
 
-- [Limits](README.md)
+- [Limits](INDEX.md)
 - [Roadmap](../planning/roadmap.md)
 - [Documentation Policy](../documentation-policy.md)
 - [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md)

@@ -8,7 +8,7 @@ summary: This document maps Demon Docs' critical behavioral contracts to their c
 ---
 # Behavioral Contract Matrix
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

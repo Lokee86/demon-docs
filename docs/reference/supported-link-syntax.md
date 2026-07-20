@@ -8,7 +8,7 @@ summary: This document defines the current link forms that Demon Docs recognizes
 ---
 # Supported Link Syntax
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
@@ -272,7 +272,7 @@ Forms intentionally outside the reconciliation surface:
 
 ## Related docs
 
-- [Reference](./README.md)
+- [Reference](./INDEX.md)
 - [Diagnostics and Exit Behavior](./diagnostics-and-exit-behavior.md)
 - [Managed Files and State](./managed-files-and-state.md)
 - [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)

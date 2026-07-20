@@ -8,7 +8,7 @@ summary: This guide moves one repository-contained file or directory and rewrite
 ---
 # Stateless Document Refactoring
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

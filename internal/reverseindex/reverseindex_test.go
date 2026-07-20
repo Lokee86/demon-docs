@@ -17,7 +17,7 @@ func TestBuildCreatesCodeFolderIndexWithDocumentationBacklinks(t *testing.T) {
 	mustWrite(t, filepath.Join(docsRoot, "runtime.md"), "# Runtime Guide\n\n## Code map\n\n- `server/runtime/session.go`\n- `server/runtime/session.go`\n")
 	mustWrite(t, filepath.Join(codeRoot, "session.go"), "package runtime\n")
 	mustWrite(t, filepath.Join(codeRoot, "transport.go"), "package runtime\n")
-	mustWrite(t, filepath.Join(codeRoot, "README.md"), "# Runtime Package\n\nManual context stays here.\n")
+	mustWrite(t, filepath.Join(codeRoot, "INDEX.md"), "# Runtime Package\n\nManual context stays here.\n")
 
 	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
 	if err != nil {
@@ -29,7 +29,7 @@ func TestBuildCreatesCodeFolderIndexWithDocumentationBacklinks(t *testing.T) {
 	if _, err := Apply(repositoryRoot, plan); err != nil {
 		t.Fatal(err)
 	}
-	contents, err := os.ReadFile(filepath.Join(codeRoot, "README.md"))
+	contents, err := os.ReadFile(filepath.Join(codeRoot, "INDEX.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestBuildReportsEligibleUnreferencedFilesUsingScopedInventory(t *testing.T)
 	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/referenced.go`\n")
 	mustWrite(t, filepath.Join(codeRoot, "api", "referenced.go"), "package api\n")
 	mustWrite(t, filepath.Join(codeRoot, "api", "unreferenced.go"), "package api\n")
-	mustWrite(t, filepath.Join(codeRoot, "api", "README.md"), "# Generated API index\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "INDEX.md"), "# Generated API index\n")
 	mustWrite(t, filepath.Join(codeRoot, "api", ".docignore"), "generated/\n")
 	mustWrite(t, filepath.Join(codeRoot, "api", "generated", "client.go"), "package generated\n")
 	mustWrite(t, filepath.Join(repositoryRoot, "client", "outside.go"), "package client\n")

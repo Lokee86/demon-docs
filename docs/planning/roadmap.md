@@ -8,7 +8,7 @@ summary: This document summarizes shipped product areas, active work, near-term 
 ---
 # Demon Docs Roadmap
 
-Parent index: [Planning](./README.md)
+Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
@@ -230,15 +230,15 @@ Near-term work should prioritize bounded document-engine capabilities, reviewabl
 
 ## Related docs
 
-- [Planning](README.md)
+- [Planning](INDEX.md)
 - [CLI Reference](../reference/cli.md)
-- [Architecture](../architecture/README.md)
-- [Operations](../operations/README.md)
+- [Architecture](../architecture/INDEX.md)
+- [Operations](../operations/INDEX.md)
 - [Codemap Evidence](../research/codemap-evidence.md)
 - [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Managing Codemaps](../guides/managing-codemaps.md)
 - [Current Product Limitations](../limits/current-limitations.md)
-- [Planned Code Intelligence](code-intelligence/README.md)
+- [Planned Code Intelligence](code-intelligence/INDEX.md)
 - [Planned Agent Context and Integrations](agent-context-and-integrations.md)
 
 ## Notes

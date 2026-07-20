@@ -8,7 +8,7 @@ summary: This document explains which filesystem locations Demon Docs observes, 
 ---
 # Dynamic Watch Scope
 
-Parent index: [Operations](./README.md)
+Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 

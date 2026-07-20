@@ -8,7 +8,7 @@ summary: This document plans declaration-level code-symbol references, provider 
 ---
 # Code-Symbol References
 
-Parent index: [Planned Code Intelligence](./README.md)
+Parent index: [Planned Code Intelligence](./INDEX.md)
 
 ## Purpose
 
@@ -244,7 +244,7 @@ finalize provider and symbol identity contract
 
 ## Related docs
 
-- [Planned Code Intelligence](README.md)
+- [Planned Code Intelligence](INDEX.md)
 - [Repository Graph](repository-graph.md)
 - [Code Dependency and Entanglement](code-dependency-and-entanglement.md)
 - [Reverse Indexes](../../architecture/reverse-indexes.md)

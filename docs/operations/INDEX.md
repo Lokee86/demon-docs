@@ -8,7 +8,7 @@ summary: Running behavior, watcher and demon ownership, runtime state, recovery,
 ---
 # Operations
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Running behavior, watcher and demon ownership, runtime state, recovery, troubleshooting, and operational verification.
 

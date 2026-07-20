@@ -8,7 +8,7 @@ summary: This document describes how Demon Docs recognizes authored Markdown cod
 ---
 # Codemap Extraction and Dataset
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

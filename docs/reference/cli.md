@@ -8,7 +8,7 @@ summary: This document summarizes the public Demon Docs command surface, subsyst
 ---
 # CLI Reference
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
@@ -263,7 +263,7 @@ demon --help
 
 ```text
 docs root:       docs
-index file:      README.md
+index file:      INDEX.md
 draft folder:    stubs
 parent label:    Parent index
 marker prefix:   doc-ledger

@@ -8,7 +8,7 @@ summary: This guide exports authored codemap data, runs deterministic missing-li
 ---
 # Evaluating Codemap Suggestions
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

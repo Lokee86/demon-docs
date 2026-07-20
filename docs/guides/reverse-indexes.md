@@ -8,7 +8,7 @@ summary: This guide configures and verifies code-folder reverse indexes so code 
 ---
 # Adopting Reverse Indexes
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

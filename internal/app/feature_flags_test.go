@@ -21,7 +21,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		if code := Run(context.Background(), []string{"fix", "--root", root, "-l"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(root, "INDEX.md")); !os.IsNotExist(err) {
 			t.Fatalf("links-only run created an index: %v", err)
 		}
 		assertDDocsState(t, root)
@@ -34,7 +34,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		if code := Run(context.Background(), []string{"fix", "--root", root, "--docs", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
-		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {
+		if _, err := os.Stat(filepath.Join(root, "INDEX.md")); err != nil {
 			t.Fatalf("indexes-only run did not create an index: %v", err)
 		}
 		if _, err := os.Stat(filepath.Join(root, ".ddocs", "objects")); !os.IsNotExist(err) {
@@ -84,7 +84,7 @@ func TestWatchOnceHonorsLinksOnly(t *testing.T) {
 	if code := Run(context.Background(), []string{"watch", "--root", root, "-l", "--once"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
-	if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatalf("links-only watch created an index: %v", err)
 	}
 	assertDDocsState(t, root)
@@ -161,7 +161,7 @@ func TestDisabledSelectedIndexWatchDoesNotFallBackToOtherSystems(t *testing.T) {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 	})
-	if _, err := os.Stat(filepath.Join(docsRoot, "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(docsRoot, "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatalf("disabled index watch created an index: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(root, ".ddocs", "refs", "ddocs", "state")); !os.IsNotExist(err) {
@@ -177,7 +177,7 @@ func TestDisabledIndexLeavesIndexOrdinaryAndLinkManaged(t *testing.T) {
 	if err := config.SetIndexEnabled(configPath, false); err != nil {
 		t.Fatal(err)
 	}
-	writeTestFile(t, filepath.Join(docsRoot, "README.md"), "# Existing index\n\n[Page](page.md)\n")
+	writeTestFile(t, filepath.Join(docsRoot, "INDEX.md"), "# Existing index\n\n[Page](page.md)\n")
 	writeTestFile(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
 	withWorkingDirectory(t, root, func(string) {
 		var stdout, stderr bytes.Buffer
@@ -193,7 +193,7 @@ func TestDisabledIndexLeavesIndexOrdinaryAndLinkManaged(t *testing.T) {
 			t.Fatalf("repair code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 	})
-	text, err := os.ReadFile(filepath.Join(docsRoot, "README.md"))
+	text, err := os.ReadFile(filepath.Join(docsRoot, "INDEX.md"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +216,7 @@ func TestDisabledLinksKeepStateWithoutRewriting(t *testing.T) {
 	if err := config.SetLinksEnabled(configPath, false); err != nil {
 		t.Fatal(err)
 	}
-	readme := filepath.Join(docsRoot, "README.md")
+	readme := filepath.Join(docsRoot, "INDEX.md")
 	writeTestFile(t, readme, "[Page](page.md)\n")
 	writeTestFile(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
 	withWorkingDirectory(t, root, func(string) {

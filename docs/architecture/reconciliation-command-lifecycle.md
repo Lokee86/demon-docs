@@ -8,7 +8,7 @@ summary: This document defines how ddocs check, ddocs fix, and ddocs watch resol
 ---
 # Reconciliation Command Lifecycle
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

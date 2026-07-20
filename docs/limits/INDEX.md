@@ -8,7 +8,7 @@ summary: Current product limitations, intentionally incomplete surfaces, and tra
 ---
 # Limits
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Current product limitations, intentionally incomplete surfaces, and transitional constraints that affect real use. Permanent safety boundaries remain in architecture; future feature designs remain in planning.
 

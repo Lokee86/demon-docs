@@ -10,7 +10,7 @@ import (
 
 func TestDefaultsAndAliases(t *testing.T) {
 	c := Default()
-	if c.Root != "docs" || c.IndexFile != "README.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles || !c.Demon.Run || !c.Index.Enabled || !c.Links.Enabled {
+	if c.Root != "docs" || c.IndexFile != "INDEX.md" || c.Markers.Prefix != "doc-ledger" || !c.ParentLink.FolderIndexes || c.ParentLink.IndexedFiles || !c.Demon.Run || !c.Index.Enabled || !c.Links.Enabled {
 		t.Fatalf("unexpected defaults: %+v", c)
 	}
 	dir := t.TempDir()
@@ -238,6 +238,14 @@ func TestStarterConfigLoads(t *testing.T) {
 		}
 		if name == "repo.toml" && loaded.Root != "manual" {
 			t.Fatalf("docs_root not loaded: %+v", loaded)
+		}
+		if loaded.IndexFile != "INDEX.md" || loaded.Files.IndexFile != "INDEX.md" {
+			t.Fatalf("default index file not loaded: %+v", loaded)
+		}
+		for _, pattern := range []string{`pattern = "**/INDEX.md"`, `pattern = "**/README.md"`, `pattern = "**/!README.md"`, `pattern = "**/!INDEX.md"`} {
+			if !strings.Contains(text, pattern) {
+				t.Fatalf("starter config omitted index schema pattern %s", pattern)
+			}
 		}
 	}
 }

@@ -8,7 +8,7 @@ summary: This document tells agents how to handle Demon Docs managed regions, ge
 ---
 # Generated Files and Managed State
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

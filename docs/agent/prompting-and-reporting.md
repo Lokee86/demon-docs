@@ -8,7 +8,7 @@ summary: This document owns prompt and report expectations for implementation ag
 ---
 # Prompting and Reporting
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

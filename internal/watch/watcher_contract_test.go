@@ -98,7 +98,7 @@ func TestInitialFixCompletesBeforeObserverCreation(t *testing.T) {
 	}
 	fake := newFakeWatcher()
 	installFakeWatcher(t, fake, func() {
-		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {
+		if _, err := os.Stat(filepath.Join(root, "INDEX.md")); err != nil {
 			t.Fatalf("observer created before initial fix: %v", err)
 		}
 	})
@@ -138,7 +138,7 @@ func TestWatcherHandlesFileRenameSourceAndDestination(t *testing.T) {
 	}
 	fake.events <- fsnotify.Event{Name: oldPath, Op: fsnotify.Rename}
 	fake.events <- fsnotify.Event{Name: newPath, Op: fsnotify.Create}
-	index := filepath.Join(root, "README.md")
+	index := filepath.Join(root, "INDEX.md")
 	waitFor(t, 3*time.Second, func() bool {
 		data, err := os.ReadFile(index)
 		return err == nil && strings.Contains(string(data), "[new.md](new.md)") && !strings.Contains(string(data), "[old.md](old.md)")
@@ -164,7 +164,7 @@ func TestWatcherAddsNewNestedDirectories(t *testing.T) {
 	}
 	fake.events <- fsnotify.Event{Name: topic, Op: fsnotify.Create}
 	waitFor(t, 3*time.Second, func() bool {
-		data, err := os.ReadFile(filepath.Join(nested, "README.md"))
+		data, err := os.ReadFile(filepath.Join(nested, "INDEX.md"))
 		return err == nil && strings.Contains(string(data), "[topic.md](topic.md)")
 	})
 	stopFakeWatch(t, cancel, done)
@@ -198,8 +198,8 @@ func TestWatcherReloadsDocignoreAndAddsNewlyVisibleDirectories(t *testing.T) {
 	fake.events <- fsnotify.Event{Name: ignorePath, Op: fsnotify.Write}
 	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(ignoredDir) })
 	waitFor(t, 3*time.Second, func() bool {
-		data, err := os.ReadFile(filepath.Join(root, "README.md"))
-		return err == nil && strings.Contains(string(data), "ignored/README.md")
+		data, err := os.ReadFile(filepath.Join(root, "INDEX.md"))
+		return err == nil && strings.Contains(string(data), "ignored/INDEX.md")
 	})
 	stopFakeWatch(t, cancel, done)
 }
@@ -246,10 +246,10 @@ func TestWatcherReconcilesDeletedWatchedDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 	fake.events <- fsnotify.Event{Name: child, Op: fsnotify.Remove}
-	index := filepath.Join(root, "README.md")
+	index := filepath.Join(root, "INDEX.md")
 	waitFor(t, 3*time.Second, func() bool {
 		data, err := os.ReadFile(index)
-		return err == nil && !bytes.Contains(data, []byte("guide/README.md"))
+		return err == nil && !bytes.Contains(data, []byte("guide/INDEX.md"))
 	})
 	stopFakeWatch(t, cancel, done)
 }
@@ -269,7 +269,7 @@ func TestExplicitDebounceOverrideWins(t *testing.T) {
 	started := time.Now()
 	fake.events <- fsnotify.Event{Name: page, Op: fsnotify.Create}
 	waitFor(t, time.Second, func() bool {
-		data, err := os.ReadFile(filepath.Join(root, "README.md"))
+		data, err := os.ReadFile(filepath.Join(root, "INDEX.md"))
 		return err == nil && strings.Contains(string(data), "[fast.md](fast.md)")
 	})
 	if time.Since(started) >= time.Second {

@@ -8,7 +8,7 @@ summary: This document defines the current deterministic codemap missing-link al
 ---
 # Codemap Missing-Link Algorithm
 
-Parent index: [Demon Docs Documentation](./README.md)
+Parent index: [Demon Docs Documentation](./INDEX.md)
 
 ## Purpose
 

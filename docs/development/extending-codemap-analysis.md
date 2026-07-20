@@ -8,7 +8,7 @@ summary: This document defines the safe workflow for adding codemap evidence, ch
 ---
 # Extending Codemap Analysis
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

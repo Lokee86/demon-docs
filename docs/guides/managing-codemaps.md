@@ -8,7 +8,7 @@ summary: This guide explains how to inspect, preview, update, verify, decline, a
 ---
 # Managing Codemaps
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

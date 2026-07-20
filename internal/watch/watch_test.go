@@ -77,7 +77,7 @@ func TestRootSelectedWithRunLockSerializesReconciliation(t *testing.T) {
 		close(locker.release)
 		t.Fatal("watch reconciliation did not acquire the shared run lock")
 	}
-	index := filepath.Join(root, "README.md")
+	index := filepath.Join(root, "INDEX.md")
 	_, statErr := os.Stat(index)
 	wroteBeforeRelease := statErr == nil
 	if statErr != nil && !os.IsNotExist(statErr) {
@@ -109,7 +109,7 @@ func TestWatchConvergesWithoutSelfWriteLoop(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
 	go func() { done <- Root(ctx, root, c, nil, false, nil) }()
-	index := filepath.Join(root, "README.md")
+	index := filepath.Join(root, "INDEX.md")
 	waitFor(t, 3*time.Second, func() bool { _, err := os.Stat(index); return err == nil })
 	time.Sleep(150 * time.Millisecond)
 	page := filepath.Join(root, "page.md")
@@ -146,7 +146,7 @@ func TestWatchConvergesWithoutSelfWriteLoop(t *testing.T) {
 
 func TestWatchPrintsActualReconciliationMessages(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("[missing](missing.md)\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "INDEX.md"), []byte("[missing](missing.md)\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	var out bytes.Buffer
@@ -154,7 +154,7 @@ func TestWatchPrintsActualReconciliationMessages(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := out.String()
-	if !strings.Contains(text, "Broken link in README.md") {
+	if !strings.Contains(text, "Broken link in INDEX.md") {
 		t.Fatalf("watch output did not include the diagnostic: %q", text)
 	}
 	if strings.Contains(text, "reconciliation messages:") {

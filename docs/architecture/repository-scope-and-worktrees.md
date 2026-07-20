@@ -8,7 +8,7 @@ summary: 'This document describes the implemented repository boundary in interna
 ---
 # Repository Scope and Worktrees
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

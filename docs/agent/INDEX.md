@@ -8,7 +8,7 @@ summary: This index summarizes the agent workflow and repository-orientation gui
 ---
 # Agent
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 ## Purpose
 
@@ -70,8 +70,8 @@ This folder does not own:
 - [Documentation Policy](../documentation-policy.md)
 - [Documentation Procedure](../documentation-procedure.md)
 - [Repository Layout](../development/repository-layout.md)
-- [Architecture](../architecture/README.md)
-- [Development](../development/README.md)
+- [Architecture](../architecture/INDEX.md)
+- [Development](../development/INDEX.md)
 
 ## Notes
 

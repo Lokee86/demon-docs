@@ -8,7 +8,7 @@ summary: This document plans the normalized polyglot repository and code graph t
 ---
 # Planned Polyglot Repository and Code Graph
 
-Parent index: [Planned Code Intelligence](./README.md)
+Parent index: [Planned Code Intelligence](./INDEX.md)
 
 ## Purpose
 
@@ -204,7 +204,7 @@ provider capability contract
 
 ## Related docs
 
-- [Planned Code Intelligence](README.md)
+- [Planned Code Intelligence](INDEX.md)
 - [Roadmap](../roadmap.md)
 - [Code Dependency and Entanglement](code-dependency-and-entanglement.md)
 - [Code-Symbol References](code-symbol-references.md)

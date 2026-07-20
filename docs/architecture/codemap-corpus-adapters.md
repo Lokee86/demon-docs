@@ -8,7 +8,7 @@ summary: This document describes how Demon Docs builds normalized repository fac
 ---
 # Codemap Corpus and Adapters
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

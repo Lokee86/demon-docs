@@ -8,7 +8,7 @@ summary: This document records retained codemap evidence findings, measured base
 ---
 # Codemap Missing-Link Evidence
 
-Parent index: [Research](./README.md)
+Parent index: [Research](./INDEX.md)
 
 ## Purpose
 
@@ -275,7 +275,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 
 ## Related docs
 
-- [Research](README.md)
+- [Research](INDEX.md)
 - [Managing Codemaps](../guides/managing-codemaps.md)
 - [Codemap Missing-Link Algorithm](../codemap-suggestion-algorithm.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)

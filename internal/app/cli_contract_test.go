@@ -18,10 +18,10 @@ func TestCLIFileAndRenderingOverrides(t *testing.T) {
 		excludes   []string
 	}{
 		{"index_file", "page.md", []string{"--index-file", "!README.md"}, "!README.md", []string{"[page.md](page.md)"}, nil},
-		{"draft_folder", "ideas/draft.md", []string{"--draft-folder", "ideas"}, "README.md", []string{"[draft.md](ideas/draft.md)"}, nil},
-		{"include", "reference.pdf", []string{"--include", "**/*.pdf"}, "README.md", []string{"[reference.pdf](reference.pdf)"}, nil},
-		{"exclude", "private.md", []string{"--exclude", "**/private.md"}, "README.md", nil, []string{"private.md"}},
-		{"marker", "page.md", []string{"--marker-prefix", "nav"}, "README.md", []string{"<!-- nav:files:start -->"}, []string{"<!-- doc-ledger:files:start -->"}},
+		{"draft_folder", "ideas/draft.md", []string{"--draft-folder", "ideas"}, "INDEX.md", []string{"[draft.md](ideas/draft.md)"}, nil},
+		{"include", "reference.pdf", []string{"--include", "**/*.pdf"}, "INDEX.md", []string{"[reference.pdf](reference.pdf)"}, nil},
+		{"exclude", "private.md", []string{"--exclude", "**/private.md"}, "INDEX.md", nil, []string{"private.md"}},
+		{"marker", "page.md", []string{"--marker-prefix", "nav"}, "INDEX.md", []string{"<!-- nav:files:start -->"}, []string{"<!-- doc-ledger:files:start -->"}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -61,8 +61,8 @@ func TestCLIParentLabelAndBooleanOverrides(t *testing.T) {
 		t.Fatalf("code=%d stderr=%q", code, stderr.String())
 	}
 	page := readTestFile(t, filepath.Join(root, "page.md"))
-	guide := readTestFile(t, filepath.Join(root, "guide", "README.md"))
-	if !strings.Contains(page, "Up: [Docs](./README.md)") {
+	guide := readTestFile(t, filepath.Join(root, "guide", "INDEX.md"))
+	if !strings.Contains(page, "Up: [Docs](./INDEX.md)") {
 		t.Fatal(page)
 	}
 	if strings.Contains(guide, "Up:") || strings.Contains(guide, "Parent index:") {
@@ -88,7 +88,7 @@ func TestConfigCommandsContract(t *testing.T) {
 		if code := Run(context.Background(), []string{"config", "show", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("show code=%d stderr=%q", code, stderr.String())
 		}
-		for _, value := range []string{"selected_config_path = <built-in defaults>", "root = 'docs'", "index_file = 'README.md'", "[frontmatter]", "enabled = false", "default_format = 'yaml'", "unknown_fields = 'remove'", "folder_indexes = true", "indexed_files = false"} {
+		for _, value := range []string{"selected_config_path = <built-in defaults>", "root = 'docs'", "index_file = 'INDEX.md'", "[frontmatter]", "enabled = false", "default_format = 'yaml'", "unknown_fields = 'remove'", "folder_indexes = true", "indexed_files = false"} {
 			if !strings.Contains(stdout.String(), value) {
 				t.Errorf("show missing %q:\n%s", value, stdout.String())
 			}

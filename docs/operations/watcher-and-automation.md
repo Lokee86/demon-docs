@@ -8,7 +8,7 @@ summary: This document describes foreground watch behavior, event scope, debounc
 ---
 # Watcher and Automation
 
-Parent index: [Operations](./README.md)
+Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 
@@ -138,7 +138,7 @@ go test ./internal/watch ./internal/app -count=1
 
 ## Related docs
 
-- [Operations](README.md)
+- [Operations](INDEX.md)
 - [CI and Automation](../guides/ci-and-automation.md)
 - [Repository Demon](repository-demon.md)
 - [Watch Scheduler and Reconciliation Serialization](../architecture/watch-scheduler.md)

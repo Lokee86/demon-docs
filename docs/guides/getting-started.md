@@ -8,7 +8,7 @@ summary: This guide installs Demon Docs, initializes an existing repository, est
 ---
 # Getting Started
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

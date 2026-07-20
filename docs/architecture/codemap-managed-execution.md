@@ -8,7 +8,7 @@ summary: This document defines the production codemap execution boundary that se
 ---
 # Codemap Managed Execution
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

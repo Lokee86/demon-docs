@@ -8,7 +8,7 @@ summary: This guide reviews unresolved repair suggestions, records accept or dec
 ---
 # Reviewing Suggestions and Changes
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

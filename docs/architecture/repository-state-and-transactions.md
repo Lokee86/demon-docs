@@ -8,7 +8,7 @@ summary: This document describes the private .ddocs/ object repository, durable 
 ---
 # Repository State and Transactions
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

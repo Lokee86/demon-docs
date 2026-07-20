@@ -8,7 +8,7 @@ summary: 'This document defines the implemented lifecycle of repository-local li
 ---
 # Link Reconciliation State Machine
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

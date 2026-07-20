@@ -81,12 +81,12 @@ func TestNonMarkdownAndConfiguredEditableExtensions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	index := plannedText(t, result, filepath.Join(root, "README.md"))
+	index := plannedText(t, result, filepath.Join(root, "INDEX.md"))
 	requireContains(t, index, "[diagram.png](diagram.png)", "[page.mdx](page.mdx)", "[draft.pdf](stubs/draft.pdf)")
 	if plannedUpdate(result, binary) != nil || plannedUpdate(result, filepath.Join(root, "stubs", "draft.pdf")) != nil {
 		t.Fatal("non-editable included file was rewritten")
 	}
-	requireContains(t, plannedText(t, result, mdx), "Parent index: [Docs](./README.md)")
+	requireContains(t, plannedText(t, result, mdx), "Parent index: [Docs](./INDEX.md)")
 }
 
 func TestCustomRenderingConfiguration(t *testing.T) {
@@ -104,7 +104,7 @@ func TestCustomRenderingConfiguration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	index := plannedText(t, result, filepath.Join(root, "README.md"))
+	index := plannedText(t, result, filepath.Join(root, "INDEX.md"))
 	requireContains(t, index, "## Pages", "## Ideas", "## Areas", "<!-- nav:files:start -->", "File: Alpha.", "Draft: File: Draft.", "Folder: Guide.")
-	requireContains(t, plannedText(t, result, filepath.Join(root, "alpha.md")), "Up: [Docs](./README.md)")
+	requireContains(t, plannedText(t, result, filepath.Join(root, "alpha.md")), "Up: [Docs](./INDEX.md)")
 }

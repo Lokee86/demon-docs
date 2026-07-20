@@ -8,7 +8,7 @@ summary: Contributor workflow, repository layout, tests, fixtures, research tool
 ---
 # Development
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Contributor workflow, repository layout, tests, fixtures, research tooling, and release verification.
 

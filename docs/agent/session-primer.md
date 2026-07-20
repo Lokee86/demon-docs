@@ -8,7 +8,7 @@ summary: This document provides a short, stable orientation layer for new agent 
 ---
 # Session Primer
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
@@ -34,14 +34,14 @@ Use this primer to get oriented quickly, then move to canonical documentation fo
 
 ## Canonical docs to use
 
-- [Guides](../guides/README.md)
-- [Reference](../reference/README.md)
-- [Architecture](../architecture/README.md)
-- [Operations](../operations/README.md)
-- [Research](../research/README.md)
-- [Planning](../planning/README.md)
-- [Development](../development/README.md)
-- [Limits](../limits/README.md)
+- [Guides](../guides/INDEX.md)
+- [Reference](../reference/INDEX.md)
+- [Architecture](../architecture/INDEX.md)
+- [Operations](../operations/INDEX.md)
+- [Research](../research/INDEX.md)
+- [Planning](../planning/INDEX.md)
+- [Development](../development/INDEX.md)
+- [Limits](../limits/INDEX.md)
 
 ## Related docs
 

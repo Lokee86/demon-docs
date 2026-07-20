@@ -8,7 +8,7 @@ summary: This document describes the behavioral contract for Demon Docs diagnost
 ---
 # Diagnostics and Exit Behavior
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

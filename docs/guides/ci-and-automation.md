@@ -8,7 +8,7 @@ summary: This guide adds Demon Docs verification to CI and explains when to use 
 ---
 # CI and Automation
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

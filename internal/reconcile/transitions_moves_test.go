@@ -31,13 +31,13 @@ func TestSameFolderDirectAndStubTransitionsPreserveDescriptions(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			root := filepath.Join(t.TempDir(), "docs")
-			write(t, filepath.Join(root, "README.md"), test.index)
+			write(t, filepath.Join(root, "INDEX.md"), test.index)
 			write(t, filepath.Join(root, test.current), "# Foo")
 			result, err := Tree(root, config.Default())
 			if err != nil {
 				t.Fatal(err)
 			}
-			index := plannedText(t, result, filepath.Join(root, "README.md"))
+			index := plannedText(t, result, filepath.Join(root, "INDEX.md"))
 			requireContains(t, index, test.want)
 			if strings.Contains(index, test.absent) {
 				t.Fatalf("old transition target remained:\n%s", index)
@@ -66,9 +66,9 @@ func TestCrossFolderFileMoveMatching(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			root := filepath.Join(t.TempDir(), "docs")
-			write(t, filepath.Join(root, "README.md"), "# Docs")
+			write(t, filepath.Join(root, "INDEX.md"), "# Docs")
 			for folder, description := range test.stale {
-				write(t, filepath.Join(root, folder, "README.md"), managedIndex(strings.ToUpper(folder[:1])+folder[1:], "- [foo.md](foo.md) - "+description+"\n", "", ""))
+				write(t, filepath.Join(root, folder, "INDEX.md"), managedIndex(strings.ToUpper(folder[:1])+folder[1:], "- [foo.md](foo.md) - "+description+"\n", "", ""))
 			}
 			destination := "gamma"
 			if len(test.stale) == 1 {
@@ -79,7 +79,7 @@ func TestCrossFolderFileMoveMatching(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			index := plannedText(t, result, filepath.Join(root, destination, "README.md"))
+			index := plannedText(t, result, filepath.Join(root, destination, "INDEX.md"))
 			requireContains(t, index, test.want)
 			if strings.Contains(index, test.absent) {
 				t.Fatalf("unexpected description:\n%s", index)
@@ -100,20 +100,20 @@ func TestCrossFolderFolderMoveMatching(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			root := filepath.Join(t.TempDir(), "docs")
-			write(t, filepath.Join(root, "README.md"), "# Docs")
+			write(t, filepath.Join(root, "INDEX.md"), "# Docs")
 			for folder, description := range test.stale {
-				write(t, filepath.Join(root, folder, "README.md"), managedIndex(strings.ToUpper(folder[:1])+folder[1:], "", "", "- [Guide](guide/README.md) - "+description+"\n"))
+				write(t, filepath.Join(root, folder, "INDEX.md"), managedIndex(strings.ToUpper(folder[:1])+folder[1:], "", "", "- [Guide](guide/INDEX.md) - "+description+"\n"))
 			}
 			destination := "gamma"
 			if len(test.stale) == 1 {
 				destination = "beta"
 			}
-			write(t, filepath.Join(root, destination, "guide", "README.md"), "# Guide")
+			write(t, filepath.Join(root, destination, "guide", "INDEX.md"), "# Guide")
 			result, err := Tree(root, config.Default())
 			if err != nil {
 				t.Fatal(err)
 			}
-			index := plannedText(t, result, filepath.Join(root, destination, "README.md"))
+			index := plannedText(t, result, filepath.Join(root, destination, "INDEX.md"))
 			requireContains(t, index, test.want)
 			if strings.Contains(index, test.absent) {
 				t.Fatalf("unexpected description:\n%s", index)

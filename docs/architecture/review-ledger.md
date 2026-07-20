@@ -8,7 +8,7 @@ summary: This document describes the repository-local review ledger for suggesti
 ---
 # Review Ledger
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

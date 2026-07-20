@@ -8,7 +8,7 @@ summary: This document describes the implemented transformation boundary that pr
 ---
 # Managed Markdown Transformation
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

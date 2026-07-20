@@ -8,7 +8,7 @@ summary: This document is the durable chronological record of the codemap missin
 ---
 # Codemap Algorithm Development Log
 
-Parent index: [Demon Docs Documentation](./README.md)
+Parent index: [Demon Docs Documentation](./INDEX.md)
 
 ## Purpose
 

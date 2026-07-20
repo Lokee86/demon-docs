@@ -8,7 +8,7 @@ summary: This document describes the implemented application boundary that resol
 ---
 # Application Orchestration
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

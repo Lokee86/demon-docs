@@ -8,7 +8,7 @@ summary: This document defines the current machine-readable and text contracts f
 ---
 # Codemap Report Formats
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 

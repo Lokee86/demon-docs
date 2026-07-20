@@ -8,7 +8,7 @@ summary: This document owns agent-facing repository safety and hygiene rules for
 ---
 # Repo Hygiene
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

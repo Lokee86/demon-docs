@@ -8,7 +8,7 @@ summary: This document defines the documentation policy for Demon Docs.
 ---
 # Documentation Policy
 
-Parent index: [Demon Docs Documentation](./README.md)
+Parent index: [Demon Docs Documentation](./INDEX.md)
 
 ## Purpose
 
@@ -305,7 +305,7 @@ every directly indexed non-Markdown support file when it is intentionally part o
 
 Subfolder links must point to the subfolder `README.md`.
 
-The top-level `docs/README.md` is both the documentation entry point and the short rulebook. Detailed policy belongs in this document rather than being duplicated in every index.
+The top-level `docs/INDEX.md` is both the documentation entry point and the short rulebook. Detailed policy belongs in this document rather than being duplicated in every index.
 
 Indexes should stay navigational. They may summarize ownership and authority, but they should not duplicate full feature documentation.
 
@@ -551,7 +551,7 @@ Package-level coverage is also not sufficient when one package owns several inde
 ## Related docs
 
 - [Documentation Procedure](documentation-procedure.md)
-- [Demon Docs Documentation](README.md)
+- [Demon Docs Documentation](INDEX.md)
 - [Repository Layout](development/repository-layout.md)
 - [Roadmap](planning/roadmap.md)
 

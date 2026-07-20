@@ -8,7 +8,7 @@ summary: Task-oriented workflows for installing, adopting, and using Demon Docs.
 ---
 # Guides
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Task-oriented workflows for installing, adopting, and using Demon Docs. Exact options belong in reference documentation; internal ownership belongs in architecture documentation.
 

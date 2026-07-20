@@ -8,7 +8,7 @@ summary: This document defines how Demon Docs publishes one planned batch of gen
 ---
 # Generated Rewrite Publication
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

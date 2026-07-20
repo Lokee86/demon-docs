@@ -8,7 +8,7 @@ summary: This document owns concise testing and verification guidance for agents
 ---
 # Agent Testing Rules
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

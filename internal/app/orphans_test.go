@@ -15,8 +15,8 @@ func TestFindOrphanDocumentsIgnoresIndexesDraftsAndSelfLinks(t *testing.T) {
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")
 	for _, path := range []string{
-		"README.md",
-		"docs/README.md",
+		"INDEX.md",
+		"docs/INDEX.md",
 		"docs/source.md",
 		"docs/linked.md",
 		"docs/orphan.md",
@@ -35,8 +35,8 @@ func TestFindOrphanDocumentsIgnoresIndexesDraftsAndSelfLinks(t *testing.T) {
 	}
 
 	files := []links.FileRecord{
-		{ID: "root-index", Path: "README.md", Scope: "repository", Kind: "file", Present: true},
-		{ID: "docs-index", Path: "docs/README.md", Scope: "repository", Kind: "file", Present: true},
+		{ID: "root-index", Path: "INDEX.md", Scope: "repository", Kind: "file", Present: true},
+		{ID: "docs-index", Path: "docs/INDEX.md", Scope: "repository", Kind: "file", Present: true},
 		{ID: "source", Path: "docs/source.md", Scope: "repository", Kind: "file", Present: true},
 		{ID: "linked", Path: "docs/linked.md", Scope: "repository", Kind: "file", Present: true},
 		{ID: "orphan", Path: "docs/orphan.md", Scope: "repository", Kind: "file", Present: true},

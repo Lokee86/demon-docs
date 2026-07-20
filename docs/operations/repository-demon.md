@@ -8,7 +8,7 @@ summary: This document describes the implemented single-owner repository demon, 
 ---
 # Repository Demon
 
-Parent index: [Operations](./README.md)
+Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 
@@ -225,7 +225,7 @@ go test ./internal/demon ./internal/app -count=1
 
 ## Related docs
 
-- [Operations](README.md)
+- [Operations](INDEX.md)
 - [CI and Automation](../guides/ci-and-automation.md)
 - [CLI Reference](../reference/cli.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)

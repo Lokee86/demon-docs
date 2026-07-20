@@ -8,7 +8,7 @@ summary: This guide upgrades the Demon Docs binaries and repository state while 
 ---
 # Upgrading Demon Docs
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 
@@ -126,6 +126,7 @@ ddocs fix
 
 Important migrations include:
 
+- recognizing that the built-in folder-index default is now `INDEX.md`; existing repositories should keep an explicit setting such as `index_file = "README.md"` or `index_file = "!README.md"` when they do not intend to rename established index files;
 - wrapping or normalizing recognized legacy managed-index headings;
 - reading compatibility configuration keys into the current model;
 - normalizing retained codemap entry syntax into the current dataset; and

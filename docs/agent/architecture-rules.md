@@ -8,7 +8,7 @@ summary: This document defines mandatory architecture and seam-editing guardrail
 ---
 # Architecture and Seam Editing Rules
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

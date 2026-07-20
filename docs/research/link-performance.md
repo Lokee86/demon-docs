@@ -8,7 +8,7 @@ summary: This document records retained performance measurements for high-fanout
 ---
 # Markdown Link Performance
 
-Parent index: [Research](./README.md)
+Parent index: [Research](./INDEX.md)
 
 ## Purpose
 
@@ -149,7 +149,7 @@ Timing varies with filesystem, antivirus, hardware, repository size, link distri
 
 ## Related docs
 
-- [Research](README.md)
+- [Research](INDEX.md)
 - [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
 - [Testing and Fixtures](../development/testing-and-fixtures.md)
 - [Roadmap](../planning/roadmap.md)

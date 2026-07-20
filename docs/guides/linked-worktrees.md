@@ -8,7 +8,7 @@ summary: This guide explains how Demon Docs state is isolated in linked Git work
 ---
 # Using Linked Git Worktrees
 
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 

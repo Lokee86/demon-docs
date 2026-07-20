@@ -8,7 +8,7 @@ summary: This document defines the implemented .ddocs object repository, record 
 ---
 # Private Object Repository
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

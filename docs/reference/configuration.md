@@ -8,7 +8,7 @@ summary: This document defines Demon Docs configuration selection, defaults, sup
 ---
 # Demon Docs Configuration
 
-Parent index: [Reference](./README.md)
+Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
@@ -350,7 +350,7 @@ The defaults reflect the standalone repo behavior:
 
 ```toml
 docs_root = "docs"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [index]
 enabled = true
@@ -366,7 +366,15 @@ default_schema = "general"
 invalidation_similarity = 0.5
 
 [[format.path_rules]]
+pattern = "**/INDEX.md"
+schema = "index"
+
+[[format.path_rules]]
 pattern = "**/README.md"
+schema = "index"
+
+[[format.path_rules]]
+pattern = "**/!README.md"
 schema = "index"
 
 [[format.path_rules]]
@@ -511,12 +519,12 @@ The canonical mutation commands are `ddocs index enable|disable` and `ddocs link
 
 `index_file` sets the folder index filename.
 
-- Default: `README.md`
-- Example custom value: `!README.md`
-- Folder README links and generated folder index paths follow this name
-- To keep the legacy filename, set `index_file = "!README.md"`.
+- Default: `INDEX.md`
+- Example custom values: `README.md`, `!README.md`, or `!INDEX.md`
+- Folder-index links and generated folder index paths follow this name
+- Existing repositories keep their configured filename; the new default applies only when no override is selected.
 
-Projects that want `!README.md` should set `index_file = "!README.md"` in config.
+Projects that want another convention should set `index_file` explicitly in config.
 
 ## `[reverse_index].roots`
 
@@ -606,7 +614,7 @@ ddocs fix --root docs --no-parent-link-folder-indexes
 
 ## `[sections.*].heading`
 
-These keys control the visible headings for managed README sections.
+These keys control the visible headings for managed folder-index sections.
 
 - `[sections.files].heading` defaults to `Direct Files`
 - `[sections.stubs].heading` defaults to `Stub Files`
@@ -746,7 +754,7 @@ folder_template = "Folder: {title}."
 
 ## `[template].include_*`
 
-These booleans control which optional sections appear in generated README templates.
+These booleans control which optional sections appear in generated folder-index templates.
 
 - `[template].include_ownership`
 - `[template].include_does_not_belong`
@@ -761,7 +769,7 @@ This config uses the default split behavior and keeps parent links in folder ind
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [parent_link]
 folder_indexes = true
@@ -774,7 +782,7 @@ This config keeps parent links in both folder indexes and indexed files:
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [parent_link]
 folder_indexes = true
@@ -787,7 +795,7 @@ This config disables parent links everywhere:
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [parent_link]
 folder_indexes = false
@@ -816,7 +824,7 @@ This config uses `_drafts` as the draft folder:
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [drafts]
 folder = "_drafts"
@@ -829,7 +837,7 @@ This config indexes Markdown plus image, PDF, and YAML files, while only editing
 
 ```toml
 root = "notes"
-index_file = "README.md"
+index_file = "INDEX.md"
 
 [files]
 include_patterns = ["**/*.md", "**/*.png", "**/*.pdf", "**/*.yaml"]
@@ -872,7 +880,7 @@ Use `ddocs config paths` to inspect selection and `ddocs config show` to inspect
 ## Related docs
 
 - [Front Matter Schemas](frontmatter.md)
-- [Reference](README.md)
+- [Reference](INDEX.md)
 - [Getting Started](../guides/getting-started.md)
 - [CLI Reference](cli.md)
 - [Document Schemas And Format Enforcement](document-schemas.md)

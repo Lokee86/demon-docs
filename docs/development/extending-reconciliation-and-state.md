@@ -8,7 +8,7 @@ summary: This document defines the safe contributor workflow for extending link 
 ---
 # Extending Reconciliation and State
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 

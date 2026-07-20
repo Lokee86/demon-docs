@@ -8,7 +8,7 @@ summary: This document defines the implemented state transitions for suggestions
 ---
 # Review Lifecycles
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 

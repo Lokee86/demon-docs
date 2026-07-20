@@ -27,7 +27,7 @@ func TestReverseFlagCheckFixAndWatchOnce(t *testing.T) {
 		if code := Run(context.Background(), []string{"check", "-r", "--reverse-root", "src"}, &out, &errOut); code != 1 || !strings.Contains(out.String(), "check failed") {
 			t.Fatalf("check code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
-		if _, err := os.Stat(filepath.Join(repositoryRoot, "src", "README.md")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(repositoryRoot, "src", "INDEX.md")); !os.IsNotExist(err) {
 			t.Fatal("reverse check wrote an index")
 		}
 		out.Reset()

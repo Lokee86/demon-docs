@@ -8,7 +8,7 @@ summary: This document defines the historical-task research design for evaluatin
 ---
 # Context-Injection Benchmarking
 
-Parent index: [Research](./README.md)
+Parent index: [Research](./INDEX.md)
 
 ## Purpose
 
@@ -227,7 +227,7 @@ The available fixture set is intentionally small and cost-conscious. Results mus
 
 ## Related docs
 
-- [Research](README.md)
+- [Research](INDEX.md)
 - [Planned Agent Context and Integrations](../planning/agent-context-and-integrations.md)
 - [Roadmap](../planning/roadmap.md)
 - [Testing and Fixtures](../development/testing-and-fixtures.md)

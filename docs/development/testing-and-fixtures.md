@@ -8,7 +8,7 @@ summary: This document describes the Demon Docs test commands, regression fixtur
 ---
 # Testing and Fixtures
 
-Parent index: [Development](./README.md)
+Parent index: [Development](./INDEX.md)
 
 ## Purpose
 
@@ -319,7 +319,7 @@ Repository-wide tests must exclude nested `.worktrees/` and local generated outp
 
 ## Related docs
 
-- [Development](README.md)
+- [Development](INDEX.md)
 - [Repository Layout](repository-layout.md)
 - [Documentation Coverage Map](documentation-coverage.md)
 - [Behavioral Contract Matrix](behavioral-contract-matrix.md)

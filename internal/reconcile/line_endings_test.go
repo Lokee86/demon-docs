@@ -11,7 +11,7 @@ import (
 
 func TestMixedLineEndingsPreserveUnmanagedBytes(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "docs")
-	readme := filepath.Join(root, "README.md")
+	readme := filepath.Join(root, "INDEX.md")
 	source := []byte("# Docs\r\n\nAuthor line with spaces  \r\n\r\n## Direct Files\n<!-- doc-ledger:files:start -->\r\n<!-- doc-ledger:files:end -->\n\n## Stub Files\r\n<!-- doc-ledger:stubs:start -->\n<!-- doc-ledger:stubs:end -->\r\n\r\n## Direct Folders\n<!-- doc-ledger:folders:start -->\r\n<!-- doc-ledger:folders:end -->\n\nTail without final newline")
 	write(t, readme, string(source))
 	write(t, filepath.Join(root, "alpha.md"), "# Alpha")

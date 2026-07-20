@@ -8,7 +8,7 @@ summary: Benchmarks, corpora, evaluation methodology, and recorded evidence. Res
 ---
 # Research
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Benchmarks, corpora, evaluation methodology, and recorded evidence. Research pages do not define shipped product contracts.
 

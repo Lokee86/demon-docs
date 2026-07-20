@@ -8,7 +8,7 @@ summary: Implemented ownership boundaries, state models, reconciliation pipeline
 ---
 # Architecture
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior. Planned architecture remains under `planning/` until the owning code exists.
 

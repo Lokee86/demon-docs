@@ -64,7 +64,7 @@ func TestFreshRepositoryGeneratedIndexConverges(t *testing.T) {
 			t.Fatalf("check code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 	})
-	index := readTestFile(t, filepath.Join(root, "docs", "README.md"))
+	index := readTestFile(t, filepath.Join(root, "docs", "INDEX.md"))
 	for _, want := range []string{
 		"document_type: index",
 		"author: TODO",

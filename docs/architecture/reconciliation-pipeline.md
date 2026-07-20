@@ -8,7 +8,7 @@ summary: 'This document describes the implemented documentation-tree scan and fo
 ---
 # Reconciliation Model
 
-Parent index: [Architecture](./README.md)
+Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
@@ -61,15 +61,15 @@ The scanner starts from the configured managed root and builds a tree of folders
 
 The scan model is descriptive only. It records what exists on disk and where Demon Docs should look for managed content.
 
-## README Index Behavior
+## Folder Index Behavior
 
-Demon Docs treats README files as structured documents with managed sections. The exact structural recognition, migration, bounded replacement, parent-line editing, and byte-preservation rules are documented in [Managed Markdown Transformation](managed-markdown-transformation.md).
+Demon Docs treats configured folder index files as structured documents with managed sections. The exact structural recognition, migration, bounded replacement, parent-line editing, and byte-preservation rules are documented in [Managed Markdown Transformation](managed-markdown-transformation.md).
 
 - Managed blocks are wrapped in HTML comment markers.
 - The managed sections are Direct Files, Stub Files, and Direct Folders.
 - Human-authored content outside the managed markers is preserved.
 - Existing managed entries are parsed from those marker blocks before reconciliation rewrites them.
-- The default index filename is `README.md`, and `index_file = "!README.md"` keeps the legacy filename.
+- The default index filename is `INDEX.md`. Repositories can retain earlier or project-specific conventions with an explicit setting such as `index_file = "README.md"`, `index_file = "!README.md"`, or `index_file = "!INDEX.md"`.
 - Folder index files get `Parent index` links by default.
 - Indexed files do not get `Parent index` links unless `indexed_files = true` is set.
 
@@ -85,7 +85,7 @@ During reconciliation, Demon Docs creates missing index files where they belong.
 - The root folder gets an index file if one is missing.
 - Draft folders do not get an index file.
 
-The generated README template includes the managed sections so reconciliation can fill them in on the first pass.
+The generated folder-index template includes the managed sections so reconciliation can fill them in on the first pass.
 
 ## Parent Index Behavior
 
@@ -174,7 +174,7 @@ go test ./internal/scan ./internal/markdown ./internal/reconcile -count=1
 
 ## Related docs
 
-- [Architecture](README.md)
+- [Architecture](INDEX.md)
 - [Getting Started](../guides/getting-started.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)

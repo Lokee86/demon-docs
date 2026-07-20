@@ -39,15 +39,15 @@ The repository root [README](../README.md) is the product introduction and quick
 
 <!-- doc-ledger:folders:start -->
 
-- [agent](agent/README.md) - Agent documentation.
-- [Architecture](architecture/README.md) - Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior.
-- [Development](development/README.md) - Contributor workflow, testing, repository layout, fixtures, and release verification.
-- [Guides](guides/README.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Demon Docs.
-- [Limits](limits/README.md) - Current user-visible limitations, incomplete surfaces, workarounds, ownership, and removal conditions.
-- [Operations](operations/README.md) - Watcher, repository demon, recovery, troubleshooting, and runtime behavior.
-- [Planning](planning/README.md) - Future, unresolved, proposed, or back-burnered work.
-- [Reference](reference/README.md) - Exact CLI, configuration, state, syntax, diagnostic, and file-format reference.
-- [Research](research/README.md) - Benchmarks, corpora, evaluation methodology, and recorded experimental evidence.
+- [agent](agent/INDEX.md) - Agent documentation.
+- [Architecture](architecture/INDEX.md) - Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior.
+- [Development](development/INDEX.md) - Contributor workflow, testing, repository layout, fixtures, and release verification.
+- [Guides](guides/INDEX.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Demon Docs.
+- [Limits](limits/INDEX.md) - Current user-visible limitations, incomplete surfaces, workarounds, ownership, and removal conditions.
+- [Operations](operations/INDEX.md) - Watcher, repository demon, recovery, troubleshooting, and runtime behavior.
+- [Planning](planning/INDEX.md) - Future, unresolved, proposed, or back-burnered work.
+- [Reference](reference/INDEX.md) - Exact CLI, configuration, state, syntax, diagnostic, and file-format reference.
+- [Research](research/INDEX.md) - Benchmarks, corpora, evaluation methodology, and recorded experimental evidence.
 <!-- doc-ledger:folders:end -->
 
 ## Stub Files
@@ -57,4 +57,4 @@ The repository root [README](../README.md) is the product introduction and quick
 
 ## Notes
 
-Demon Docs uses `README.md` rather than Space Rocks' `!INDEX.md` convention because `README.md` is the product default. The committed `demon-docs.toml` additionally enables file-level parent links and indexes the development fixture script.
+The repository follows the product default and uses `INDEX.md` for generated folder indexes. The committed `demon-docs.toml` also enables file-level parent links and indexes the development fixture script.

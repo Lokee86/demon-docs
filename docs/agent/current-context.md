@@ -8,7 +8,7 @@ summary: This file is volatile project memory for agents working on Demon Docs.
 ---
 # Agent Current Context
 
-Parent index: [Agent](./README.md)
+Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 

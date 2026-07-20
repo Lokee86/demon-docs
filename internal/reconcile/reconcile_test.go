@@ -37,8 +37,8 @@ func TestFixIsIdempotentAndUsesConfiguredIndexEverywhere(t *testing.T) {
 	if _, err := Apply(first); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
-		t.Fatal("silently created README.md")
+	if _, err := os.Stat(filepath.Join(root, "INDEX.md")); !os.IsNotExist(err) {
+		t.Fatal("silently created INDEX.md")
 	}
 	rootIndex, err := os.ReadFile(filepath.Join(root, "!README.md"))
 	if err != nil {
@@ -64,7 +64,7 @@ func TestFixIsIdempotentAndUsesConfiguredIndexEverywhere(t *testing.T) {
 }
 func TestMultipleTrailingBlankLinesRemainIdempotent(t *testing.T) {
 	root := t.TempDir()
-	indexPath := filepath.Join(root, "README.md")
+	indexPath := filepath.Join(root, "INDEX.md")
 	pagePath := filepath.Join(root, "page.md")
 	write(t, indexPath, "# Docs\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n<!-- doc-ledger:files:end -->\n\n## Stub Files\n<!-- doc-ledger:stubs:start -->\n<!-- doc-ledger:stubs:end -->\n\n## Direct Folders\n<!-- doc-ledger:folders:start -->\n<!-- doc-ledger:folders:end -->\n\n\n")
 	write(t, pagePath, "# Page\n\nBody.\n\n\n")
@@ -125,13 +125,13 @@ func TestCheckPlanningDoesNotMutate(t *testing.T) {
 	if string(before) != string(after) {
 		t.Fatal("planning mutated file")
 	}
-	if _, err := os.Stat(filepath.Join(root, "README.md")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(root, "INDEX.md")); !os.IsNotExist(err) {
 		t.Fatal("planning created index")
 	}
 }
 func TestPreservesCRLFUnmanagedContentAndFinalNewline(t *testing.T) {
 	root := t.TempDir()
-	readme := filepath.Join(root, "README.md")
+	readme := filepath.Join(root, "INDEX.md")
 	source := "# Docs\r\n\r\nUser text  \r\n\r\n## Direct Files\r\n<!-- doc-ledger:files:start -->\r\n<!-- doc-ledger:files:end -->\r\n\r\n## Stub Files\r\n<!-- doc-ledger:stubs:start -->\r\n<!-- doc-ledger:stubs:end -->\r\n\r\n## Direct Folders\r\n<!-- doc-ledger:folders:start -->\r\n<!-- doc-ledger:folders:end -->\r\n\r\nTail\r\n"
 	write(t, readme, source)
 	write(t, filepath.Join(root, "a.md"), "# A\r\n")
@@ -156,7 +156,7 @@ func TestPreservesCRLFUnmanagedContentAndFinalNewline(t *testing.T) {
 }
 func TestDescriptionMovesAndStaleMessages(t *testing.T) {
 	root := t.TempDir()
-	write(t, filepath.Join(root, "README.md"), "# Docs\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n- [gone.md](gone.md) - Gone.\n<!-- doc-ledger:files:end -->\n\n## Stub Files\n<!-- doc-ledger:stubs:start -->\n- [foo.md](stubs/foo.md) - Stub: custom details.\n<!-- doc-ledger:stubs:end -->\n\n## Direct Folders\n<!-- doc-ledger:folders:start -->\n<!-- doc-ledger:folders:end -->\n")
+	write(t, filepath.Join(root, "INDEX.md"), "# Docs\n\n## Direct Files\n<!-- doc-ledger:files:start -->\n- [gone.md](gone.md) - Gone.\n<!-- doc-ledger:files:end -->\n\n## Stub Files\n<!-- doc-ledger:stubs:start -->\n- [foo.md](stubs/foo.md) - Stub: custom details.\n<!-- doc-ledger:stubs:end -->\n\n## Direct Folders\n<!-- doc-ledger:folders:start -->\n<!-- doc-ledger:folders:end -->\n")
 	write(t, filepath.Join(root, "foo.md"), "# Foo\n")
 	result, err := Tree(root, config.Default())
 	if err != nil {

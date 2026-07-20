@@ -7,7 +7,7 @@ policy_exempt: false
 summary: Adopt Demon Docs in a small existing repository, from initialization and indexes through link health, safe moves, reverse indexes, codemap suggestions, and schema-backed document creation.
 ---
 # Product Walkthrough
-Parent index: [Guides](./README.md)
+Parent index: [Guides](./INDEX.md)
 ## Purpose
 This walkthrough shows the main Demon Docs workflow in a small existing repository. It introduces each managed surface separately so the resulting changes remain reviewable.
 ## Overview
@@ -20,7 +20,7 @@ docs/
   guides/installing.md
 internal/runtime/service.go
 ```
-`docs/README.md` contains ordinary authored navigation:
+`docs/INDEX.md` contains ordinary authored navigation:
 ```markdown
 # Acme Service
 Start with the [installation guide](guides/installing.md) and read the
@@ -61,7 +61,7 @@ With frontmatter and format disabled, the fixture reports:
 ```text
 ddocs fix updated 3 file(s)
 ```
-Demon Docs adds managed index regions to `docs/README.md` and creates indexes for `docs/architecture/` and `docs/guides/`. The guide index contains:
+Demon Docs adds managed index regions to `docs/INDEX.md` and creates indexes for `docs/architecture/` and `docs/guides/`. The guide index contains:
 ```markdown
 ## Direct Files
 <!-- doc-ledger:files:start -->

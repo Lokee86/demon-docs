@@ -8,7 +8,7 @@ summary: Exact public contracts for commands, configuration, managed files, priv
 ---
 # Reference
 
-Parent index: [Demon Docs Documentation](../README.md)
+Parent index: [Demon Docs Documentation](../INDEX.md)
 
 Exact public contracts for commands, configuration, managed files, private state, diagnostics, and supported repository behavior.
 

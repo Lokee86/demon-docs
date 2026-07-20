@@ -8,7 +8,7 @@ summary: This document plans normalized dependency facts, bounded neighborhoods,
 ---
 # Deterministic Code, Dependency, and Entanglement Facts
 
-Parent index: [Planned Code Intelligence](./README.md)
+Parent index: [Planned Code Intelligence](./INDEX.md)
 
 ## Purpose
 
@@ -176,7 +176,7 @@ provider capability contract
 
 ## Related docs
 
-- [Planned Code Intelligence](README.md)
+- [Planned Code Intelligence](INDEX.md)
 - [Repository Graph](repository-graph.md)
 - [Code-Symbol References](code-symbol-references.md)
 - [Codemap Evidence](../../research/codemap-evidence.md)
