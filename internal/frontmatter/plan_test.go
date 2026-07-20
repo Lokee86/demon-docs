@@ -98,6 +98,58 @@ func TestBuildApplyIsIdempotentPreservesCRLFAndKeepsIDAcrossMove(t *testing.T) {
 	}
 }
 
+func TestBuildUsesFormatRulesAndGeneratedIndexDefaults(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for path, body := range map[string]string{
+		filepath.Join(docs, "README.md"): "# Docs\n",
+		filepath.Join(docs, "guide.md"): `---
+author: Demon Docs
+created: "2026-07-20"
+document_id: 11111111-2222-4333-8444-555555555555
+document_type: ""
+summary: Existing summary
+---
+# Guide
+`,
+	} {
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cfg := config.Default()
+	cfg.Root = "docs"
+	cfg.IndexFile = "README.md"
+	cfg.Frontmatter = schema()
+	cfg.Format.Enabled = true
+	cfg.Format.DefaultSchema = "general"
+	cfg.Format.PathRules = []config.FormatPathRule{{Pattern: "**/README.md", Schema: "index"}}
+	plan, err := Build(repo, docs, cfg, true, time.Date(2026, 7, 20, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Failed() || len(plan.Updates) != 2 {
+		t.Fatalf("unexpected repair plan: %+v", plan)
+	}
+	updates := map[string]string{}
+	for _, update := range plan.Updates {
+		updates[filepath.Base(update.Path)] = update.NewText
+	}
+	if !strings.Contains(updates["README.md"], "document_type: index") ||
+		!strings.Contains(updates["README.md"], "author: Demon Docs") ||
+		!strings.Contains(updates["README.md"], "summary: Generated documentation folder index.") {
+		t.Fatalf("index defaults did not follow the path-selected schema: %q", updates["README.md"])
+	}
+	if !strings.Contains(updates["guide.md"], "document_type: general") ||
+		!strings.Contains(updates["guide.md"], "author: Demon Docs") ||
+		!strings.Contains(updates["guide.md"], "summary: Existing summary") {
+		t.Fatalf("ordinary defaults changed unexpectedly: %q", updates["guide.md"])
+	}
+}
+
 func TestApplyRejectsLineEndingOnlyChangesAfterPlanning(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")

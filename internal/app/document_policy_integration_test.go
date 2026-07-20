@@ -38,6 +38,48 @@ func TestInitWritesSchemasAndNewCreatesDocument(t *testing.T) {
 	}
 }
 
+func TestFreshRepositoryGeneratedIndexConverges(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "docs"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	withWorkingDirectory(t, root, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("init code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"new", "general", "docs/page.md"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("new code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix", "--docs"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("fix code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"check", "--docs"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("check code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
+	index := readTestFile(t, filepath.Join(root, "docs", "README.md"))
+	for _, want := range []string{
+		"document_type: index",
+		"author: TODO",
+		"summary: Generated documentation folder index.",
+		"## Direct Files",
+	} {
+		if !strings.Contains(index, want) {
+			t.Fatalf("generated index missing %q:\n%s", want, index)
+		}
+	}
+	if strings.Contains(index, "## Purpose") {
+		t.Fatalf("generated index was enforced as a general document:\n%s", index)
+	}
+}
+
 func TestNewRefusesExistingFileWithoutForce(t *testing.T) {
 	root := initializedDocumentPolicyRepo(t)
 	target := filepath.Join(root, "docs", "existing.md")

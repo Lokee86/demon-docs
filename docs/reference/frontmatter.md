@@ -101,6 +101,10 @@ require = "policy_exempt_reason"
 
 Projects may replace this schema. No document type, status system, team model, or project-specific policy is hard-coded into Demon Docs.
 
+When document-body format enforcement is enabled and `document_type` is missing, frontmatter repair resolves the configured format path rules and then `default_schema`, and writes that selected schema name. Existing non-empty `document_type` metadata remains authoritative. This keeps generated indexes and path-classified planning or service documents from being stamped with the generic frontmatter default before body-format enforcement runs.
+
+Generated folder indexes are Demon Docs-owned files. When such an index lacks required `author` or `summary` values and those fields have no configured source, repair uses `TODO` for the author and `Generated documentation folder index.` for the summary. A configured literal default or non-empty `default_author` takes precedence.
+
 ## Field definitions
 
 Each `[frontmatter.fields.<name>]` table supports:
@@ -173,7 +177,7 @@ Type-specific document policy selected through `document_type` belongs to the se
 ## Code map
 
 - `internal/frontmatter/` — parsing, validation, repair planning, duplicate-ID detection, atomic writes, and immutable state.
-- `internal/config/config.go` — schema configuration and starter defaults.
+- `internal/config/config.go` and `internal/config/format_selection.go` — schema configuration, starter defaults, and shared metadata/path-rule selection.
 - `internal/app/app.go` — `check` and `fix` integration.
 - `internal/watch/` — continuous reconciliation integration.
 

@@ -143,7 +143,7 @@ default_author = ""
 unknown_fields = "remove"
 ```
 
-Frontmatter applies to non-ignored `.md` files beneath the configured docs root. It is independent of `[files].include_patterns` and `[files].exclude_patterns`, which control folder-index membership rather than document policy. Generated folder indexes are included because index reconciliation completes before frontmatter reconciliation in the same `fix` or watch pass.
+Frontmatter applies to non-ignored `.md` files beneath the configured docs root. It is independent of `[files].include_patterns` and `[files].exclude_patterns`, which control folder-index membership rather than document policy. Generated folder indexes are included because index reconciliation completes before frontmatter reconciliation in the same `fix` or watch pass. When `document_type` is missing and format enforcement is enabled, repair uses the format path-rule/default selection rather than blindly writing the generic frontmatter default.
 
 YAML blocks use `---`; TOML blocks use `+++`. A recognized existing block keeps its format. `default_format` is used only when a block is inserted. `allowed_formats` rejects a recognized but disallowed format instead of converting it. Malformed, unclosed, duplicate-key, or multiple leading blocks are reported without destructive rewriting.
 
@@ -194,7 +194,7 @@ equals = true
 require = "policy_exempt_reason"
 ```
 
-`check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so repositories must either configure those values, relax the schema, or author them explicitly.
+`check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so ordinary authored documents must configure those values, relax the schema, or author them explicitly. Demon Docs-owned generated folder indexes receive deterministic fallback author and summary values when no configured source exists, allowing a fresh initialized repository to converge without weakening policy for ordinary documents.
 
 ## Document Schemas And Body Format
 
@@ -209,7 +209,7 @@ default_schema = "general"
 invalidation_similarity = 0.5
 ```
 
-Shared schemas are TOML files named after `document_type`. Metadata selects the schema first. Path fallbacks are evaluated only when metadata is absent:
+Shared schemas are TOML files named after `document_type`. Metadata selects the schema first. Path fallbacks are evaluated only when metadata is absent. During frontmatter repair, that same selection supplies a missing `document_type`, so later passes retain the selected path-based schema:
 
 ```toml
 [[format.path_rules]]

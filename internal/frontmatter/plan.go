@@ -54,8 +54,12 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		if !parsed.HasBlock {
 			parsed.Format = cfg.Frontmatter.DefaultFormat
 		}
+		frontmatterSchema, err := schemaForDocument(relative, parsed.Values, cfg)
+		if err != nil {
+			return plan, fmt.Errorf("resolve frontmatter defaults for %s: %w", relative, err)
+		}
 		recorded := immutable.values(relative, parsed.Values, !duplicateExisting[path])
-		outcome := Evaluate(relative, parsed, cfg.Frontmatter, repair, recorded, now)
+		outcome := Evaluate(relative, parsed, frontmatterSchema, repair, recorded, now)
 		plan.Diagnostics = append(plan.Diagnostics, outcome.Diagnostics...)
 		if value, ok := outcome.Values["document_id"].(string); ok && strings.TrimSpace(value) != "" {
 			ids[value] = append(ids[value], relative)
@@ -179,6 +183,52 @@ func markdownFiles(repoRoot, docsRoot string) ([]string, error) {
 		return left < right
 	})
 	return files, nil
+}
+
+func schemaForDocument(relative string, values map[string]any, cfg config.Config) (config.Frontmatter, error) {
+	schema := cfg.Frontmatter
+	if !cfg.Format.Enabled {
+		return schema, nil
+	}
+	selectionValues := values
+	if value, present := values["document_type"]; present {
+		if !emptyValue(value) {
+			return schema, nil
+		}
+		selectionValues = make(map[string]any, len(values)-1)
+		for name, existing := range values {
+			if name != "document_type" {
+				selectionValues[name] = existing
+			}
+		}
+	}
+	selected, err := config.SelectFormatSchema(relative, selectionValues, cfg.Format)
+	if err != nil {
+		return schema, err
+	}
+	fields := make(map[string]config.FrontmatterField, len(schema.Fields))
+	for name, definition := range schema.Fields {
+		fields[name] = definition
+	}
+	if definition, ok := fields["document_type"]; ok {
+		definition.Default = selected
+		definition.DefaultFrom = ""
+		fields["document_type"] = definition
+	}
+	if strings.EqualFold(filepath.Base(filepath.FromSlash(relative)), cfg.IndexFile) {
+		if definition, ok := fields["author"]; ok && !hasConfiguredSource(definition, schema) {
+			definition.Default = "TODO"
+			definition.DefaultFrom = ""
+			fields["author"] = definition
+		}
+		if definition, ok := fields["summary"]; ok && !hasConfiguredSource(definition, schema) {
+			definition.Default = "Generated documentation folder index."
+			definition.DefaultFrom = ""
+			fields["summary"] = definition
+		}
+	}
+	schema.Fields = fields
+	return schema, nil
 }
 
 func otherPaths(paths []string, current string) []string {
