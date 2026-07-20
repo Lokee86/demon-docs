@@ -72,3 +72,21 @@ func indexableCodeFile(repositoryRoot, path string, exact map[string]struct{}) b
 	_, ok := sourceExtensions[strings.ToLower(filepath.Ext(path))]
 	return ok
 }
+
+func orphanFiles(repositoryRoot string, folderFiles map[string][]string, f facts) []string {
+	orphans := []string{}
+	for _, files := range folderFiles {
+		for _, path := range files {
+			relative, err := filepath.Rel(repositoryRoot, path)
+			if err != nil {
+				continue
+			}
+			relative = filepath.ToSlash(filepath.Clean(relative))
+			if len(f.fileDocs[relative]) == 0 {
+				orphans = append(orphans, relative)
+			}
+		}
+	}
+	sort.Strings(orphans)
+	return orphans
+}

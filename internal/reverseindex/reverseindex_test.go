@@ -92,6 +92,43 @@ func TestBuildHonorsNestedDocignoreFiles(t *testing.T) {
 	}
 }
 
+func TestBuildReportsEligibleUnreferencedFilesUsingScopedInventory(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	codeRoot := filepath.Join(repositoryRoot, "services")
+	mustWrite(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/referenced.go`\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "referenced.go"), "package api\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "unreferenced.go"), "package api\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "README.md"), "# Generated API index\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", ".docignore"), "generated/\n")
+	mustWrite(t, filepath.Join(codeRoot, "api", "generated", "client.go"), "package generated\n")
+	mustWrite(t, filepath.Join(repositoryRoot, "client", "outside.go"), "package client\n")
+
+	plan, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Orphans) != 1 || plan.Orphans[0] != "services/api/unreferenced.go" {
+		t.Fatalf("orphans=%v", plan.Orphans)
+	}
+	if _, err := Apply(repositoryRoot, plan); err != nil {
+		t.Fatal(err)
+	}
+	clean, err := Build(repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(clean.Orphans) != 1 || clean.Orphans[0] != "services/api/unreferenced.go" {
+		t.Fatalf("clean orphans=%v", clean.Orphans)
+	}
+	if !clean.CheckFailed() {
+		t.Fatal("orphan did not make the plan unhealthy for check")
+	}
+	if clean.Failed() {
+		t.Fatal("orphan incorrectly made the mutation plan fail")
+	}
+}
+
 func TestBuildScopesMissingTargetDiagnostics(t *testing.T) {
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")

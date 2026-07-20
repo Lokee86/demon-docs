@@ -73,6 +73,7 @@ func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, for
 	if err != nil {
 		return Plan{}, err
 	}
+	plan.Orphans = orphanFiles(repositoryRoot, folderFiles, collected)
 	selected := map[string]struct{}{}
 	for folder, files := range folderFiles {
 		if len(files) > 0 {

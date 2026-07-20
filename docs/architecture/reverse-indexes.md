@@ -31,7 +31,8 @@ The reverse-index boundary owns:
 - grouping source documents by resolved code target;
 - inventorying eligible code files under selected folders;
 - rendering one deterministic managed reverse-index block per selected folder;
-- reporting unresolved in-scope codemap targets; and
+- reporting unresolved in-scope codemap targets;
+- reporting eligible in-scope code files with no resolved authored file reference during read-only checks; and
 - planning, checking, applying, and watching reverse-index updates.
 
 ## Does not own
@@ -138,7 +139,7 @@ resolve roots and codemap headings
 -> report or apply file updates
 ```
 
-`check --reverse` reports pending updates without writing. `fix --reverse` applies the planned file updates. `watch --reverse` runs the same build and apply path after relevant filesystem events.
+`check --reverse` reports pending updates and reverse-index orphans without writing. `fix --reverse` applies only the planned file updates; orphan status is check-only because the command does not invent authored links. `watch --reverse` runs the same build and apply path after relevant filesystem events.
 
 When reverse indexing is selected together with documentation indexes or links, foreground watch runs the normal watcher and reverse-index watcher concurrently under one command context. This changes scheduling, not correctness or output ownership.
 
@@ -155,12 +156,15 @@ Fatal build errors include:
 
 Non-fatal target diagnostics identify source document, source line, resolution status, and target. Diagnostics are sorted before output.
 
+Eligible files in the selected inventory with no entry in the resolved authored file facts are reported during `check --reverse` as sorted `message: Reverse-index orphan: <repo-relative-path>` messages. The inventory already excludes hard ignores, `.docignore` paths, generated reverse-index files, and files outside selected roots.
+
 ## Invariants and safety boundaries
 
 - Authored codemap sections are the only source of documentation-to-code relationships.
 - Existing codemap links are never classified as irrelevant or removal candidates.
 - Only explicit file and folder targets create current reverse-index facts.
 - Unresolved or out-of-scope targets do not create substitute edges.
+- Orphan health does not create substitute edges or alter the fix/watch projection path.
 - Output is deterministic for the same repository snapshot and configuration.
 - Writes remain inside configured index files and the reverse-index marker pair.
 - Authored content outside the managed block is preserved.
