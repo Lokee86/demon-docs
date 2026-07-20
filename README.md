@@ -174,7 +174,7 @@ ddocs codemaps check --root docs/architecture/example.md
 
 The command adopts the complete configured section as one managed artifact, preserves existing valid links by default, automatically adds selected non-declined `hard_link` and `context` recommendations, and uses content-addressed transactional writes. Persisted declines suppress unchanged future additions. Confidence pruning is separately configurable and disabled by default.
 
-Existing configured sections are supported now. The internal file-type schema placement seam exists, but the public application does not yet connect the provider needed to create a missing schema-required section.
+Existing configured sections are supported now. When the effective document schema requires a codemap section, the public command uses schema-defined placement to create it deterministically; documents without that schema authority remain unchanged.
 
 Codemap generation never runs through generic `fix`, generic `check`, watch, or the repository demon.
 
@@ -204,7 +204,7 @@ See [Testing and Fixtures](docs/development/testing-and-fixtures.md) and [Reposi
 
 ## Project status
 
-Repository indexing, frontmatter enforcement, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, production codemap execution for existing sections, and codemap research tooling are implemented. Public file-type-schema placement for missing codemap sections, broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
+Repository indexing, frontmatter and document-schema enforcement, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, production codemap execution, schema-driven missing-section placement, and codemap research tooling are implemented. Broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
 
 See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 

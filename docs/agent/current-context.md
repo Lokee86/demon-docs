@@ -28,7 +28,6 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Public file-type-schema placement for creating missing codemap sections is not fully connected.
 - Broader diagnostics remain incomplete.
 - Polyglot code intelligence remains planned.
 - Deterministic agent-context integration remains planned.

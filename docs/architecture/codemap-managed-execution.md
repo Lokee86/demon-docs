@@ -39,22 +39,17 @@ The default policy is additive and conservative. Existing valid links remain eve
 
 Existing configured codemap sections are fully supported by the public execution commands.
 
-The internal `codemap.SectionSchema` seam for creating a missing schema-required section is implemented and tested. The application layer does not yet provide a repository file-type schema implementation to `codemaprun.Options.Schema`. Therefore the current public commands skip a file whose configured codemap section is absent. They do not yet create that missing section from repository configuration.
-
-This distinction is important:
+When a selected document has no matching section, the application resolves its effective document-policy schema and supplies any required codemap placement through `codemaprun.Options.Schema`. The command then creates the missing section at the schema-defined position before adopting and reconciling it. A document whose effective schema does not require a codemap section remains unchanged.
 
 ```text
 implemented now
 = recognize, adopt, inspect, check, and update existing configured sections
-
-implemented internal seam
-= accept schema placement and create a required missing section
-
-connected through document policy
-= resolve the selected effective document schema and supply its codemap placement to the execution plan
+= resolve shared or document-specific schemas for selected documents
+= create a required missing section at its deterministic schema position
+= leave documents without schema placement authority unchanged
 ```
 
-See [Current Product Limitations](../limits/current-limitations.md) for the user-visible impact and removal condition.
+See [Document Schemas](../reference/document-schemas.md) and [Current Product Limitations](../limits/current-limitations.md) for the public ownership boundary.
 
 ## Code root
 
@@ -162,7 +157,7 @@ An existing matching section is processed regardless of whether a future file-ty
 
 ## Schema-driven missing-section seam
 
-`codemap.SectionSchema` is the internal interface for a future repository file-type policy provider:
+`codemap.SectionSchema` is the internal interface used by the repository document-policy provider:
 
 ```go
 type SectionSchema interface {

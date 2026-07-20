@@ -57,7 +57,7 @@ ddocs status
 ddocs config show
 ```
 
-The current public command can update existing configured sections. Although the internal schema-placement seam is implemented, the CLI does not yet resolve repository file types into codemap placements. A file without a configured codemap section is currently skipped rather than given a new section automatically.
+The public command updates existing configured sections and resolves the selected document's effective schema when the section is absent. A required schema codemap section is created at its deterministic configured position. A document whose effective schema does not declare a codemap section is skipped rather than receiving an invented placement.
 
 ## Configure recognized headings
 
@@ -373,7 +373,7 @@ Select the Markdown document that owns the codemap. Directory traversal may cont
 
 ### Section is reported missing
 
-Confirm that the heading is configured or supply `--heading`. The current public CLI cannot yet create the section from a file-type schema, so add the schema-defined heading manually until that provider is connected.
+Confirm that the heading is configured or supply `--heading`. If the document should receive a new section, ensure its effective shared or document-specific schema declares a required codemap section and deterministic placement. Heading recognition alone does not authorize Demon Docs to invent a section.
 
 ### More than one configured section exists
 
