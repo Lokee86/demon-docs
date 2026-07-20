@@ -107,7 +107,7 @@ ddocs fix --links
 ddocs fix --reverse
 ```
 
-Without selectors, documentation indexes and links run. Reverse indexes also run when roots are configured or supplied.
+Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run. Link repair follows `[links].enabled`, and reverse indexes also run when roots are configured or supplied.
 
 ## Expected result
 
@@ -144,7 +144,9 @@ Stop foreground watchers or the repository demon, then use the recovery guidance
 
 ## Related docs
 
+- [Product Walkthrough](product-walkthrough.md)
 - [CLI Reference](../reference/cli.md)
+- [Using Document Schemas](document-schemas.md)
 - [Configuration Reference](../reference/configuration.md)
 - [Managed Files and State](../reference/managed-files-and-state.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)

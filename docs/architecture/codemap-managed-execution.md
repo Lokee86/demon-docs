@@ -39,7 +39,7 @@ The default policy is additive and conservative. Existing valid links remain eve
 
 Existing configured codemap sections are fully supported by the public execution commands.
 
-The internal `codemap.SectionSchema` seam for creating a missing schema-required section is implemented and tested. The application layer does not yet provide a repository file-type schema implementation to `codemaprun.Options.Schema`. Therefore the current public commands skip a file whose configured codemap section is absent. They do not yet create that missing section from repository configuration.
+The internal `codemap.SectionSchema` seam for creating a missing schema-required section is implemented and tested. The application supplies `documentpolicy.CodemapSchemaProvider` to `codemaprun.Options.Schema`; that provider selects the effective document schema from metadata, path rules, and document-specific exceptions, then returns a validated required placement when the schema declares a codemap section.
 
 This distinction is important:
 
@@ -52,9 +52,12 @@ implemented internal seam
 
 connected through document policy
 = resolve the selected effective document schema and supply its codemap placement to the execution plan
+
+not created automatically
+= a missing section whose effective schema is absent, optional, or does not declare a codemap section
 ```
 
-See [Current Product Limitations](../limits/current-limitations.md) for the user-visible impact and removal condition.
+The remaining boundary is intentional: heading configuration recognizes existing sections, while a schema is required to authorize a new heading and placement. See [Current Product Limitations](../limits/current-limitations.md) for other current codemap limits.
 
 ## Code root
 
@@ -500,6 +503,7 @@ A new renderer or schema provider must preserve complete-section ownership, dete
 - `internal/codemap/managed_section.go` — Markdown-aware section location and schema insertion validation.
 - `internal/codemap/managed_render.go` — marker validation, fence/bullet rendering, line removal, normalization.
 - `internal/codemaprecommend/` — production ranking and evidence filters.
+- `internal/documentpolicy/codemap.go` — effective-schema selection and deterministic placement for required missing codemap sections.
 - `internal/review/` — shared decline and reconsideration replay.
 - `internal/filetxn/` — batch preflight, atomic replacement, verification, and guarded rollback.
 - `internal/textio/` — source encoding and newline preservation.
@@ -513,6 +517,9 @@ internal/app/codemap_execute_test.go
   help and singular compatibility alias
   required roots
   single-file check/dry-run/fix convergence
+
+internal/documentpolicy/documentpolicy_test.go
+  required schema placement and no-placement behavior
 
 internal/codemap/managed_test.go
   complete-section adoption

@@ -183,12 +183,14 @@ This may start a run slightly after the exact debounce boundary, bounded by the 
 
 ## Selected-feature execution
 
-The base reconciliation callback can run forward indexes, links, or both.
+The base reconciliation callback can run documentation indexes, frontmatter, document-body format, links, or any selected combination. The application owns their ordering; the scheduler only serializes the callback.
 
 The order is fixed:
 
 ```text
-forward index reconciliation, when selected
+documentation indexes, when selected
+-> frontmatter, when selected
+-> document-body format, when selected
 -> link reconciliation, when selected
 -> output summary and individual diagnostics
 ```
@@ -199,7 +201,7 @@ Reverse-index watching is a separate observer and execution loop. Mixed watch mo
 
 ## Shared cross-watcher run lock
 
-When reverse indexes are selected together with forward indexes or links, `internal/app.runSelectedWatch` creates:
+When reverse indexes are selected together with documentation indexes, frontmatter, document format, or links, `internal/app.runSelectedWatch` creates:
 
 - one cancellation context shared by both watcher loops;
 - one synchronized output writer;

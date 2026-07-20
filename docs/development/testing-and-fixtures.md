@@ -116,6 +116,12 @@ Orphan health tests verify that link-enabled `check`:
 
 Focused coverage lives in `internal/app/orphans_test.go` and `internal/app/orphans_integration_test.go`.
 
+## Frontmatter and Document-Format Coverage
+
+Frontmatter tests cover YAML/TOML parsing, leading-block protection, deterministic rendering, configured field types, unknown-field modes, conditional requirements, immutable restoration, duplicate document IDs, docs-root containment, CRLF preservation, and idempotent repair across a path move. Document-policy tests cover protected Markdown syntax, schema selection, hierarchy and alias validation, reordering and nesting, placeholder creation, explicit ignore/merge/delete operations, stable-ID heading renames, document-specific schema invalidation, and schema-aware codemap placement.
+
+Focused coverage lives in `internal/frontmatter/`, `internal/documentpolicy/`, `internal/app/frontmatter_integration_test.go`, `internal/app/document_policy_integration_test.go`, and `internal/app/document_policy_migration_test.go`.
+
 ## Review-Ledger Coverage
 
 Review tests cover persisted decline decisions, stale evidence fingerprints, ambiguous link suggestions, codemap selection, applied-change events, Git-object append behavior, undo depth and age, whole-run preflight, repair-level undo, blocks, unblocks, and refusal to overwrite later edits.
@@ -291,6 +297,8 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `internal/codemaprun/build_test.go` — production plans, decline suppression, additions, pruning, and rewrite construction.
 - `internal/app/codemap_execute_test.go` — command aliases, required roots, dry-run, check, fix, and convergence.
 - `internal/filetxn/apply_test.go` — shared batch preflight, atomic replacement, digest verification, and guarded rollback.
+- `internal/frontmatter/*_test.go` — parser, evaluator, schema validation, immutable state, and repair planning.
+- `internal/documentpolicy/*_test.go` — schema selection, body enforcement, explicit conflict resolution, migration, creation, and codemap placement.
 - `internal/watch/*_test.go` — watcher filters, scheduling, and filesystem events.
 - `internal/demon/runtime_test.go` — owner and feeder lifecycle coverage.
 - `internal/app/demon_test.go` — daemon CLI and shell integration coverage.

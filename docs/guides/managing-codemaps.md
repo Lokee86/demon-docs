@@ -57,7 +57,7 @@ ddocs status
 ddocs config show
 ```
 
-The current public command can update existing configured sections. Although the internal schema-placement seam is implemented, the CLI does not yet resolve repository file types into codemap placements. A file without a configured codemap section is currently skipped rather than given a new section automatically.
+The public command updates existing configured sections and can create a missing section when the selected effective document schema declares a required codemap placement. A file whose schema is absent, optional, or has no codemap section is reported as `missing` and remains unchanged; heading configuration alone never invents placement.
 
 ## Configure recognized headings
 
@@ -373,7 +373,7 @@ Select the Markdown document that owns the codemap. Directory traversal may cont
 
 ### Section is reported missing
 
-Confirm that the heading is configured or supply `--heading`. The current public CLI cannot yet create the section from a file-type schema, so add the schema-defined heading manually until that provider is connected.
+Confirm that the heading is configured or supply `--heading`. If the section is still reported as `missing`, inspect the selected `document_type`, matching `format.path_rules`, and document-specific schema. Add a required codemap section to the effective schema when automatic placement is intended; a schema without that section is an intentional no-op.
 
 ### More than one configured section exists
 

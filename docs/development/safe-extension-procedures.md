@@ -35,10 +35,14 @@ Use the focused procedures for implementation details:
 | New review suggestion kind | `internal/review` model and producer | review policy/projection, CLI output, history compatibility, undo decision |
 | New review event or decision action | `internal/review` store/model | replay behavior, schema compatibility, batch publication tests |
 | New codemap evidence kind | `internal/evidence` | ranking admission/weight decision, benchmark and precision evaluation |
+| Codemap missing-section placement rule | `internal/documentpolicy` provider and `internal/codemap` seam | schema authority, deterministic placement, skip/refusal behavior, codemap and document-policy tests |
 | Ranking weight, admission, cap, or tier change | `internal/codemapbench` | pinned evaluation, methodology record, evidence/ranking architecture |
 | New language dependency adapter | `internal/codemapcorpus` | explicit supported syntax, false-positive fixtures, corpus architecture |
 | New report field or meaning | owning report package | schema compatibility decision, canonical serialization tests, reference |
 | New configuration key | `internal/config` | defaults, decode, starter config when appropriate, reference and tests |
+| New frontmatter field, value source, or conditional rule | `internal/config` and `internal/frontmatter` | frontmatter reference, validation/repair tests, immutable-state decision, behavioral contract |
+| New document schema section or body-format policy | `internal/documentpolicy` | document-schema reference, schema compatibility/invalidation decision, creation/enforcement/migration tests |
+| New shared authored-file rewrite behavior | `internal/filetxn` | generated-publication ownership, hash/rollback contract, source-preservation tests, behavioral contract |
 | Compatibility alias | `internal/config` or CLI parser | migration reference, precedence test, removal condition if transitional |
 | New public command or subcommand | `internal/app` and executable entry when needed | scoped help, CLI reference, task guide, exit/diagnostic tests |
 | New watcher feature | `internal/watch` plus owning subsystem | event relevance, run-lock participation, dynamic scope, operations docs |

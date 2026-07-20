@@ -45,7 +45,7 @@ internal/ddrepo/
 
 The shared `internal/filetxn` boundary owns the content-addressed filesystem transaction used by both link and frontmatter rewrites. Link publication layers review history, graph refresh, and durable link suppressions on top of it.
 
-This boundary owns:
+The shared filesystem boundary owns:
 
 - validating the internal consistency of prepared rewrites;
 - checking every source before the first replacement;
@@ -53,12 +53,17 @@ This boundary owns:
 - preserving source permissions and exact newline-encoded bytes;
 - same-directory temporary-file writes and OS-specific atomic replacement;
 - post-replacement hash verification;
-- rollback of an attempted source batch after a filesystem failure;
+- rollback of an attempted source batch after a filesystem failure.
+
+The link-specific publication layer additionally owns:
+
 - preparation and append-only publication of applied-change events;
 - rollback of source files when review-history publication fails;
 - refreshing generated link offsets and source metadata;
 - publishing the complete private link-state projection; and
 - making watcher suppressions durable with that state projection.
+
+Frontmatter uses the shared filesystem boundary but owns its own diagnostics, immutable-value projection, and rollback when private-state publication fails. Documentation-body format uses the same rewrite boundary and owns schema-history snapshots and invalidation recovery.
 
 ## Does not own
 

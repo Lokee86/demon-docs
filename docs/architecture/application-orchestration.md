@@ -36,7 +36,7 @@ The application boundary owns:
 - scoped help and shared version behavior;
 - repository and configuration selection;
 - translation of CLI flags into subsystem options;
-- `--docs`, `--links`, and `--reverse` selection semantics;
+- `--docs`, `--frontmatter`, `--format`, `--links`, and `--reverse` selection semantics;
 - ordering selected reconciliation systems;
 - command output and aggregate success/failure decisions;
 - orphan-document health-check integration for link-enabled checks;
@@ -96,7 +96,7 @@ Command parsing must not become an alternative source of repository truth. Resol
 ## Invariants and safety boundaries
 
 - Supplying any subsystem selector runs only selected systems.
-- Without selectors, documentation indexes and links run; reverse indexes join when configured.
+- Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run; link repair follows `[links].enabled`, and reverse indexes join when configured.
 - Read-only commands do not apply authored-file reconciliation writes.
 - Ambiguous subsystem diagnostics are not converted into guessed fixes by the application layer.
 - Both executable names must expose compatible behavior unless a command is intentionally alias-specific.
@@ -138,6 +138,9 @@ Important non-ownership boundaries:
 - `internal/watch/` owns watcher scheduling.
 - `internal/demon/` owns runtime leases and lifecycle.
 - `internal/review/` owns review history, decision replay, undo construction, and repair controls.
+- `internal/frontmatter/` owns frontmatter parsing, repair planning, and immutable-value state.
+- `internal/documentpolicy/` owns document schemas, body-format enforcement, explicit conflict operations, and schema history.
+- `internal/filetxn/` owns shared content-addressed replacement and guarded rollback.
 - `internal/codemap/`, `internal/codemaprecommend/`, `internal/codemaprun/`, and `internal/evidence/` own codemap analysis and foreground execution.
 
 ## Tests

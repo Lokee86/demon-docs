@@ -10,7 +10,13 @@ summary: Demon Docs can validate and repair a configurable front matter schema f
 
 Parent index: [Reference](./README.md)
 
-Demon Docs can validate and repair a configurable front matter schema for every non-ignored Markdown document under the configured documentation root. Generated folder indexes are included; generated files are not silently exempted from the same repository rules.
+## Purpose
+
+This document defines the configurable frontmatter formats, field schema, repair sources, immutable-value behavior, and diagnostics used by Demon Docs.
+
+## Overview
+
+Frontmatter enforcement plans without authored-file mutation during `check` and performs guarded repairs during `fix` or `watch`. It applies a configurable field schema to every non-ignored Markdown document beneath the configured docs root, including generated folder indexes, while preserving the document body and selected existing frontmatter format.
 
 ## Formats
 
@@ -179,7 +185,12 @@ Type-specific document policy selected through `document_type` belongs to the se
 
 ## Related docs
 
+- [Using Document Schemas](../guides/document-schemas.md)
 - [Configuration](configuration.md)
 - [CLI Reference](cli.md)
 - [Diagnostics and Exit Behavior](diagnostics-and-exit-behavior.md)
 - [Managed Files and State](managed-files-and-state.md)
+
+## Notes
+
+Frontmatter policy is separate from document-body format enforcement. The two operations share repository scope and the file-transaction boundary but have different schemas, diagnostics, and private-state records.
