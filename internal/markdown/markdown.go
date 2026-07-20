@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -29,6 +30,9 @@ func fencedCodeRanges(source string) []sourceRange {
 	data := []byte(source)
 	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
 	var result []sourceRange
+	if end := frontmatter.LeadingBlockEnd(source); end > 0 {
+		result = append(result, sourceRange{Start: 0, End: end})
+	}
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
@@ -71,6 +75,7 @@ func structuralIndex(source, value string, from int, ranges []sourceRange) int {
 func headings(source string) []heading {
 	data := []byte(source)
 	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
+	frontmatterEnd := frontmatter.LeadingBlockEnd(source)
 	var result []heading
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
@@ -85,6 +90,9 @@ func headings(source string) []heading {
 			return ast.WalkContinue, nil
 		}
 		seg := lines.At(0)
+		if seg.Start < frontmatterEnd {
+			return ast.WalkContinue, nil
+		}
 		start := seg.Start
 		for start > 0 && data[start-1] != '\n' {
 			start--

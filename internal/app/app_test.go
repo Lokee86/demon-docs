@@ -45,7 +45,7 @@ func TestFixCheckAndOverrides(t *testing.T) {
 		t.Fatal(err)
 	}
 	var out, errOut bytes.Buffer
-	args := []string{"fix", "-i", "--root", root, "--index-file", "!README.md", "--parent-link-indexed-files"}
+	args := []string{"fix", "-i", "--root", root, "--no-local-config", "--no-global-config", "--index-file", "!README.md", "--parent-link-indexed-files"}
 	if code := Run(context.Background(), args, &out, &errOut); code != 0 {
 		t.Fatalf("code=%d err=%s", code, errOut.String())
 	}
@@ -61,7 +61,7 @@ func TestFixCheckAndOverrides(t *testing.T) {
 	}
 	out.Reset()
 	errOut.Reset()
-	if code := Run(context.Background(), []string{"check", "-i", "--root", root, "--index-file", "!README.md", "--parent-link-indexed-files"}, &out, &errOut); code != 0 || !strings.Contains(out.String(), "check passed") {
+	if code := Run(context.Background(), []string{"check", "-i", "--root", root, "--no-local-config", "--no-global-config", "--index-file", "!README.md", "--parent-link-indexed-files"}, &out, &errOut); code != 0 || !strings.Contains(out.String(), "check passed") {
 		t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
 	}
 }

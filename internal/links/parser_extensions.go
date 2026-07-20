@@ -3,6 +3,8 @@ package links
 import (
 	"sort"
 	"strings"
+
+	"github.com/Lokee86/demon-docs/internal/frontmatter"
 )
 
 const linkParserVersion = 2
@@ -28,6 +30,9 @@ func parseMarkdownDocument(source string) parsedMarkdown {
 
 func protectedMarkdownRanges(source string) []byteRange {
 	ranges := fencedRanges(source)
+	if end := frontmatter.LeadingBlockEnd(source); end > 0 {
+		ranges = append(ranges, byteRange{Start: 0, End: end})
+	}
 	for i := 0; i < len(source); {
 		if end, ok := rangeEnd(i, ranges); ok {
 			i = end

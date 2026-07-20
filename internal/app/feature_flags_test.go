@@ -31,7 +31,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		root := t.TempDir()
 		writeTestFile(t, filepath.Join(root, "page.md"), "# Page\n")
 		var stdout, stderr bytes.Buffer
-		if code := Run(context.Background(), []string{"fix", "--root", root, "--docs"}, &stdout, &stderr); code != 0 {
+		if code := Run(context.Background(), []string{"fix", "--root", root, "--docs", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 		if _, err := os.Stat(filepath.Join(root, "README.md")); err != nil {

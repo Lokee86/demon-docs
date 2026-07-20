@@ -8,6 +8,26 @@ import (
 	"github.com/Lokee86/demon-docs/internal/config"
 )
 
+func TestFrontmatterIsInvisibleToMarkdownStructure(t *testing.T) {
+	for name, source := range map[string]string{
+		"yaml": "---\nsummary: A managed document.\n---\n# Real Title\n\nBody.\n",
+		"toml": "+++\nsummary = \"A managed document.\"\n+++\n# Real Title\n\nBody.\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := FirstHeadingTitle(source); got != "Real Title" {
+				t.Fatalf("title = %q", got)
+			}
+			updated := UpdateParent(source, "Parent index: [Docs](./README.md)", "Parent index")
+			if !strings.Contains(updated, "# Real Title\n\nParent index: [Docs](./README.md)\n\nBody.") {
+				t.Fatalf("parent inserted at wrong location:\n%s", updated)
+			}
+			if !strings.HasPrefix(updated, source[:4]) {
+				t.Fatalf("frontmatter prefix changed:\n%s", updated)
+			}
+		})
+	}
+}
+
 func TestGoldmarkIgnoresHeadingsInsideCodeFences(t *testing.T) {
 	source := "# Real\n\n```md\n## Related Docs\n```\n\nTail\n"
 	got := EnsureManaged(source, config.Default())

@@ -232,7 +232,7 @@ func atomicWrite(path string, data []byte) error {
 	if err := temporary.Close(); err != nil {
 		return err
 	}
-	return os.Rename(name, path)
+	return atomicReplace(name, path)
 }
 
 func otherPaths(paths []string, current string) []string {

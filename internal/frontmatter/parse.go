@@ -88,6 +88,33 @@ func detectFormat(source string) (string, string) {
 	return "", ""
 }
 
+// LeadingBlockEnd returns the byte offset immediately after a leading YAML or
+// TOML front matter block. An unterminated leading block protects the remainder
+// of the source from Markdown scanners and is diagnosed separately by Parse.
+func LeadingBlockEnd(source string) int {
+	_, delimiter := detectFormat(source)
+	if delimiter == "" {
+		return 0
+	}
+	lineEnd := strings.IndexByte(source, '\n')
+	if lineEnd < 0 {
+		return len(source)
+	}
+	position := lineEnd + 1
+	for position < len(source) {
+		relativeEnd := strings.IndexByte(source[position:], '\n')
+		end := len(source)
+		if relativeEnd >= 0 {
+			end = position + relativeEnd + 1
+		}
+		if trimLine(source[position:end]) == delimiter {
+			return end
+		}
+		position = end
+	}
+	return len(source)
+}
+
 func decode(format, block string) (map[string]any, error) {
 	values := map[string]any{}
 	if strings.TrimSpace(block) == "" {

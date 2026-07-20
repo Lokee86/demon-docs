@@ -6,6 +6,21 @@ import (
 	"testing"
 )
 
+func TestLeadingBlockEndProtectsFrontmatter(t *testing.T) {
+	for _, source := range []string{
+		"---\nsummary: test\n---\n# Body\n",
+		"+++\nsummary = \"test\"\n+++\n# Body\n",
+	} {
+		end := LeadingBlockEnd(source)
+		if end <= 0 || source[end:] != "# Body\n" {
+			t.Fatalf("end=%d remainder=%q", end, source[end:])
+		}
+	}
+	if end := LeadingBlockEnd("---\nsummary: broken\n"); end != len("---\nsummary: broken\n") {
+		t.Fatalf("unterminated end=%d", end)
+	}
+}
+
 func TestParseSupportsYAMLAndTOMLAndPreservesBody(t *testing.T) {
 	for name, source := range map[string]string{
 		FormatYAML: "---\r\nauthor: Human\r\n---\r\n# Title\r\n\r\nBody\r\n",

@@ -19,6 +19,14 @@ func TestParseMarkdownLinksFindsInlineImagesAndReferences(t *testing.T) {
 	}
 }
 
+func TestParseMarkdownLinksIgnoresFrontmatterTargets(t *testing.T) {
+	source := "---\nsummary: See [metadata](ignored.md).\nrelated: [[also-ignored]]\n---\n[body](kept.md)\n"
+	found := parseMarkdownLinks(source)
+	if len(found) != 1 || found[0].RawPath != "kept.md" {
+		t.Fatalf("frontmatter links leaked into inventory: %#v", found)
+	}
+}
+
 func TestResolveLocalTargetRejectsWebURLsButAcceptsAbsolutePaths(t *testing.T) {
 	if _, _, local := resolveLocalTarget("https://example.com/a.md", "C:/repo/README.md", false); local {
 		t.Fatal("web URL was treated as a local target")
