@@ -39,6 +39,7 @@ The repository root [README](../README.md) is the product introduction and quick
 
 <!-- doc-ledger:folders:start -->
 
+- [agent](agent/README.md) - Agent documentation.
 - [Architecture](architecture/README.md) - Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior.
 - [Development](development/README.md) - Contributor workflow, testing, repository layout, fixtures, and release verification.
 - [Guides](guides/README.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Demon Docs.

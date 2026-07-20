@@ -149,6 +149,7 @@ See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon]
 
 - [Documentation index](docs/README.md)
 - [Documentation policy](docs/documentation-policy.md)
+- [Agent guidance](docs/agent/README.md)
 - [Guides](docs/guides/README.md)
 - [Reference](docs/reference/README.md)
 - [Architecture](docs/architecture/README.md)

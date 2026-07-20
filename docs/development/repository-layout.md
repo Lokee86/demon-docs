@@ -98,6 +98,7 @@ Research scripts and outputs must identify whether they are reproducible inputs,
 ## Documentation layout
 
 ```text
+docs/agent/         agent workflow, orientation, testing, and editing guardrails
 docs/guides/        task-oriented user workflows
 docs/reference/     exact public contracts
 docs/architecture/  implemented ownership and behavior
