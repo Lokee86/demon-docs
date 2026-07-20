@@ -42,6 +42,7 @@ func ResolveScope(options ScopeOptions) (Scope, error) {
 			return Scope{}, err
 		}
 		base = filepath.Dir(configPath)
+		repositoryRoot = base
 		if root, ok := RootForConfig(configPath); ok {
 			repositoryRoot = root
 			base = root
@@ -69,8 +70,11 @@ func ResolveScope(options ScopeOptions) (Scope, error) {
 	if err != nil {
 		return Scope{}, err
 	}
+	if options.HasRootOverride && !initialized {
+		repositoryRoot = docsRoot
+	}
 
-	if initialized {
+	if repositoryRoot != "" {
 		if !Contains(repositoryRoot, docsRoot) {
 			return Scope{}, fmt.Errorf("docs root must be inside repository root: %s", rootValue)
 		}

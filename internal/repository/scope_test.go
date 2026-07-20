@@ -80,7 +80,7 @@ func TestResolveScopeRejectsRepositoryEscape(t *testing.T) {
 	}
 }
 
-func TestLegacyScopeOwnsItsDocsRoot(t *testing.T) {
+func TestLegacyConfigDirectoryOwnsRepositoryScope(t *testing.T) {
 	root := t.TempDir()
 	configPath := filepath.Join(root, "legacy.toml")
 	if err := os.WriteFile(configPath, nil, 0o644); err != nil {
@@ -94,7 +94,29 @@ func TestLegacyScopeOwnsItsDocsRoot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if scope.Initialized || scope.RepositoryRoot != filepath.Join(root, "notes") || scope.IgnorePath != filepath.Join(root, "notes", ".docignore") {
+	if scope.Initialized || scope.RepositoryRoot != root || scope.DocsRoot != filepath.Join(root, "notes") || scope.IgnorePath != filepath.Join(root, ".docignore") {
 		t.Fatalf("unexpected legacy scope: %+v", scope)
+	}
+}
+
+func TestLegacyExplicitRootOverrideOwnsStandaloneScope(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "docs")
+	configPath := filepath.Join(root, "legacy.toml")
+	if err := os.WriteFile(configPath, nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	scope, err := ResolveScope(ScopeOptions{
+		WorkingDirectory: root,
+		ConfigPath:       configPath,
+		ConfiguredRoot:   "notes",
+		RootOverride:     outside,
+		HasRootOverride:  true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scope.RepositoryRoot != outside || scope.DocsRoot != outside || scope.IgnorePath != filepath.Join(outside, ".docignore") {
+		t.Fatalf("unexpected override scope: %+v", scope)
 	}
 }
