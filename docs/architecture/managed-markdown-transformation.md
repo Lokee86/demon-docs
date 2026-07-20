@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-72b2-a536-7659111e2ff5
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented transformation boundary that preserves authored Markdown while Demon Docs creates and updates managed folder indexes, parent-index lines, descriptions, and generated entries.
+---
 # Managed Markdown Transformation
 
 Parent index: [Architecture](./README.md)

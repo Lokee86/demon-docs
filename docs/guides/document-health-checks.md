@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7608-9064-9752b1288671
+document_type: general
+policy_exempt: false
+summary: This guide explains the orphan-document health check performed by ddocs check when link reconciliation is selected.
+---
 # Document Health Checks
 
 Parent index: [Guides](./README.md)

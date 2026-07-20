@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7fe6-b7fe-3d23205115ac
+document_type: general
+policy_exempt: false
+summary: This guide moves one repository-contained file or directory and rewrites affected local links with ddocs mv, including use before repository initialization.
+---
 # Stateless Document Refactoring
 
 Parent index: [Guides](./README.md)

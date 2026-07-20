@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-78ad-bdd8-091628f2a7fb
+document_type: general
+policy_exempt: false
+summary: This document provides a safe diagnostic and recovery sequence for configuration mistakes, unexpected writes, ambiguous links, stale watchers, repository-demon ownership problems, and damaged private state.
+---
 # Recovery and Troubleshooting
 
 Parent index: [Operations](./README.md)

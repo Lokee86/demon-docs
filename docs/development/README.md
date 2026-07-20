@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7030-afb0-1c2501c7aa4f
+document_type: general
+policy_exempt: false
+summary: Contributor workflow, repository layout, tests, fixtures, research tooling, and release verification.
+---
 # Development
 
 Parent index: [Demon Docs Documentation](../README.md)

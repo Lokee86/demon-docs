@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7874-9b0a-5ab2f1373ce8
+document_type: general
+policy_exempt: false
+summary: This document maps the Demon Docs repository into command entry points, implementation packages, tests, research artifacts, and generated or runtime boundaries.
+---
 # Repository Layout
 
 Parent index: [Development](./README.md)

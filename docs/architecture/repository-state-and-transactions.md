@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-733b-b7ae-6c97556cdf19
+document_type: general
+policy_exempt: false
+summary: This document describes the private .ddocs/ object repository, durable identity and history state, transaction boundaries, and recovery assumptions used by deterministic reconciliation.
+---
 # Repository State and Transactions
 
 Parent index: [Architecture](./README.md)

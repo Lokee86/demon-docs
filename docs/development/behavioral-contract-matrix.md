@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7b71-a12d-60a0efab1898
+document_type: general
+policy_exempt: false
+summary: This document maps Demon Docs' critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
+---
 # Behavioral Contract Matrix
 
 Parent index: [Development](./README.md)

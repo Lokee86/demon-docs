@@ -11,3 +11,48 @@ exclude_patterns = []
 
 [editable]
 parent_index_extensions = [".md"]
+
+[frontmatter]
+enabled = true
+default_format = "yaml"
+allowed_formats = ["yaml", "toml"]
+default_author = "brian"
+unknown_fields = "remove"
+
+[frontmatter.fields.document_id]
+type = "uuid"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.author]
+type = "string"
+required = true
+default_from = "frontmatter.default_author"
+
+[frontmatter.fields.document_type]
+type = "string"
+required = true
+default = "general"
+
+[frontmatter.fields.created]
+type = "date"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.summary]
+type = "string"
+required = true
+
+[frontmatter.fields.policy_exempt]
+type = "boolean"
+default = false
+
+[frontmatter.fields.policy_exempt_reason]
+type = "string"
+
+[[frontmatter.rules]]
+when_field = "policy_exempt"
+equals = true
+require = "policy_exempt_reason"

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-71be-844f-43c55077f6ee
+document_type: general
+policy_exempt: false
+summary: Future, unresolved, proposed, partially implemented, or back-burnered work. Planning pages are not canonical references for shipped behavior.
+---
 # Planning
 
 Parent index: [Demon Docs Documentation](../README.md)

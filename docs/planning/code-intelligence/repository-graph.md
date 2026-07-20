@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7e16-a1e9-eb98628a66bf
+document_type: general
+policy_exempt: false
+summary: This document plans the normalized polyglot repository and code graph that may join existing documentation/link facts with provider-supplied code facts.
+---
 # Planned Polyglot Repository and Code Graph
 
 Parent index: [Planned Code Intelligence](./README.md)

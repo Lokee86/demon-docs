@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7b52-aa6e-731e59030442
+document_type: general
+policy_exempt: false
+summary: This document records current Demon Docs limitations that materially affect adoption, diagnostics, or feature expectations.
+---
 # Current Product Limitations
 
 Parent index: [Limits](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-77ab-a0c0-84a287899c46
+document_type: general
+policy_exempt: false
+summary: This guide exports authored codemap data, runs deterministic missing-link holdouts, creates a curated precision sample, evaluates labeled suggestions, and applies review thresholds without treating benchmark output as automatic...
+---
 # Evaluating Codemap Suggestions
 
 Parent index: [Guides](./README.md)

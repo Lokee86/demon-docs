@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7852-ae71-3a30d63b7dfa
+document_type: general
+policy_exempt: false
+summary: This document defines the current link forms that Demon Docs recognizes while reconciling repository Markdown. It is a parser and rewrite contract, not a statement that every link format supported by a Markdown renderer is validated.
+---
 # Supported Link Syntax
 
 Parent index: [Reference](./README.md)

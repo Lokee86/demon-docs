@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7dff-9331-c53ab2c88526
+document_type: general
+policy_exempt: false
+summary: This document describes the Demon Docs test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
+---
 # Testing and Fixtures
 
 Parent index: [Development](./README.md)

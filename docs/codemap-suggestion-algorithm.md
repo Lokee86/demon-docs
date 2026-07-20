@@ -1,4 +1,14 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7549-855a-80c60bf09e9c
+document_type: general
+policy_exempt: false
+summary: The codemap suggestion algorithm is ready for early implementation testing and repository dogfooding.
+---
 # Codemap Suggestion Algorithm
+
+Parent index: [Demon Docs Documentation](./README.md)
 
 ## Status
 

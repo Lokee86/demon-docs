@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-71c0-9170-576569cd158c
+document_type: general
+policy_exempt: false
+summary: This document explains which filesystem locations Demon Docs observes, how watch scope changes while a process is running, how ignore-policy and external-target updates affect observation, and how to recover from watch-scope failures.
+---
 # Dynamic Watch Scope
 
 Parent index: [Operations](./README.md)

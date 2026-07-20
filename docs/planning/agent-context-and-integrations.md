@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7c56-a0ce-a8a3c84239ee
+document_type: general
+policy_exempt: false
+summary: This document plans bounded deterministic context bundles and thin host integrations for agents without making an LLM, daemon, or host plugin part of reconciliation correctness.
+---
 # Deterministic Agent Context and Integrations
 
 Parent index: [Planning](./README.md)

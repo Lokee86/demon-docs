@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-78f0-9d65-ec823d3798ee
+document_type: general
+policy_exempt: false
+summary: Exact public contracts for commands, configuration, managed files, private state, diagnostics, and supported repository behavior.
+---
 # Reference
 
 Parent index: [Demon Docs Documentation](../README.md)

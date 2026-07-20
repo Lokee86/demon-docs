@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-7727-9e69-a5563ef1b1a8
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented ignore policy and filesystem traversal boundary. It covers repository-root .docignore, nested .docignore files used by reverse-index traversal, permanent exclusions, path-scope safety, and the...
+---
 # Ignore and Traversal
 
 Parent index: [Architecture](./README.md)

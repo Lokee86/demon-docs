@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7a71-8fff-be364ee93444
+document_type: general
+policy_exempt: false
+summary: This document defines Demon Docs configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
+---
 # Demon Docs Configuration
 
 Parent index: [Reference](./README.md)

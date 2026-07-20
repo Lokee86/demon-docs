@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7bda-afb0-bc282fdd47c1
+document_type: general
+policy_exempt: false
+summary: This document defines the implemented watcher scheduling, debounce, single-run ownership, cross-watcher serialization, error propagation, cancellation, and self-write convergence contracts.
+---
 # Watch Scheduler and Reconciliation Serialization
 
 Parent index: [Architecture](./README.md)

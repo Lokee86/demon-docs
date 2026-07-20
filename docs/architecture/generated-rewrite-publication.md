@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-734f-a812-8f4c708fb696
+document_type: general
+policy_exempt: false
+summary: This document defines how Demon Docs publishes one planned batch of generated Markdown rewrites across authored source files, the append-only review ledger, refreshed link metadata, and private link state.
+---
 # Generated Rewrite Publication
 
 Parent index: [Architecture](./README.md)

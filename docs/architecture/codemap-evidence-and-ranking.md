@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-787b-ae80-fc5555714de5
+document_type: general
+policy_exempt: false
+summary: This document describes how normalized repository facts become deterministic potentially-missing-link candidates, scores, ordered suggestions, and hardlink or context tiers.
+---
 # Codemap Evidence and Ranking
 
 Parent index: [Architecture](./README.md)

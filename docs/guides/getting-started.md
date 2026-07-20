@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-73e8-b9e0-df6ed92de6e5
+document_type: general
+policy_exempt: false
+summary: This guide installs Demon Docs, initializes an existing repository, establishes deterministic index and link state, and reaches a clean ddocs check result.
+---
 # Getting Started
 
 Parent index: [Guides](./README.md)

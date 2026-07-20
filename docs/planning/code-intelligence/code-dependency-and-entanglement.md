@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-74a7-917f-aa3b6e202737
+document_type: general
+policy_exempt: false
+summary: This document plans normalized dependency facts, bounded neighborhoods, impact projections, and entanglement indicators supplied through the future polyglot provider seam.
+---
 # Deterministic Code, Dependency, and Entanglement Facts
 
 Parent index: [Planned Code Intelligence](./README.md)

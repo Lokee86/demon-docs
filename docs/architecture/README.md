@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7379-acb5-839b25450de6
+document_type: general
+policy_exempt: false
+summary: Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior. Planned architecture remains under planning/ until the owning code exists.
+---
 # Architecture
 
 Parent index: [Demon Docs Documentation](../README.md)

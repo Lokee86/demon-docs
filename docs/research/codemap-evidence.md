@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-752b-b343-5d1994112f29
+document_type: general
+policy_exempt: false
+summary: This document records retained codemap evidence findings, current measured baselines, corpus provenance, and safety interpretation. Implemented extraction, corpus, ranking, benchmark methodology, precision governance, and report...
+---
 # Codemap Missing-Link Evidence
 
 Parent index: [Research](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7366-a679-359c693253d2
+document_type: general
+policy_exempt: false
+summary: This document summarizes shipped product areas, active work, near-term hardening, back-burnered architecture, and later product tracks without acting as the canonical reference for implemented behavior.
+---
 # Demon Docs Roadmap
 
 Parent index: [Planning](./README.md)

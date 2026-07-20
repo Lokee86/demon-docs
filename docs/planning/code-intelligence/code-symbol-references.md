@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-71b2-a949-b6557ef7de3c
+document_type: general
+policy_exempt: false
+summary: This document plans declaration-level code-symbol references, provider resolution states, graph edges, user-facing syntax direction, and move/rename behavior.
+---
 # Code-Symbol References
 
 Parent index: [Planned Code Intelligence](./README.md)

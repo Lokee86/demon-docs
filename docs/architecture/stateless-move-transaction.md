@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7b7c-b413-d90eba5fa431
+document_type: general
+policy_exempt: false
+summary: 'This document describes the implemented architecture of ddocs mv: its stateless planning and application boundary, repository containment rules, Markdown path-rewrite behavior, filesystem ordering, rollback behavior, and verification seams.'
+---
 # Stateless Move Transaction
 
 Parent index: [Architecture](./README.md)

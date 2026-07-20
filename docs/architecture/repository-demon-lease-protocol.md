@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-78ff-9979-bf10c5796eeb
+document_type: general
+policy_exempt: false
+summary: This document defines the implemented repository-demon ownership claim, feeder demand leases, heartbeat and release safety, stale-owner recovery, detached startup, shutdown conditions, and platform process seams.
+---
 # Repository Demon Lease Protocol
 
 Parent index: [Architecture](./README.md)

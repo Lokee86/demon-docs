@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-7b3e-b0d4-2dfff823b601
+document_type: general
+policy_exempt: false
+summary: This document describes how Demon Docs recognizes authored Markdown code maps, normalizes their targets, resolves those targets against repository scope, and exports the deterministic schema-1 dataset consumed by later analysis stages.
+---
 # Codemap Extraction and Dataset
 
 Parent index: [Architecture](./README.md)

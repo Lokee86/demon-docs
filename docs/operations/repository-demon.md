@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-786b-b8fa-227d06a1db44
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented single-owner repository demon, feeder lease protocol, shell integration, linked-worktree behavior, runtime state, shutdown, recovery, and logs.
+---
 # Repository Demon
 
 Parent index: [Operations](./README.md)

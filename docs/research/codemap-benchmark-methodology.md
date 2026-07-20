@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7497-89d2-06fb5608e35d
+document_type: general
+policy_exempt: false
+summary: This document defines the controlled-holdout methodology used to measure whether the codemap suggestion pipeline can recover authored document-to-code relationships without reading the hidden answers.
+---
 # Codemap Benchmark Methodology
 
 Parent index: [Research](./README.md)

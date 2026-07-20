@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-77b0-a469-9dcfdc8e196a
+document_type: general
+policy_exempt: false
+summary: This guide adds Demon Docs verification to CI and explains when to use foreground watch mode or the repository demon during local work.
+---
 # CI and Automation
 
 Parent index: [Guides](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-720d-b9ba-bfa926a5d8e5
+document_type: general
+policy_exempt: false
+summary: This is the top-level documentation index and rulebook entry point for Demon Docs.
+---
 # Demon Docs Documentation
 
 This is the top-level documentation index and rulebook entry point for Demon Docs.

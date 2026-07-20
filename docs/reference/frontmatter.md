@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7aa1-a158-b3f4ab6b4003
+document_type: general
+policy_exempt: false
+summary: Demon Docs can validate and repair a configurable front matter schema for every non-ignored Markdown document under the configured documentation root. Generated folder indexes are included; generated files are not silently exempted from...
+---
 # Front Matter Schemas
 
 Parent index: [Reference](./README.md)

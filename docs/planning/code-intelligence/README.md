@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7ce6-aed3-79734c26ecc7
+document_type: general
+policy_exempt: false
+summary: Back-burnered architecture for a language-neutral provider seam, normalized code facts, symbol references, and bounded graph projections.
+---
 # Planned Code Intelligence
 
 Parent index: [Planning](../README.md)

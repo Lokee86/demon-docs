@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-75d2-93b1-1542c56d90bf
+document_type: general
+policy_exempt: false
+summary: This document defines the current compatibility inputs, automatic migrations, and refusal behavior used when Demon Docs reads older configuration, managed indexes, codemap syntax, or link state.
+---
 # Compatibility and Migrations
 
 Parent index: [Reference](./README.md)

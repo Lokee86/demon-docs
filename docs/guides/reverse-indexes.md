@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-705a-914f-a3f7de68db27
+document_type: general
+policy_exempt: false
+summary: This guide configures and verifies code-folder reverse indexes so code directories show which authored documentation pages explicitly reference them.
+---
 # Adopting Reverse Indexes
 
 Parent index: [Guides](./README.md)

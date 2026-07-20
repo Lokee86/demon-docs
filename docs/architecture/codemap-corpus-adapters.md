@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-7a47-b5c2-b8cd161a8a8b
+document_type: general
+policy_exempt: false
+summary: This document describes how Demon Docs builds normalized repository facts for codemap evidence, including repository files, dependency edges, symbols, related documents, and bounded Git history.
+---
 # Codemap Corpus and Adapters
 
 Parent index: [Architecture](./README.md)

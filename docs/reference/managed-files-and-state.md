@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-76de-a665-333edc85e448
+document_type: general
+policy_exempt: false
+summary: This document defines which repository files Demon Docs may manage, which portions remain authored, what private state is stored under .ddocs/, and which source-preservation guarantees apply.
+---
 # Managed Files and State
 
 Parent index: [Reference](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-702e-b2f8-81010f9c18f6
+document_type: general
+policy_exempt: false
+summary: This document defines the current host-neutral feeder workflow for MCP servers, coding agents, editors, and other external processes that keep the repository demon active while work is in progress.
+---
 # Host Adapter Feeder Integration
 
 Parent index: [Operations](./README.md)

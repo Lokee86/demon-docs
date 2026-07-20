@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-72df-b917-0041b8f11041
+document_type: general
+policy_exempt: false
+summary: This guide reviews unresolved repair suggestions, records accept or decline decisions, inspects applied changes, and performs bounded undo or repair blocking.
+---
 # Reviewing Suggestions and Changes
 
 Parent index: [Guides](./README.md)

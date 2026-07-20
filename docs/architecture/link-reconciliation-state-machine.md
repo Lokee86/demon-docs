@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-7c51-acc4-30369edf7f42
+document_type: general
+policy_exempt: false
+summary: 'This document defines the implemented lifecycle of repository-local link records: how Markdown sources enter the graph, how prior identity is reused, how targets are resolved, how repair states are selected, and how records converge...'
+---
 # Link Reconciliation State Machine
 
 Parent index: [Architecture](./README.md)

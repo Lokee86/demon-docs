@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7e7e-b4bf-d9df176cdea3
+document_type: general
+policy_exempt: false
+summary: This document maps every current production package, public command family, and independent stateful flow to canonical documentation owners so implemented behavior does not exist only in code, tests, the root README, research notes, or...
+---
 # Documentation Coverage Map
 
 Parent index: [Development](./README.md)

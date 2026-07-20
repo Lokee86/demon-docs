@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-71df-880f-c50a8e6f3768
+document_type: general
+policy_exempt: false
+summary: This document defines how ddocs check, ddocs fix, and ddocs watch resolve configuration and scope, select reconciliation systems, order planners and writes, aggregate diagnostics, and return command results.
+---
 # Reconciliation Command Lifecycle
 
 Parent index: [Architecture](./README.md)

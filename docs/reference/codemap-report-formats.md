@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-733e-95bc-725e05c90e68
+document_type: general
+policy_exempt: false
+summary: This document defines the current machine-readable and text contracts for codemap datasets, holdout benchmark reports, precision benchmark files, and precision evaluation output.
+---
 # Codemap Report Formats
 
 Parent index: [Reference](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7c99-819d-f406416fc04f
+document_type: general
+policy_exempt: false
+summary: This document defines the safe workflow for adding codemap evidence, changing ranking policy, adding language adapters, and evolving benchmark or precision report contracts.
+---
 # Extending Codemap Analysis
 
 Parent index: [Development](./README.md)

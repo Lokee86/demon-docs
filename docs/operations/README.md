@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7e24-b520-215f4eac33af
+document_type: general
+policy_exempt: false
+summary: Running behavior, watcher and demon ownership, runtime state, recovery, troubleshooting, and operational verification.
+---
 # Operations
 
 Parent index: [Demon Docs Documentation](../README.md)

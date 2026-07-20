@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7140-8037-b4805305b2cd
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented reverse-index projection from authored documentation codemap targets into managed indexes inside configured code roots.
+---
 # Code-Folder Reverse Indexes
 
 Parent index: [Architecture](./README.md)

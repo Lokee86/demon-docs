@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-713c-b3c5-e35edf5c86f6
+document_type: general
+policy_exempt: false
+summary: This document summarizes the public Demon Docs command surface, subsystem selectors, mutation behavior, and command ownership.
+---
 # CLI Reference
 
 Parent index: [Reference](./README.md)

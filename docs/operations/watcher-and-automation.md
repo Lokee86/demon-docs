@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-79ca-b3ff-0b46a1bbedff
+document_type: general
+policy_exempt: false
+summary: This document describes foreground watch behavior, event scope, debounce and serialization, output, and the boundary between explicit terminal ownership and the repository demon.
+---
 # Watcher and Automation
 
 Parent index: [Operations](./README.md)

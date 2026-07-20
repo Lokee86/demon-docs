@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7a6a-a79d-308aa88e877c
+document_type: general
+policy_exempt: false
+summary: This document describes the repository-local review ledger for suggestions, applied repairs, user decisions, undo history, and repair controls.
+---
 # Review Ledger
 
 Parent index: [Architecture](./README.md)

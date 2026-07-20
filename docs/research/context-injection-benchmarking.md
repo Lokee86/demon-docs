@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7e4a-a048-7d24a81a2014
+document_type: general
+policy_exempt: false
+summary: This document defines the historical-task research design for evaluating deterministic context injection against no-context controls without benchmark leakage.
+---
 # Context-Injection Benchmarking
 
 Parent index: [Research](./README.md)

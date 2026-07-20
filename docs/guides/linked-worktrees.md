@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7dc6-8055-c44e60f2f0f5
+document_type: general
+policy_exempt: false
+summary: This guide explains how Demon Docs state is isolated in linked Git worktrees and how to bootstrap repository-demon operation without copying runtime or historical state from the primary worktree.
+---
 # Using Linked Git Worktrees
 
 Parent index: [Guides](./README.md)

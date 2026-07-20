@@ -1,4 +1,14 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-74a7-b456-2b3b0aa24a6e
+document_type: general
+policy_exempt: false
+summary: This document is the durable chronological record of the codemap missing-link algorithm, its benchmark program, tuning decisions, rejected experiments, and measured baselines.
+---
 # Codemap Algorithm Development Log
+
+Parent index: [Demon Docs Documentation](./README.md)
 
 ## Purpose
 

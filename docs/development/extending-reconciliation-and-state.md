@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-76d7-9f86-feea837c424e
+document_type: general
+policy_exempt: false
+summary: This document defines the safe contributor workflow for extending link syntax, reconciliation statuses, private state records, schemas, review events, and suggestion kinds.
+---
 # Extending Reconciliation and State
 
 Parent index: [Development](./README.md)

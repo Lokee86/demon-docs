@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-70fa-9a38-ce6c368c9a43
+document_type: general
+policy_exempt: false
+summary: This document provides the implemented end-to-end ownership map for authored codemap extraction, repository facts, missing-link evidence, ranking, controlled holdouts, precision evaluation, and review selection.
+---
 # Codemap Pipeline
 
 Parent index: [Architecture](./README.md)

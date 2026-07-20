@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-719a-b726-af194111f3a1
+document_type: general
+policy_exempt: false
+summary: This document defines the implemented .ddocs object repository, record namespace, deterministic sharding and codec, root publication, transaction semantics, concurrency control, corruption behavior, and ownership boundaries.
+---
 # Private Object Repository
 
 Parent index: [Architecture](./README.md)

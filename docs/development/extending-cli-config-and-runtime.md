@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7058-a264-1a2d6a542dc0
+document_type: general
+policy_exempt: false
+summary: This document defines the safe workflow for adding public commands, nested help, configuration keys and aliases, watcher features, and repository-demon or host integration behavior.
+---
 # Extending CLI, Configuration, and Runtime
 
 Parent index: [Development](./README.md)

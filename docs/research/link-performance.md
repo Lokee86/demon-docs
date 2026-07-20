@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7707-bda4-29732e04ffa1
+document_type: general
+policy_exempt: false
+summary: This document records retained performance measurements for high-fanout target moves, real Space Rocks moves, and repeated full-corpus mass renames.
+---
 # Markdown Link Performance
 
 Parent index: [Research](./README.md)

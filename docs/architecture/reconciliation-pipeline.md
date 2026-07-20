@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-72fb-a795-935b163af75a
+document_type: general
+policy_exempt: false
+summary: 'This document describes the implemented documentation-tree scan and forward-index reconciliation flow: how filesystem inventory becomes a deterministic plan of index, description, and parent-link updates.'
+---
 # Reconciliation Model
 
 Parent index: [Architecture](./README.md)

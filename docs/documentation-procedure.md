@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7a47-8394-a30cf61f95f4
+document_type: general
+policy_exempt: false
+summary: This document defines the standard process for creating, updating, moving, graduating, and removing Demon Docs documentation.
+---
 # Documentation Procedure
 
 Parent index: [Demon Docs Documentation](./README.md)

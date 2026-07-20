@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-784c-82af-177e788d28b8
+document_type: general
+policy_exempt: false
+summary: Task-oriented workflows for installing, adopting, and using Demon Docs. Exact options belong in reference documentation; internal ownership belongs in architecture documentation.
+---
 # Guides
 
 Parent index: [Demon Docs Documentation](../README.md)

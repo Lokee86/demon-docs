@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-798b-bde2-333a82ea7a83
+document_type: general
+policy_exempt: false
+summary: This document describes the behavioral contract for Demon Docs diagnostics, unresolved conditions, mutation refusal, and command success or failure.
+---
 # Diagnostics and Exit Behavior
 
 Parent index: [Reference](./README.md)

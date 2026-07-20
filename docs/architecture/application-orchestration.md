@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-7006-9c64-6b8a2ecdc3b2
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented application boundary that resolves configuration, selects subsystems, coordinates check, fix, and watch, and exposes stateless move, suggestion, change-history, codemap, and repository-demon...
+---
 # Application Orchestration
 
 Parent index: [Architecture](./README.md)

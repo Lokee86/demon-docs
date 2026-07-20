@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-73f6-a471-f6655e9a23ce
+document_type: general
+policy_exempt: false
+summary: This document defines how codemap suggestions are sampled, manually audited, labeled, evaluated, retained, and used to govern ranking changes.
+---
 # Codemap Precision Governance
 
 Parent index: [Research](./README.md)

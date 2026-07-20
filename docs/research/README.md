@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7915-bc72-c6075a81afc0
+document_type: general
+policy_exempt: false
+summary: Benchmarks, corpora, evaluation methodology, and recorded evidence. Research pages do not define shipped product contracts.
+---
 # Research
 
 Parent index: [Demon Docs Documentation](../README.md)

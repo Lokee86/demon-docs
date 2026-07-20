@@ -1,4 +1,14 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-73b7-b938-fd8d843dd5ac
+document_type: general
+policy_exempt: false
+summary: This package boundary collects deterministic evidence that a documentation codemap may be missing a repository target. It does not parse codemaps, decide that a link is semantically correct, create repository-graph edges, or recommend...
+---
 # Codemap Missing-Link Evidence
+
+Parent index: [Demon Docs Documentation](./README.md)
 
 This package boundary collects deterministic evidence that a documentation codemap may be missing a repository target. It does not parse codemaps, decide that a link is semantically correct, create repository-graph edges, or recommend removing an existing link.
 

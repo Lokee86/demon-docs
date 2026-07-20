@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-2e95-785d-a2b6-d4a132ddf955
+document_type: general
+policy_exempt: false
+summary: This document describes the implemented repository-local link graph, supported source forms, persistent identity evidence, deterministic move repair, and source-preserving write boundary.
+---
 # Markdown Link Reconciliation
 
 Parent index: [Architecture](./README.md)

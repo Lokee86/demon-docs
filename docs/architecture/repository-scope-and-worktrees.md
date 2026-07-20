@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7fd7-9f86-3ef6e942ed96
+document_type: general
+policy_exempt: false
+summary: 'This document describes the implemented repository boundary in internal/repository/: how Demon Docs discovers initialized repositories, resolves documentation scope, protects docs-root containment, and handles linked Git worktrees for...'
+---
 # Repository Scope and Worktrees
 
 Parent index: [Architecture](./README.md)

@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-72b1-a1b3-39ffc6b36427
+document_type: general
+policy_exempt: false
+summary: This document routes common Demon Docs extensions to the correct ownership boundary, required documentation, and minimum verification.
+---
 # Safe Extension Procedures
 
 Parent index: [Development](./README.md)

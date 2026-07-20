@@ -1,3 +1,11 @@
+---
+author: brian
+created: "2026-07-19"
+document_id: 019f7d55-31e4-7ad0-aaf4-6046c8448538
+document_type: general
+policy_exempt: false
+summary: This guide upgrades the Demon Docs binaries and repository state while preserving authored files, configuration, link identity evidence, review history, and a recoverable pre-upgrade snapshot.
+---
 # Upgrading Demon Docs
 
 Parent index: [Guides](./README.md)
