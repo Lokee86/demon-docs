@@ -1,2 +1,5 @@
 # Local agent tooling state
 .codex/
+
+# Committed adoption-tutorial fixture
+tutorial/adoption-demo/

@@ -12,7 +12,6 @@ bin/
 **/.ddocs/
 /.worktrees/
 /.codex/
-.codex-hackathon/
 *.log
 *.pid
 __pycache__/

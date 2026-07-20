@@ -193,6 +193,87 @@ See:
 - [Codemap Algorithm Development Log](docs/codemap-algorithm-development-log.md) for benchmark and tuning history; and
 - [Codemap Missing-Link Evidence](docs/codemap-evidence.md) for the evidence boundary.
 
+## Built with GPT-5.6 and Codex
+
+Demon Docs was built through an AI-native engineering workflow designed to use GPT-5.6 and Codex as an implementation team while retaining explicit human control over product direction, architecture, risk, and scope.
+
+None of the current Go implementation was written by hand. Implementation, testing, debugging, documentation, repository operations, and many architectural drafts were produced through ChatGPT-5.6, Codex, and delegated agent workflows.
+
+This was not a single-prompt generation process. The project was developed through many small implementation streams, repeated reviews, test failures, rejected approaches, benchmark-driven corrections, and deliberate consolidation.
+
+### How GPT-5.6 was used
+
+GPT-5.6 was used primarily through ChatGPT with a customized Model Context Protocol server connected directly to the repository.
+
+That environment allowed GPT-5.6 to inspect and edit files, manage branches and Git worktrees, run bounded verification tasks, reconcile parallel implementation streams, and maintain context across the project. It acted as the primary engineering interface for:
+
+- turning product requirements into concrete architecture;
+- dividing large features into bounded implementation steps;
+- implementing and reviewing repository changes;
+- identifying missing ownership boundaries and architectural seams;
+- coordinating parallel work;
+- diagnosing failed tests and integration problems;
+- reviewing documentation against the implemented product surface;
+- maintaining repository and worktree hygiene; and
+- preparing the project for release and submission.
+
+GPT-5.6 also entered the project with accumulated context from working with me on Space Rocks, a substantially larger software project. That context included established preferences for deterministic behaviour, explicit ownership, conservative mutation, early architectural seams, isolated Git worktrees, small implementation tasks, direct verification, and comprehensive documentation.
+
+This meant the development relationship did not begin from a blank prompt. GPT-5.6 already understood many of the engineering standards, workflow constraints, and failure patterns I expected it to account for.
+
+### How Codex was used
+
+Codex provided additional implementation capacity, particularly when work could be divided into isolated or parallel streams.
+
+Codex sessions were used for bounded implementation, debugging, testing, documentation, and corrective passes. Hermes was also used to coordinate Codex agents and sub-agents during portions of development where parallel execution was useful. Hermes was deployed with 5.6-luna.
+
+Work was generally divided by ownership boundary or feature surface, completed in isolated branches or worktrees where practical, then reviewed, tested, merged, and corrected through the primary GPT-5.6 workflow.
+
+Codex was not treated as an autonomous product owner. Its work operated within requirements, constraints, and architectural decisions already established for the project.
+
+### Human ownership
+
+I acted as the product designer and lead engineer.
+
+I identified the original problem, defined the product, selected and rejected features, established behavioural and safety constraints, reviewed plans and implementation results, prioritized work, resolved conflicting approaches, and decided what needed to be cut or postponed. Innovative approaches, such as the novel codemap extraction algorithm, and the use of Git-style tracking, were also human-based and driven, though developed and deployed by AI.
+
+Important human decisions included:
+
+- rebuilding the project in Go rather than extending the original Python prototype;
+- making deterministic behaviour a core product constraint;
+- limiting automatic mutation to explicit managed surfaces;
+- preserving authored prose outside those surfaces;
+- separating safe daemon operations from riskier explicit commands;
+- retaining ambiguous repairs for human review rather than guessing;
+- building review, decline, block, and guarded-undo workflows;
+- using a private Git-style object and transaction system for repository state;
+- treating codemap generation as experimental rather than presenting early results as production guarantees; and
+- deferring RepoGraph and agent-context injection when their scope threatened the submission deadline.
+
+AI wrote the code and much of the architecture, but it did so inside a managed engineering process. Plans were challenged, abstractions were rejected, tests changed implementation direction, benchmark failures changed evidence rules, and features were cut when they could not be completed responsibly.
+
+The intended model was not “prompt once and accept the result.” It was to use AI as an engineering team under active technical direction.
+
+### Development evidence
+
+The repository includes the [raw hackathon development logs](.codex-hackathon/sessions/).
+
+These JSONL files are preserved as unmodified session records rather than edited excerpts. They show implementation prompts, tool activity, agent responses, failures, corrections, and work distributed across multiple sessions.
+
+They should not be interpreted as a complete transcript of the project. Much of the primary development happened through GPT-5.6 in ChatGPT using the repository MCP server, while the included files primarily preserve the Codex-facing portion of the workflow. Together with the Git history, they provide a direct record of how the project was built rather than only a retrospective description.
+
+The repository history provides the other major evidence boundary. It preserves both the earlier Python prototype and the subsequent Go rebuild, allowing the project’s pre-hackathon state and hackathon development to be distinguished directly.
+
+### Prior work and hackathon scope
+
+Before the hackathon, the project existed as a small Python utility called **Doc Ledger**. It generated documentation indexes and included an early watcher-daemon concept, but remained a narrow, backburnered tool.
+
+During the hackathon, it was rebuilt in Go and renamed Demon Docs.
+
+The rebuild added repository-scoped identity and state, link reconciliation after ordinary filesystem moves, link-aware file operations, review and undo history, document and frontmatter schemas, reverse indexes, orphan health checks, the upgraded daemon lifecycle, experimental codemap suggestions, broader testing, and the current documentation system.
+
+The original ideas of automated index maintenance and a watcher daemon predate the hackathon. The present architecture and nearly the entire current product surface were developed during the submission period.
+
 ## Development
 
 Run the complete local release gate:
