@@ -151,16 +151,16 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runDemon(ctx, args[1:], out, errOut)
 	default:
 		fmt.Fprintln(errOut, topUsageLine)
-		choices := "init, status, mv, fix, check, watch, codemap, suggestions, changes, config, index, links, demon"
+		choices := "init, status, mv, fix, check, watch, codemaps, suggestions, changes, config, index, links, demon"
 		if runtime.GOOS == "windows" {
-			choices = "'init', 'status', 'mv', 'fix', 'check', 'watch', 'codemap', 'suggestions', 'changes', 'config', 'index', 'links', 'demon'"
+			choices = "'init', 'status', 'mv', 'fix', 'check', 'watch', 'codemaps', 'suggestions', 'changes', 'config', 'index', 'links', 'demon'"
 		}
 		fmt.Fprintf(errOut, "ddocs: error: argument command: invalid choice: '%s' (choose from %s)\n", args[0], choices)
 		return 2
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             generate, check, inspect, export, and benchmark codemaps\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation indexes and configured frontmatter\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap fix --dry-run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
+	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, manages codemap sections, and projects codemap references onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemaps,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemaps            generate, check, inspect, export, and benchmark codemaps\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation indexes and configured frontmatter\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemaps fix --dry-run\n  ddocs codemaps export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -761,17 +761,17 @@ func enabledText(enabled bool) string {
 }
 
 func codemapHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...\n\nExplicitly generate and maintain unified codemap sections, or run codemap research tools. The watcher and daemon never execute codemap operations.\n\npositional arguments:\n  {fix,check,inspect,export,benchmark,precision}\n    fix                 adopt and update codemap sections\n    check               report stale codemap sections for an explicit root\n    inspect             explain recommendations for an explicit root\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           generate, sample, or evaluate precision suggestions\n\noptions:\n  -h, --help            show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs codemaps [-h] {fix,check,inspect,export,benchmark,precision} ...\n\nExplicitly generate and maintain unified codemap sections, or run codemap research tools. The watcher and daemon never execute codemap operations.\n\npositional arguments:\n  {fix,check,inspect,export,benchmark,precision}\n    fix                 adopt and update codemap sections\n    check               report stale codemap sections for an explicit root\n    inspect             explain recommendations for an explicit root\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           generate, sample, or evaluate precision suggestions\n\noptions:\n  -h, --help            show this help message and exit")
 }
 
 func codemapExportHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace configured headings\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
+	fmt.Fprintln(w, "usage: ddocs codemaps export [-h] [--root PATH] [--config PATH]\n                             [--no-local-config] [--no-global-config]\n                             [--heading TEXT] [--target-base BASE]\n                             [--target-root PATH] [--output PATH]\n\nScan Markdown documents and export normalized code-map links, diagnostics, target resolution, and content hashes. JSON is written to stdout unless --output is provided.\n\noptions:\n  -h, --help          show this help message and exit\n  --root PATH         override the configured docs root\n  --config PATH       explicit ddocs config file\n  --no-local-config   skip current-directory local config\n  --no-global-config  skip the global user config\n  --heading TEXT      accepted code-map heading; repeat to replace configured headings\n  --target-base BASE  resolve targets from repository or document (default repository)\n  --target-root PATH  repository-relative component root; repeat as needed\n  --output PATH       write JSON to a file instead of stdout")
 }
 
 func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...")
-		fmt.Fprintln(errOut, "ddocs codemap: error: the following arguments are required: codemap_command")
+		fmt.Fprintln(errOut, "usage: ddocs codemaps [-h] {fix,check,inspect,export,benchmark,precision} ...")
+		fmt.Fprintln(errOut, "ddocs codemaps: error: the following arguments are required: codemap_command")
 		return 2
 	}
 	if args[0] == "-h" || args[0] == "--help" {
@@ -788,8 +788,8 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runCodemapPrecision(ctx, args[1:], out, errOut)
 	}
 	if args[0] != "export" {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...")
-		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from fix, check, inspect, export, benchmark, precision)\n", args[0])
+		fmt.Fprintln(errOut, "usage: ddocs codemaps [-h] {fix,check,inspect,export,benchmark,precision} ...")
+		fmt.Fprintf(errOut, "ddocs codemaps: error: argument codemap_command: invalid choice: '%s' (choose from fix, check, inspect, export, benchmark, precision)\n", args[0])
 		return 2
 	}
 	if helpRequested(args[1:]) {
@@ -797,7 +797,7 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 0
 	}
 
-	fs := flag.NewFlagSet("ddocs codemap export", flag.ContinueOnError)
+	fs := flag.NewFlagSet("ddocs codemaps export", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	var flags commonFlags
 	var headings stringsFlag
@@ -813,7 +813,7 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs.Var(&targetRoots, "target-root", "repository-relative component root")
 	fs.Var(&output, "output", "write JSON to a file")
 	if err := fs.Parse(args[1:]); err != nil {
-		fmt.Fprintf(errOut, "ddocs codemap export: error: %v\n", err)
+		fmt.Fprintf(errOut, "ddocs codemaps export: error: %v\n", err)
 		return 2
 	}
 	if fs.NArg() != 0 {
@@ -821,7 +821,7 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 2
 	}
 	if targetBase != string(codemap.TargetBaseRepository) && targetBase != string(codemap.TargetBaseDocument) {
-		fmt.Fprintf(errOut, "ddocs codemap export: error: invalid --target-base %q; expected repository or document\n", targetBase)
+		fmt.Fprintf(errOut, "ddocs codemaps export: error: invalid --target-base %q; expected repository or document\n", targetBase)
 		return 2
 	}
 	resolved, configPath, code := load(flags, errOut)
@@ -881,7 +881,7 @@ func configInitHelp(w io.Writer) {
 }
 
 const (
-	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon} ..."
+	topUsageLine    = "usage: ddocs [-h] [-v] {init,status,mv,fix,check,watch,codemaps,suggestions,changes,config,index,links,demon} ..."
 	configUsageLine = "usage: ddocs config [-h] {paths,show,init} ..."
 	configShowUsage = "usage: ddocs config show [-h] [--config PATH] [--no-local-config]\n                              [--no-global-config]"
 	configInitUsage = "usage: ddocs config init [-h] (--local | --global) [--force]"

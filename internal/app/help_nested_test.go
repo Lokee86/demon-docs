@@ -17,17 +17,17 @@ func TestNestedCommandHelpContract(t *testing.T) {
 		{
 			name: "precision source",
 			args: []string{"codemap", "precision", "source", "--help"},
-			want: []string{"usage: ddocs codemap precision source", "--exclude-prefix PATH", "default current directory", "does not edit authored codemap sections"},
+			want: []string{"usage: ddocs codemaps precision source", "--exclude-prefix PATH", "default current directory", "does not edit authored codemap sections"},
 		},
 		{
 			name: "precision sample",
 			args: []string{"codemap", "precision", "sample", "--help"},
-			want: []string{"usage: ddocs codemap precision sample", "--suggestions PATH", "default 150", "--repository TEXT", "--revision TEXT"},
+			want: []string{"usage: ddocs codemaps precision sample", "--suggestions PATH", "default 150", "--repository TEXT", "--revision TEXT"},
 		},
 		{
 			name: "precision evaluate",
 			args: []string{"codemap", "precision", "evaluate", "--help"},
-			want: []string{"usage: ddocs codemap precision evaluate", "--benchmark PATH", "--suggestions PATH", "default text"},
+			want: []string{"usage: ddocs codemaps precision evaluate", "--benchmark PATH", "--suggestions PATH", "default text"},
 		},
 		{
 			name:   "suggestions select",

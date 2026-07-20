@@ -16,19 +16,22 @@ This guide exports authored codemap data, runs deterministic missing-link holdou
 
 ## Overview
 
-Demon Docs has two related but separate codemap workflows:
+Demon Docs has three related codemap workflows:
 
 ```text
+production generation
+= codemap inspect, fix --dry-run, fix, check
+
 research and calibration
 = export, benchmark, precision source, sample, evaluate
 
-repository decisions
-= ddocs suggestions select, decline, reconsider
+persisted decisions
+= suggestions show, decline, reconsider, and compatibility selection
 ```
 
-The research commands measure and inspect the evidence pipeline. They do not silently edit authored codemaps. Repository suggestion commands expose current candidates through the review ledger and convert only an explicit selection into a normal hash-guarded repair.
+Research commands measure and inspect the evidence pipeline. They do not edit managed codemap sections. Explicit production generation automatically adds selected non-declined recommendations from both tiers. Repository suggestion commands provide the shared persisted decision surface; an unchanged decline suppresses the corresponding future addition.
 
-The system is one-directional: it may suggest a potentially missing code target. It never recommends removing an existing authored codemap link as irrelevant.
+Missing-link generation remains one-directional and does not classify an existing link as irrelevant. Production execution separately supports opt-in confidence pruning, disabled by default and outside the precision labels described in this guide.
 
 ## Prerequisites
 
@@ -42,13 +45,13 @@ The system is one-directional: it may suggest a potentially missing code target.
 Inspect command options:
 
 ```bash
-ddocs codemap export --help
+ddocs codemaps export --help
 ```
 
 A typical export is:
 
 ```bash
-ddocs codemap export --output research/codemap-dataset.json
+ddocs codemaps export --output research/codemap-dataset.json
 ```
 
 The dataset records documents, normalized codemap entries, source locations, target-resolution results, content hashes, and diagnostics. Use a committed or otherwise pinned repository snapshot when comparing reports across changes.
@@ -58,7 +61,7 @@ An export describes authored relationships. It does not generate missing-link su
 ## Run a controlled holdout benchmark
 
 ```bash
-ddocs codemap benchmark \
+ddocs codemaps benchmark \
   --repo . \
   --seed review-v1 \
   --holdout-fraction 0.2 \
@@ -80,7 +83,7 @@ The default fraction is `0.2`. `--trusted-links PATH` can restrict ground truth 
 Optional threshold gates:
 
 ```bash
-ddocs codemap benchmark \
+ddocs codemaps benchmark \
   --min-precision 0.60 \
   --min-recall 0.70
 ```
@@ -98,7 +101,7 @@ Holdout recovery measures whether authored relationships can be rediscovered. It
 ## Generate current suggestions for precision review
 
 ```bash
-ddocs codemap precision source \
+ddocs codemaps precision source \
   --repo . \
   --output research/current-suggestions.json
 ```
@@ -118,7 +121,7 @@ Use `--exclude-prefix` for index files, generated material, or other document po
 ## Create a deterministic sample
 
 ```bash
-ddocs codemap precision sample \
+ddocs codemaps precision sample \
   --suggestions research/current-suggestions.json \
   --count 150 \
   --seed precision-v1 \
@@ -137,19 +140,19 @@ Review each sampled candidate against the pinned repository snapshot and record 
 
 The evaluator must not use hidden implementation assumptions or expected score changes as the oracle. Labels should answer whether the proposed documentation-to-code relationship is valid for the sampled document and target.
 
-Keep distinctions such as valid link, useful contextual relationship, and junk evidence explicit when the benchmark schema provides them. Do not relabel an existing authored link as a removal candidate; removal quality is outside this product contract.
+Keep distinctions such as valid link, useful contextual relationship, and junk evidence explicit when the benchmark schema provides them. Do not relabel an existing authored link as a removal candidate in this benchmark: current precision sampling evaluates missing-link recommendations, while optional pruning requires a separate hidden-existing-target evaluation.
 
 ## Evaluate the labeled sample
 
 ```bash
-ddocs codemap precision evaluate \
+ddocs codemaps precision evaluate \
   --benchmark research/precision-sample.json \
   --suggestions research/current-suggestions.json \
   --format json \
   --output research/precision-evaluation.json
 ```
 
-The legacy flag-only `ddocs codemap precision` form is equivalent to `evaluate`, but new scripts should use the explicit subcommand.
+The legacy flag-only `ddocs codemaps precision` form is equivalent to `evaluate`, but new scripts should use the explicit subcommand.
 
 Evaluation compares the labeled sample with the exact deterministic suggestion report. Use the same pinned report that produced the sample unless the purpose is explicitly to compare a changed model against fixed labels.
 
@@ -169,20 +172,20 @@ Report at least:
 
 A result from one repository or curated sample does not establish universal product quality. Compare like-for-like reports and add new independently labeled corpora before broadening claims.
 
-## Use repository suggestion decisions
+## Use repository decision policy
 
 After calibration, inspect current repository candidates with:
 
 ```bash
 ddocs suggestions
 ddocs suggestions show SUGGESTION
-ddocs suggestions select SUGGESTION CANDIDATE
 ddocs suggestions decline SUGGESTION CANDIDATE --reason "..."
+ddocs suggestions reconsider SUGGESTION
 ```
 
-Selecting a candidate applies the normal repair and records it in `ddocs changes`. Declines persist while the relationship and evidence fingerprint remain unchanged.
+Declines persist while the relationship and evidence fingerprint remain unchanged. Production `codemap fix` replays that policy and automatically adds remaining selected candidates. A materially changed evidence fingerprint may surface a new current decision.
 
-Research reports do not bypass this review path.
+The compatibility `suggestions select` path can still apply one candidate as a normal recorded repair, but it is not required before production codemap generation. Research reports themselves never mutate the codemap or bypass persisted declines.
 
 ## Expected result
 
@@ -191,8 +194,9 @@ Research reports do not bypass this review path.
 - Precision samples are deterministic and independently reviewed.
 - Metrics state their population and limitations.
 - Threshold failures are visible to CI or research scripts.
-- No benchmark command edits authored codemap relationships.
-- Current accepted or declined candidates remain auditable through the review ledger.
+- No benchmark command edits managed codemap relationships.
+- Explicit production generation remains a separate inspect/dry-run/fix/check workflow.
+- Current declined candidates remain auditable through the review ledger.
 
 ## Failure and recovery
 
@@ -218,6 +222,8 @@ Retain both reports, inspect rank and evidence changes, and decide whether the c
 
 ## Related docs
 
+- [Managing Codemaps](managing-codemaps.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)
 - [Codemap Missing-Link Evidence](../research/codemap-evidence.md)
 - [Reviewing Suggestions and Changes](reviewing-suggestions-and-changes.md)

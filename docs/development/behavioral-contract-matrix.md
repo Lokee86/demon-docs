@@ -112,12 +112,18 @@ A test passing does not authorize undocumented contract changes. A document clai
 | Target resolution keeps missing, ambiguous, unsupported, and pattern states explicit | [Codemap Extraction and Dataset](../architecture/codemap-extraction-and-dataset.md) | dataset target-base/root/ambiguity tests | codemap export command tests |
 | Corpus adapters emit only recognized local deterministic facts | [Codemap Corpus and Adapters](../architecture/codemap-corpus-adapters.md) | corpus dependency, symbol, path, history, and related-document tests | `go test ./internal/codemapcorpus -count=1` |
 | Existing authored targets and the document itself are excluded from candidates | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) | evidence collector tests | evidence and benchmark suites |
-| Suggestion ranking, admission, caps, fan-out discounting, and tiers are deterministic | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) | `codemapbench/adapters*_test.go`, symbol and current tests | pinned source-report comparison |
+| Recommendation ranking, admission, caps, fan-out discounting, negative-evidence filters, and tiers are deterministic | [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) | `internal/codemaprecommend/suggestions_test.go`, evidence symbol tests, benchmark compatibility tests | pinned source-report comparison plus `go test ./internal/codemaprecommend ./internal/codemapbench -count=1` |
 | Controlled holdouts do not leak through document text, visible targets, or related documents | [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md) | run/orchestrator tests and app benchmark engine isolation test | pinned repository holdout |
 | Holdout selection is deterministic and input-order independent | [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md) | `holdout_test.go` | repeated benchmark with fixed seed |
 | Report JSON is canonical and schema-versioned | [Codemap Report Formats](../reference/codemap-report-formats.md) | `report_export_test.go`, dataset stable JSON test | artifact diff in research validation |
 | Precision samples are deterministic, stratified, auditable, and fully labeled before evaluation | [Codemap Precision Governance](../research/codemap-precision-governance.md) | `codemapprecision/precision_test.go` | pinned labeled evaluation |
-| Existing links are never proposed for removal or irrelevance | [Codemap Pipeline](../architecture/codemap-pipeline.md) | current suggestion visibility/exclusion tests and review integration | manual report review plus full suite |
+| Existing links are retained by default; confidence pruning occurs only under explicit independent settings | [Codemap Managed Execution](../architecture/codemap-managed-execution.md), [Configuration Reference](../reference/configuration.md) | `TestReconcileManagedRemovesOnlySelectedEntry`, `internal/codemaprun/build_test.go` pruning cases | `codemap inspect` and dry-run against representative repository docs plus full suite |
+| Complete existing codemap sections are adopted into one managed region without authored/generated provenance splitting | [Codemap Managed Execution](../architecture/codemap-managed-execution.md), [Managed Files and State](../reference/managed-files-and-state.md) | `TestReconcileManagedAdoptsWholeExistingSection`, `TestReconcileManagedUnifiesExistingPartialManagedRegion` | focused codemap package suite and idempotent second fix |
+| Fenced Space Rocks-style maps remain fenced and do not receive redundant bullet lists | [Codemap Managed Execution](../architecture/codemap-managed-execution.md) | `TestReconcileManagedPreservesFencedCodemapStyle` | representative Space Rocks dry-run plus focused codemap tests |
+| A missing section is skipped without a schema and created only from an explicit validated schema placement | [Codemap Managed Execution](../architecture/codemap-managed-execution.md), [Current Product Limitations](../limits/current-limitations.md) | `TestReconcileManagedSkipsMissingSectionWithoutSchema`, `TestReconcileManagedCreatesOnlySchemaRequiredSection` | focused codemap tests; public CLI currently verifies skip behavior |
+| Unchanged declined recommendations are suppressed before section reconciliation | [Codemap Managed Execution](../architecture/codemap-managed-execution.md), [Review Lifecycles](../architecture/review-lifecycles.md) | `internal/codemaprun/build_test.go`, `TestPolicyKeepsDeclineUntilFingerprintChanges` | codemap inspect plus review integration suite |
+| Codemap check, inspect, and dry-run do not write; fix converges and uses content-addressed publication | [Codemap Managed Execution](../architecture/codemap-managed-execution.md) | `TestCodemapFixDryRunCheckAndApplySingleFile`, `internal/filetxn/apply_test.go` | check/fix/check smoke plus full Go suite |
+| Normal reconciliation, watch, and repository-demon paths never invoke codemap generation | [Codemap Managed Execution](../architecture/codemap-managed-execution.md), [Application Orchestration](../architecture/application-orchestration.md) | codemap command dispatch tests and absence from reconciliation/watch call graphs | full application, watch, and demon suites |
 
 ## CLI and configuration contracts
 
@@ -126,6 +132,7 @@ A test passing does not authorize undocumented contract changes. A document clai
 | `check` reports drift without writing | [CLI Reference](../reference/cli.md), [Application Orchestration](../architecture/application-orchestration.md) | `TestCheckReportsDriftWithoutWriting` and feature-selection tests | fixture matrix |
 | Feature selectors run only requested systems | [CLI Reference](../reference/cli.md) | `feature_flags_test.go` | CLI regression suite |
 | Every public and nested command has scoped side-effect-free help | [Testing and Fixtures](testing-and-fixtures.md) | `help_test.go`, `help_nested_test.go`, `cmd/demon/main_test.go` | smoke gate |
+| Codemap fix permits an optional root; check and inspect require one; singular and plural command names route to the same implementation | [CLI Reference](../reference/cli.md), [Codemap Managed Execution](../architecture/codemap-managed-execution.md) | `TestCodemapExecutionHelpAndRequiredRoots` | executable help smoke and app suite |
 | Configuration selection and compatibility aliases retain documented precedence | [Configuration Reference](../reference/configuration.md), [Compatibility and Migrations](../reference/compatibility-and-migrations.md) | config behavior and alias tests | Linux and Windows CI |
 | Config mutation preserves unrelated comments, keys, and formatting | [Configuration Reference](../reference/configuration.md) | demon-run atomic edit tests | config package suite |
 
@@ -190,6 +197,8 @@ This matrix becomes misleading when:
 - [Safe Extension Procedures](safe-extension-procedures.md)
 - [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md)
 - [Codemap Pipeline](../architecture/codemap-pipeline.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 
 ## Notes
 

@@ -22,6 +22,7 @@ Task-oriented workflows for installing, adopting, and using Demon Docs. Exact op
 - [evaluating-codemap-suggestions.md](evaluating-codemap-suggestions.md) - Export codemap datasets, run holdouts, build labeled precision samples, and interpret evidence safely.
 - [getting-started.md](getting-started.md) - Install Demon Docs, initialize a repository, establish link state, and run the first clean check.
 - [linked-worktrees.md](linked-worktrees.md) - Bootstrap and operate independent Demon Docs state in linked Git worktrees.
+- [managing-codemaps.md](managing-codemaps.md) - Inspect, preview, update, verify, decline, and conservatively prune unified managed codemap sections.
 - [reverse-indexes.md](reverse-indexes.md) - Configure, preview, apply, and verify code-folder reverse indexes.
 - [reviewing-suggestions-and-changes.md](reviewing-suggestions-and-changes.md) - Inspect, select, decline, reconsider, audit, undo, block, and unblock repository suggestions and changes.
 - [upgrading.md](upgrading.md) - Upgrade binaries and private state while preserving a recoverable pre-upgrade snapshot.

@@ -36,6 +36,7 @@ The focused canonical owners are:
 - [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md)
 - [Codemap Corpus and Adapters](codemap-corpus-adapters.md)
 - [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md)
+- [Codemap Managed Execution](codemap-managed-execution.md)
 - [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md)
 - [Codemap Precision Governance](../research/codemap-precision-governance.md)
 - [Codemap Report Formats](../reference/codemap-report-formats.md)
@@ -112,7 +113,7 @@ See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
 ### 4. Foreground generation
 
-`internal/codemaprun` computes current recommendations with all existing links visible, projects them through persisted decline and staleness policy, and reconciles the complete codemap section. Existing sections are processed regardless of schema. Missing sections are created only through the file-type schema placement seam.
+`internal/codemaprun` computes current recommendations with all existing links visible, projects them through persisted decline and staleness policy, and reconciles the complete codemap section. Existing sections are processed regardless of schema. The internal file-type schema placement seam can create a required missing section, but the public application does not yet supply a repository schema provider, so current CLI execution skips documents without a configured section.
 
 ### 5. Controlled holdout
 
@@ -128,33 +129,36 @@ See [Codemap Precision Governance](../research/codemap-precision-governance.md).
 
 ### 7. Unified reconciliation
 
-The codemap section is adopted under codemap-specific managed markers. Existing syntax is preserved where possible: fenced Space Rocks-style path lists remain fenced, and bullet maps retain their bullet prefix. Qualified missing links are added automatically. Existing links are retained unless an explicit removal policy applies. Writes use the shared content-addressed transactional file layer.
+The codemap section is adopted under codemap-specific managed markers. Existing syntax is preserved where possible: fenced Space Rocks-style path lists remain fenced, and bullet maps retain their bullet prefix. Qualified missing links from both tiers are added automatically after shared decline filtering. Existing links are retained unless an explicit removal policy applies. Writes use the shared content-addressed transactional file layer. The detailed scope, adoption, rendering, pruning, transaction, and failure lifecycle is owned by [Codemap Managed Execution](codemap-managed-execution.md).
 
 ## Command surfaces
 
 ```text
-ddocs codemap fix [--root FILE_OR_DIRECTORY] [--dry-run]
+ddocs codemaps fix [--root FILE_OR_DIRECTORY] [--dry-run]
   adopt and update unified codemap sections
 
-ddocs codemap check --root FILE_OR_DIRECTORY
+ddocs codemap ...
+  singular compatibility alias for the canonical plural command family
+
+ddocs codemaps check --root FILE_OR_DIRECTORY
   report stale selected codemaps without writing
 
-ddocs codemap inspect --root FILE_OR_DIRECTORY
+ddocs codemaps inspect --root FILE_OR_DIRECTORY
   explain recommendations, evidence, declines, and removals
 
-ddocs codemap export
+ddocs codemaps export
   build/export authored dataset
 
-ddocs codemap benchmark
+ddocs codemaps benchmark
   controlled exact-link holdout
 
-ddocs codemap precision source
+ddocs codemaps precision source
   generate current unmatched suggestion report
 
-ddocs codemap precision sample
+ddocs codemaps precision sample
   create deterministic unlabeled review sample
 
-ddocs codemap precision evaluate
+ddocs codemaps precision evaluate
   validate completed labels and calculate metrics
 
 ddocs suggestions decline|reconsider
@@ -186,7 +190,7 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 
 ## Failure behavior
 
-Each stage fails with its own context rather than silently dropping required inputs. Unsupported facts normally become explicit resolution states or absent evidence; unreadable required files, invalid schemas, inconsistent labels, or output failures abort the command.
+Each stage fails with its own context rather than silently dropping required inputs. Unsupported facts normally become explicit resolution states or absent evidence; unreadable required files, multiple matching codemap sections, malformed ownership markers, invalid schema placements, concurrent source changes, inconsistent labels, or output failures abort the relevant command.
 
 A benchmark threshold failure represents a completed measurement below a requested gate, not an execution failure.
 
@@ -217,6 +221,8 @@ The [Behavioral Contract Matrix](../development/behavioral-contract-matrix.md) m
 - [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md)
 - [Codemap Corpus and Adapters](codemap-corpus-adapters.md)
 - [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md)
+- [Codemap Managed Execution](codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 - [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md)
 - [Codemap Precision Governance](../research/codemap-precision-governance.md)
 - [Codemap Report Formats](../reference/codemap-report-formats.md)

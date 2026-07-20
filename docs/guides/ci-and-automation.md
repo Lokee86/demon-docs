@@ -45,6 +45,14 @@ fail the job for pending reconciliation, unresolved links, reverse-index failure
 
 Do not run `ddocs fix` as an unreviewed CI mutation. CI should report required changes; developers should apply and review them locally.
 
+Generic `ddocs check` does not include production codemap generation. Repositories that require codemap convergence in CI must add an explicit contained check:
+
+```bash
+ddocs codemaps check --root docs
+```
+
+That command remains read-only and fails when one or more selected codemaps would change. It also reports section, marker, scope, and planning failures. Because missing-section creation is not yet connected to the public file-type schema provider, a document without a configured section is currently skipped rather than failed as stale.
+
 ## Narrow CI adoption
 
 Subsystem selectors permit staged adoption:
@@ -86,8 +94,9 @@ Do not run an additional detached wrapper around `ddocs watch` when the reposito
 ## Expected result
 
 - CI reports pending documentation or link reconciliation without mutating the checkout.
+- Repositories that opt into codemap convergence run explicit `ddocs codemaps check --root ...` alongside generic checks.
 - Local watch or daemon automation shortens feedback loops.
-- A plain `ddocs check` remains sufficient to verify correctness after automation is stopped.
+- A plain `ddocs check` remains sufficient for normal reconciliation after automation is stopped, but it does not verify codemap generation.
 
 ## Failure and recovery
 
@@ -114,6 +123,8 @@ Use `demon --status` and `demon --logs`. The repository demon has single-owner c
 - [Watcher and Automation](../operations/watcher-and-automation.md)
 - [Repository Demon](../operations/repository-demon.md)
 - [Document Health Checks](document-health-checks.md)
+- [Managing Codemaps](managing-codemaps.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 
 ## Notes

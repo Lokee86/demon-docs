@@ -29,6 +29,8 @@ Foreground watch performs one reconciliation immediately, observes relevant file
 
 The watcher is optional automation. A later `ddocs check` must be able to verify the same repository state without the watcher running.
 
+Codemap generation is not a watcher feature. Neither foreground watch nor the repository demon invokes `codemap fix`, `codemap check`, recommendation planning, managed codemap adoption, or confidence pruning. A watcher may observe Markdown files written by an explicit codemap command and reconcile its own selected systems, but it does not regenerate the codemap or enqueue a codemap-specific follow-up.
+
 ## Watch Commands
 
 ```bash
@@ -92,7 +94,9 @@ ddocs demon --logs
 - Use the repository demon for automatic shell or agent-driven lifecycle.
 - Use `ddocs check` before commit or in CI.
 - Use `ddocs fix` for deterministic recovery or a deliberate one-shot repair.
+- Use explicit `ddocs codemaps inspect|fix|check` when managed codemap generation is desired.
 - Expect `fix` to report zero updated files when a watcher already reconciled the tree.
+- Do not assume watcher health implies codemap-generation convergence.
 
 ## Test Coverage
 
@@ -138,6 +142,8 @@ go test ./internal/watch ./internal/app -count=1
 - [Dynamic Watch Scope](dynamic-watch-scope.md)
 - [Recovery and Troubleshooting](recovery-and-troubleshooting.md)
 - [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 
 ## Notes
 

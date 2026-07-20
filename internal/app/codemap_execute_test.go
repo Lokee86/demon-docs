@@ -18,7 +18,7 @@ func TestCodemapExecutionHelpAndRequiredRoots(t *testing.T) {
 		if code := Run(context.Background(), []string{"codemap", command, "--help"}, &stdout, &stderr); code != 0 || stderr.Len() != 0 {
 			t.Fatalf("%s help code=%d stderr=%q", command, code, stderr.String())
 		}
-		for _, want := range []string{"usage: ddocs codemap " + command, "one Markdown file", "daemon never execute"} {
+		for _, want := range []string{"usage: ddocs codemaps " + command, "one Markdown file", "daemon never execute"} {
 			if !strings.Contains(stdout.String(), want) {
 				t.Fatalf("%s help missing %q:\n%s", command, want, stdout.String())
 			}
@@ -32,7 +32,7 @@ func TestCodemapExecutionHelpAndRequiredRoots(t *testing.T) {
 	}
 
 	var stdout, stderr bytes.Buffer
-	if code := Run(context.Background(), []string{"codemaps", "fix", "--help"}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "usage: ddocs codemap fix") {
+	if code := Run(context.Background(), []string{"codemaps", "fix", "--help"}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "usage: ddocs codemaps fix") {
 		t.Fatalf("plural alias code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
 }

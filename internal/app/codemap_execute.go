@@ -23,7 +23,7 @@ func codemapExecutionHelp(w io.Writer, command string) {
 	if command == "fix" {
 		rootUsage = "[--root PATH]"
 	}
-	fmt.Fprintf(w, "usage: ddocs codemap %s [-h] %s [--config PATH] [--heading TEXT]", command, rootUsage)
+	fmt.Fprintf(w, "usage: ddocs codemaps %s [-h] %s [--config PATH] [--heading TEXT]", command, rootUsage)
 	if command == "fix" {
 		fmt.Fprint(w, " [--dry-run]")
 	}
@@ -46,7 +46,7 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		codemapExecutionHelp(out, command)
 		return 0
 	}
-	fs := flag.NewFlagSet("ddocs codemap "+command, flag.ContinueOnError)
+	fs := flag.NewFlagSet("ddocs codemaps "+command, flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	var flags commonFlags
 	var root optionalString
@@ -61,7 +61,7 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		fs.BoolVar(&dryRun, "dry-run", false, "report planned updates without writing")
 	}
 	if err := fs.Parse(args); err != nil {
-		fmt.Fprintf(errOut, "ddocs codemap %s: error: %v\n", command, err)
+		fmt.Fprintf(errOut, "ddocs codemaps %s: error: %v\n", command, err)
 		return 2
 	}
 	if fs.NArg() != 0 {
@@ -69,8 +69,8 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		return 2
 	}
 	if command != "fix" && !root.set {
-		fmt.Fprintf(errOut, "usage: ddocs codemap %s [-h] --root PATH\n", command)
-		fmt.Fprintf(errOut, "ddocs codemap %s: error: the following arguments are required: --root\n", command)
+		fmt.Fprintf(errOut, "usage: ddocs codemaps %s [-h] --root PATH\n", command)
+		fmt.Fprintf(errOut, "ddocs codemaps %s: error: the following arguments are required: --root\n", command)
 		return 2
 	}
 
@@ -120,10 +120,10 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		return 0
 	case "check":
 		if plan.ChangedCount() == 0 {
-			fmt.Fprintln(out, "ddocs codemap check passed")
+			fmt.Fprintln(out, "ddocs codemaps check passed")
 			return 0
 		}
-		fmt.Fprintln(out, "ddocs codemap check failed")
+		fmt.Fprintln(out, "ddocs codemaps check failed")
 		for _, document := range plan.Documents {
 			if document.Changed {
 				fmt.Fprintln(out, document.Path)
@@ -132,14 +132,14 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		return 1
 	case "fix":
 		if dryRun {
-			fmt.Fprintf(out, "ddocs codemap fix would update %d file(s)\n", plan.ChangedCount())
+			fmt.Fprintf(out, "ddocs codemaps fix would update %d file(s)\n", plan.ChangedCount())
 			writeCodemapSummary(out, plan)
 			return 0
 		}
 		if err := codemaprun.Apply(plan); err != nil {
 			return fail(errOut, err)
 		}
-		fmt.Fprintf(out, "ddocs codemap fix updated %d file(s)\n", plan.ChangedCount())
+		fmt.Fprintf(out, "ddocs codemaps fix updated %d file(s)\n", plan.ChangedCount())
 		writeCodemapSummary(out, plan)
 		return 0
 	default:

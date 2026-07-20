@@ -236,7 +236,7 @@ remove_low_score_links = false
 
 Existing links are retained by default even when the algorithm does not rediscover them or ranks them below the hard-link tier. `remove_undiscovered_links` permits removal when a hidden-link evaluation cannot recover an existing resolved target. `remove_low_score_links` permits removal when that evaluation recovers only a context-tier relationship. Both are intentionally `false` by default.
 
-New missing links are added automatically. The codemap operation consults the shared review-decision store before writing each addition, so an unchanged declined recommendation remains suppressed and materially changed evidence may be reconsidered under the existing fingerprint policy.
+New missing links from both `hard_link` and `context` tiers are added automatically by explicit codemap execution. The codemap operation consults the shared review-decision store before writing each addition, so an unchanged declined recommendation remains suppressed and materially changed evidence may be reconsidered under the existing fingerprint policy. Tier remains visible in inspection and removal policy; it is not a per-run approval gate.
 
 The research-oriented `codemap export` command additionally supports `--target-base repository|document`, repeated `--target-root PATH`, and `--output PATH`. `[reverse_index].roots` remains separate configuration for reverse indexes. Codemap execution is never invoked by ordinary reconciliation, foreground watch, or the repository daemon.
 
@@ -488,9 +488,11 @@ remove_undiscovered_links = false
 remove_low_score_links = false
 ```
 
-`ddocs codemap fix|check|inspect --heading TEXT` replaces the configured headings for that explicit codemap operation. `--codemap-heading TEXT` remains the reverse-index reconciliation override.
+`ddocs codemaps fix|check|inspect --heading TEXT` replaces the configured headings for that explicit codemap operation. `--codemap-heading TEXT` remains the reverse-index reconciliation override.
 
-When a matching section exists, it is processed regardless of the document's file-type schema. When no matching section exists, creation is permitted only through the file-type schema's codemap placement. The full section is managed as one unified codemap; existing links and deterministic additions are not split into separate authored and generated subsections.
+When a matching section exists, it is processed regardless of the document's file-type schema. The full section is managed as one unified codemap; existing links and deterministic additions are not split into separate authored and generated subsections.
+
+The internal codemap layer accepts a file-type schema placement for a missing section, but the current public application does not yet resolve or supply that schema provider. Therefore current CLI execution leaves a document without a configured codemap section unchanged. This is a current product limitation rather than permission to invent a section outside schema policy.
 
 Removal based on algorithm confidence is opt-in through the two boolean settings. Definitively broken paths remain governed by normal link maintenance.
 
@@ -812,6 +814,8 @@ Use `ddocs config paths` to inspect selection and `ddocs config show` to inspect
 - [Managed Files and State](managed-files-and-state.md)
 - [Review Ledger](../architecture/review-ledger.md)
 - [Application Orchestration](../architecture/application-orchestration.md)
+- [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
+- [Managing Codemaps](../guides/managing-codemaps.md)
 - [Recovery and Troubleshooting](../operations/recovery-and-troubleshooting.md)
 
 ## Notes
