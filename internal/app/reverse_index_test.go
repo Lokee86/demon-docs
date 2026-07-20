@@ -149,13 +149,49 @@ func TestReverseCheckFailsForUnresolvedScopedTarget(t *testing.T) {
 	})
 }
 
+func TestReverseCheckReportsDeterministicOrphansWithoutFixFailure(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	servicesRoot := filepath.Join(repositoryRoot, "services")
+	mustMakeDir(t, docsRoot)
+	mustWriteAppFile(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `services/api/referenced.go`\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", "referenced.go"), "package api\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", "z-unreferenced.go"), "package api\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", "a-unreferenced.go"), "package api\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", "README.md"), "# API\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", ".docignore"), "generated/\n")
+	mustWriteAppFile(t, filepath.Join(servicesRoot, "api", "generated", "client.go"), "package generated\n")
+	mustWriteAppFile(t, filepath.Join(repositoryRoot, "client", "outside.go"), "package client\n")
+	mustWriteAppFile(t, filepath.Join(repositoryRoot, ".ddocs", "config.toml"), "docs_root = \"docs\"\nindex_file = \"README.md\"\n\n[reverse_index]\nroots = [\"services\"]\n\n[codemap]\nheadings = [\"Code map\"]\n")
+
+	withWorkingDirectory(t, repositoryRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"fix", "--reverse"}, &out, &errOut); code != 0 {
+			t.Fatalf("fix code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if strings.Contains(out.String(), "Reverse-index orphan:") {
+			t.Fatalf("fix reported check-only orphan status: %q", out.String())
+		}
+
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--reverse"}, &out, &errOut); code != 1 {
+			t.Fatalf("check code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		want := "ddocs check failed\nmessage: Reverse-index orphan: services/api/a-unreferenced.go\nmessage: Reverse-index orphan: services/api/z-unreferenced.go\n"
+		if out.String() != want {
+			t.Fatalf("check output=%q want %q", out.String(), want)
+		}
+	})
+}
+
 func TestReverseFlagAppearsInStandardCommandHelp(t *testing.T) {
 	for _, command := range []string{"check", "fix", "watch"} {
 		var out, errOut bytes.Buffer
 		if code := Run(context.Background(), []string{command, "--help"}, &out, &errOut); code != 0 {
 			t.Fatalf("%s code=%d err=%q", command, code, errOut.String())
 		}
-		for _, text := range []string{"-r, --reverse", "--reverse-root PATH", "--codemap-heading TEXT"} {
+		for _, text := range []string{"-r, --reverse", "--reverse-root PATH", "--codemap-heading TEXT", "check reports eligible in-scope code files with no resolved authored file target"} {
 			if !strings.Contains(out.String(), text) {
 				t.Fatalf("%s help omitted %q:\n%s", command, text, out.String())
 			}

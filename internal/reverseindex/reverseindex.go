@@ -7,11 +7,14 @@ const section = "reverse-index"
 type Plan struct {
 	Updates        []model.FileUpdate
 	Diagnostics    []string
+	Orphans        []string
 	IndexCount     int
 	ReferenceCount int
 }
 
 func (p Plan) Failed() bool { return len(p.Updates) > 0 || len(p.Diagnostics) > 0 }
+
+func (p Plan) CheckFailed() bool { return p.Failed() || len(p.Orphans) > 0 }
 
 type facts struct {
 	fileDocs   map[string]map[string]struct{}

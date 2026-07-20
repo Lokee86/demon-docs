@@ -90,7 +90,7 @@ These commands should succeed when repository and configuration selection can be
 
 Returns success only when every selected subsystem is clean and sufficiently initialized for verification.
 
-Returns non-zero for pending work, unresolved selected-system conditions, frontmatter violations, or orphan documents when links are selected. Frontmatter warnings may be printed while the command still succeeds.
+Returns non-zero for pending work, unresolved selected-system conditions, frontmatter violations, orphan documents when links are selected, or reverse-index orphans when reverse indexes are selected. Frontmatter warnings may be printed while the command still succeeds.
 
 ### `mv`
 

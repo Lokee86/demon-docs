@@ -121,8 +121,10 @@ Watch mode is a convenience. A later static `ddocs check --reverse` must reprodu
 - Explicit folder and file targets link back to their source documentation.
 - Eligible direct code files remain visible even when no document targets them.
 - Unresolved authored targets remain diagnostics rather than guessed backlinks.
+- `check --reverse` reports every eligible in-scope code file with no resolved authored file target as `message: Reverse-index orphan: PATH` and returns non-zero.
+- Ignored files, generated reverse-index files, and files outside the selected roots are excluded from orphan health checks.
 - A second `fix --reverse` changes no files.
-- `check --reverse` succeeds.
+- `check --reverse` succeeds once the projection is current and every eligible file has an authored file target.
 
 ## Failure and recovery
 
@@ -141,6 +143,10 @@ Add explicit file or folder targets, or remove reverse indexing from the reposit
 ### A target is unresolved
 
 Correct the authored target. Reverse indexes do not select among missing or ambiguous destinations.
+
+### A reverse-index orphan is reported
+
+Add an explicit file target for the reported code file under a configured codemap heading, or adjust the reverse root or `.docignore` rules if the file should not be in scope. `fix --reverse` only rebuilds the projection; it does not invent the missing authored relationship.
 
 ### A root is rejected
 
