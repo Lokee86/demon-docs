@@ -39,17 +39,17 @@ extensions = [".md", ".mdx"]
 func TestCodemapHeadingsLoadFromConfig(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.toml")
-	if err := os.WriteFile(path, []byte("[codemap]\nheadings = [\"Implementation map\", \"Source map\"]\n"), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte("[codemap]\nheadings = [\"Implementation map\", \"Source map\"]\nremove_undiscovered_links = true\nremove_low_score_links = true\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	loaded, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(loaded.Codemap.Headings, []string{"Implementation map", "Source map"}) {
-		t.Fatalf("codemap headings not loaded: %+v", loaded.Codemap)
+	if !reflect.DeepEqual(loaded.Codemap.Headings, []string{"Implementation map", "Source map"}) || !loaded.Codemap.RemoveUndiscoveredLinks || !loaded.Codemap.RemoveLowScoreLinks {
+		t.Fatalf("codemap settings not loaded: %+v", loaded.Codemap)
 	}
-	if !strings.Contains(StarterText(), "[codemap]\nheadings =") {
+	if !strings.Contains(StarterText(), "[codemap]\nheadings =") || !strings.Contains(StarterText(), "remove_undiscovered_links = false") || !strings.Contains(StarterText(), "remove_low_score_links = false") {
 		t.Fatal("starter config omitted codemap headings")
 	}
 	for _, section := range []string{"[index]\nenabled = true", "[links]\nenabled = true"} {

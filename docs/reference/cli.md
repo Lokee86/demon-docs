@@ -126,6 +126,9 @@ Repository-local `.ddocs/config.toml` remains the preferred initialized-reposito
 ## Codemap commands
 
 ```bash
+ddocs codemap fix [--root FILE_OR_DIRECTORY] [--dry-run]
+ddocs codemap check --root FILE_OR_DIRECTORY
+ddocs codemap inspect --root FILE_OR_DIRECTORY
 ddocs codemap export --output PATH
 ddocs codemap benchmark ...
 ddocs codemap precision source ...
@@ -133,9 +136,15 @@ ddocs codemap precision sample ...
 ddocs codemap precision evaluate ...
 ```
 
-`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision source` generates current suggestions without hiding authored links, `precision sample` creates a deterministic unlabeled review set, and `precision evaluate` compares a labeled benchmark with its deterministic suggestion report. The legacy flag-only precision form remains equivalent to `evaluate`.
+`codemap fix` is the explicit production operation. It adopts the complete configured codemap section as one managed unit, preserves existing valid links by default, applies the deterministic missing-link algorithm, honors shared declined-suggestion fingerprints, and writes through the shared transactional file-rewrite layer. A file root targets one existing Markdown file; a directory root targets eligible Markdown recursively. Without `--root`, `fix` uses the configured docs root. `--dry-run` performs no file or review-state writes.
 
-These commands do not silently modify authored codemap sections.
+`codemap check` requires an explicit root and returns non-zero when the selected files would change. `codemap inspect` also requires an explicit root and prints recommendation tiers, scores, evidence, declined candidates, and configured removals without writing.
+
+Existing configured codemap headings are processed regardless of schema. A missing section is created only when the file-type schema declares and places one; the codemap layer exposes that schema seam and never creates a document. Existing and newly generated links remain one unified managed codemap section.
+
+`export` writes a deterministic authored-codemap dataset. `benchmark` runs controlled holdouts. `precision source` generates current recommendations without hiding authored links, `precision sample` creates a deterministic unlabeled review set, and `precision evaluate` compares a labeled benchmark with its deterministic recommendation report. The benchmark and CLI consume the same production ranking package.
+
+Codemap execution is intentionally excluded from `ddocs fix`, `ddocs check`, `ddocs watch`, and every daemon path. It runs only through an explicit `ddocs codemap ...` or `demon codemap ...` command.
 
 ## Repository demon commands
 

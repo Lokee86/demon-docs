@@ -40,7 +40,11 @@ type Review struct {
 type Index struct{ Enabled bool }
 type Links struct{ Enabled bool }
 type ReverseIndex struct{ Roots []string }
-type Codemap struct{ Headings []string }
+type Codemap struct {
+	Headings                []string
+	RemoveUndiscoveredLinks bool
+	RemoveLowScoreLinks     bool
+}
 type Template struct {
 	ManagedSections                                                          []string
 	IncludeOwnership, IncludeDoesNotBelong, IncludeRelatedDocs, IncludeNotes bool
@@ -105,7 +109,7 @@ func Default() Config {
 			"Codemap",
 			"Code or source map",
 			"Code and test map",
-		}},
+		}, RemoveUndiscoveredLinks: false, RemoveLowScoreLinks: false},
 		Frontmatter: Frontmatter{
 			DefaultFormat:  "yaml",
 			AllowedFormats: []string{"yaml", "toml"},
@@ -123,7 +127,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n\n[frontmatter]\nenabled = true\ndefault_format = \"yaml\"\nallowed_formats = [\"yaml\", \"toml\"]\ndefault_author = \"\"\nunknown_fields = \"remove\"\n\n[frontmatter.fields.document_id]\ntype = \"uuid\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.author]\ntype = \"string\"\nrequired = true\ndefault_from = \"frontmatter.default_author\"\n\n[frontmatter.fields.document_type]\ntype = \"string\"\nrequired = true\ndefault = \"general\"\n\n[frontmatter.fields.created]\ntype = \"date\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.summary]\ntype = \"string\"\nrequired = true\n\n[frontmatter.fields.policy_exempt]\ntype = \"boolean\"\ndefault = false\n\n[frontmatter.fields.policy_exempt_reason]\ntype = \"string\"\n\n[[frontmatter.rules]]\nwhen_field = \"policy_exempt\"\nequals = true\nrequire = \"policy_exempt_reason\"\n"
+	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\nremove_undiscovered_links = false\nremove_low_score_links = false\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n\n[frontmatter]\nenabled = true\ndefault_format = \"yaml\"\nallowed_formats = [\"yaml\", \"toml\"]\ndefault_author = \"\"\nunknown_fields = \"remove\"\n\n[frontmatter.fields.document_id]\ntype = \"uuid\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.author]\ntype = \"string\"\nrequired = true\ndefault_from = \"frontmatter.default_author\"\n\n[frontmatter.fields.document_type]\ntype = \"string\"\nrequired = true\ndefault = \"general\"\n\n[frontmatter.fields.created]\ntype = \"date\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.summary]\ntype = \"string\"\nrequired = true\n\n[frontmatter.fields.policy_exempt]\ntype = \"boolean\"\ndefault = false\n\n[frontmatter.fields.policy_exempt_reason]\ntype = \"string\"\n\n[[frontmatter.rules]]\nwhen_field = \"policy_exempt\"\nequals = true\nrequire = \"policy_exempt_reason\"\n"
 }
 
 type rawConfig struct {
@@ -179,7 +183,9 @@ type rawConfig struct {
 		Folders *[]string `toml:"folders"`
 	} `toml:"reverse_index"`
 	Codemap *struct {
-		Headings *[]string `toml:"headings"`
+		Headings                *[]string `toml:"headings"`
+		RemoveUndiscoveredLinks *bool     `toml:"remove_undiscovered_links"`
+		RemoveLowScoreLinks     *bool     `toml:"remove_low_score_links"`
 	} `toml:"codemap"`
 	Aliases *struct {
 		Files   *[]string `toml:"files"`
@@ -317,8 +323,16 @@ func Load(path string) (Config, error) {
 			c.ReverseIndex.Roots = *r.Folders
 		}
 	}
-	if m := raw.Codemap; m != nil && m.Headings != nil {
-		c.Codemap.Headings = *m.Headings
+	if m := raw.Codemap; m != nil {
+		if m.Headings != nil {
+			c.Codemap.Headings = *m.Headings
+		}
+		if m.RemoveUndiscoveredLinks != nil {
+			c.Codemap.RemoveUndiscoveredLinks = *m.RemoveUndiscoveredLinks
+		}
+		if m.RemoveLowScoreLinks != nil {
+			c.Codemap.RemoveLowScoreLinks = *m.RemoveLowScoreLinks
+		}
 	}
 	if a := raw.Aliases; a != nil {
 		if a.Files != nil {

@@ -137,7 +137,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runMove(args[1:], out, errOut)
 	case "fix", "check", "watch":
 		return runTree(ctx, args[0], args[1:], out, errOut)
-	case "codemap":
+	case "codemap", "codemaps":
 		return runCodemap(ctx, args[1:], out, errOut)
 	case "suggestions":
 		return runSuggestions(ctx, args[1:], out, errOut)
@@ -160,7 +160,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation indexes and configured frontmatter\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
+	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             generate, check, inspect, export, and benchmark codemaps\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation indexes and configured frontmatter\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap fix --dry-run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -761,7 +761,7 @@ func enabledText(enabled bool) string {
 }
 
 func codemapHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs codemap [-h] {export,benchmark,precision} ...\n\nExtract authored code-map relationships and benchmark missing-link suggestions.\n\npositional arguments:\n  {export,benchmark,precision}\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           generate, sample, or evaluate precision suggestions\n\noptions:\n  -h, --help            show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...\n\nExplicitly generate and maintain unified codemap sections, or run codemap research tools. The watcher and daemon never execute codemap operations.\n\npositional arguments:\n  {fix,check,inspect,export,benchmark,precision}\n    fix                 adopt and update codemap sections\n    check               report stale codemap sections for an explicit root\n    inspect             explain recommendations for an explicit root\n    export              write the deterministic codemap dataset as JSON\n    benchmark           run a deterministic missing-link benchmark\n    precision           generate, sample, or evaluate precision suggestions\n\noptions:\n  -h, --help            show this help message and exit")
 }
 
 func codemapExportHelp(w io.Writer) {
@@ -770,13 +770,16 @@ func codemapExportHelp(w io.Writer) {
 
 func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) == 0 {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark,precision} ...")
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...")
 		fmt.Fprintln(errOut, "ddocs codemap: error: the following arguments are required: codemap_command")
 		return 2
 	}
 	if args[0] == "-h" || args[0] == "--help" {
 		codemapHelp(out)
 		return 0
+	}
+	if args[0] == "fix" || args[0] == "check" || args[0] == "inspect" {
+		return runCodemapExecution(ctx, args[0], args[1:], out, errOut)
 	}
 	if args[0] == "benchmark" {
 		return runCodemapBenchmark(ctx, args[1:], out, errOut)
@@ -785,8 +788,8 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return runCodemapPrecision(ctx, args[1:], out, errOut)
 	}
 	if args[0] != "export" {
-		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {export,benchmark,precision} ...")
-		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from export, benchmark, precision)\n", args[0])
+		fmt.Fprintln(errOut, "usage: ddocs codemap [-h] {fix,check,inspect,export,benchmark,precision} ...")
+		fmt.Fprintf(errOut, "ddocs codemap: error: argument codemap_command: invalid choice: '%s' (choose from fix, check, inspect, export, benchmark, precision)\n", args[0])
 		return 2
 	}
 	if helpRequested(args[1:]) {
@@ -1097,7 +1100,7 @@ func show(w io.Writer, c config.Config, path string) {
 	if selected == "" {
 		selected = "<built-in defaults>"
 	}
-	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[index]\nenabled = %t\n[links]\nenabled = %t\n[frontmatter]\nenabled = %t\ndefault_format = %s\nallowed_formats = %s\ndefault_author = %s\nunknown_fields = %s\nfields = %s\nrules = %d\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[review]\nundo_depth = %d\nundo_max_age_days = %d\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), c.Index.Enabled, c.Links.Enabled, c.Frontmatter.Enabled, quote(c.Frontmatter.DefaultFormat), list(c.Frontmatter.AllowedFormats), quote(c.Frontmatter.DefaultAuthor), quote(c.Frontmatter.UnknownFields), list(frontmatterFieldNames(c.Frontmatter.Fields)), len(c.Frontmatter.Rules), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), c.Review.UndoDepth, c.Review.UndoMaxAgeDays, quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[index]\nenabled = %t\n[links]\nenabled = %t\n[frontmatter]\nenabled = %t\ndefault_format = %s\nallowed_formats = %s\ndefault_author = %s\nunknown_fields = %s\nfields = %s\nrules = %d\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\nremove_undiscovered_links = %t\nremove_low_score_links = %t\n[review]\nundo_depth = %d\nundo_max_age_days = %d\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), c.Index.Enabled, c.Links.Enabled, c.Frontmatter.Enabled, quote(c.Frontmatter.DefaultFormat), list(c.Frontmatter.AllowedFormats), quote(c.Frontmatter.DefaultAuthor), quote(c.Frontmatter.UnknownFields), list(frontmatterFieldNames(c.Frontmatter.Fields)), len(c.Frontmatter.Rules), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), c.Codemap.RemoveUndiscoveredLinks, c.Codemap.RemoveLowScoreLinks, c.Review.UndoDepth, c.Review.UndoMaxAgeDays, quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
 }
 
 func frontmatterFieldNames(fields map[string]config.FrontmatterField) []string {

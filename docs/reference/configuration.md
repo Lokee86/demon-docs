@@ -47,6 +47,8 @@ The supported keys are:
 - `[reverse_index].roots`
 - `[reverse_index].folders` as a compatibility alias
 - `[codemap].headings`
+- `[codemap].remove_undiscovered_links`
+- `[codemap].remove_low_score_links`
 - `[markers].prefix`
 - `[parent_link].label`
 - `[parent_link].folder_indexes`
@@ -223,14 +225,20 @@ Demon Docs supports undo by reconciliation run, one file change, or one repair w
 
 ## Codemap Configuration
 
-The current `codemap export` command uses CLI options for format-specific overrides:
+```toml
+[codemap]
+headings = ["Code map", "Codemap", "Code or source map", "Code and test map"]
+remove_undiscovered_links = false
+remove_low_score_links = false
+```
 
-- repeated `--heading TEXT` replaces the default accepted heading aliases;
-- `--target-base repository|document` selects path resolution origin;
-- repeated `--target-root PATH` supplies repository-relative component roots; and
-- `--output PATH` writes the deterministic dataset to a file.
+`headings` identifies existing codemap sections. Matching is case-insensitive. The production `codemap fix`, `check`, and `inspect` commands accept repeated `--heading TEXT` overrides.
 
-`[codemap].headings` persists the headings used by reverse reconciliation. `[reverse_index].roots` persists repository-relative recursive code roots. `--codemap-heading` and `--reverse-root` replace those configured values for one `check`, `fix`, or `watch` invocation.
+Existing links are retained by default even when the algorithm does not rediscover them or ranks them below the hard-link tier. `remove_undiscovered_links` permits removal when a hidden-link evaluation cannot recover an existing resolved target. `remove_low_score_links` permits removal when that evaluation recovers only a context-tier relationship. Both are intentionally `false` by default.
+
+New missing links are added automatically. The codemap operation consults the shared review-decision store before writing each addition, so an unchanged declined recommendation remains suppressed and materially changed evidence may be reconsidered under the existing fingerprint policy.
+
+The research-oriented `codemap export` command additionally supports `--target-base repository|document`, repeated `--target-root PATH`, and `--output PATH`. `[reverse_index].roots` remains separate configuration for reverse indexes. Codemap execution is never invoked by ordinary reconciliation, foreground watch, or the repository daemon.
 
 ## Selection
 
@@ -315,6 +323,8 @@ roots = []
 
 [codemap]
 headings = ["Code map", "Codemap", "Code or source map", "Code and test map"]
+remove_undiscovered_links = false
+remove_low_score_links = false
 
 [markers]
 prefix = "doc-ledger"
@@ -467,23 +477,29 @@ ddocs watch -r --once --reverse-root .
 
 `[reverse_index].folders` remains accepted as an alias for older experimental configs, but `roots` is the canonical key.
 
-## `[codemap].headings`
+## `[codemap].headings` and removal policy
 
-`[codemap].headings` defines the authored Markdown section headings recognized as codemaps. Matching is case-insensitive and ignores trailing Markdown heading markers.
+`[codemap].headings` defines the Markdown section headings recognized as codemaps. Matching is case-insensitive and ignores trailing Markdown heading markers.
 
 ```toml
 [codemap]
 headings = ["Implementation map", "Source map"]
+remove_undiscovered_links = false
+remove_low_score_links = false
 ```
 
-`--codemap-heading TEXT` replaces the configured headings for one reconciliation invocation and may be repeated. Reverse reconciliation returns an error when the documentation scope contains no matching codemap section. A matching section with no code targets returns a separate empty-codemap error.
+`ddocs codemap fix|check|inspect --heading TEXT` replaces the configured headings for that explicit codemap operation. `--codemap-heading TEXT` remains the reverse-index reconciliation override.
+
+When a matching section exists, it is processed regardless of the document's file-type schema. When no matching section exists, creation is permitted only through the file-type schema's codemap placement. The full section is managed as one unified codemap; existing links and deterministic additions are not split into separate authored and generated subsections.
+
+Removal based on algorithm confidence is opt-in through the two boolean settings. Definitively broken paths remain governed by normal link maintenance.
 
 ## `[markers].prefix`
 
 `[markers].prefix` sets the HTML comment prefix for managed sections.
 
 - Default: `doc-ledger`
-- The managed blocks use `files`, `stubs`, and `folders` section ids
+- Managed blocks use `files`, `stubs`, `folders`, and `codemap` section ids
 
 ## `[parent_link].label` and `[parent_link].folder_indexes` / `[parent_link].indexed_files`
 

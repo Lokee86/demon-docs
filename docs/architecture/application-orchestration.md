@@ -43,7 +43,7 @@ The application boundary owns:
 - explicit stateless move command integration;
 - suggestion selection/decline and applied-change inspection/undo command integration;
 - foreground watch startup;
-- codemap export, benchmark, and precision command integration;
+- explicit codemap fix, check, inspect, export, benchmark, and precision command integration;
 - repository-demon public and hidden commands; and
 - compatibility aliases such as `--indexes` and the `demon` executable.
 
@@ -83,6 +83,8 @@ executable main
 
 `watch` performs one normal reconciliation before entering event-driven scheduling. The repository demon eventually owns a watcher process, but its lifecycle commands still enter through the application boundary.
 
+Codemap generation is a separate foreground command family. `ddocs codemap fix|check|inspect` does not enter normal reconciliation, watch scheduling, or repository-demon execution. This exclusion is structural rather than a runtime feature flag.
+
 ## State ownership
 
 The application layer holds command-scoped options and aggregate results. Durable repository identity and history belong to `internal/ddrepo` and link/reverse-index state packages. Runtime demon ownership belongs to `internal/demon`.
@@ -115,6 +117,7 @@ Primary files and packages:
 - `internal/app/move.go` - stateless refactoring command integration.
 - `internal/app/orphans.go` - orphan-document health computation.
 - `internal/app/review_*.go` - suggestion, change, undo, and repair-control command integration.
+- `internal/app/codemap_execute.go` - explicit codemap fix/check/inspect command contract.
 - `internal/app/codemap_benchmark.go` - benchmark command contract.
 - `internal/app/codemap_precision.go` - precision command contract.
 - `internal/repository/` - repository and worktree discovery used by the application.
@@ -128,7 +131,7 @@ Important non-ownership boundaries:
 - `internal/watch/` owns watcher scheduling.
 - `internal/demon/` owns runtime leases and lifecycle.
 - `internal/review/` owns review history, decision replay, undo construction, and repair controls.
-- `internal/codemap*` and `internal/evidence/` own codemap analysis.
+- `internal/codemap/`, `internal/codemaprecommend/`, `internal/codemaprun/`, and `internal/evidence/` own codemap analysis and foreground execution.
 
 ## Tests
 
@@ -141,6 +144,7 @@ Relevant coverage includes:
 - `cmd/demon/main_test.go`
 - `internal/app/demon_test.go`
 - `internal/app/feature_flags_test.go`
+- `internal/app/codemap_execute_test.go`
 - `internal/app/codemap_export_test.go`
 - `internal/app/codemap_benchmark_test.go`
 - `internal/app/codemap_precision_test.go`
