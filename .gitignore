@@ -11,6 +11,7 @@ bin/
 /.ddocs/
 **/.ddocs/
 /.worktrees/
+/.codex/
 .codex-hackathon/
 *.log
 *.pid
