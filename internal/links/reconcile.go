@@ -56,6 +56,9 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 
 	stateStarted := time.Now()
 	previousFiles, previousLinks, initialized, err := loadState(root)
+	if err == nil {
+		previousFiles, previousLinks = pruneNestedWorktreeState(root, previousFiles, previousLinks)
+	}
 	timings.StateLoad = time.Since(stateStarted)
 	if err != nil {
 		return Plan{}, err

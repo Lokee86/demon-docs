@@ -44,7 +44,7 @@ It does not own authored link labels or prose, external target contents, semanti
 
 ## Scope
 
-Markdown source files and repository-local targets are scanned throughout the Demon Docs repository root, subject to `.docignore` and the permanent traversal exclusions. A link to an ignored repository path is left outside the link graph. Explicit targets outside the repository are not governed by the repository's `.docignore`.
+Markdown source files and repository-local targets are scanned throughout the Demon Docs repository root, subject to `.docignore` and the permanent traversal exclusions. Nested `.worktrees/` and `.workingtrees/` directories are pruned so attached checkout copies do not enter the repository link graph. A link to an ignored repository path is left outside the link graph. Explicit targets outside the repository are not governed by the repository's `.docignore`.
 
 Local targets may be:
 

@@ -43,6 +43,9 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 			return walkErr
 		}
 		if path != root {
+			if entry.IsDir() && isNestedWorktreeDirectory(entry.Name()) {
+				return filepath.SkipDir
+			}
 			if entry.Type()&os.ModeSymlink != 0 {
 				if entry.IsDir() {
 					return filepath.SkipDir
@@ -191,6 +194,43 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 	return result, nil
 }
 
+func isNestedWorktreeDirectory(name string) bool {
+	return name == ".worktrees" || name == ".workingtrees"
+}
+
+func isNestedWorktreePath(root, candidate string) bool {
+	relative, err := filepath.Rel(root, candidate)
+	if err != nil || relative == "." || filepath.IsAbs(relative) || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return false
+	}
+	for _, segment := range strings.Split(filepath.Clean(relative), string(filepath.Separator)) {
+		if isNestedWorktreeDirectory(segment) {
+			return true
+		}
+	}
+	return false
+}
+
+func pruneNestedWorktreeState(root string, files FilesManifest, links LinksManifest) (FilesManifest, LinksManifest) {
+	excludedSources := map[string]bool{}
+	keptFiles := FilesManifest{SchemaVersion: files.SchemaVersion}
+	for _, record := range files.Files {
+		if record.Scope == "repository" && isNestedWorktreePath(root, filepath.Join(root, filepath.FromSlash(record.Path))) {
+			excludedSources[record.ID] = true
+			continue
+		}
+		keptFiles.Files = append(keptFiles.Files, record)
+	}
+	keptLinks := LinksManifest{SchemaVersion: links.SchemaVersion}
+	for _, record := range links.Links {
+		if excludedSources[record.SourceFileID] {
+			continue
+		}
+		keptLinks.Links = append(keptLinks.Links, record)
+	}
+	return keptFiles, keptLinks
+}
+
 func (i *inventory) rebuild() {
 	i.byAbs = map[string]int{}
 	i.byFold = map[string][]int{}
@@ -205,6 +245,9 @@ func (i *inventory) rebuild() {
 func (i *inventory) ignored(path string) (bool, error) {
 	if !repository.Contains(i.root, path) {
 		return false, nil
+	}
+	if isNestedWorktreePath(i.root, path) {
+		return true, nil
 	}
 	isDirectory := false
 	if info, err := os.Stat(path); err == nil {

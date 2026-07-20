@@ -41,6 +41,68 @@ func TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget(t *testing.T) {
 	}
 }
 
+func TestNestedWorktreeDirectoriesAreExcludedFromRepositoryInventory(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[nested](.worktrees/branch-a/nested.md)\n")
+	writeTestFile(t, filepath.Join(root, ".worktrees", "branch-a", "nested.md"), "# Nested\n")
+	writeTestFile(t, filepath.Join(root, ".workingtrees", "branch-b", "nested.md"), "# Nested\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, record := range plan.Files.Files {
+		if strings.HasPrefix(filepath.ToSlash(record.Path), ".worktrees/") ||
+			strings.HasPrefix(filepath.ToSlash(record.Path), ".workingtrees/") {
+			t.Fatalf("nested worktree path entered repository inventory: %#v", record)
+		}
+	}
+	if len(plan.Links.Links) != 0 {
+		t.Fatalf("nested worktree source or target entered link state: %#v", plan.Links.Links)
+	}
+}
+
+func TestLinkedWorktreeCanBeTheRepositoryRoot(t *testing.T) {
+	parent := t.TempDir()
+	root := filepath.Join(parent, ".worktrees", "branch-a")
+	writeTestFile(t, filepath.Join(root, "README.md"), "# Linked checkout\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, record := range plan.Files.Files {
+		if record.Path == "README.md" && record.Present {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("linked-worktree repository root was excluded: %#v", plan.Files.Files)
+	}
+}
+
+func TestPruneNestedWorktreeStateDropsExcludedSourcesButKeepsAffectedAuthoredLinks(t *testing.T) {
+	root := t.TempDir()
+	files := FilesManifest{SchemaVersion: schemaVersion, Files: []FileRecord{
+		{ID: "normal", Path: "README.md", Scope: "repository", Kind: "file", Present: true},
+		{ID: "nested", Path: ".worktrees/branch-a/README.md", Scope: "repository", Kind: "file", Present: true},
+	}}
+	links := LinksManifest{SchemaVersion: schemaVersion, Links: []LinkRecord{
+		{ID: "nested-source", SourceFileID: "nested", TargetFileID: "normal"},
+		{ID: "normal-source", SourceFileID: "normal", TargetFileID: "nested"},
+	}}
+
+	keptFiles, keptLinks := pruneNestedWorktreeState(root, files, links)
+	if len(keptFiles.Files) != 1 || keptFiles.Files[0].ID != "normal" {
+		t.Fatalf("unexpected retained files: %#v", keptFiles.Files)
+	}
+	if len(keptLinks.Links) != 1 || keptLinks.Links[0].ID != "normal-source" {
+		t.Fatalf("affected authored source link must remain to force reparsing: %#v", keptLinks.Links)
+	}
+}
+
 func TestDocignoreExcludesLinkTargets(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, filepath.Join(root, ".docignore"), "ignored.bin\n")

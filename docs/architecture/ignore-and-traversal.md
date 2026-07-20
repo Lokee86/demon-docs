@@ -120,7 +120,7 @@ The forward scanner does not index `.docignore` merely because it exists: after 
 
 ### Link inventory and moves
 
-`internal/links/inventory.go` walks the repository with a root `Policy`, skips ignored directories with `filepath.SkipDir`, and excludes ignored files from the repository target inventory. Its `ignored` helper intentionally returns no repository-policy result for paths outside the repository, allowing external link targets to remain an independent link concern. `internal/links/move.go` uses the same inventory policy to refuse an ignored move source or destination and to avoid rewriting links whose resolved targets are ignored.
+`internal/links/inventory.go` walks the repository with a root `Policy`, skips ignored directories with `filepath.SkipDir`, and excludes ignored files from the repository target inventory. It also prunes nested `.worktrees/` and `.workingtrees/` directories before inventorying files, so attached checkout copies do not become duplicate repository sources or targets. The configured repository root itself remains valid when it happens to be a linked worktree. Its `ignored` helper intentionally returns no repository-policy result for paths outside the repository, allowing external link targets to remain an independent link concern. `internal/links/move.go` uses the same inventory policy to refuse an ignored move source or destination and to avoid rewriting links whose resolved targets are ignored.
 
 The links boundary owns link syntax, target resolution, identity state, and source-preserving rewrites. It does not reinterpret a negated or ignored path as a link repair decision.
 
@@ -183,7 +183,7 @@ load root Hierarchy
 
 ## Tests
 
-Focused tests cover permanent exclusions, Git-ignore matching and negation, nested policy domains, deeper negation, repository-owned scanner scope, link-target exclusion, reverse nested `.docignore`, reverse watch refresh, and ordinary watcher control-file handling.
+Focused tests cover permanent exclusions, Git-ignore matching and negation, nested policy domains, deeper negation, repository-owned scanner scope, link-target exclusion, nested-worktree pruning, reverse nested `.docignore`, reverse watch refresh, and ordinary watcher control-file handling.
 
 ```bash
 go test ./internal/ignore ./internal/scan ./internal/links ./internal/reverseindex ./internal/watch -count=1
