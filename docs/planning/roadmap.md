@@ -20,7 +20,7 @@ The roadmap is a sequencing and status document. Current product summaries link 
 
 ## Current status
 
-Active roadmap. The current feature branch includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, reverse-index health, and explicit production codemap execution for existing configured sections. Missing-section creation from file-type schemas remains incomplete until the public schema provider is connected. Polyglot code intelligence and context delivery remain back-burnered or later work.
+Active roadmap. The current branch includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, document-format schemas, reverse-index health, and explicit production codemap execution with schema-governed missing-section creation. Polyglot code intelligence and context delivery remain back-burnered or later work.
 
 ## Ownership boundary
 
@@ -95,7 +95,7 @@ See [Repository Demon](../operations/repository-demon.md).
 - Generic reconciliation, watch, and repository-demon paths never invoke codemap generation.
 - The repository corpus adapter collects paths, dependency neighbours, declared symbols, source/test relationships, related-document targets, and bounded Git co-change evidence.
 - Holdout and precision tooling consume the same production ranker used by the explicit writer.
-- The internal schema-placement seam is implemented, but the public file-type schema provider required to create a missing section is not yet connected.
+- The public codemap command now uses the document-policy schema provider to create required missing sections at deterministic schema positions.
 
 The current curated Space Rocks sample contains 150 labeled recommendations. The retained baseline has 68 hard-link recommendations, 75.00% hard-link strict precision, 98.53% hard-link relevance, 72.86% labeled-valid hard-link recovery, 82 context recommendations, and 10/10 canonical hidden-link recovery. The ordinary cross-repository holdout recovers 11/18 links. These numbers describe pinned samples, not universal quality.
 
@@ -121,8 +121,8 @@ See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions
 
 Near-term goals are:
 
-- connect the repository file-type schema provider so schema-required missing sections can be placed through the existing seam;
-- add end-to-end schema-placement command tests and diagnostics;
+- expand end-to-end schema-placement command tests and diagnostics;
+- dogfood document-specific codemap placement exceptions on representative repositories;
 - dogfood explicit generation on representative Demon Docs and Space Rocks sections;
 - compare each scoring change against pinned precision and holdout samples;
 - preserve deterministic output, evidence fingerprints, whole-section ownership, and default no-pruning behavior;

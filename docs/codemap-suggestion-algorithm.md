@@ -314,7 +314,7 @@ Current limits remain:
 - ordinary cross-repository holdout recovery remains 11/18;
 - thresholds are empirical defaults rather than universal constants;
 - both tiers are currently auto-added by production execution after decline filtering; and
-- the public file-type schema provider for creating missing codemap sections is not yet connected.
+- production missing-section creation is constrained by selected effective document schemas and remains separate from ranking quality.
 
 Continued tuning against the same fixed errors would risk overfitting. New data should precede another algorithm pass.
 

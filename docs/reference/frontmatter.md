@@ -168,7 +168,7 @@ Document IDs provide a stable identity seam for future link-continuity recovery.
 
 Demon Docs preserves the Markdown body and original line-ending style. When a front matter block must be rewritten, fields are rendered deterministically. Comments and original key ordering inside the block are not preserved.
 
-Type-specific document policy selected through `document_type` is intentionally outside this feature and belongs to the document-policy layer.
+Type-specific document policy selected through `document_type` belongs to the separate document-body format operation in the shared document-policy system. See [Document Schemas And Format Enforcement](document-schemas.md).
 
 ## Code map
 

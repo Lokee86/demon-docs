@@ -113,7 +113,7 @@ See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
 ### 4. Foreground generation
 
-`internal/codemaprun` computes current recommendations with all existing links visible, projects them through persisted decline and staleness policy, and reconciles the complete codemap section. Existing sections are processed regardless of schema. The internal file-type schema placement seam can create a required missing section, but the public application does not yet supply a repository schema provider, so current CLI execution skips documents without a configured section.
+`internal/codemaprun` computes current recommendations with all existing links visible, projects them through persisted decline and staleness policy, and reconciles the complete codemap section. Existing sections are processed regardless of schema. The application supplies the document-policy schema provider, so a required missing codemap section is created at its schema-defined position; schemas without one leave the document unchanged.
 
 ### 5. Controlled holdout
 

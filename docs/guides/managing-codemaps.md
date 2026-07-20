@@ -106,8 +106,8 @@ configured removals
 Interpret section status as:
 
 - `existing` — one configured section was found and evaluated;
-- `missing` — no configured section exists and no connected schema provider created one;
-- `schema-created` — the internal schema path supplied a required placement; this is not currently produced by the public CLI.
+- `missing` — no configured section exists and the selected effective schema does not require one;
+- `schema-created` — the selected effective schema supplied a required placement and the public command created the section.
 
 A `missing` result can still show computed candidates, but no document update is planned without a section placement.
 

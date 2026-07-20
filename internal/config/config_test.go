@@ -262,6 +262,48 @@ func TestFrontmatterAbsentRemainsDisabled(t *testing.T) {
 	}
 }
 
+func TestFormatConfigurationLoads(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	text := `[format]
+enabled = true
+schema_dir = ".ddocs/policies"
+document_schema_dir = ".ddocs/document-policies"
+default_schema = "service"
+invalidation_similarity = 0.75
+
+[[format.path_rules]]
+pattern = "docs/planning/**"
+schema = "planning"
+`
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !loaded.Format.Enabled || loaded.Format.SchemaDir != ".ddocs/policies" || loaded.Format.DocumentSchemaDir != ".ddocs/document-policies" || loaded.Format.DefaultSchema != "service" || loaded.Format.InvalidationSimilarity != 0.75 {
+		t.Fatalf("format settings not loaded: %+v", loaded.Format)
+	}
+	if len(loaded.Format.PathRules) != 1 || loaded.Format.PathRules[0] != (FormatPathRule{Pattern: "docs/planning/**", Schema: "planning"}) {
+		t.Fatalf("format path rules not loaded: %+v", loaded.Format.PathRules)
+	}
+}
+
+func TestFormatAbsentRemainsDisabledButKeepsDefaults(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("root = \"docs\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Format.Enabled || loaded.Format.SchemaDir != ".ddocs/schemas" || loaded.Format.DocumentSchemaDir != ".ddocs/document-schemas" || loaded.Format.DefaultSchema != "general" || loaded.Format.InvalidationSimilarity != 0.5 {
+		t.Fatalf("unexpected legacy format defaults: %+v", loaded.Format)
+	}
+}
+
 func TestFrontmatterConfigurationLoads(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.toml")
 	text := `[frontmatter]

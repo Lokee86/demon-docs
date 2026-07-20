@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 )
 
 func TestRelevantEventFiltering(t *testing.T) {
@@ -44,6 +45,45 @@ func TestRepositoryOwnedDocignoreAndOutsideEvents(t *testing.T) {
 	}
 	if RelevantWithIgnoreRoot(filepath.Join(repositoryRoot, "outside.md"), c, docsRoot, repositoryRoot) {
 		t.Fatal("event outside docs root was relevant")
+	}
+}
+
+func TestFormatSchemaEventsBypassPrivateStateIgnore(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	schemaDir := filepath.Join(repositoryRoot, ".ddocs", "schemas")
+	documentSchemaDir := filepath.Join(repositoryRoot, ".ddocs", "document-schemas")
+	for _, directory := range []string{docsRoot, schemaDir, documentSchemaDir} {
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	shared := filepath.Join(schemaDir, "general.toml")
+	local := filepath.Join(documentSchemaDir, "document.toml")
+	privateObject := filepath.Join(repositoryRoot, ".ddocs", "objects", "object")
+	if err := os.MkdirAll(filepath.Dir(privateObject), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{shared, local, privateObject} {
+		if err := os.WriteFile(path, []byte("test"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	policy, err := ignorepolicy.Load(repositoryRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := config.Default()
+	c.Format.Enabled = true
+	features := Features{Format: true, TrackLinks: true}
+	if !relevantSelectedWithPolicy(shared, c, policy, docsRoot, repositoryRoot, features, false) {
+		t.Fatal("shared schema event was ignored")
+	}
+	if !relevantSelectedWithPolicy(local, c, policy, docsRoot, repositoryRoot, features, false) {
+		t.Fatal("document-specific schema event was ignored")
+	}
+	if relevantSelectedWithPolicy(privateObject, c, policy, docsRoot, repositoryRoot, features, false) {
+		t.Fatal("unrelated private state event became relevant")
 	}
 }
 

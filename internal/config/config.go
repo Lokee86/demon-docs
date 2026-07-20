@@ -71,6 +71,18 @@ type Frontmatter struct {
 	Fields         map[string]FrontmatterField
 	Rules          []FrontmatterRule
 }
+type FormatPathRule struct {
+	Pattern string `toml:"pattern"`
+	Schema  string `toml:"schema"`
+}
+type Format struct {
+	Enabled                bool
+	SchemaDir              string
+	DocumentSchemaDir      string
+	DefaultSchema          string
+	InvalidationSimilarity float64
+	PathRules              []FormatPathRule
+}
 type Config struct {
 	Root, IndexFile string
 	Markers         Marker
@@ -88,6 +100,7 @@ type Config struct {
 	ReverseIndex    ReverseIndex
 	Codemap         Codemap
 	Frontmatter     Frontmatter
+	Format          Format
 }
 
 func Default() Config {
@@ -115,6 +128,13 @@ func Default() Config {
 			AllowedFormats: []string{"yaml", "toml"},
 			UnknownFields:  "remove",
 		},
+		Format: Format{
+			Enabled:                false,
+			SchemaDir:              ".ddocs/schemas",
+			DocumentSchemaDir:      ".ddocs/document-schemas",
+			DefaultSchema:          "general",
+			InvalidationSimilarity: 0.5,
+		},
 	}
 }
 
@@ -127,7 +147,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\nremove_undiscovered_links = false\nremove_low_score_links = false\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n\n[frontmatter]\nenabled = true\ndefault_format = \"yaml\"\nallowed_formats = [\"yaml\", \"toml\"]\ndefault_author = \"\"\nunknown_fields = \"remove\"\n\n[frontmatter.fields.document_id]\ntype = \"uuid\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.author]\ntype = \"string\"\nrequired = true\ndefault_from = \"frontmatter.default_author\"\n\n[frontmatter.fields.document_type]\ntype = \"string\"\nrequired = true\ndefault = \"general\"\n\n[frontmatter.fields.created]\ntype = \"date\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.summary]\ntype = \"string\"\nrequired = true\n\n[frontmatter.fields.policy_exempt]\ntype = \"boolean\"\ndefault = false\n\n[frontmatter.fields.policy_exempt_reason]\ntype = \"string\"\n\n[[frontmatter.rules]]\nwhen_field = \"policy_exempt\"\nequals = true\nrequire = \"policy_exempt_reason\"\n"
+	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[format]\nenabled = true\nschema_dir = \".ddocs/schemas\"\ndocument_schema_dir = \".ddocs/document-schemas\"\ndefault_schema = \"general\"\ninvalidation_similarity = 0.5\n\n[[format.path_rules]]\npattern = \"**/README.md\"\nschema = \"index\"\n\n[[format.path_rules]]\npattern = \"**/!INDEX.md\"\nschema = \"index\"\n\n[[format.path_rules]]\npattern = \"**/planning/**\"\nschema = \"planning\"\n\n[[format.path_rules]]\npattern = \"**/services/**\"\nschema = \"service\"\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\nremove_undiscovered_links = false\nremove_low_score_links = false\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n\n[frontmatter]\nenabled = true\ndefault_format = \"yaml\"\nallowed_formats = [\"yaml\", \"toml\"]\ndefault_author = \"\"\nunknown_fields = \"remove\"\n\n[frontmatter.fields.document_id]\ntype = \"uuid\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.author]\ntype = \"string\"\nrequired = true\ndefault_from = \"frontmatter.default_author\"\n\n[frontmatter.fields.document_type]\ntype = \"string\"\nrequired = true\ndefault = \"general\"\n\n[frontmatter.fields.created]\ntype = \"date\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.summary]\ntype = \"string\"\nrequired = true\n\n[frontmatter.fields.policy_exempt]\ntype = \"boolean\"\ndefault = false\n\n[frontmatter.fields.policy_exempt_reason]\ntype = \"string\"\n\n[[frontmatter.rules]]\nwhen_field = \"policy_exempt\"\nequals = true\nrequire = \"policy_exempt_reason\"\n"
 }
 
 type rawConfig struct {
@@ -207,6 +227,14 @@ type rawConfig struct {
 		Fields         map[string]FrontmatterField `toml:"fields"`
 		Rules          []FrontmatterRule           `toml:"rules"`
 	} `toml:"frontmatter"`
+	Format *struct {
+		Enabled                *bool            `toml:"enabled"`
+		SchemaDir              *string          `toml:"schema_dir"`
+		DocumentSchemaDir      *string          `toml:"document_schema_dir"`
+		DefaultSchema          *string          `toml:"default_schema"`
+		InvalidationSimilarity *float64         `toml:"invalidation_similarity"`
+		PathRules              []FormatPathRule `toml:"path_rules"`
+	} `toml:"format"`
 }
 
 func Load(path string) (Config, error) {
@@ -357,6 +385,26 @@ func Load(path string) (Config, error) {
 		}
 		if t.IncludeNotes != nil {
 			c.Template.IncludeNotes = *t.IncludeNotes
+		}
+	}
+	if f := raw.Format; f != nil {
+		if f.Enabled != nil {
+			c.Format.Enabled = *f.Enabled
+		}
+		if f.SchemaDir != nil {
+			c.Format.SchemaDir = *f.SchemaDir
+		}
+		if f.DocumentSchemaDir != nil {
+			c.Format.DocumentSchemaDir = *f.DocumentSchemaDir
+		}
+		if f.DefaultSchema != nil {
+			c.Format.DefaultSchema = *f.DefaultSchema
+		}
+		if f.InvalidationSimilarity != nil {
+			c.Format.InvalidationSimilarity = *f.InvalidationSimilarity
+		}
+		if f.PathRules != nil {
+			c.Format.PathRules = f.PathRules
 		}
 	}
 	if f := raw.Frontmatter; f != nil {

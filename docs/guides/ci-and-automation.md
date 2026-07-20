@@ -51,7 +51,7 @@ Generic `ddocs check` does not include production codemap generation. Repositori
 ddocs codemaps check --root docs
 ```
 
-That command remains read-only and fails when one or more selected codemaps would change. It also reports section, marker, scope, and planning failures. Because missing-section creation is not yet connected to the public file-type schema provider, a document without a configured section is currently skipped rather than failed as stale.
+That command remains read-only and fails when one or more selected codemaps would change. It also reports section, marker, scope, schema-placement, and planning failures. A document whose selected effective schema requires a missing codemap section is stale; a schema without a codemap section leaves the document unchanged.
 
 ## Narrow CI adoption
 

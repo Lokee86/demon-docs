@@ -161,20 +161,20 @@ Removal condition:
 
 This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, repository-specific evaluation, and improved evidence providers.
 
-## Missing codemap sections are not yet created from file-type schemas
+## Codemap section creation requires an explicit document schema
 
-The internal codemap layer implements and tests a `SectionSchema` placement seam, but the public application does not yet connect a repository file-type schema provider to production codemap execution.
+Production codemap execution creates a missing section only when the selected effective document schema declares a required codemap section and deterministic placement.
 
 Impact:
 
-- existing configured codemap sections can be adopted and updated;
-- a selected document without a configured section is reported as `missing` and left unchanged;
-- `section: schema-created` is an internal reachable state but not currently produced by normal CLI configuration; and
-- repositories must add the schema-defined heading manually before production generation can manage that document.
+- existing configured codemap sections can be adopted and updated regardless of schema;
+- a selected document whose effective schema requires a codemap section can report `schema-created` and receive the section automatically;
+- a document whose effective schema has no codemap section is reported as `missing` and left unchanged; and
+- heading configuration alone does not authorize Demon Docs to invent a new section.
 
 Workaround:
 
-Define the intended heading in `[codemap].headings`, add the correctly placed section to the document, then run `codemap inspect`, dry-run, fix, and check.
+Add a required codemap section to the appropriate shared schema or document-specific schema, then run `codemaps inspect`, dry-run, fix, and check.
 
 Owning docs:
 
@@ -184,7 +184,7 @@ Owning docs:
 
 Removal condition:
 
-A repository file-type schema model, configuration loader, document-type resolver, placement provider, CLI integration, diagnostics, and end-to-end tests are connected to `codemaprun.Options.Schema`.
+This is a deliberate ownership boundary rather than an incomplete connection. Any broader creation policy still requires an explicit deterministic schema authority; heading recognition alone must not become placement authority.
 
 ## Agent context delivery is not implemented
 

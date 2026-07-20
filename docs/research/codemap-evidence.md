@@ -248,7 +248,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - Ordinary cross-repository holdout recovery remains 11/18.
 - Thresholds are empirical defaults rather than universal constants.
 - Production currently auto-adds both selected tiers after decline filtering.
-- The public file-type schema provider for creating missing codemap sections is not connected.
+- Production execution now creates missing codemap sections only through selected effective document schemas; schema placement is separate from ranking quality.
 - Continued tuning on the same frozen errors risks overfitting.
 
 ## Retained artifacts

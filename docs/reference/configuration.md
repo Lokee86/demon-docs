@@ -81,6 +81,13 @@ The supported keys are:
 - `[frontmatter].allowed_formats`
 - `[frontmatter].default_author`
 - `[frontmatter].unknown_fields`
+- `[format].enabled`
+- `[format].schema_dir`
+- `[format].document_schema_dir`
+- `[format].default_schema`
+- `[format].invalidation_similarity`
+- `[[format.path_rules]].pattern`
+- `[[format.path_rules]].schema`
 - `[frontmatter.fields.<name>].type`
 - `[frontmatter.fields.<name>].required`
 - `[frontmatter.fields.<name>].immutable`
@@ -189,6 +196,37 @@ require = "policy_exempt_reason"
 
 `check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so repositories must either configure those values, relax the schema, or author them explicitly.
 
+## Document Schemas And Body Format
+
+Initialized repositories enable document-body format enforcement and write human-editable starter schemas:
+
+```toml
+[format]
+enabled = true
+schema_dir = ".ddocs/schemas"
+document_schema_dir = ".ddocs/document-schemas"
+default_schema = "general"
+invalidation_similarity = 0.5
+```
+
+Shared schemas are TOML files named after `document_type`. Metadata selects the schema first. Path fallbacks are evaluated only when metadata is absent:
+
+```toml
+[[format.path_rules]]
+pattern = "docs/services/**"
+schema = "service"
+
+[[format.path_rules]]
+pattern = "docs/planning/**"
+schema = "planning"
+```
+
+`schema_dir` stores human-authored shared policy. `document_schema_dir` stores generated but human-editable per-document exceptions keyed by immutable `document_id`. `default_schema` is used after metadata and path fallbacks. An empty default disables enforcement for unmatched documents.
+
+`invalidation_similarity` controls when a changed shared schema invalidates document-specific exceptions. Similarity is measured cumulatively from the exact shared-schema fingerprint recorded when the exception was accepted, comparing canonical definitions by stable section ID against the larger schema's section count. The default `0.5` requires re-confirmation when similarity falls below 50 percent. `0` disables automatic invalidation.
+
+Use `ddocs new DOCUMENT_TYPE PATH` to create a document from the corresponding schema. Use `ddocs check --format` and `ddocs fix --format` to operate on Markdown body structure independently from frontmatter. See [Document Schemas And Format Enforcement](document-schemas.md).
+
 ## Repository Demon
 
 Initialized repositories permit the self-managing watcher by default:
@@ -272,12 +310,14 @@ Compatibility fallbacks remain supported at lower priority:
 
 CLI flags override the selected base config. The reconciliation selectors are operational flags rather than persistent configuration:
 
-- `-d` / `--docs` selects documentation-folder indexes and configured frontmatter enforcement.
+- `-d` / `--docs` selects documentation-folder indexes, configured frontmatter enforcement, and document-body format enforcement.
+- `--frontmatter` selects frontmatter enforcement only.
+- `--format` selects document-body format enforcement only.
 - `-l` / `--links` selects Markdown link reconciliation.
 - `-r` / `--reverse` selects code-folder reverse indexes.
 - `-i` / `--indexes` remains a compatibility alias for `--docs`.
 - When any selector is supplied, only selected systems run.
-- Without selectors, docs, configured frontmatter, and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
+- Without selectors, indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
 - The selectors apply to `check`, `fix`, and `watch`.
 
 Examples include:
@@ -317,6 +357,29 @@ enabled = true
 
 [links]
 enabled = true
+
+[format]
+enabled = true
+schema_dir = ".ddocs/schemas"
+document_schema_dir = ".ddocs/document-schemas"
+default_schema = "general"
+invalidation_similarity = 0.5
+
+[[format.path_rules]]
+pattern = "**/README.md"
+schema = "index"
+
+[[format.path_rules]]
+pattern = "**/!INDEX.md"
+schema = "index"
+
+[[format.path_rules]]
+pattern = "**/planning/**"
+schema = "planning"
+
+[[format.path_rules]]
+pattern = "**/services/**"
+schema = "service"
 
 [reverse_index]
 roots = []
@@ -492,7 +555,7 @@ remove_low_score_links = false
 
 When a matching section exists, it is processed regardless of the document's file-type schema. The full section is managed as one unified codemap; existing links and deterministic additions are not split into separate authored and generated subsections.
 
-The internal codemap layer accepts a file-type schema placement for a missing section, but the current public application does not yet resolve or supply that schema provider. Therefore current CLI execution leaves a document without a configured codemap section unchanged. This is a current product limitation rather than permission to invent a section outside schema policy.
+The public codemap command resolves the same metadata-first effective document schema used by body-format enforcement. When that schema requires a codemap section, the command creates it at the schema-defined position. A document whose schema does not declare a codemap section remains unchanged; the command never invents a placement outside schema policy.
 
 Removal based on algorithm confidence is opt-in through the two boolean settings. Definitively broken paths remain governed by normal link maintenance.
 
@@ -602,7 +665,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, frontmatter enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
+An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, frontmatter enforcement, document-body format enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -798,6 +861,7 @@ The first link-enabled `fix` or `watch` pass establishes this baseline without r
 - `internal/repository/scope.go` — repository-root and docs-root resolution boundaries.
 - `internal/repository/repository.go` — repository discovery and initialization.
 - `internal/frontmatter/` — YAML/TOML parsing, schema evaluation, immutable-value state, and docs-root repair planning.
+- `internal/documentpolicy/` — TOML document schemas, Markdown body parsing, structure enforcement, creation, and document-specific exceptions.
 - `internal/links/` — schema-versioned link state governed by repository scope rather than TOML keys.
 - `internal/review/` — review history, decisions, blocks, and undo eligibility.
 
@@ -811,6 +875,7 @@ Use `ddocs config paths` to inspect selection and `ddocs config show` to inspect
 - [Reference](README.md)
 - [Getting Started](../guides/getting-started.md)
 - [CLI Reference](cli.md)
+- [Document Schemas And Format Enforcement](document-schemas.md)
 - [Managed Files and State](managed-files-and-state.md)
 - [Review Ledger](../architecture/review-ledger.md)
 - [Application Orchestration](../architecture/application-orchestration.md)

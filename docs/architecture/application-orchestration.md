@@ -85,7 +85,7 @@ executable main
 
 Codemap generation is a separate foreground command family. Canonical `ddocs codemaps fix|check|inspect`, with singular `codemap` retained as a compatibility alias, resolves a contained file-or-directory scope, builds one production codemap plan, and either inspects, compares, or applies it. They do not enter normal reconciliation, watch scheduling, or repository-demon execution. This exclusion is structural rather than a runtime feature flag.
 
-The application currently supplies configured headings, marker prefix, and removal policy to the codemap planner. It does not yet supply the repository file-type schema provider required to create a missing schema-defined section, so current public execution adopts existing sections only.
+The application supplies configured headings, marker prefix, removal policy, and the repository document-schema provider to the codemap planner. Existing sections are adopted regardless of schema; when the selected effective schema requires a codemap section, the planner creates it at the schema-defined position before adoption.
 
 ## State ownership
 
@@ -104,7 +104,7 @@ Command parsing must not become an alternative source of repository truth. Resol
 - Nested help must describe the requested subcommand rather than falling back to its parent summary.
 - Help text and documentation must change with public command behavior.
 - Production codemap execution remains explicit and cannot be enabled indirectly through normal reconciliation or daemon configuration.
-- A missing codemap section remains unchanged until a file-type schema provider supplies an explicit placement.
+- A missing codemap section is created only when the selected effective document schema supplies an explicit required placement; otherwise it remains unchanged.
 
 ## Code map
 

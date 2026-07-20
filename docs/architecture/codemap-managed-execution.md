@@ -50,8 +50,8 @@ implemented now
 implemented internal seam
 = accept schema placement and create a required missing section
 
-not yet connected publicly
-= resolve a repository file type and supply its codemap placement to the execution plan
+connected through document policy
+= resolve the selected effective document schema and supply its codemap placement to the execution plan
 ```
 
 See [Current Product Limitations](../limits/current-limitations.md) for the user-visible impact and removal condition.
@@ -182,7 +182,7 @@ The schema is consulted only when no configured codemap section exists. An exist
 
 When a schema requires a section, insertion validates the heading, level, and source offset, inserts the heading with bounded blank-line separation, adds that heading to the active recognition set, and verifies that the new section can be located. The codemap layer never creates the document itself.
 
-The public application currently passes no schema provider, so this path is not yet reachable through the CLI.
+The public application supplies the document-policy schema provider. It selects metadata-first shared and document-specific schemas, then exposes a required codemap section and its deterministic insertion position to the planner.
 
 ## Planning lifecycle
 
@@ -332,7 +332,7 @@ evidence lines
 configured removals
 ```
 
-A missing section can still have computed recommendations, but without a connected schema provider it remains unchanged.
+A missing section can still have computed recommendations. It is created only when the selected effective schema requires a codemap section; otherwise the document remains unchanged.
 
 ### `check`
 
@@ -449,7 +449,7 @@ The command fails. Directory traversal may contain non-Markdown files, but only 
 
 ### No configured section exists
 
-The current public command leaves the document unchanged. Use an existing configured heading until the repository file-type schema provider is connected.
+The command creates the section only when the selected effective document schema requires one. Documents whose schema has no codemap section remain unchanged.
 
 ### Multiple matching sections exist
 

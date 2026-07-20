@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/Lokee86/demon-docs/internal/codemaprun"
+	"github.com/Lokee86/demon-docs/internal/documentpolicy"
 	"github.com/Lokee86/demon-docs/internal/repository"
 )
 
@@ -109,6 +110,11 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		MarkerPrefix:            resolved.Markers.Prefix,
 		RemoveUndiscoveredLinks: resolved.Codemap.RemoveUndiscoveredLinks,
 		RemoveLowScoreLinks:     resolved.Codemap.RemoveLowScoreLinks,
+		Schema: documentpolicy.CodemapSchemaProvider{
+			RepositoryRoot: scope.RepositoryRoot,
+			Config:         resolved,
+			Headings:       acceptedHeadings,
+		},
 	})
 	if err != nil {
 		return fail(errOut, err)
