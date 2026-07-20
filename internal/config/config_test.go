@@ -241,3 +241,108 @@ func TestStarterConfigLoads(t *testing.T) {
 		}
 	}
 }
+
+func TestFrontmatterAbsentRemainsDisabled(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("root = \"docs\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if loaded.Frontmatter.Enabled {
+		t.Fatalf("frontmatter unexpectedly enabled: %+v", loaded.Frontmatter)
+	}
+	if loaded.Frontmatter.DefaultFormat != "yaml" || !reflect.DeepEqual(loaded.Frontmatter.AllowedFormats, []string{"yaml", "toml"}) || loaded.Frontmatter.UnknownFields != "remove" {
+		t.Fatalf("unexpected frontmatter defaults: %+v", loaded.Frontmatter)
+	}
+	if loaded.Frontmatter.Fields != nil || loaded.Frontmatter.Rules != nil {
+		t.Fatalf("legacy config unexpectedly gained a schema: %+v", loaded.Frontmatter)
+	}
+}
+
+func TestFrontmatterConfigurationLoads(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	text := `[frontmatter]
+enabled = true
+default_format = "toml"
+allowed_formats = ["toml"]
+default_author = "Demon Docs"
+unknown_fields = "warn"
+
+[frontmatter.fields.document_id]
+type = "uuid"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.author]
+type = "string"
+required = true
+default_from = "frontmatter.default_author"
+
+[frontmatter.fields.policy_exempt]
+type = "boolean"
+default = false
+
+[[frontmatter.rules]]
+when_field = "policy_exempt"
+equals = true
+require = "policy_exempt_reason"
+`
+	if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !loaded.Frontmatter.Enabled || loaded.Frontmatter.DefaultFormat != "toml" || !reflect.DeepEqual(loaded.Frontmatter.AllowedFormats, []string{"toml"}) || loaded.Frontmatter.DefaultAuthor != "Demon Docs" || loaded.Frontmatter.UnknownFields != "warn" {
+		t.Fatalf("frontmatter settings not loaded: %+v", loaded.Frontmatter)
+	}
+	id := loaded.Frontmatter.Fields["document_id"]
+	if id.Type != "uuid" || !id.Required || !id.Immutable || !id.Generated {
+		t.Fatalf("document_id field not loaded: %+v", id)
+	}
+	author := loaded.Frontmatter.Fields["author"]
+	if author.DefaultFrom != "frontmatter.default_author" || !author.Required {
+		t.Fatalf("author field not loaded: %+v", author)
+	}
+	exempt := loaded.Frontmatter.Fields["policy_exempt"]
+	if exempt.Type != "boolean" || exempt.Default != false {
+		t.Fatalf("policy_exempt field not loaded: %+v", exempt)
+	}
+	if len(loaded.Frontmatter.Rules) != 1 || loaded.Frontmatter.Rules[0].WhenField != "policy_exempt" || loaded.Frontmatter.Rules[0].Equals != true || loaded.Frontmatter.Rules[0].Require != "policy_exempt_reason" {
+		t.Fatalf("frontmatter rule not loaded: %+v", loaded.Frontmatter.Rules)
+	}
+}
+
+func TestStarterConfigIncludesDefaultFrontmatterSchema(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "starter.toml")
+	if err := os.WriteFile(path, []byte(StarterText()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !loaded.Frontmatter.Enabled || loaded.Frontmatter.DefaultFormat != "yaml" || !reflect.DeepEqual(loaded.Frontmatter.AllowedFormats, []string{"yaml", "toml"}) || loaded.Frontmatter.UnknownFields != "remove" {
+		t.Fatalf("starter frontmatter settings incorrect: %+v", loaded.Frontmatter)
+	}
+	expected := map[string]FrontmatterField{
+		"document_id":          {Type: "uuid", Required: true, Immutable: true, Generated: true},
+		"author":               {Type: "string", Required: true, DefaultFrom: "frontmatter.default_author"},
+		"document_type":        {Type: "string", Required: true, Default: "general"},
+		"created":              {Type: "date", Required: true, Immutable: true, Generated: true},
+		"summary":              {Type: "string", Required: true},
+		"policy_exempt":        {Type: "boolean", Default: false},
+		"policy_exempt_reason": {Type: "string"},
+	}
+	if !reflect.DeepEqual(loaded.Frontmatter.Fields, expected) {
+		t.Fatalf("starter frontmatter fields incorrect: %#v", loaded.Frontmatter.Fields)
+	}
+	if len(loaded.Frontmatter.Rules) != 1 || loaded.Frontmatter.Rules[0] != (FrontmatterRule{WhenField: "policy_exempt", Equals: true, Require: "policy_exempt_reason"}) {
+		t.Fatalf("starter frontmatter rules incorrect: %#v", loaded.Frontmatter.Rules)
+	}
+}

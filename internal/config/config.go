@@ -45,6 +45,28 @@ type Template struct {
 	ManagedSections                                                          []string
 	IncludeOwnership, IncludeDoesNotBelong, IncludeRelatedDocs, IncludeNotes bool
 }
+type FrontmatterField struct {
+	Type        string `toml:"type"`
+	Required    bool   `toml:"required"`
+	Immutable   bool   `toml:"immutable"`
+	Generated   bool   `toml:"generated"`
+	Default     any    `toml:"default"`
+	DefaultFrom string `toml:"default_from"`
+}
+type FrontmatterRule struct {
+	WhenField string `toml:"when_field"`
+	Equals    any    `toml:"equals"`
+	Require   string `toml:"require"`
+}
+type Frontmatter struct {
+	Enabled        bool
+	DefaultFormat  string
+	AllowedFormats []string
+	DefaultAuthor  string
+	UnknownFields  string
+	Fields         map[string]FrontmatterField
+	Rules          []FrontmatterRule
+}
 type Config struct {
 	Root, IndexFile string
 	Markers         Marker
@@ -61,6 +83,7 @@ type Config struct {
 	Links           Links
 	ReverseIndex    ReverseIndex
 	Codemap         Codemap
+	Frontmatter     Frontmatter
 }
 
 func Default() Config {
@@ -83,6 +106,11 @@ func Default() Config {
 			"Code or source map",
 			"Code and test map",
 		}},
+		Frontmatter: Frontmatter{
+			DefaultFormat:  "yaml",
+			AllowedFormats: []string{"yaml", "toml"},
+			UnknownFields:  "remove",
+		},
 	}
 }
 
@@ -95,7 +123,7 @@ func RepositoryStarterText(docsRoot string) string {
 }
 
 func starterBody() string {
-	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n"
+	return "index_file = \"README.md\"\n\n[index]\nenabled = true\n\n[links]\nenabled = true\n\n[reverse_index]\nroots = []\n\n[codemap]\nheadings = [\"Code map\", \"Codemap\", \"Code or source map\", \"Code and test map\"]\n\n[demon]\nrun = true\n\n[review]\nundo_depth = 100\nundo_max_age_days = 30\n\n[parent_link]\nfolder_indexes = true\nindexed_files = false\n\n[drafts]\nfolder = \"stubs\"\ndescription_prefix = \"Stub: \"\n\n[watch]\ndebounce_seconds = 0.75\nignored_dirs = [\".cache\", \"__pycache__\"]\nignored_suffixes = [\"~\", \".swp\", \".tmp\", \".bak\"]\n\n[frontmatter]\nenabled = true\ndefault_format = \"yaml\"\nallowed_formats = [\"yaml\", \"toml\"]\ndefault_author = \"\"\nunknown_fields = \"remove\"\n\n[frontmatter.fields.document_id]\ntype = \"uuid\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.author]\ntype = \"string\"\nrequired = true\ndefault_from = \"frontmatter.default_author\"\n\n[frontmatter.fields.document_type]\ntype = \"string\"\nrequired = true\ndefault = \"general\"\n\n[frontmatter.fields.created]\ntype = \"date\"\nrequired = true\nimmutable = true\ngenerated = true\n\n[frontmatter.fields.summary]\ntype = \"string\"\nrequired = true\n\n[frontmatter.fields.policy_exempt]\ntype = \"boolean\"\ndefault = false\n\n[frontmatter.fields.policy_exempt_reason]\ntype = \"string\"\n\n[[frontmatter.rules]]\nwhen_field = \"policy_exempt\"\nequals = true\nrequire = \"policy_exempt_reason\"\n"
 }
 
 type rawConfig struct {
@@ -164,6 +192,15 @@ type rawConfig struct {
 		IncludeRelatedDocs   *bool     `toml:"include_related_docs"`
 		IncludeNotes         *bool     `toml:"include_notes"`
 	} `toml:"template"`
+	Frontmatter *struct {
+		Enabled        *bool                       `toml:"enabled"`
+		DefaultFormat  *string                     `toml:"default_format"`
+		AllowedFormats *[]string                   `toml:"allowed_formats"`
+		DefaultAuthor  *string                     `toml:"default_author"`
+		UnknownFields  *string                     `toml:"unknown_fields"`
+		Fields         map[string]FrontmatterField `toml:"fields"`
+		Rules          []FrontmatterRule           `toml:"rules"`
+	} `toml:"frontmatter"`
 }
 
 func Load(path string) (Config, error) {
@@ -306,6 +343,30 @@ func Load(path string) (Config, error) {
 		}
 		if t.IncludeNotes != nil {
 			c.Template.IncludeNotes = *t.IncludeNotes
+		}
+	}
+	if f := raw.Frontmatter; f != nil {
+		c.Frontmatter.Enabled = true
+		if f.Enabled != nil {
+			c.Frontmatter.Enabled = *f.Enabled
+		}
+		if f.DefaultFormat != nil {
+			c.Frontmatter.DefaultFormat = *f.DefaultFormat
+		}
+		if f.AllowedFormats != nil {
+			c.Frontmatter.AllowedFormats = *f.AllowedFormats
+		}
+		if f.DefaultAuthor != nil {
+			c.Frontmatter.DefaultAuthor = *f.DefaultAuthor
+		}
+		if f.UnknownFields != nil {
+			c.Frontmatter.UnknownFields = *f.UnknownFields
+		}
+		if f.Fields != nil {
+			c.Frontmatter.Fields = f.Fields
+		}
+		if f.Rules != nil {
+			c.Frontmatter.Rules = f.Rules
 		}
 	}
 	return c, nil
