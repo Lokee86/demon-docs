@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/evidence"
 )
 
@@ -42,7 +43,7 @@ func (r Runner) SuggestCurrent(ctx context.Context) (Report, error) {
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
-			return SuggestionsFromEvidence(document, candidates), nil
+			return codemaprecommend.SuggestionsFromEvidence(document, candidates), nil
 		})
 	}
 

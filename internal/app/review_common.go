@@ -12,9 +12,10 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
-	"github.com/Lokee86/demon-docs/internal/codemapbench"
 	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/evidence"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/review"
@@ -78,23 +79,28 @@ func currentCodemapSuggestions(ctx context.Context, scope repository.Scope, reso
 	if err != nil {
 		return nil, fmt.Errorf("build codemap suggestion corpus: %w", err)
 	}
-	runner := codemapbench.NewRunner(benchmarkCorpus{
-		links:  codemapbench.ResolvedLinksFromDataset(dataset),
-		corpus: corpus,
-		format: format,
-	}, codemapbench.Config{})
-	report, err := runner.SuggestCurrent(ctx)
-	if err != nil {
-		return nil, err
-	}
 	policy, err := review.LoadPolicy(scope.RepositoryRoot)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]review.Suggestion, 0, len(report.UnmatchedSuggestions))
-	for _, item := range report.UnmatchedSuggestions {
-		suggestion := review.CodemapSuggestion(item.Document, item.Target, item.Score, string(item.Tier), item.Evidence)
-		result = append(result, policy.ApplySuggestion(suggestion))
+	result := []review.Suggestion{}
+	for _, document := range dataset.Documents {
+		if document.SectionCount == 0 {
+			continue
+		}
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		input, err := corpus.Input(document.Path, corpus.KnownTargets(document.Path))
+		if err != nil {
+			return nil, err
+		}
+		input.DocumentText = codemap.StripAuthoredSections(input.DocumentText, format)
+		items := codemaprecommend.SuggestionsFromEvidence(document.Path, evidence.Collect(input))
+		for _, item := range items {
+			suggestion := review.CodemapSuggestion(item.Document, item.Target, item.Score, string(item.Tier), item.Evidence)
+			result = append(result, policy.ApplySuggestion(suggestion))
+		}
 	}
 	return result, nil
 }
