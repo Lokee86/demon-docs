@@ -39,6 +39,14 @@ Parent navigation can be enabled independently for folder indexes and indexed fi
 
 Demon Docs edits only configured Markdown-like file types for parent links. The root index has no parent link.
 
+## Frontmatter
+
+When `[frontmatter].enabled` is true, Demon Docs validates every non-ignored `.md` file beneath the configured docs root, including generated folder indexes. Existing YAML (`---`) and TOML (`+++`) blocks keep their format. Missing blocks use the configured default format.
+
+`fix` may insert configured defaults or generated UUID/date values, restore immutable fields from private state, and remove unknown fields when configured. It does not replace an existing valid mutable value. Malformed blocks, invalid mutable values, and required fields without a repair source remain authored problems and are not guessed.
+
+The Markdown body, newline convention, and final-newline behavior remain preserved during frontmatter replacement.
+
 ## Local link rewrites
 
 Link reconciliation may rewrite the resolved path portion of recognized local links in repository Markdown sources.
@@ -62,7 +70,7 @@ Configured reverse-index roots may receive generated documentation projections. 
 
 ## `.docignore`
 
-`.docignore` lives at the repository root and uses Git ignore syntax. It applies to index scanning, link scanning, reverse-index traversal, and watcher event filtering as implemented by each subsystem.
+`.docignore` lives at the repository root and uses Git ignore syntax. It applies to index scanning, frontmatter enforcement, link scanning, reverse-index traversal, and watcher event filtering as implemented by each subsystem.
 
 These directories are always pruned at every depth:
 
@@ -85,6 +93,7 @@ State families include:
 configuration
 object and identity records
 path history and fingerprints
+recorded immutable frontmatter values
 incoming-link and reverse-index state
 transaction and generated-write metadata
 review decisions and repair controls under `refs/ddocs/review`
@@ -94,7 +103,7 @@ feeder leases and heartbeats
 bounded logs
 ```
 
-Private state is implementation-owned and should not be hand-edited while commands or watchers are active. Link identity state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither creates commits on the user's normal Git branch.
+Private state is implementation-owned and should not be hand-edited while commands or watchers are active. Link identity and immutable-frontmatter records share `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither creates commits on the user's normal Git branch.
 
 ## Rebuildability
 

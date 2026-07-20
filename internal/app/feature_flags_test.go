@@ -150,7 +150,7 @@ func TestDisabledSelectedIndexWatchDoesNotFallBackToOtherSystems(t *testing.T) {
 	root := t.TempDir()
 	docsRoot := filepath.Join(root, "docs")
 	configPath := filepath.Join(root, ".ddocs", "config.toml")
-	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	writeTestFile(t, configPath, starterWithoutFrontmatter("docs"))
 	if err := config.SetIndexEnabled(configPath, false); err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestDisabledIndexLeavesIndexOrdinaryAndLinkManaged(t *testing.T) {
 	root := t.TempDir()
 	docsRoot := filepath.Join(root, "docs")
 	configPath := filepath.Join(root, ".ddocs", "config.toml")
-	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	writeTestFile(t, configPath, starterWithoutFrontmatter("docs"))
 	if err := config.SetIndexEnabled(configPath, false); err != nil {
 		t.Fatal(err)
 	}
@@ -209,7 +209,7 @@ func TestDisabledLinksKeepStateWithoutRewriting(t *testing.T) {
 	root := t.TempDir()
 	docsRoot := filepath.Join(root, "docs")
 	configPath := filepath.Join(root, ".ddocs", "config.toml")
-	writeTestFile(t, configPath, config.RepositoryStarterText("docs"))
+	writeTestFile(t, configPath, starterWithoutFrontmatter("docs"))
 	if err := config.SetIndexEnabled(configPath, false); err != nil {
 		t.Fatal(err)
 	}
@@ -257,6 +257,10 @@ func TestDisabledLinksKeepStateWithoutRewriting(t *testing.T) {
 	if string(updated) != "[Page](moved.md)\n" {
 		t.Fatalf("re-enabled links did not use persistent tracking state: %s", updated)
 	}
+}
+
+func starterWithoutFrontmatter(root string) string {
+	return strings.Replace(config.RepositoryStarterText(root), "[frontmatter]\nenabled = true", "[frontmatter]\nenabled = false", 1)
 }
 
 func assertDDocsState(t *testing.T, root string) {

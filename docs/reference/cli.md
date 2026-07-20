@@ -44,7 +44,7 @@ Mutation scope: the requested filesystem source and affected repository Markdown
 
 ### `ddocs check`
 
-Computes reconciliation without writing authored repository files. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
+Computes reconciliation without writing authored repository files or frontmatter state. It reports pending updates and unresolved conditions and returns non-zero when the selected systems are not clean. When links are selected, it also reports managed Markdown documents with no meaningful inbound link.
 
 Mutation scope: no authored-file writes. Internal read/cache behavior remains implementation-owned.
 
@@ -52,7 +52,7 @@ Mutation scope: no authored-file writes. Internal read/cache behavior remains im
 
 Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation.
 
-Mutation scope: managed documentation indexes, recognized repository Markdown link paths, configured reverse-index outputs, and private `.ddocs/` state.
+Mutation scope: managed documentation indexes, configured Markdown frontmatter beneath the docs root, recognized repository Markdown link paths, configured reverse-index outputs, and private `.ddocs/` state.
 
 ### `ddocs watch`
 
@@ -63,13 +63,13 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
 ## Subsystem selectors
 
 ```text
--d, --docs     documentation folder indexes and parent navigation
+-d, --docs     documentation indexes, parent navigation, and configured frontmatter
 -l, --links    repository-local Markdown link inventory and reconciliation
 -r, --reverse  code-folder reverse indexes
 -i, --indexes  compatibility alias for --docs
 ```
 
-When any selector is supplied, only selected systems run. Without selectors, documentation indexes and links run; reverse indexes also run when reverse roots are configured or supplied.
+When any selector is supplied, only selected systems run. Without selectors, documentation indexes, configured frontmatter, and links run; reverse indexes also run when reverse roots are configured or supplied.
 
 Selectors apply to `check`, `fix`, and `watch` where supported.
 
@@ -172,7 +172,7 @@ Configuration can override these conventions.
 
 ## Diagnostics and failure behavior
 
-`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including broken or ambiguous links, uninitialized link state, and orphan managed Markdown documents when links are selected.
+`check` returns non-zero for pending deterministic updates and unresolved selected-system conditions, including frontmatter violations, broken or ambiguous links, uninitialized link state, and orphan managed Markdown documents when links are selected.
 
 `fix` does not guess among multiple plausible targets. Ambiguous sources remain unchanged and are exposed through `ddocs suggestions`.
 
@@ -201,7 +201,7 @@ ddocs check --links
 ddocs suggestions
 ddocs changes
 
-# Reconcile only documentation indexes.
+# Reconcile documentation indexes and configured frontmatter.
 ddocs fix --docs
 
 # Run one watcher-path pass and exit.

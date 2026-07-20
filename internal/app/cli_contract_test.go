@@ -88,7 +88,7 @@ func TestConfigCommandsContract(t *testing.T) {
 		if code := Run(context.Background(), []string{"config", "show", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("show code=%d stderr=%q", code, stderr.String())
 		}
-		for _, value := range []string{"selected_config_path = <built-in defaults>", "root = 'docs'", "index_file = 'README.md'", "folder_indexes = true", "indexed_files = false"} {
+		for _, value := range []string{"selected_config_path = <built-in defaults>", "root = 'docs'", "index_file = 'README.md'", "[frontmatter]", "enabled = false", "default_format = 'yaml'", "unknown_fields = 'remove'", "folder_indexes = true", "indexed_files = false"} {
 			if !strings.Contains(stdout.String(), value) {
 				t.Errorf("show missing %q:\n%s", value, stdout.String())
 			}

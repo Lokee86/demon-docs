@@ -66,6 +66,20 @@ The supported keys are:
 - `[demon].run`
 - `[review].undo_depth`
 - `[review].undo_max_age_days`
+- `[frontmatter].enabled`
+- `[frontmatter].default_format`
+- `[frontmatter].allowed_formats`
+- `[frontmatter].default_author`
+- `[frontmatter].unknown_fields`
+- `[frontmatter.fields.<name>].type`
+- `[frontmatter.fields.<name>].required`
+- `[frontmatter.fields.<name>].immutable`
+- `[frontmatter.fields.<name>].generated`
+- `[frontmatter.fields.<name>].default`
+- `[frontmatter.fields.<name>].default_from`
+- `[[frontmatter.rules]].when_field`
+- `[[frontmatter.rules]].equals`
+- `[[frontmatter.rules]].require`
 
 ## Repository Feature Toggles
 
@@ -97,7 +111,73 @@ Disabling `[index].enabled` suspends folder-index creation, insertion, repair, a
 
 Disabling `[links].enabled` suspends automatic link rewrites and user-visible link diagnostics. Demon Docs continues updating its private file identities, path history, and link graph in `.ddocs/`. Re-enabling link maintenance therefore resumes from retained state instead of rebuilding tracking from scratch.
 
-Selectors do not override a disabled repository feature. For example, `ddocs fix -d` remains a no-op while indexing is disabled, and `ddocs fix -l` refreshes internal link state without rewriting documents while link maintenance is disabled.
+Selectors do not override a disabled repository feature. For example, `ddocs fix -d` does not create indexes while indexing is disabled, and `ddocs fix -l` refreshes internal link state without rewriting documents while link maintenance is disabled. Configured frontmatter remains a separate docs-selected subsystem, so `-d` may still validate or repair frontmatter when indexing is disabled.
+
+## Frontmatter Schema
+
+Initialized repositories include a strict, project-editable frontmatter schema. Legacy configs without a `[frontmatter]` section keep frontmatter enforcement disabled.
+
+```toml
+[frontmatter]
+enabled = true
+default_format = "yaml"
+allowed_formats = ["yaml", "toml"]
+default_author = ""
+unknown_fields = "remove"
+```
+
+Frontmatter applies to non-ignored `.md` files beneath the configured docs root. It is independent of `[files].include_patterns` and `[files].exclude_patterns`, which control folder-index membership rather than document policy. Generated folder indexes are included because index reconciliation completes before frontmatter reconciliation in the same `fix` or watch pass.
+
+YAML blocks use `---`; TOML blocks use `+++`. A recognized existing block keeps its format. `default_format` is used only when a block is inserted. `allowed_formats` rejects a recognized but disallowed format instead of converting it. Malformed, unclosed, duplicate-key, or multiple leading blocks are reported without destructive rewriting.
+
+Supported field types are:
+
+- `string`
+- `boolean` or `bool`
+- `integer`
+- `number`
+- `string_list` or the compatibility alias `list`
+- `uuid`
+- `date` in `YYYY-MM-DD` form
+
+Each field may be required, immutable, or supplied by one configured source:
+
+```toml
+[frontmatter.fields.document_id]
+type = "uuid"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.author]
+type = "string"
+required = true
+default_from = "frontmatter.default_author"
+
+[frontmatter.fields.document_type]
+type = "string"
+required = true
+default = "general"
+```
+
+`default`, `default_from`, and `generated` are mutually exclusive. The only current `default_from` source is `frontmatter.default_author`. Generated values are supported for `uuid` and `date`: UUIDs are created once and then preserved; generated dates use the current local calendar date. Immutable values are recorded in Demon Docs private state and restored by `fix` when later edits disagree with that known value. Existing valid mutable values are never overwritten. Existing invalid mutable values remain authored content and are reported for manual correction.
+
+Unknown-field handling is configured with `unknown_fields`:
+
+- `remove` is the default. `check` fails; `fix` deletes only the unknown fields.
+- `warn` preserves the fields and emits warnings without failing solely because of them.
+- `ignore` preserves the fields silently.
+
+Conditional requirements use repeated rule tables:
+
+```toml
+[[frontmatter.rules]]
+when_field = "policy_exempt"
+equals = true
+require = "policy_exempt_reason"
+```
+
+`check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so repositories must either configure those values, relax the schema, or author them explicitly.
 
 ## Repository Demon
 
@@ -176,12 +256,12 @@ Compatibility fallbacks remain supported at lower priority:
 
 CLI flags override the selected base config. The reconciliation selectors are operational flags rather than persistent configuration:
 
-- `-d` / `--docs` selects documentation-folder indexes.
+- `-d` / `--docs` selects documentation-folder indexes and configured frontmatter enforcement.
 - `-l` / `--links` selects Markdown link reconciliation.
 - `-r` / `--reverse` selects code-folder reverse indexes.
 - `-i` / `--indexes` remains a compatibility alias for `--docs`.
 - When any selector is supplied, only selected systems run.
-- Without selectors, docs and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
+- Without selectors, docs, configured frontmatter, and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
 - The selectors apply to `check`, `fix`, and `watch`.
 
 Examples include:
@@ -275,6 +355,51 @@ run = true
 [review]
 undo_depth = 100
 undo_max_age_days = 30
+
+[frontmatter]
+enabled = true
+default_format = "yaml"
+allowed_formats = ["yaml", "toml"]
+default_author = ""
+unknown_fields = "remove"
+
+[frontmatter.fields.document_id]
+type = "uuid"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.author]
+type = "string"
+required = true
+default_from = "frontmatter.default_author"
+
+[frontmatter.fields.document_type]
+type = "string"
+required = true
+default = "general"
+
+[frontmatter.fields.created]
+type = "date"
+required = true
+immutable = true
+generated = true
+
+[frontmatter.fields.summary]
+type = "string"
+required = true
+
+[frontmatter.fields.policy_exempt]
+type = "boolean"
+default = false
+
+[frontmatter.fields.policy_exempt_reason]
+type = "string"
+
+[[frontmatter.rules]]
+when_field = "policy_exempt"
+equals = true
+require = "policy_exempt_reason"
 
 [template]
 include_ownership = true
@@ -451,7 +576,7 @@ exclude_patterns = ["**/*.tmp"]
 
 ## `.docignore`
 
-An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
+An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. It excludes paths from index traversal, frontmatter enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
 Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
 
@@ -646,6 +771,7 @@ The first link-enabled `fix` or `watch` pass establishes this baseline without r
 - `internal/app/app.go` — config commands and one-shot CLI overrides.
 - `internal/repository/scope.go` — repository-root and docs-root resolution boundaries.
 - `internal/repository/repository.go` — repository discovery and initialization.
+- `internal/frontmatter/` — YAML/TOML parsing, schema evaluation, immutable-value state, and docs-root repair planning.
 - `internal/links/` — schema-versioned link state governed by repository scope rather than TOML keys.
 - `internal/review/` — review history, decisions, blocks, and undo eligibility.
 

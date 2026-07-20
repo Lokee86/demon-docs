@@ -9,6 +9,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/sys v0.43.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

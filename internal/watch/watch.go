@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
@@ -44,7 +45,7 @@ func Root(ctx context.Context, root string, c config.Config, debounce *float64, 
 }
 
 func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.Config, debounce *float64, once bool, out io.Writer) error {
-	return RootSelected(ctx, root, ignoreRoot, c, Features{Indexes: true}, debounce, once, out)
+	return RootSelected(ctx, root, ignoreRoot, c, Features{Indexes: true, Frontmatter: c.Frontmatter.Enabled}, debounce, once, out)
 }
 
 func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer) error {
@@ -52,6 +53,11 @@ func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config
 }
 
 func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer, runLock sync.Locker) error {
+	if features.Frontmatter {
+		if err := frontmatter.ValidateConfig(c.Frontmatter); err != nil {
+			return err
+		}
+	}
 	if out == nil {
 		out = io.Discard
 	}
@@ -78,6 +84,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		changed := 0
 		var diagnostics []string
 		unresolved := 0
+		frontmatterUnresolved := 0
 		if features.Indexes {
 			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
 			if err != nil {
@@ -89,6 +96,23 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 			changed += count
 			diagnostics = append(diagnostics, result.Messages...)
+		}
+		if features.Frontmatter {
+			plan, err := frontmatter.Build(repositoryRoot, docsRoot, c, true, time.Now())
+			if err != nil {
+				return err
+			}
+			count, err := frontmatter.Apply(repositoryRoot, docsRoot, plan)
+			if err != nil {
+				return err
+			}
+			changed += count
+			for _, diagnostic := range plan.Diagnostics {
+				diagnostics = append(diagnostics, frontmatterDiagnostic(diagnostic))
+				if !diagnostic.Warning && !diagnostic.Resolved {
+					frontmatterUnresolved++
+				}
+			}
 		}
 		if features.TrackLinks {
 			var plan links.Plan
@@ -125,6 +149,9 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		}
 		if unresolved > 0 {
 			fmt.Fprintf(out, "%s ddocs watch unresolved links: %d\n", timestamp(), unresolved)
+		}
+		if frontmatterUnresolved > 0 {
+			fmt.Fprintf(out, "%s ddocs watch unresolved frontmatter issue(s): %d\n", timestamp(), frontmatterUnresolved)
 		}
 		return nil
 	}
@@ -312,6 +339,20 @@ func watchIgnored(path string, c config.Config) bool {
 		}
 	}
 	return false
+}
+
+func frontmatterDiagnostic(diagnostic frontmatter.Diagnostic) string {
+	location := diagnostic.Path
+	if diagnostic.Field != "" {
+		location += ":" + diagnostic.Field
+	}
+	status := "issue"
+	if diagnostic.Warning {
+		status = "warning"
+	} else if diagnostic.Resolved {
+		status = "repaired"
+	}
+	return fmt.Sprintf("Frontmatter %s at %s: %s", status, location, diagnostic.Message)
 }
 
 func timestamp() string { return time.Now().Format("2006-01-02T15:04:05") }

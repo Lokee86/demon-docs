@@ -10,12 +10,15 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/demon"
+	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
@@ -70,8 +73,8 @@ func addCommon(fs *flag.FlagSet, c *commonFlags) {
 	fs.Var(&c.config, "config", "explicit ddocs config file")
 	fs.BoolVar(&c.noLocal, "no-local-config", false, "skip current-directory local config")
 	fs.BoolVar(&c.noGlobal, "no-global-config", false, "skip the global user config")
-	fs.BoolVar(&c.docsOnly, "d", false, "reconcile documentation indexes")
-	fs.BoolVar(&c.docsOnly, "docs", false, "reconcile documentation indexes")
+	fs.BoolVar(&c.docsOnly, "d", false, "reconcile documentation indexes and configured frontmatter")
+	fs.BoolVar(&c.docsOnly, "docs", false, "reconcile documentation indexes and configured frontmatter")
 	fs.BoolVar(&c.docsOnly, "i", false, "compatibility alias for --docs")
 	fs.BoolVar(&c.docsOnly, "indexes", false, "compatibility alias for --docs")
 	fs.BoolVar(&c.linksOnly, "l", false, "reconcile links")
@@ -157,7 +160,7 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation-folder indexes\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
+	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, and projects authored codemaps onto code folders.\n\npositional arguments:\n  {init,status,mv,fix,check,watch,codemap,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemap             extract and benchmark authored code-map relationships\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -d, --docs            documentation indexes and configured frontmatter\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n\nUse selectors with check, fix, or watch. Run `ddocs check --help` for selector defaults, reverse-root overrides, and codemap-heading configuration.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs status\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs mv docs/old.md docs/new.md\n  ddocs fix\n  ddocs check -r\n  ddocs fix --reverse --reverse-root services/game-server\n  ddocs watch -d -r\n  ddocs demon --help\n  ddocs demon --status\n  ddocs demon run\n  ddocs codemap export\n  ddocs suggestions docs/guide.md\n  ddocs changes docs/guide.md\n  ddocs config paths\n  ddocs index disable\n  ddocs links enable\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
@@ -285,8 +288,8 @@ func treeUsage(command string) string {
 func treeHelp(w io.Writer, command string) {
 	usage := treeUsage(command)
 	description := map[string]string{
-		"fix":   "Reconcile selected documentation indexes, links, and reverse indexes and write needed updates.",
-		"check": "Verify that selected documentation indexes, links, and reverse indexes are already reconciled. Report orphan managed Markdown documents when links are selected.",
+		"fix":   "Reconcile selected documentation indexes, frontmatter, links, and reverse indexes and write needed updates.",
+		"check": "Verify that selected documentation indexes, frontmatter, links, and reverse indexes are already reconciled. Report orphan managed Markdown documents when links are selected.",
 		"watch": "Watch runs in the foreground by default, runs selected reconciliation immediately, and then watches for relevant filesystem changes. Each reconciliation diagnostic is printed as an individual message.",
 	}[command]
 	watchOptions := ""
@@ -295,7 +298,7 @@ func treeHelp(w io.Writer, command string) {
 		watchOptions = "  --once                run one reconciliation pass and exit\n  --debounce-seconds FLOAT\n                        override the watcher debounce interval\n"
 		watchNotes = "\nWatcher lifecycle:\n  - ddocs watch remains attached to the current terminal\n  - use ddocs demon for detached, repository-local self-management\n"
 	}
-	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -d, --docs            reconcile documentation-folder indexes\n  -l, --links           reconcile repository-local Markdown links and check orphan health\n  -r, --reverse         reconcile code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n  --root PATH           docs root directory to reconcile\n  --reverse-root PATH   replace [reverse_index].roots for this run; repeat as needed\n  --codemap-heading TEXT\n                        replace [codemap].headings for this run; repeat as needed\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nSelector rules:\n  - when any selector is supplied, only selected systems run\n  - without selectors, docs and links run\n  - without selectors, reverse also runs when reverse roots are configured or supplied\n\nLink reconciliation:\n  - validates and repairs Markdown links, images, and reference definitions\n  - supports wiki links such as [[guide]], [[docs/guide|Guide]], and ![[image.png]]\n  - validates local HTML href, src, and poster targets\n  - reports undefined explicit or collapsed reference labels such as [Guide][guide] and [guide][]\n  - leaves shortcut references such as [guide] untreated unless a definition exists\n  - check reports managed non-index, non-draft Markdown documents with no meaningful inbound link\n\nReverse-index rules:\n  - -r/--reverse requires [reverse_index].roots or at least one --reverse-root\n  - relative --reverse-root paths resolve from the current working directory\n  - absolute --reverse-root paths must remain inside the repository\n  - --codemap-heading matching is case-insensitive and replaces configured headings\n  - reverse reconciliation errors when no matching codemap section exists\n  - a matching codemap section with no code targets is reported separately\n%s\nExamples:\n  ddocs %s -d\n  ddocs %s -l\n  ddocs %s -r --reverse-root services/game-server\n  ddocs %s -d -r\n  ddocs %s -r --codemap-heading \"Implementation map\"\n\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions, watchNotes, command, command, command, command, command)
+	fmt.Fprintf(w, "%s\n\n%s\n\noptions:\n  -h, --help            show this help message and exit\n  -d, --docs            reconcile documentation indexes and configured frontmatter\n  -l, --links           reconcile repository-local Markdown links and check orphan health\n  -r, --reverse         reconcile code-folder reverse indexes\n  -i, --indexes         compatibility alias for --docs\n  --root PATH           docs root directory to reconcile\n  --reverse-root PATH   replace [reverse_index].roots for this run; repeat as needed\n  --codemap-heading TEXT\n                        replace [codemap].headings for this run; repeat as needed\n  --config PATH         explicit ddocs config file\n  --no-local-config     skip current-directory local config\n  --no-global-config    skip the global user config\n  --index-file NAME     override the folder index filename\n  --draft-folder NAME   override the draft folder name\n  --draft-description-prefix TEXT\n                        override the draft file description prefix\n  --include PATTERN     add an include pattern for indexed files\n  --exclude PATTERN     add an exclude pattern for indexed files\n  --marker-prefix TEXT  override the managed marker prefix\n  --parent-label TEXT   override the parent link label\n  --parent-link-folder-indexes, --no-parent-link-folder-indexes\n                        enable parent links in folder indexes\n  --parent-link-indexed-files, --no-parent-link-indexed-files\n                        enable parent links in indexed files\n%s\nSelector rules:\n  - when any selector is supplied, only selected systems run\n  - without selectors, docs, configured frontmatter, and links run\n  - without selectors, reverse also runs when reverse roots are configured or supplied\n\nFrontmatter reconciliation:\n  - runs for Markdown beneath the configured docs root when [frontmatter].enabled is true\n  - preserves existing YAML or TOML format and uses default_format only when inserting a block\n  - check reports violations without writing; fix applies only safe configured repairs\n\nLink reconciliation:\n  - validates and repairs Markdown links, images, and reference definitions\n  - supports wiki links such as [[guide]], [[docs/guide|Guide]], and ![[image.png]]\n  - validates local HTML href, src, and poster targets\n  - reports undefined explicit or collapsed reference labels such as [Guide][guide] and [guide][]\n  - leaves shortcut references such as [guide] untreated unless a definition exists\n  - check reports managed non-index, non-draft Markdown documents with no meaningful inbound link\n\nReverse-index rules:\n  - -r/--reverse requires [reverse_index].roots or at least one --reverse-root\n  - relative --reverse-root paths resolve from the current working directory\n  - absolute --reverse-root paths must remain inside the repository\n  - --codemap-heading matching is case-insensitive and replaces configured headings\n  - reverse reconciliation errors when no matching codemap section exists\n  - a matching codemap section with no code targets is reported separately\n%s\nExamples:\n  ddocs %s -d\n  ddocs %s -l\n  ddocs %s -r --reverse-root services/game-server\n  ddocs %s -d -r\n  ddocs %s -r --codemap-heading \"Implementation map\"\n\nConfig selection order:\n  1. --config PATH\n  2. nearest .ddocs/config.toml found upward\n  3. ./.demon-docs.toml\n  4. ./demon-docs.toml\n  5. ./.doc-ledger.toml\n  6. ./doc-ledger.toml\n  7. global user config (demon-docs, then doc-ledger compatibility)\n  8. built-in defaults\n\nConfig rules:\n  - repository config is discovered by searching upward\n  - legacy local config is current-directory only\n  - local and global configs are not merged\n  - CLI flags override the selected config\n", usage, description, watchOptions, watchNotes, command, command, command, command, command)
 }
 
 var (
@@ -376,7 +379,12 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return fail(errOut, err)
 	}
 	features := selectedFeatures(flags, c)
-	if (features.Indexes || features.Reverse) && !repository.DocsRootExists(scope) {
+	if features.Frontmatter {
+		if err := frontmatter.ValidateConfig(c.Frontmatter); err != nil {
+			return fail(errOut, err)
+		}
+	}
+	if (features.Indexes || features.Frontmatter || features.Reverse) && !repository.DocsRootExists(scope) {
 		fmt.Fprintf(errOut, "ddocs error: docs root does not exist: %s\n", scope.DocsRoot)
 		return 2
 	}
@@ -406,8 +414,9 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		}
 	}
 	linkPlan := links.Plan{}
+	frontmatterPlan := frontmatter.Plan{}
 	reversePlan := reverseindex.Plan{}
-	if features.Reverse {
+	if features.Reverse && command != "fix" {
 		reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
 		if err != nil {
 			return fail(errOut, err)
@@ -417,6 +426,17 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		changed := 0
 		if features.Indexes {
 			count, err := reconcile.ApplyWithin(indexResult, scope.DocsRoot)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			changed += count
+		}
+		if features.Frontmatter {
+			frontmatterPlan, err = frontmatter.Build(scope.RepositoryRoot, scope.DocsRoot, c, true, time.Now())
+			if err != nil {
+				return fail(errOut, err)
+			}
+			count, err := frontmatter.Apply(scope.RepositoryRoot, scope.DocsRoot, frontmatterPlan)
 			if err != nil {
 				return fail(errOut, err)
 			}
@@ -442,6 +462,10 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			}
 		}
 		if features.Reverse {
+			reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
+			if err != nil {
+				return fail(errOut, err)
+			}
 			count, err := reverseindex.Apply(scope.RepositoryRoot, reversePlan)
 			if err != nil {
 				return fail(errOut, err)
@@ -453,14 +477,29 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		if features.Links {
 			writeMessages(out, linkPlan.Messages)
 		}
+		writeFrontmatterDiagnostics(out, frontmatterPlan.Diagnostics)
 		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
+		failed := false
 		if features.Links && linkPlan.Unresolved > 0 {
 			fmt.Fprintf(out, "ddocs fix unresolved %d link(s)\n", linkPlan.Unresolved)
+			failed = true
+		}
+		if features.Frontmatter && frontmatterPlan.Failed() {
+			fmt.Fprintf(out, "ddocs fix unresolved %d frontmatter issue(s)\n", unresolvedFrontmatter(frontmatterPlan.Diagnostics))
+			failed = true
+		}
+		if failed {
 			return 1
 		}
 		return 0
 	}
 
+	if features.Frontmatter {
+		frontmatterPlan, err = frontmatter.Build(scope.RepositoryRoot, scope.DocsRoot, c, false, time.Now())
+		if err != nil {
+			return fail(errOut, err)
+		}
+	}
 	if features.TrackLinks {
 		if features.Links {
 			linkPlan, err = links.Reconcile(scope.RepositoryRoot)
@@ -483,7 +522,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			return fail(errOut, err)
 		}
 	}
-	failed := len(indexResult.Updates) > 0 || features.Links && linkPlan.Failed() || features.Reverse && reversePlan.Failed() || len(orphanDocuments) > 0
+	failed := len(indexResult.Updates) > 0 || features.Frontmatter && frontmatterPlan.Failed() || features.Links && linkPlan.Failed() || features.Reverse && reversePlan.Failed() || len(orphanDocuments) > 0
 	if failed {
 		fmt.Fprintln(out, "ddocs check failed")
 		for _, update := range indexResult.Updates {
@@ -498,6 +537,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			fmt.Fprintln(out, update.Path)
 		}
 		writeMessages(out, indexResult.Messages)
+		writeFrontmatterDiagnostics(out, frontmatterPlan.Diagnostics)
 		if features.Links {
 			writeMessages(out, linkPlan.Messages)
 		}
@@ -507,6 +547,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
 		return 1
 	}
+	writeFrontmatterDiagnostics(out, frontmatterPlan.Diagnostics)
 	fmt.Fprintln(out, "ddocs check passed")
 	return 0
 }
@@ -518,17 +559,19 @@ func selectedFeatures(flags commonFlags, c config.Config) watch.Features {
 	if defaultSelection {
 		reverseConfigured := len(c.ReverseIndex.Roots) > 0 || len(flags.reverseRoots.values) > 0 || len(flags.codemapHeadings.values) > 0
 		return watch.Features{
-			Indexes:    indexesSelected && c.Index.Enabled,
-			Links:      linksSelected && c.Links.Enabled,
-			TrackLinks: linksSelected,
-			Reverse:    reverseConfigured,
+			Indexes:     indexesSelected && c.Index.Enabled,
+			Frontmatter: indexesSelected && c.Frontmatter.Enabled,
+			Links:       linksSelected && c.Links.Enabled,
+			TrackLinks:  linksSelected,
+			Reverse:     reverseConfigured,
 		}
 	}
 	return watch.Features{
-		Indexes:    indexesSelected && c.Index.Enabled,
-		Links:      linksSelected && c.Links.Enabled,
-		TrackLinks: linksSelected,
-		Reverse:    flags.reverseOnly,
+		Indexes:     indexesSelected && c.Index.Enabled,
+		Frontmatter: indexesSelected && c.Frontmatter.Enabled,
+		Links:       linksSelected && c.Links.Enabled,
+		TrackLinks:  linksSelected,
+		Reverse:     flags.reverseOnly,
 	}
 }
 
@@ -536,6 +579,34 @@ func writeMessages(out io.Writer, messages []string) {
 	for _, message := range messages {
 		fmt.Fprintf(out, "message: %s\n", message)
 	}
+}
+
+func writeFrontmatterDiagnostics(out io.Writer, diagnostics []frontmatter.Diagnostic) {
+	for _, diagnostic := range diagnostics {
+		level := "diagnostic"
+		if diagnostic.Warning {
+			level = "warning"
+		}
+		field := ""
+		if diagnostic.Field != "" {
+			field = ":" + diagnostic.Field
+		}
+		status := ""
+		if diagnostic.Resolved {
+			status = " (fixed)"
+		}
+		fmt.Fprintf(out, "%s: %s%s: %s%s\n", level, diagnostic.Path, field, diagnostic.Message, status)
+	}
+}
+
+func unresolvedFrontmatter(diagnostics []frontmatter.Diagnostic) int {
+	count := 0
+	for _, diagnostic := range diagnostics {
+		if !diagnostic.Warning && !diagnostic.Resolved {
+			count++
+		}
+	}
+	return count
 }
 func load(f commonFlags, errOut io.Writer) (config.Config, string, int) {
 	cwd, _ := os.Getwd()
@@ -1023,5 +1094,14 @@ func show(w io.Writer, c config.Config, path string) {
 	if selected == "" {
 		selected = "<built-in defaults>"
 	}
-	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[index]\nenabled = %t\n[links]\nenabled = %t\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[review]\nundo_depth = %d\nundo_max_age_days = %d\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), c.Index.Enabled, c.Links.Enabled, list(c.ReverseIndex.Roots), list(c.Codemap.Headings), c.Review.UndoDepth, c.Review.UndoMaxAgeDays, quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+	fmt.Fprintf(w, "selected_config_path = %s\ndocs_root = %s\nindex_file = %s\n[index]\nenabled = %t\n[links]\nenabled = %t\n[frontmatter]\nenabled = %t\ndefault_format = %s\nallowed_formats = %s\ndefault_author = %s\nunknown_fields = %s\nfields = %s\nrules = %d\n[reverse_index]\nroots = %s\n[codemap]\nheadings = %s\n[review]\nundo_depth = %d\nundo_max_age_days = %d\n[markers]\nprefix = %s\n[parent_link]\nlabel = %s\nfolder_indexes = %t\nindexed_files = %t\n[drafts]\nfolder = %s\ndescription_prefix = %s\n[files]\ninclude_patterns = %s\nexclude_patterns = %s\n", selected, quote(c.Root), quote(c.IndexFile), c.Index.Enabled, c.Links.Enabled, c.Frontmatter.Enabled, quote(c.Frontmatter.DefaultFormat), list(c.Frontmatter.AllowedFormats), quote(c.Frontmatter.DefaultAuthor), quote(c.Frontmatter.UnknownFields), list(frontmatterFieldNames(c.Frontmatter.Fields)), len(c.Frontmatter.Rules), list(c.ReverseIndex.Roots), list(c.Codemap.Headings), c.Review.UndoDepth, c.Review.UndoMaxAgeDays, quote(c.Markers.Prefix), quote(c.ParentLink.Label), c.ParentLink.FolderIndexes, c.ParentLink.IndexedFiles, quote(c.Draft.Folder), quote(c.Draft.DescriptionPrefix), list(c.Files.IncludePatterns), list(c.Files.ExcludePatterns))
+}
+
+func frontmatterFieldNames(fields map[string]config.FrontmatterField) []string {
+	names := make([]string, 0, len(fields))
+	for name := range fields {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }

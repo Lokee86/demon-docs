@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
@@ -13,10 +14,11 @@ import (
 )
 
 type Features struct {
-	Indexes    bool
-	Links      bool
-	TrackLinks bool
-	Reverse    bool
+	Indexes     bool
+	Frontmatter bool
+	Links       bool
+	TrackLinks  bool
+	Reverse     bool
 }
 
 func modelResult(updates []model.FileUpdate) model.ReconcileResult {
@@ -31,11 +33,26 @@ func relevantSelectedWithPolicy(path string, c config.Config, policy ignorepolic
 		ignored, err := policy.Ignored(path, wasDirectory)
 		return err == nil && !ignored && !watchIgnored(path, c)
 	}
-	if features.Indexes && wasDirectory && repository.Contains(docsRoot, path) {
+	if features.Frontmatter && repository.Contains(docsRoot, path) {
+		ignored, err := policy.Ignored(path, wasDirectory)
+		if err != nil || ignored || watchIgnored(path, c) {
+			return false
+		}
+		if wasDirectory {
+			return true
+		}
+		if info, err := os.Stat(path); err == nil && info.IsDir() {
+			return true
+		}
+		if strings.EqualFold(filepath.Ext(path), ".md") {
+			return true
+		}
+	}
+	if (features.Indexes || features.Frontmatter) && wasDirectory && repository.Contains(docsRoot, path) {
 		ignored, err := policy.Ignored(path, true)
 		return err == nil && !ignored && !watchIgnored(path, c)
 	}
-	if features.Indexes {
+	if features.Indexes || features.Frontmatter {
 		return relevantWithPolicy(path, c, policy, docsRoot)
 	}
 	return false

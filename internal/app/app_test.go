@@ -117,7 +117,7 @@ func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
 
 	withWorkingDirectory(t, child, func(string) {
 		var out, errOut bytes.Buffer
-		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 0 {
+		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 1 || !strings.Contains(out.String(), "unresolved") || !strings.Contains(out.String(), "frontmatter issue") {
 			t.Fatalf("fix code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 		rootIndex := filepath.Join(docsRoot, "README.md")

@@ -18,6 +18,14 @@ The current repository differs from the deterministic result for a selected subs
 
 `check` reports the condition and returns non-zero. `fix` may apply it when the update is safe and within scope.
 
+### Frontmatter violation
+
+A Markdown file beneath the configured docs root has missing, invalid, immutable, conditional, duplicate-ID, malformed-block, disallowed-format, or unknown-field state under the selected schema.
+
+`check` reports the path and field without writing. `fix` removes unknown fields only when `unknown_fields = "remove"`, inserts configured defaults or generated values, and restores known immutable values. Existing valid mutable values are preserved. Existing invalid mutable values and required fields without a repair source remain unresolved and make `fix` return non-zero after any safe partial repairs.
+
+Warning-mode unknown fields are preserved and reported without failing solely because of the warning.
+
 ### Broken target
 
 A recognized local reference resolves to no current target.
@@ -74,7 +82,7 @@ These commands should succeed when repository and configuration selection can be
 
 Returns success only when every selected subsystem is clean and sufficiently initialized for verification.
 
-Returns non-zero for pending work, unresolved selected-system conditions, or orphan documents when links are selected.
+Returns non-zero for pending work, unresolved selected-system conditions, frontmatter violations, or orphan documents when links are selected. Frontmatter warnings may be printed while the command still succeeds.
 
 ### `mv`
 
@@ -82,7 +90,7 @@ Returns success after the explicit move and every planned rewrite complete. Dry-
 
 ### `fix`
 
-Returns success when safe planned mutations are applied and no fatal command error prevents completion. Unresolved ambiguous items may remain reported and may still require a later non-zero `check`.
+Returns success when safe planned mutations are applied and no unresolved selected-system condition remains. Frontmatter repair may apply deterministic fields and still return non-zero when authored input is required. Ambiguous link items remain unchanged and non-zero.
 
 ### `suggestions` and `changes`
 
@@ -115,7 +123,7 @@ Machine-readable output is not implied unless a command explicitly documents suc
 
 Demon Docs should fail without broad mutation when:
 
-- configuration cannot be selected safely;
+- configuration or the selected frontmatter schema cannot be validated safely;
 - a root escapes repository scope;
 - expected source content changed after planning;
 - atomic replacement cannot complete;
