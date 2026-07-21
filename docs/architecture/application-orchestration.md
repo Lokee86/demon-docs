@@ -37,7 +37,8 @@ The application boundary owns:
 - repository and configuration selection;
 - translation of CLI flags into subsystem options;
 - `--docs`, `--indexes`, `--frontmatter`, `--format`, `--links`, and `--reverse` selection semantics;
-- ordering selected reconciliation systems, with link repair first, documentation-index writes last, and changed-source link-state refresh scoped to the files written by other systems;
+- running independent read-only `check` planners concurrently while retaining deterministic result and error ordering;
+- ordering selected mutating reconciliation systems, with link repair first, documentation-index writes last, and changed-source link-state refresh scoped to the files written by other systems;
 - command output and aggregate success/failure decisions;
 - orphan-document health-check integration for link-enabled checks;
 - explicit stateless move command integration;
@@ -114,7 +115,8 @@ Primary files and packages:
 - `cmd/ddocs/main.go` - canonical executable entry.
 - `cmd/demon/main.go` - repository-demon alias entry and argument normalization.
 - `cmd/demon/main_test.go` - alias help and version-routing coverage.
-- `internal/app/app.go` - main command parsing and reconciliation orchestration.
+- `internal/app/app.go` - main command parsing, mutating reconciliation orchestration, and output aggregation.
+- `internal/app/check_planning.go` - bounded parallel read-only subsystem planning and serialized private-state publication.
 - `internal/app/help_test.go` - top-level help and public command coverage.
 - `internal/app/help_nested_test.go` - scoped nested help coverage.
 - `internal/app/cli_contract_test.go` - CLI contract coverage.

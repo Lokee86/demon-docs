@@ -42,6 +42,7 @@ type Entry struct {
 }
 
 type Store struct {
+	mu         sync.RWMutex
 	repository *ddrepo.Repository
 	entries    map[string]Entry
 	dirty      map[string]Entry
@@ -119,14 +120,17 @@ func (s *Store) Lookup(path, contentHash, frontmatterPolicyHash, schemaHash, imm
 	if s == nil {
 		return Entry{}, false
 	}
-	entry, ok := s.entries[NormalizePath(path)]
-	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != NormalizePath(path) ||
+	normalized := NormalizePath(path)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	entry, ok := s.entries[normalized]
+	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != normalized ||
 		entry.ContentSHA256 != contentHash || entry.EngineVersion != EngineVersion ||
 		entry.FrontmatterPolicyHash != frontmatterPolicyHash || entry.EffectiveSchemaHash != schemaHash ||
 		entry.ImmutableSnapshotHash != immutableHash {
 		return Entry{}, false
 	}
-	return entry, true
+	return cloneEntry(entry), true
 }
 
 // Candidate returns a path/content/version/policy match before the caller has
@@ -136,13 +140,16 @@ func (s *Store) Candidate(path, contentHash, frontmatterPolicyHash string) (Entr
 	if s == nil {
 		return Entry{}, false
 	}
-	entry, ok := s.entries[NormalizePath(path)]
-	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != NormalizePath(path) ||
+	normalized := NormalizePath(path)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	entry, ok := s.entries[normalized]
+	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != normalized ||
 		entry.ContentSHA256 != contentHash || entry.EngineVersion != EngineVersion ||
 		entry.FrontmatterPolicyHash != frontmatterPolicyHash {
 		return Entry{}, false
 	}
-	return entry, true
+	return cloneEntry(entry), true
 }
 
 func (s *Store) Merge(entry Entry) {
@@ -151,6 +158,9 @@ func (s *Store) Merge(entry Entry) {
 	}
 	entry.SchemaVersion = schemaVersion
 	entry.Path = NormalizePath(entry.Path)
+	entry = cloneEntry(entry)
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	previous, exists := s.entries[entry.Path]
 	if exists && sameIdentity(previous, entry) {
 		entry.FrontmatterClean = entry.FrontmatterClean || previous.FrontmatterClean
@@ -165,7 +175,7 @@ func (s *Store) Merge(entry Entry) {
 			entry.SchemaName = previous.SchemaName
 		}
 		if entry.ImmutableValues == nil {
-			entry.ImmutableValues = previous.ImmutableValues
+			entry.ImmutableValues = cloneValues(previous.ImmutableValues)
 		}
 	}
 	s.entries[entry.Path] = entry
@@ -186,6 +196,8 @@ func (s *Store) Retain(paths []string) {
 	for _, path := range paths {
 		active[NormalizePath(path)] = true
 	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	for path := range s.entries {
 		if active[path] {
 			continue
@@ -197,7 +209,12 @@ func (s *Store) Retain(paths []string) {
 }
 
 func (s *Store) Save() error {
-	if s == nil || s.repository == nil || len(s.dirty) == 0 && len(s.deleted) == 0 {
+	if s == nil {
+		return nil
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.repository == nil || len(s.dirty) == 0 && len(s.deleted) == 0 {
 		return nil
 	}
 	deleted := make([]string, 0, len(s.deleted))
@@ -296,6 +313,22 @@ func sameIdentity(left, right Entry) bool {
 	return left.Path == NormalizePath(right.Path) && left.ContentSHA256 == right.ContentSHA256 &&
 		left.EngineVersion == right.EngineVersion && left.FrontmatterPolicyHash == right.FrontmatterPolicyHash &&
 		left.EffectiveSchemaHash == right.EffectiveSchemaHash && left.ImmutableSnapshotHash == right.ImmutableSnapshotHash
+}
+
+func cloneEntry(entry Entry) Entry {
+	entry.ImmutableValues = cloneValues(entry.ImmutableValues)
+	return entry
+}
+
+func cloneValues(values map[string]any) map[string]any {
+	if values == nil {
+		return nil
+	}
+	cloned := make(map[string]any, len(values))
+	for key, value := range values {
+		cloned[key] = value
+	}
+	return cloned
 }
 
 func recordName(path string) string { return prefix + Hash(NormalizePath(path)) }

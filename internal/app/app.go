@@ -422,22 +422,10 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 	}
 
 	indexResult := model.ReconcileResult{}
-	if features.Indexes && command != "fix" {
-		indexResult, err = reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
-		if err != nil {
-			return fail(errOut, err)
-		}
-	}
 	linkPlan := links.Plan{}
 	frontmatterPlan := frontmatter.Plan{}
 	formatPlan := documentpolicy.Plan{}
 	reversePlan := reverseindex.Plan{}
-	if features.Reverse && command != "fix" {
-		reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
-		if err != nil {
-			return fail(errOut, err)
-		}
-	}
 	if command == "fix" {
 		changed := 0
 		changedSourcePaths := map[string]bool{}
@@ -565,33 +553,18 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 0
 	}
 
-	if features.Frontmatter {
-		frontmatterPlan, err = frontmatter.Build(scope.RepositoryRoot, scope.DocsRoot, c, false, time.Now())
-		if err != nil {
-			return fail(errOut, err)
-		}
+	plans, err := buildCheckPlans(scope, c, features, reverseOptions)
+	if err != nil {
+		return fail(errOut, err)
 	}
-	if features.Format {
-		formatPlan, err = documentpolicy.Build(scope.RepositoryRoot, scope.DocsRoot, c, false)
-		if err != nil {
-			return fail(errOut, err)
-		}
+	if err := plans.savePrivateState(features); err != nil {
+		return fail(errOut, err)
 	}
-	if features.TrackLinks {
-		if features.Links {
-			linkPlan, err = links.Reconcile(scope.RepositoryRoot)
-		} else {
-			linkPlan, err = links.Track(scope.RepositoryRoot)
-		}
-		if err != nil {
-			return fail(errOut, err)
-		}
-		if !features.Links {
-			if err := links.Save(linkPlan); err != nil {
-				return fail(errOut, err)
-			}
-		}
-	}
+	indexResult = plans.index
+	linkPlan = plans.links
+	frontmatterPlan = plans.frontmatter
+	formatPlan = plans.format
+	reversePlan = plans.reverse
 	orphanDocuments := []string{}
 	if features.Links && repository.DocsRootExists(scope) {
 		orphanDocuments, err = findOrphanDocuments(scope, c, linkPlan)

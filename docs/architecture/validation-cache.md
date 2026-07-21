@@ -41,6 +41,8 @@ YAML and TOML behavior, diagnostic ordering, and deterministic repair ordering a
 
 `check` may update cache records only when the repository already has an initialized `.ddocs` private object store; standalone checks do not initialize one merely to persist cache data. It never writes authored Markdown or schema files. `fix` writes the same cache records in addition to its existing guarded authored-file and immutable-state publication. Cache records use the existing `ddrepo` transaction and do not create commits on the user's normal Git branch.
 
+Frontmatter and document-format `check` planners share one command-scoped cache store. The store synchronizes lookup, retention, and merge operations while the two planners run concurrently. Cache entries are cloned at the store boundary so callers cannot mutate shared map state. The merged dirty set is published once, serially, only after all selected check planners finish successfully.
+
 Each validation pass also removes cache records whose normalized paths are no longer in the active Markdown scope. A rename or deletion therefore does not leave permanently reachable stale records. Re-merging an identical cache entry does not publish a private-state transaction, and a repeated clean frontmatter fix does not republish immutable values that already match durable state.
 
 ## Related docs

@@ -27,9 +27,33 @@ type Plan struct {
 }
 
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time) (Plan, error) {
+	if !cfg.Frontmatter.Enabled {
+		return BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, now, nil)
+	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return Plan{}, fmt.Errorf("open validation cache: %w", err)
+	}
+	plan, err := BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, now, cache)
+	if err != nil {
+		return plan, err
+	}
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
+	return plan, nil
+}
+
+// BuildWithValidationCache builds one frontmatter plan against a caller-owned
+// command cache. The caller publishes the cache after all parallel planners
+// complete, keeping private-state writes outside the planning phase.
+func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time, cache *validationcache.Store) (Plan, error) {
 	plan := Plan{immutable: map[string]map[string]any{}}
 	if !cfg.Frontmatter.Enabled {
 		return plan, nil
+	}
+	if cache == nil {
+		return plan, errors.New("frontmatter validation cache is required")
 	}
 	if err := ValidateConfig(cfg.Frontmatter); err != nil {
 		return plan, err
@@ -39,10 +63,6 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		return plan, err
 	}
 	immutable := loadImmutableIndex(repoRoot)
-	cache, err := validationcache.Open(repoRoot)
-	if err != nil {
-		return plan, fmt.Errorf("open validation cache: %w", err)
-	}
 	cache.Retain(relativeValidationPaths(repoRoot, files))
 	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
 	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache, schemaHasher)
@@ -176,9 +196,6 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		}
 		return left.Message < right.Message
 	})
-	if err := cache.Save(); err != nil {
-		return plan, fmt.Errorf("save validation cache: %w", err)
-	}
 	return plan, nil
 }
 

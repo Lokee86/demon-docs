@@ -43,6 +43,27 @@ type Plan struct {
 }
 
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, error) {
+	if !cfg.Format.Enabled {
+		return BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, nil)
+	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return Plan{}, fmt.Errorf("open validation cache: %w", err)
+	}
+	plan, err := BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, cache)
+	if err != nil {
+		return plan, err
+	}
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
+	return plan, nil
+}
+
+// BuildWithValidationCache builds one document-format plan against a
+// caller-owned command cache. Cache publication remains a serialized command
+// concern after parallel planning completes.
+func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store) (Plan, error) {
 	plan := Plan{
 		invalidatedSchemas: map[string][]byte{},
 		history:            map[string]Schema{},
@@ -51,6 +72,9 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	}
 	if !cfg.Format.Enabled {
 		return plan, nil
+	}
+	if cache == nil {
+		return plan, errors.New("document-format validation cache is required")
 	}
 	if cfg.Format.InvalidationSimilarity < 0 || cfg.Format.InvalidationSimilarity > 1 {
 		return plan, fmt.Errorf("format.invalidation_similarity must be between 0 and 1")
@@ -69,10 +93,6 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	files, err := markdownFiles(repoRoot, docsRoot)
 	if err != nil {
 		return plan, err
-	}
-	cache, err := validationcache.Open(repoRoot)
-	if err != nil {
-		return plan, fmt.Errorf("open validation cache: %w", err)
 	}
 	activePaths := make([]string, 0, len(files))
 	for _, path := range files {
@@ -290,9 +310,6 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		}
 		return left.Message < right.Message
 	})
-	if err := cache.Save(); err != nil {
-		return plan, fmt.Errorf("save validation cache: %w", err)
-	}
 	return plan, nil
 }
 

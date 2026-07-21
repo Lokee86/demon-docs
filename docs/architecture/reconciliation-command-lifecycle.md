@@ -181,25 +181,36 @@ The selected subsystem plans are independent values:
 
 Each plan carries its own updates and diagnostics. The application layer does not translate one subsystem's internal state into another subsystem's plan.
 
-The exact planning order differs between read-only and mutating commands because link reconciliation during `fix` must see documentation-index writes already applied.
+Read-only `check` builds independent subsystem plans concurrently and publishes shared private cache state only after planning completes. Mutating `fix` remains deliberately serial because later planners and guarded rewrites must observe earlier successful writes.
 
 ## `check` lifecycle
 
 `check` is read-only with respect to authored files and the selected frontmatter, document-format, index, and reverse-index outputs. When link maintenance is disabled but link tracking is selected, the implementation may save the tracking baseline without rewriting authored links; an enabled link reconciliation check does not publish a new baseline.
 
-### Planning order
+### Parallel planning and serial publication
+
+`check` opens one command-scoped validation cache when frontmatter or document-format validation is selected, then launches the independent selected planners as one bounded subsystem group:
 
 ```text
-1. build documentation-index plan when selected
-2. build reverse-index plan when selected
-3. build frontmatter plan when selected
-4. build document-format plan when selected
-5. build link plan when selected
-6. derive orphan documents from current link plan when links are selected and docs root exists
-7. aggregate failure state
+documentation-index planner ─┐
+reverse-index planner ───────┤
+frontmatter planner ─────────┤
+document-format planner ─────┼─> wait for all selected planners
+link planner ────────────────┘
 ```
 
-Reverse planning occurs before link planning in the current application code. The plans are independent, so this ordering does not grant either subsystem ownership of the other.
+The planners read the same command scope concurrently and produce independent result values. This slice does not materialize an immutable filesystem snapshot, so each subsystem's existing source-content and apply guards remain authoritative if files change during planning. The planners do not write authored files. Frontmatter and document-format planning share a synchronized in-memory validation cache so their clean-result records merge without racing or losing either subsystem's result.
+
+After every selected planner succeeds, private-state publication is serialized:
+
+```text
+1. save the merged validation cache when selected
+2. save the disabled-link tracking baseline when link tracking is selected without repair
+3. derive orphan documents from the completed link plan when links are selected and docs root exists
+4. aggregate failure state and render output in deterministic subsystem order
+```
+
+Planner errors are also selected in the stable historical order: documentation indexes, reverse indexes, frontmatter, document format, then links. Completion timing therefore does not change which error or diagnostic order the command exposes.
 
 ### Failure aggregation
 
@@ -403,6 +414,7 @@ The application layer stores no durable reconciliation graph.
 ## Invariants and safety boundaries
 
 - `check` never calls authored-file appliers for indexes, frontmatter, document format, links, or reverse indexes; the disabled-link tracking path may persist its baseline as noted above.
+- Independent `check` planners may run concurrently, but validation-cache and link-baseline publication remain serialized after successful planning.
 - Any supplied selector disables unselected default systems.
 - Frontmatter and document-format reconciliation during `fix` observe successful documentation-index writes from the same command.
 - Link reconciliation during `fix` observes successful documentation-index and policy writes from the same command.
@@ -461,7 +473,8 @@ Do not imply a command-wide transaction unless implementation provides rollback 
 
 - `cmd/ddocs/main.go` — canonical executable entry.
 - `cmd/demon/main.go` — alias normalization before shared application entry.
-- `internal/app/app.go` — tree-command parsing, configuration/scope resolution, selection, plan/apply ordering, output, and exit results.
+- `internal/app/app.go` — tree-command parsing, configuration/scope resolution, selection, fix ordering, output, and exit results.
+- `internal/app/check_planning.go` — bounded parallel `check` planning, deterministic planner-error selection, and serialized private-state publication.
 - `internal/app/reverse_index.go` — reverse-root resolution and reverse watch coordination.
 - `internal/app/orphans.go` — read-only orphan projection.
 - `internal/app/feature_flags_test.go` — selector and default-feature behavior.
