@@ -7,6 +7,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/textio"
 	"github.com/Lokee86/demon-docs/internal/validationcache"
+	"github.com/Lokee86/demon-docs/internal/validationworkers"
 )
 
 type plannedSource struct {
@@ -21,15 +22,17 @@ type plannedSource struct {
 }
 
 func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store, schemaHasher *validationcache.SchemaHasher) ([]plannedSource, map[string]bool, error) {
-	sources := make([]plannedSource, 0, len(files))
-	for _, path := range files {
+	sources := make([]plannedSource, len(files))
+	policyHash := validationcache.FrontmatterPolicyHash(cfg)
+	errors := validationworkers.Run(len(files), func(index int) error {
+		path := files[index]
 		relative, err := filepath.Rel(repoRoot, path)
 		if err != nil {
-			return nil, nil, err
+			return err
 		}
 		document, err := textio.Read(path)
 		if err != nil {
-			return nil, nil, fmt.Errorf("read frontmatter source %s: %w", path, err)
+			return fmt.Errorf("read frontmatter source %s: %w", path, err)
 		}
 		source := plannedSource{
 			path:        path,
@@ -37,7 +40,6 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 			document:    document,
 			contentHash: validationcache.ContentHash(document.RawBytes()),
 		}
-		policyHash := validationcache.FrontmatterPolicyHash(cfg)
 		if candidate, ok := cache.Candidate(source.relative, source.contentHash, policyHash); ok && candidate.FrontmatterClean {
 			schemaHash := schemaHasher.Effective(candidate.SchemaName, candidate.DocumentID)
 			recorded := immutable.values(source.relative, map[string]any{"document_id": candidate.DocumentID}, true)
@@ -51,7 +53,13 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 		if !source.cacheHit {
 			source.parsed, source.parseErr = Parse(document.Text, allowedFormats)
 		}
-		sources = append(sources, source)
+		sources[index] = source
+		return nil
+	})
+	for _, err := range errors {
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	pathsByID := make(map[string][]string)
@@ -71,13 +79,18 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 			duplicates[path] = true
 		}
 	}
+	duplicateSources := make([]int, 0)
 	for index := range sources {
-		if !sources[index].cacheHit || !duplicateIDs[sourceDocumentID(sources[index])] {
-			continue
+		if sources[index].cacheHit && duplicateIDs[sourceDocumentID(sources[index])] {
+			duplicateSources = append(duplicateSources, index)
 		}
+	}
+	validationworkers.Run(len(duplicateSources), func(job int) error {
+		index := duplicateSources[job]
 		sources[index].parsed, sources[index].parseErr = Parse(sources[index].document.Text, allowedFormats)
 		sources[index].cacheHit = false
-	}
+		return nil
+	})
 	return sources, duplicates, nil
 }
 

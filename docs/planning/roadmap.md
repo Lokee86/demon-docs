@@ -50,6 +50,15 @@ This roadmap describes the current product state and the next implementation tra
 
 See [Document Health Checks](../guides/document-health-checks.md).
 
+### Validation performance
+
+- Cold frontmatter source reads and parsing use a bounded 16-worker pool.
+- Cold document-format source reads, frontmatter parsing, Markdown parsing, and schema enforcement use the same bounded pool.
+- Results remain indexed by deterministic file order and merge serially before duplicate-document-ID handling, immutable-state decisions, diagnostics, repair planning, cache publication, and schema-history publication.
+- The durable clean-validation cache remains the fastest repeated path; parallel workers reduce the cost when that cache is absent or invalidated.
+
+See [Validation Cache](../architecture/validation-cache.md) and [Markdown Link Performance](../research/link-performance.md).
+
 ### Repository-local link reconciliation and refactoring
 
 - Repository Markdown is scanned subject to `.docignore` and permanent traversal exclusions.
@@ -140,7 +149,6 @@ The following work is independent of the larger code-graph track:
 ### Remaining validation and link-scan performance opportunities
 
 - **Path-scoped watcher reconciliation:** the watcher currently coalesces events into pending work but does not preserve a complete feature-specific dirty-path set. Introduce changed-source and changed-target batches, route them to incremental subsystem entry points, retain full reconciliation as an overflow and uncertainty fallback, and benchmark end-to-end move latency separately from configured debounce. Large directory moves should not require repeated broad repository passes when deterministic identity and event evidence are sufficient.
-- **Bounded parallel cold validation:** frontmatter and document-format validation currently enumerate and process applicable Markdown documents serially on a cache miss. Introduce a bounded document-worker pool for file reads, parsing, and per-document evaluation, then merge results deterministically before duplicate-document-ID checks, immutable-state decisions, diagnostics, repair planning, and publication. Benchmark conservative Windows worker limits rather than using unbounded goroutines.
 - **Validation cache invalidation by unrelated rewrites:** validation reuse currently depends on the raw whole-document SHA-256. Link repairs, generated index changes, or other body-only rewrites therefore invalidate otherwise reusable frontmatter and format results. Split cache identity by validation-owned input surface, or safely refresh affected cache entries from final published bytes, so unrelated generated rewrites do not trigger cold validation.
 - **Incremental changed-source link parsing:** unchanged source fingerprints already reuse stored link records, offsets, lines, and columns, but any source-content change currently reparses the complete Markdown document. Persist line or bounded-chunk hashes and enough synchronization metadata to diff changed regions, shift stored byte and line locations for unchanged regions, and reparse only affected regions plus context. Fall back to a full parse when edits may change non-local Markdown state, including frontmatter boundaries, fenced-code delimiters, reference definitions, HTML constructs, or parser-version changes.
 

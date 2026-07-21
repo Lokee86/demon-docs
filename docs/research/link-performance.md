@@ -49,7 +49,24 @@ A synthetic 1,000-document corpus measured the warmed clean-validation path afte
 
 Repeated warmed passes created no additional loose private objects. These measurements demonstrate cache-hit behavior on the development host; they are not cold-pass numbers or universal guarantees.
 
-Cold or invalidated frontmatter and document-format passes still process documents serially. Unchanged Markdown link sources reuse stored link records, but any source-content change still reparses the complete document. Both remaining opportunities are tracked in [Current Product Limitations](../limits/current-limitations.md) and the [Roadmap](../planning/roadmap.md).
+Cold or invalidated validation now uses a bounded 16-worker pool. Frontmatter validation parallelizes source reads and parsing before deterministic duplicate-ID and immutable-state handling. Document-format validation additionally parallelizes Markdown parsing and schema enforcement, then merges results in file order before repair and cache publication. Unchanged Markdown link sources still reuse stored link records, but any changed link source still reparses the complete document.
+
+## Cold validation worker measurements
+
+A reproducible 1,000-document Windows harness compared the pre-change commit `b4d36ec` with the bounded-worker implementation on the same host using `GOMAXPROCS=16` and five warmed-host runs:
+
+| Cold operation | Serial mean | Parallel mean | Improvement |
+|---|---:|---:|---:|
+| Frontmatter validation | 157.5 ms | 56.1 ms | 2.81x |
+| Document-format validation | 314.4 ms | 171.6 ms | 1.83x |
+
+Best observed runs improved from 144.5 ms to 52.7 ms for frontmatter and from 278.3 ms to 165.1 ms for document format. The retained harness is `research/validation-performance/main.go` and runs with:
+
+```bash
+go run ./research/validation-performance
+```
+
+These measurements include repository traversal, document reads, parsing, validation planning, and deterministic result merging. They exclude CLI startup and do not claim linear scaling across filesystems or machines.
 
 ## Research status
 

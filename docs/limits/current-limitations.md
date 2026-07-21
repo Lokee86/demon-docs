@@ -263,20 +263,23 @@ Removal condition:
 
 Watch events produce path-aware dirty sets, each subsystem can reconcile only affected sources and targets, repeated state reads and writes are reduced or batched, large moves have bounded targeted handling, and retained benchmarks establish end-to-end latency expectations across representative repository sizes and event bursts.
 
-## Cold frontmatter and format validation is serial
+## Cold validation retains serial coordination stages
 
-The durable validation cache makes repeated clean checks fast, but a cold or invalidated frontmatter/document-format pass still enumerates and processes applicable Markdown documents serially.
+Cold validation now uses a bounded 16-worker pool rather than processing every document serially. Frontmatter source reads and parsing run concurrently. Document-format source reads, frontmatter parsing, Markdown parsing, and schema enforcement also run concurrently.
+
+Results remain indexed by deterministic file order and merge serially before operations that depend on repository-wide state. Duplicate-document-ID ownership and repair, immutable-value decisions, shared-schema and schema-history coordination, diagnostics ordering, rewrite planning, cache publication, and private-state publication remain serialized.
 
 Impact:
 
-- first-run cost scales with the number and complexity of documents;
-- broad policy or schema changes invalidate many cache entries at once;
-- link, index, or other body-only rewrites change the raw whole-document hash and force fresh frontmatter and format scans even when their relevant inputs did not change; and
-- available CPU parallelism is not yet used for document reads, parsing, and per-document evaluation.
+- cold validation is substantially faster but does not scale linearly with CPU count;
+- repositories dominated by shared-schema loading, private-state access, or publication may see smaller gains than parse-heavy corpora;
+- broad policy or schema changes still invalidate many cache entries at once;
+- link, index, or other body-only rewrites still change the raw whole-document hash and force fresh frontmatter and format scans even when their relevant inputs did not change; and
+- the worker limit is fixed at 16 rather than dynamically tuned per filesystem or machine.
 
 Workaround:
 
-Adopt policy in bounded scopes, retain `.ddocs/` cache state, and avoid deleting private state as routine cleanup. Use narrow `--frontmatter` or `--format` checks when diagnosing one policy system.
+Retain `.ddocs/` cache state, avoid deleting private state as routine cleanup, and use narrow `--frontmatter` or `--format` checks when diagnosing one policy system. The current bounded worker count is intended as a conservative cross-platform default.
 
 Owning docs:
 
@@ -286,7 +289,7 @@ Owning docs:
 
 Removal condition:
 
-A bounded document-worker pool is implemented, deterministic result merging and duplicate-ID behavior remain protected, and Windows-focused benchmarks establish a conservative default worker count. Cache identity is also narrowed to the validation-relevant document surfaces, or affected cache records are safely refreshed after final generated rewrites, so body-only link changes do not cause unrelated cold validation.
+Cache identity is narrowed to validation-relevant document surfaces, or affected cache records are safely refreshed after final generated rewrites, so body-only link changes do not cause unrelated cold validation. Any further parallel coordination changes preserve deterministic duplicate-ID behavior, schema-history decisions, diagnostic ordering, and publication safety under retained benchmarks.
 
 ## Changed Markdown sources are reparsed as whole documents
 

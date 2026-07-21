@@ -10,7 +10,6 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/filetxn"
-	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/validationcache"
@@ -107,44 +106,37 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		historyResults[name] = schemaHistoryResult{schema: schema, exists: exists, err: historyErr}
 		return schema, exists, historyErr
 	}
-	for _, path := range files {
-		relative, _ := filepath.Rel(repoRoot, path)
-		relative = filepath.ToSlash(relative)
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return plan, err
-		}
-		source := string(data)
-		contentHash := validationcache.ContentHash(data)
-		candidate, hasCandidate := cache.Candidate(relative, contentHash, policyHash)
-		if hasCandidate && candidate.FormatClean && candidate.SchemaName != "" {
-			schemaHash := schemaHasher.Effective(candidate.SchemaName, candidate.DocumentID)
-			if _, valid := cache.Lookup(relative, contentHash, policyHash, schemaHash, candidate.ImmutableSnapshotHash); valid {
-				shared, loadErr := loadSharedOnce(candidate.SchemaName)
-				if loadErr != nil {
-					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: loadErr.Error()})
-					continue
-				}
-				plan.history[candidate.SchemaName] = shared
-				if _, _, historyErr := loadHistoryOnce(candidate.SchemaName); historyErr != nil {
-					return plan, historyErr
-				}
-				plan.cacheHits++
+	sources, err := loadDocumentSources(repoRoot, files, cfg, cache, policyHash, schemaHasher)
+	if err != nil {
+		return plan, err
+	}
+	evaluations := make([]documentEvaluation, 0, len(sources))
+	for _, source := range sources {
+		relative := source.relative
+		if source.cacheHit {
+			shared, loadErr := loadSharedOnce(source.candidate.SchemaName)
+			if loadErr != nil {
+				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: loadErr.Error()})
 				continue
 			}
+			plan.history[source.candidate.SchemaName] = shared
+			if _, _, historyErr := loadHistoryOnce(source.candidate.SchemaName); historyErr != nil {
+				return plan, historyErr
+			}
+			plan.cacheHits++
+			continue
 		}
-		parsed, err := frontmatter.Parse(source, cfg.Frontmatter.AllowedFormats)
-		if err != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
+		if source.parseErr != nil {
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.parseErr.Error()})
 			plan.blockAllHistory = true
 			continue
 		}
-		schemaName, err := selectSchema(relative, parsed.Values, cfg.Format)
-		if err != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
+		if source.schemaErr != nil {
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.schemaErr.Error()})
 			plan.blockAllHistory = true
 			continue
 		}
+		schemaName := source.schemaName
 		if schemaName == "" {
 			continue
 		}
@@ -158,8 +150,8 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		if err != nil {
 			return plan, err
 		}
-		documentID, _ := parsed.Values["document_id"].(string)
-		documentType, _ := parsed.Values["document_type"].(string)
+		documentID, _ := source.parsed.Values["document_id"].(string)
+		documentType, _ := source.parsed.Values["document_type"].(string)
 		local := DocumentSchema{}
 		localPath := ""
 		localExists := false
@@ -237,36 +229,53 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 				continue
 			}
 		}
-		bodyStart := frontmatter.LeadingBlockEnd(source)
-		body := source[bodyStart:]
-		document := parseMarkdown(body)
-		result := enforceDocument(document, shared, previous, hasPrevious, repair)
+		evaluations = append(evaluations, documentEvaluation{
+			path:         source.path,
+			relative:     relative,
+			data:         source.data,
+			text:         source.text,
+			contentHash:  source.contentHash,
+			candidate:    source.candidate,
+			schemaName:   schemaName,
+			documentID:   documentID,
+			documentType: documentType,
+			bodyStart:    source.bodyStart,
+			document:     source.document,
+			current:      shared,
+			previous:     previous,
+			hasPrevious:  hasPrevious,
+		})
+	}
+
+	runDocumentEvaluations(evaluations, repair)
+	for _, evaluation := range evaluations {
+		result := evaluation.result
 		for _, diagnostic := range result.Diagnostics {
-			diagnostic.Path = relative
+			diagnostic.Path = evaluation.relative
 			plan.Diagnostics = append(plan.Diagnostics, diagnostic)
 			if !diagnostic.Warning && !diagnostic.Resolved {
-				plan.blockedHistory[schemaName] = true
+				plan.blockedHistory[evaluation.schemaName] = true
 			}
 		}
 		if repair && result.Changed && !result.Blocked {
-			next := source[:bodyStart] + result.Document.render()
-			if next != source {
-				old := source
-				plan.Updates = append(plan.Updates, model.FileUpdate{Path: path, OldText: &old, NewText: next})
-				plan.rewrites = append(plan.rewrites, filetxn.New(path, data, []byte(next)))
+			next := evaluation.text[:evaluation.bodyStart] + result.Document.render()
+			if next != evaluation.text {
+				old := evaluation.text
+				plan.Updates = append(plan.Updates, model.FileUpdate{Path: evaluation.path, OldText: &old, NewText: next})
+				plan.rewrites = append(plan.rewrites, filetxn.New(evaluation.path, evaluation.data, []byte(next)))
 			}
 		}
 		if len(result.Diagnostics) == 0 && !result.Changed {
 			cache.Merge(validationcache.Entry{
-				Path:                  relative,
-				ContentSHA256:         contentHash,
+				Path:                  evaluation.relative,
+				ContentSHA256:         evaluation.contentHash,
 				EngineVersion:         validationcache.EngineVersion,
 				FrontmatterPolicyHash: policyHash,
-				EffectiveSchemaHash:   schemaHasher.Effective(schemaName, documentID),
-				ImmutableSnapshotHash: candidate.ImmutableSnapshotHash,
-				DocumentID:            strings.TrimSpace(documentID),
-				DocumentType:          strings.TrimSpace(documentType),
-				SchemaName:            schemaName,
+				EffectiveSchemaHash:   schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
+				ImmutableSnapshotHash: evaluation.candidate.ImmutableSnapshotHash,
+				DocumentID:            strings.TrimSpace(evaluation.documentID),
+				DocumentType:          strings.TrimSpace(evaluation.documentType),
+				SchemaName:            evaluation.schemaName,
 				FormatClean:           true,
 			})
 		}

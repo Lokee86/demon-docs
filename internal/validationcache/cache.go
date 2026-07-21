@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/ddrepo"
@@ -50,6 +51,7 @@ type Store struct {
 type SchemaHasher struct {
 	repoRoot string
 	format   config.Format
+	mu       sync.Mutex
 	hashes   map[string]string
 }
 
@@ -62,11 +64,21 @@ func (h *SchemaHasher) Effective(schemaName, documentID string) string {
 		return ""
 	}
 	key := strings.TrimSpace(schemaName) + "\x00" + strings.TrimSpace(documentID)
+	h.mu.Lock()
 	if hash, ok := h.hashes[key]; ok {
+		h.mu.Unlock()
 		return hash
 	}
+	h.mu.Unlock()
+
 	hash := effectiveSchemaHash(h.repoRoot, h.format, schemaName, documentID)
+	h.mu.Lock()
+	if existing, ok := h.hashes[key]; ok {
+		h.mu.Unlock()
+		return existing
+	}
 	h.hashes[key] = hash
+	h.mu.Unlock()
 	return hash
 }
 
