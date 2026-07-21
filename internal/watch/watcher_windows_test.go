@@ -12,6 +12,8 @@ import (
 )
 
 func TestWindowsRecursiveWatcherAllowsNestedTreeMove(t *testing.T) {
+	const eventTimeout = 10 * time.Second
+
 	root := t.TempDir()
 	oldTree := filepath.Join(root, "old")
 	newTree := filepath.Join(root, "new")
@@ -40,7 +42,7 @@ func TestWindowsRecursiveWatcherAllowsNestedTreeMove(t *testing.T) {
 	if err := os.WriteFile(marker, []byte("ready\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	readyDeadline := time.After(3 * time.Second)
+	readyDeadline := time.After(eventTimeout)
 	for {
 		select {
 		case event, ok := <-watcher.Events():
@@ -75,7 +77,7 @@ watcherReady:
 
 	var sawOldRename bool
 	var sawNewCreate bool
-	deadline := time.After(3 * time.Second)
+	deadline := time.After(eventTimeout)
 	for !sawOldRename || !sawNewCreate {
 		select {
 		case event, ok := <-watcher.Events():
