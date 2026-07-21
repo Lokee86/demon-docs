@@ -138,6 +138,7 @@ configuration
 object and identity records
 path history and fingerprints
 recorded immutable frontmatter values
+incremental frontmatter and document-format validation cache records
 shared schema history used for deterministic heading migrations
 human-authored shared schemas under `schemas/`
 human-editable document-specific schemas under `document-schemas/`

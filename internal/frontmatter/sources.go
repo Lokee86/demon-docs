@@ -4,20 +4,24 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/textio"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 type plannedSource struct {
-	path     string
-	relative string
-	document textio.Document
-	parsed   Document
-	parseErr error
+	path        string
+	relative    string
+	document    textio.Document
+	parsed      Document
+	parseErr    error
+	contentHash string
+	cacheHit    bool
+	cacheEntry  validationcache.Entry
 }
 
-func loadSources(repoRoot string, files []string, allowedFormats []string) ([]plannedSource, map[string]bool, error) {
+func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store) ([]plannedSource, map[string]bool, error) {
 	sources := make([]plannedSource, 0, len(files))
-	pathsByID := make(map[string][]string)
 	for _, path := range files {
 		relative, err := filepath.Rel(repoRoot, path)
 		if err != nil {
@@ -27,30 +31,62 @@ func loadSources(repoRoot string, files []string, allowedFormats []string) ([]pl
 		if err != nil {
 			return nil, nil, fmt.Errorf("read frontmatter source %s: %w", path, err)
 		}
-		parsed, parseErr := Parse(document.Text, allowedFormats)
 		source := plannedSource{
-			path:     path,
-			relative: filepath.ToSlash(relative),
-			document: document,
-			parsed:   parsed,
-			parseErr: parseErr,
+			path:        path,
+			relative:    filepath.ToSlash(relative),
+			document:    document,
+			contentHash: validationcache.ContentHash(document.RawBytes()),
 		}
-		sources = append(sources, source)
-		if parseErr == nil {
-			if id := documentID(parsed.Values); id != "" {
-				pathsByID[id] = append(pathsByID[id], path)
+		policyHash := validationcache.FrontmatterPolicyHash(cfg)
+		if candidate, ok := cache.Candidate(source.relative, source.contentHash, policyHash); ok && candidate.FrontmatterClean {
+			schemaHash := validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, candidate.SchemaName, candidate.DocumentID)
+			recorded := immutable.values(source.relative, map[string]any{"document_id": candidate.DocumentID}, true)
+			immutableHash := validationcache.Hash(recorded)
+			if entry, valid := cache.Lookup(source.relative, source.contentHash, policyHash, schemaHash, immutableHash); valid {
+				source.cacheHit = true
+				source.cacheEntry = entry
+				source.parsed = Document{Values: map[string]any{"document_id": entry.DocumentID, "document_type": entry.DocumentType}, HasBlock: true}
 			}
 		}
+		if !source.cacheHit {
+			source.parsed, source.parseErr = Parse(document.Text, allowedFormats)
+		}
+		sources = append(sources, source)
 	}
 
+	pathsByID := make(map[string][]string)
+	for _, source := range sources {
+		if id := sourceDocumentID(source); id != "" {
+			pathsByID[id] = append(pathsByID[id], source.path)
+		}
+	}
 	duplicates := make(map[string]bool)
-	for _, paths := range pathsByID {
+	duplicateIDs := make(map[string]bool)
+	for id, paths := range pathsByID {
 		if len(paths) < 2 {
 			continue
 		}
+		duplicateIDs[id] = true
 		for _, path := range paths {
 			duplicates[path] = true
 		}
 	}
+	for index := range sources {
+		if !sources[index].cacheHit || !duplicateIDs[sourceDocumentID(sources[index])] {
+			continue
+		}
+		sources[index].parsed, sources[index].parseErr = Parse(sources[index].document.Text, allowedFormats)
+		sources[index].cacheHit = false
+	}
 	return sources, duplicates, nil
+}
+
+func sourceDocumentID(source plannedSource) string {
+	if source.cacheHit {
+		return source.cacheEntry.DocumentID
+	}
+	if source.parseErr != nil {
+		return ""
+	}
+	return documentID(source.parsed.Values)
 }

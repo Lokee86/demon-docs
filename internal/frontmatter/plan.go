@@ -15,6 +15,7 @@ import (
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/repository"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 type Plan struct {
@@ -22,6 +23,7 @@ type Plan struct {
 	Diagnostics []Diagnostic
 	immutable   map[string]map[string]any
 	rewrites    []filetxn.Rewrite
+	cacheHits   int
 }
 
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time) (Plan, error) {
@@ -36,11 +38,16 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 	if err != nil {
 		return plan, err
 	}
-	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats)
+	immutable := loadImmutableIndex(repoRoot)
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return plan, fmt.Errorf("open validation cache: %w", err)
+	}
+	cache.Retain(relativeValidationPaths(repoRoot, files))
+	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache)
 	if err != nil {
 		return plan, err
 	}
-	immutable := loadImmutableIndex(repoRoot)
 	duplicateOwners := selectDuplicateOwners(sources, immutable)
 	usedIDs := collectDocumentIDs(sources)
 	ids := map[string][]string{}
@@ -49,6 +56,19 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		relative := source.relative
 		doc := source.document
 		parsed := source.parsed
+		if source.cacheHit {
+			plan.cacheHits++
+			if repair && len(source.cacheEntry.ImmutableValues) > 0 {
+				plan.immutable[relative] = cloneValues(source.cacheEntry.ImmutableValues)
+				cacheEntry := source.cacheEntry
+				cacheEntry.ImmutableSnapshotHash = validationcache.Hash(cacheEntry.ImmutableValues)
+				cache.Merge(cacheEntry)
+			}
+			if id := sourceDocumentID(source); id != "" {
+				ids[id] = append(ids[id], relative)
+			}
+			continue
+		}
 		if source.parseErr != nil {
 			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.parseErr.Error()})
 			continue
@@ -107,6 +127,25 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 				plan.rewrites = append(plan.rewrites, filetxn.New(path, doc.Encode(old), doc.Encode(next)))
 			}
 		}
+		if len(outcome.Diagnostics) == 0 && !duplicateExisting[path] && !outcome.Changed {
+			immutableSnapshot := recorded
+			if repair && len(outcome.Immutable) > 0 {
+				immutableSnapshot = outcome.Immutable
+			}
+			cache.Merge(validationcache.Entry{
+				Path:                  relative,
+				ContentSHA256:         source.contentHash,
+				EngineVersion:         validationcache.EngineVersion,
+				FrontmatterPolicyHash: validationcache.FrontmatterPolicyHash(cfg),
+				EffectiveSchemaHash:   selectedSchemaHash(repoRoot, relative, parsed.Values, cfg),
+				ImmutableSnapshotHash: validationcache.Hash(immutableSnapshot),
+				DocumentID:            documentID(outcome.Values),
+				DocumentType:          stringValue(outcome.Values["document_type"]),
+				SchemaName:            selectedSchemaName(relative, parsed.Values, cfg),
+				ImmutableValues:       cloneValues(outcome.Immutable),
+				FrontmatterClean:      true,
+			})
+		}
 	}
 	for id, paths := range ids {
 		if len(paths) < 2 {
@@ -133,6 +172,9 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		}
 		return left.Message < right.Message
 	})
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
 	return plan, nil
 }
 
@@ -258,6 +300,49 @@ func schemaForDocument(relative string, values map[string]any, cfg config.Config
 	}
 	schema.Fields = fields
 	return schema, nil
+}
+
+func selectedSchemaName(relative string, values map[string]any, cfg config.Config) string {
+	if !cfg.Format.Enabled {
+		return ""
+	}
+	selectionValues := values
+	if value, present := values["document_type"]; present && emptyValue(value) {
+		selectionValues = make(map[string]any, len(values)-1)
+		for name, existing := range values {
+			if name != "document_type" {
+				selectionValues[name] = existing
+			}
+		}
+	}
+	name, err := config.SelectFormatSchema(relative, selectionValues, cfg.Format)
+	if err != nil {
+		return ""
+	}
+	return name
+}
+
+func selectedSchemaHash(repoRoot, relative string, values map[string]any, cfg config.Config) string {
+	return validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, selectedSchemaName(relative, values, cfg), documentID(values))
+}
+
+func relativeValidationPaths(repoRoot string, files []string) []string {
+	paths := make([]string, 0, len(files))
+	for _, path := range files {
+		relative, err := filepath.Rel(repoRoot, path)
+		if err == nil {
+			paths = append(paths, filepath.ToSlash(relative))
+		}
+	}
+	return paths
+}
+
+func stringValue(value any) string {
+	text, ok := value.(string)
+	if !ok {
+		return ""
+	}
+	return text
 }
 
 func otherPaths(paths []string, current string) []string {

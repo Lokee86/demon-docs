@@ -15,7 +15,7 @@ func selectDuplicateOwners(sources []plannedSource, immutable immutableIndex) ma
 		if source.parseErr != nil {
 			continue
 		}
-		if id := documentID(source.parsed.Values); id != "" {
+		if id := sourceDocumentID(source); id != "" {
 			pathsByID[id] = append(pathsByID[id], source.relative)
 		}
 	}
@@ -49,7 +49,7 @@ func collectDocumentIDs(sources []plannedSource) map[string]struct{} {
 		if source.parseErr != nil {
 			continue
 		}
-		if id := documentID(source.parsed.Values); id != "" {
+		if id := sourceDocumentID(source); id != "" {
 			ids[id] = struct{}{}
 		}
 	}

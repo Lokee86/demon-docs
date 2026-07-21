@@ -37,6 +37,7 @@ Implemented ownership boundaries, state models, reconciliation pipelines, and in
 - [review-ledger.md](review-ledger.md) - Append-only suggestion decisions, applied changes, undo data, repair blocks, policy projection, and Git-backed publication.
 - [review-lifecycles.md](review-lifecycles.md) - Suggestion decisions, staleness, selection, applied changes, undo, repair blocks, and append-only event replay.
 - [stateless-move-transaction.md](stateless-move-transaction.md) - Explicit move planning, path remapping, preflight, rewrite ordering, and best-effort rollback.
+- [validation-cache.md](validation-cache.md) - Validation Cache documentation.
 - [watch-scheduler.md](watch-scheduler.md) - Debounce state, follow-up runs, mixed-watcher serialization, cancellation, and error propagation.
 <!-- doc-ledger:files:end -->
 

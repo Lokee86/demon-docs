@@ -34,6 +34,10 @@ func Read(path string) (Document, error) {
 	return Decode(b), nil
 }
 
+// RawBytes returns the original file bytes used for content identity. The
+// normalized Text field remains the source-preserving editing representation.
+func (d Document) RawBytes() []byte { return []byte(d.raw) }
+
 func (d Document) Encode(text string) []byte {
 	if d.mixed {
 		return []byte(d.encodeMixed(text))

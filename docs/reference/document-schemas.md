@@ -125,6 +125,8 @@ ddocs watch --format
 
 `--docs` is the umbrella selector for folder indexes, frontmatter, and body format. `--frontmatter` and `--format` select the two policy operations independently.
 
+Clean body-format results participate in the durable validation cache. Entries are reused only when the document content, validation engine, effective frontmatter policy, and effective selected shared/document schema hashes match. Editing either the shared schema or the document-specific schema invalidates the affected entry. Cache state is private `.ddocs/` state; `check` does not write authored Markdown or schema files.
+
 The format parser uses ordinary Markdown symbols. It does not add or require managed-region markers. Headings inside fenced code, blockquotes, and HTML blocks are ignored completely.
 
 `check` reports violations without writing. `fix` may:

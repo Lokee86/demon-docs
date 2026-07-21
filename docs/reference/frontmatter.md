@@ -147,6 +147,12 @@ The required field must exist and be non-empty when the condition matches. Other
 
 `check` never modifies documents.
 
+## Incremental validation cache
+
+Unchanged clean documents may be served from the durable validation cache under `.ddocs/`. A reusable entry requires the normalized path, content SHA-256, validation engine version, effective frontmatter policy hash, selected shared/document schema hash, and the current immutable-value snapshot to match. Only zero-diagnostic documents are cached. Duplicate document IDs and immutable changes invalidate or bypass reuse, so cache hits do not suppress those diagnostics.
+
+`check` may write cache records inside an already initialized `.ddocs/` store; it does not initialize private state for a standalone repository and does not write authored Markdown, schema inputs, or generated document content. Content, policy, schema, immutable-state, or engine changes invalidate the entry automatically, and records for documents no longer in scope are removed.
+
 ## Check and fix behavior
 
 Front matter runs with the documentation system during default reconciliation and `--docs` selection.

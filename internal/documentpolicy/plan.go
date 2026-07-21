@@ -13,6 +13,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/repository"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 type Diagnostic struct {
@@ -33,6 +34,7 @@ type Plan struct {
 	blockedHistory     map[string]bool
 	blockAllHistory    bool
 	repositoryRoot     string
+	cacheHits          int
 }
 
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, error) {
@@ -63,6 +65,19 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	if err != nil {
 		return plan, err
 	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return plan, fmt.Errorf("open validation cache: %w", err)
+	}
+	activePaths := make([]string, 0, len(files))
+	for _, path := range files {
+		relative, relativeErr := filepath.Rel(repoRoot, path)
+		if relativeErr == nil {
+			activePaths = append(activePaths, filepath.ToSlash(relative))
+		}
+	}
+	cache.Retain(activePaths)
+	policyHash := validationcache.FrontmatterPolicyHash(cfg)
 	for _, path := range files {
 		relative, _ := filepath.Rel(repoRoot, path)
 		relative = filepath.ToSlash(relative)
@@ -71,6 +86,24 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 			return plan, err
 		}
 		source := string(data)
+		contentHash := validationcache.ContentHash(data)
+		candidate, hasCandidate := cache.Candidate(relative, contentHash, policyHash)
+		if hasCandidate && candidate.FormatClean && candidate.SchemaName != "" {
+			schemaHash := validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, candidate.SchemaName, candidate.DocumentID)
+			if _, valid := cache.Lookup(relative, contentHash, policyHash, schemaHash, candidate.ImmutableSnapshotHash); valid {
+				shared, _, loadErr := LoadShared(repoRoot, cfg.Format, candidate.SchemaName)
+				if loadErr != nil {
+					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: loadErr.Error()})
+					continue
+				}
+				plan.history[candidate.SchemaName] = shared
+				if _, _, historyErr := loadSchemaHistory(repoRoot, candidate.SchemaName); historyErr != nil {
+					return plan, historyErr
+				}
+				plan.cacheHits++
+				continue
+			}
+		}
 		parsed, err := frontmatter.Parse(source, cfg.Frontmatter.AllowedFormats)
 		if err != nil {
 			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
@@ -97,6 +130,7 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 			return plan, err
 		}
 		documentID, _ := parsed.Values["document_id"].(string)
+		documentType, _ := parsed.Values["document_type"].(string)
 		local := DocumentSchema{}
 		localPath := ""
 		localExists := false
@@ -193,6 +227,20 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 				plan.rewrites = append(plan.rewrites, filetxn.New(path, data, []byte(next)))
 			}
 		}
+		if len(result.Diagnostics) == 0 && !result.Changed {
+			cache.Merge(validationcache.Entry{
+				Path:                  relative,
+				ContentSHA256:         contentHash,
+				EngineVersion:         validationcache.EngineVersion,
+				FrontmatterPolicyHash: policyHash,
+				EffectiveSchemaHash:   validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, schemaName, documentID),
+				ImmutableSnapshotHash: candidate.ImmutableSnapshotHash,
+				DocumentID:            strings.TrimSpace(documentID),
+				DocumentType:          strings.TrimSpace(documentType),
+				SchemaName:            schemaName,
+				FormatClean:           true,
+			})
+		}
 	}
 	sort.Slice(plan.Diagnostics, func(i, j int) bool {
 		left, right := plan.Diagnostics[i], plan.Diagnostics[j]
@@ -204,6 +252,9 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		}
 		return left.Message < right.Message
 	})
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
 	return plan, nil
 }
 
