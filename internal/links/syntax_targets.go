@@ -1,6 +1,7 @@
 package links
 
 import (
+	"net/url"
 	"path/filepath"
 	"strings"
 )
@@ -18,6 +19,40 @@ func exactTargetForSyntax(inventory *inventory, resolved, syntax string) (*FileR
 		return inventory.exact(candidates[0])
 	}
 	return nil, ""
+}
+
+func exactObsidianTarget(inventory *inventory, rawPath, syntax string) (*FileRecord, string) {
+	if rawPath == "" || (syntax != "inline" && syntax != "reference" && syntax != "wiki") {
+		return nil, ""
+	}
+	decoded, err := url.PathUnescape(rawPath)
+	if err != nil {
+		decoded = rawPath
+	}
+	if hasScheme(decoded) || filepath.IsAbs(filepath.FromSlash(decoded)) || isDrivePath(decoded) || strings.HasPrefix(decoded, `\\`) {
+		return nil, ""
+	}
+
+	candidate := filepath.FromSlash(decoded)
+	if syntax == "wiki" && filepath.Ext(candidate) == "" {
+		candidate += ".md"
+	}
+	if strings.ContainsAny(decoded, `/\`) {
+		if strings.HasPrefix(decoded, "./") || strings.HasPrefix(decoded, ".\\") || strings.HasPrefix(decoded, "../") || strings.HasPrefix(decoded, "..\\") {
+			return nil, ""
+		}
+		return inventory.exact(filepath.Join(inventory.root, candidate))
+	}
+	candidates := inventory.candidates(filepath.Base(candidate), "file")
+	if len(candidates) == 1 {
+		return inventory.exact(candidates[0])
+	}
+	return nil, ""
+}
+
+func isObsidianBareMarkdownPath(rawPath, syntax string) bool {
+	return rawPath != "" && (syntax == "inline" || syntax == "reference") &&
+		!strings.ContainsAny(rawPath, `/\`) && rawPath != "." && rawPath != ".."
 }
 
 func targetCaseMismatch(syntax, resolved, actual string) bool {

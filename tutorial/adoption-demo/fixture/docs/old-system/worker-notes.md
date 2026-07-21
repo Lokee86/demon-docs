@@ -1,9 +1,9 @@
 ---
-document_id: service-core
-author: Astra Team
+document_id: service-node
+author: Platform Team
 document_type: service
-created: 2026-04-18
-summary: Working notes for asynchronous task execution.
+created: 2026-04-23
+summary: Background execution notes.
 policy_exempt: false
 ---
 # Worker Notes
@@ -34,3 +34,11 @@ The worker consumes API output and reports task state back to [API notes](api-no
 ## Notes
 
 The two responsibility sections were written by different maintainers.
+
+## Related docs
+
+- [API service](api-notes.md)
+- [Storage service](docs/old-system/storage/storage-notes.md)
+- [Monitoring](monitoring.md)
+- [Lifecycle](lifecycle.md)
+- [Backup procedures](backups.md)

@@ -1,9 +1,9 @@
 ---
-document_id: backup-service
-author: Astra Team
+document_id: 612f8d14-d36f-4912-bf30-7629387a7f77
+author: Platform Team
 document_type: service
 created: 2026-04-28
-summary: Backup and restoration expectations for relay storage.
+summary: Snapshot and restoration procedures.
 policy_exempt: false
 ---
 # Backups
@@ -24,3 +24,11 @@ Define recoverability expectations for durable relay data.
 ## Does not own
 
 - Application-level retry behavior.
+
+## Related docs
+
+- [Storage service](docs/old-system/storage/storage-notes.md)
+- [Migration plan](migration.md)
+- [Release plan](release-plan.md)
+- [Phase two](phase-two.md)
+- [[worker-notes|Worker service]]

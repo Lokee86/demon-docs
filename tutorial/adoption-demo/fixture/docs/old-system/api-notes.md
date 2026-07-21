@@ -1,7 +1,7 @@
 ---
-document_id: service-core
+document_id: service-node
 document_type: service
-created: 2026-04-18
+created: 2026-04-22
 policy_exempt: false
 legacy_status: active
 ---
@@ -23,12 +23,20 @@ Document the API process that currently fronts Astra Relay.
 
 ## Overview
 
-The API validates incoming payloads and forwards accepted work to [[worker-notes|the worker service]]. Storage behavior is described in [storage notes](storage/storage-notes.md#retention).
+The API validates incoming payloads and forwards accepted work to [[worker-notes|the worker service]]. Storage behavior is described in [storage notes](storage/archive/storage-notes.md#retention).
 
-![System overview](assets/system-overview.jpg)
+![System overview](system-overview.jpg)
 
-The same asset is also embedded for Obsidian users: ![[assets/system-overview.jpg]].
+The same asset is also embedded for Obsidian users: ![[system-overview.jpg]].
 
 ## Notes
 
 The file and folder names in this section predate the current service taxonomy.
+
+## Related docs
+
+- [System architecture](architecture.md)
+- [Deployment](deployment.md)
+- [Monitoring](monitoring.md)
+- [Release plan](release-plan.md)
+- [[worker-notes|Worker service]]

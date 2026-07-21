@@ -94,8 +94,11 @@ func finalMoveDestination(source, destination string) (string, error) {
 	return filepath.Clean(destination), nil
 }
 
-func resolveMoveTarget(inventory *inventory, resolved, syntax, movedSource string) (string, error) {
+func resolveMoveTarget(inventory *inventory, resolved, rawPath, syntax, movedSource string) (string, error) {
 	if record, actual := exactTargetForSyntax(inventory, resolved, syntax); record != nil {
+		return filepath.Clean(actual), nil
+	}
+	if record, actual := exactObsidianTarget(inventory, rawPath, syntax); record != nil {
 		return filepath.Clean(actual), nil
 	}
 	candidate := expectedTargetPath(syntax, resolved)

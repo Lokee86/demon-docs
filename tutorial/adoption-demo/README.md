@@ -1,10 +1,29 @@
 # Demon Docs adoption walkthrough
 
+> [!IMPORTANT]
+> **Do not open `tutorial/`, `tutorial/adoption-demo/`, or `tutorial/adoption-demo/fixture/` as the Obsidian vault.**
+>
+> `tutorial/adoption-demo/fixture/` is a tracked, read-only source template containing synthetic Astra Relay documentation. It is not the working tutorial repository, it is not Demon Docs product documentation, and it is not Space Rocks documentation.
+>
+> Run the reset script first. It creates a separate disposable sibling directory named `demon-docs-adoption-demo`. **Open and edit only that sibling directory.** Running the reset script again deletes and recreates that sibling workspace from the tracked fixture.
+
 This walkthrough adopts Demon Docs into a deliberately inconsistent documentation repository, repairs what can be decided safely, preserves authored decisions, reorganizes a service area without breaking references, and finishes by enabling automatic maintenance.
 
 The fixture is deterministic and contains no nested Git repository or initialized `.ddocs` state. Its top-level `README.md` discloses every intentional starting problem and navigability shortcoming. The demonstration uses YAML frontmatter; TOML frontmatter is also supported but is outside this walkthrough.
 
 Codemap generation, reverse code indexes, and source-code integration are intentionally excluded so the walkthrough stays focused on the core documentation-maintenance workflow.
+
+## Source template versus working repository
+
+```text
+Demon Docs checkout/
+└── tutorial/adoption-demo/fixture/   tracked source template; do not use as the vault
+
+Sibling of the Demon Docs checkout/
+└── demon-docs-adoption-demo/         generated disposable repository; use this as the vault
+```
+
+The reset scripts never repair or regenerate files in place under `tutorial/`. They copy the tracked source template into the sibling working repository. The scripts refuse targets located inside the Demon Docs checkout.
 
 ## 1. Install Demon Docs
 
@@ -16,9 +35,9 @@ go install ./cmd/demon
 ddocs --version
 ```
 
-## 2. Reset the demonstration repository
+## 2. Generate or reset the disposable demonstration repository
 
-From the Demon Docs checkout:
+Run the script **from the Demon Docs checkout**:
 
 ```bash
 bash tutorial/adoption-demo/reset-demo.sh
@@ -32,7 +51,27 @@ PowerShell equivalent:
 Set-Location ..\demon-docs-adoption-demo
 ```
 
-The reset scripts replace the target completely, producing the same untreated fixture every time.
+The script copies:
+
+```text
+tutorial/adoption-demo/fixture/
+```
+
+into this separate sibling directory:
+
+```text
+../demon-docs-adoption-demo/
+```
+
+The sibling directory is the actual tutorial repository. The script deletes and recreates it on every run, so edits made there are intentionally disposable. It does **not** modify the tracked source fixture inside the Demon Docs checkout.
+
+Before continuing, confirm that the current directory ends with:
+
+```text
+demon-docs-adoption-demo
+```
+
+Open that exact directory as the Obsidian vault. Do not open the Demon Docs checkout, its `tutorial/` directory, or the tracked `fixture/` directory as the vault.
 
 ## 3. Review the disclosed starting condition
 
@@ -40,11 +79,13 @@ Open the repository's top-level `README.md`.
 
 It provides a complete inventory of the fixture's intentional state:
 
-- metadata and document-schema violations;
+- twenty-three documents with existing YAML frontmatter, ranging from valid to incomplete, weakly identified, duplicated, empty-valued, invalidly dated, and unknown-field-bearing;
+- five documents with no frontmatter at all;
+- two stale Markdown paths;
 - one ambiguous wiki link and one orphaned document;
 - an older service area that needs to be moved and renamed;
 - eleven folders without local indexes, reducing navigability without constituting broken Markdown;
-- correctly resolving Markdown links, wiki links, fragments, and image references that must survive the later reorganization;
+- 175 authored local link occurrences across Markdown links, wiki links, aliases, fragments, a reference-style link, an image link, and a wiki image embed;
 - one ignored private-notes file that is intentionally outside Demon Docs management.
 
 The individual files remain available for manual inspection, but the walkthrough now lets Demon Docs diagnose the repository itself.
@@ -144,15 +185,25 @@ ddocs check --docs
 
 The documentation check should now pass.
 
-## 9. Establish and review link health
+## 9. Repair links and establish trusted history
 
-The first link pass records the repository baseline. Run the command again so deterministic repairs can be applied against that baseline:
+Start with a read-only link check:
+
+```bash
+ddocs check --links
+```
+
+The initial report should include two genuine broken references:
+
+- `docs/getting-started.md` points to `concepts/archive/configuration.md`, while the repository contains exactly one `configuration.md` at `concepts/configuration.md`;
+- `docs/old-system/api-notes.md` points to `storage/archive/storage-notes.md#retention`, while the repository contains exactly one `storage-notes.md` at `storage/storage-notes.md#retention`.
+
+The first repair pass records the repository's link baseline. The second can use the now-initialized state and the unique filename candidates to repair both stale paths deterministically:
 
 ```bash
 ddocs fix --links
 ddocs fix --links
 ddocs suggestions docs/home.md
-ddocs check --links
 ```
 
 Scoping `suggestions` to `docs/home.md` keeps unrelated suggestion types out of the walkthrough output.
@@ -182,13 +233,35 @@ Add this authored entry under `Related docs` in `docs/home.md`:
 - [Launch retrospective](notes/launch-retrospective.md)
 ```
 
-Verify the result:
+Verify that the adopted repository now has a clean link baseline:
 
 ```bash
 ddocs check --links
 ```
 
-The link check should now pass.
+Next, create a new broken-link condition with an ordinary filesystem rename while the daemon is still disabled:
+
+```bash
+mv \
+  docs/guides/local-setup.md \
+  docs/guides/workstation-setup.md
+```
+
+The authored references still point to `local-setup.md`. Confirm the failure without modifying anything:
+
+```bash
+ddocs check --links
+```
+
+Because the clean baseline recorded the document's prior identity and location, Demon Docs can now repair the static filesystem change deterministically:
+
+```bash
+ddocs fix --links
+grep -R -n "workstation-setup" docs
+ddocs check --links
+```
+
+The old path should be replaced across the affected documents and generated indexes before the final link check passes.
 
 ## 10. Preview the service reorganization
 
@@ -198,7 +271,7 @@ The service notes still live under `docs/old-system`. Preview the largest move b
 ddocs mv --dry-run docs/old-system docs/services
 ```
 
-The preview reports the planned move and affected references without mutating the repository.
+The preview reports the planned move and a broad set of affected Markdown files and rewritten links without mutating the repository.
 
 ## 11. Move and rename the service area
 
@@ -214,12 +287,20 @@ ddocs mv \
   docs/services/assets/service-overview.jpg
 ```
 
+The service tree is referenced throughout the concepts, guides, troubleshooting, planning, stub, and service documents. The folder move and subsequent API, worker, storage, and image renames rewrite dozens of references across the documentation tree, exercising a substantial portion of the 175-link graph rather than one isolated source file.
+
 Inspect `docs/services/api-service.md` after the move. In one document, the fixture verifies preservation and rewriting of:
 
 - a labeled wiki link;
 - a Markdown link with a heading fragment;
 - a Markdown image reference;
 - a wiki image embed.
+
+Then search the broader graph for rewritten service paths:
+
+```bash
+grep -R -n "services/\|api-service\|worker-service\|storage-service" docs
+```
 
 Verify all managed references again:
 

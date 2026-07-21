@@ -133,7 +133,7 @@ func PlanMove(repositoryRoot, source, destination string) (MovePlan, error) {
 			if ignored {
 				continue
 			}
-			actualTarget, err := resolveMoveTarget(inventory, resolved, found.Syntax, source)
+			actualTarget, err := resolveMoveTarget(inventory, resolved, found.RawPath, found.Syntax, source)
 			if err != nil {
 				return MovePlan{}, fmt.Errorf("resolve affected link in %s:%d:%d: %w", markdownSource.record.Path, found.Line, found.Column, err)
 			}

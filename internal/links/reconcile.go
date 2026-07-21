@@ -322,6 +322,12 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 		}
 		ordinal++
 		targetRecord, actualPath := exactTargetForSyntax(inventory, resolved, found.Syntax)
+		resolvedForCase := resolved
+		if targetRecord == nil {
+			if targetRecord, actualPath = exactObsidianTarget(inventory, found.RawPath, found.Syntax); targetRecord != nil {
+				resolvedForCase = actualPath
+			}
+		}
 		if targetRecord == nil {
 			if _, statErr := os.Stat(resolved); statErr == nil {
 				targetRecord, actualPath, err = inventory.ensureTarget(resolved, "")
@@ -334,7 +340,7 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 			record.TargetFileID = targetRecord.ID
 			record.ResolvedPath = storePath(inventory.root, actualPath)
 			record.Status = "valid"
-			if targetCaseMismatch(found.Syntax, resolved, actualPath) {
+			if targetCaseMismatch(found.Syntax, resolvedForCase, actualPath) {
 				record.Status = "case_mismatch"
 				if initialized && repair {
 					newPath := renderTargetForSyntax(found.Syntax, found.RawPath, style, source.path, actualPath)
@@ -370,7 +376,7 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 				candidates = []string{moved}
 			}
 		}
-		if len(candidates) == 0 && (initialized || found.Syntax == "wiki") {
+		if len(candidates) == 0 && (initialized || found.Syntax == "wiki" || isObsidianBareMarkdownPath(found.RawPath, found.Syntax)) {
 			candidates = candidatePathsForSyntax(inventory, resolved, preferredID, found.Syntax)
 		}
 		record.Candidates = displayPaths(inventory.root, candidates)

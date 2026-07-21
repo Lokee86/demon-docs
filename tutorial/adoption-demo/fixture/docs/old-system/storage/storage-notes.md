@@ -29,4 +29,8 @@ Telemetry is retained for thirty days in the demonstration environment.
 
 ## Related docs
 
-- [Backup notes](backups.md)
+- [Backup procedures](backups.md)
+- [API service](api-notes.md)
+- [Worker service](worker-notes.md)
+- [Monitoring](monitoring.md)
+- [Release plan](release-plan.md)

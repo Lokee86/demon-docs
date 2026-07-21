@@ -1,9 +1,9 @@
 ---
-document_id: plan-roadmap
-author: Astra Team
+document_id: 43454dc0-89e0-4492-ae99-7471993ff298
+author: Product Team
 document_type: planning
-created: 2026-06-01
-summary: Delivery sequence for the Astra Relay demonstration.
+created: 2026-05-01
+summary: Delivery roadmap for Astra Relay.
 policy_exempt: false
 ---
 # Roadmap
@@ -11,9 +11,12 @@ policy_exempt: false
 ## Related docs
 
 - [Release plan](release-plan.md)
-- [Migration](migration.md)
-- [Phase one](phases/phase-one.md)
-- [Phase two](phases/phase-two.md)
+- [Migration plan](migration.md)
+- [Phase one](phase-one.md)
+- [Phase two](phase-two.md)
+- [System architecture](architecture.md)
+- [[api-notes|API service notes]]
+- [[worker-notes|Worker service notes]]
 
 ## Purpose
 

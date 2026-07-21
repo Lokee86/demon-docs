@@ -9,7 +9,7 @@ team: flight-operations
 
 ## Overview
 
-Astra Relay coordinates telemetry and task dispatch for remote field stations. Begin with the [configuration concepts](concepts/configuration.md).
+Astra Relay coordinates telemetry and task dispatch for remote field stations. Begin with the [configuration concepts](concepts/archive/configuration.md).
 
 ## Purpose
 
@@ -18,4 +18,7 @@ Explain the shortest route from a fresh checkout to a working local environment.
 ## Related docs
 
 - [Documentation home](home.md)
-- [Local setup](guides/local-setup.md)
+- [Quick start](quick-start.md)
+- [Glossary](glossary.md)
+- [Local setup](local-setup.md)
+- [[navigation|Navigation concepts]]
