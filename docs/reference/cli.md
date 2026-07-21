@@ -88,6 +88,8 @@ Mutation scope: no authored-file writes. Internal read/cache behavior remains im
 
 Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation.
 
+Link repair runs first. After frontmatter, document format, reverse indexes, and documentation indexes apply, link state is refreshed only for source paths that changed. A clean frontmatter-only, format-only, or index-only fix does not run repository-wide link tracking. Explicit `--links` retains the full link reconciliation path, including its review history, rollback, and watcher-suppression behavior.
+
 Mutation scope: managed documentation indexes, configured Markdown frontmatter and body structure beneath the docs root, recognized repository Markdown link paths, configured reverse-index outputs, and private `.ddocs/` state.
 
 ### `ddocs watch`

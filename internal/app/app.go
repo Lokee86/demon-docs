@@ -440,6 +440,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 	}
 	if command == "fix" {
 		changed := 0
+		changedSourcePaths := map[string]bool{}
 		if features.TrackLinks {
 			if features.Links {
 				linkPlan, err = links.Reconcile(scope.RepositoryRoot)
@@ -464,6 +465,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
+			addChangedSourcePaths(changedSourcePaths, indexResult.Updates)
 			if err := reconcile.PrepareMissingWithin(indexResult, scope.DocsRoot); err != nil {
 				return fail(errOut, err)
 			}
@@ -473,6 +475,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
+			addChangedSourcePaths(changedSourcePaths, frontmatterPlan.Updates)
 			count, err := frontmatter.Apply(scope.RepositoryRoot, scope.DocsRoot, frontmatterPlan)
 			if err != nil {
 				return fail(errOut, err)
@@ -484,6 +487,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
+			addChangedSourcePaths(changedSourcePaths, formatPlan.Updates)
 			count, err := documentpolicy.Apply(formatPlan, scope.DocsRoot)
 			if err != nil {
 				return fail(errOut, err)
@@ -495,6 +499,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
+			addChangedSourcePaths(changedSourcePaths, reversePlan.Updates)
 			count, err := reverseindex.Apply(scope.RepositoryRoot, reversePlan)
 			if err != nil {
 				return fail(errOut, err)
@@ -507,14 +512,24 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			if err != nil {
 				return fail(errOut, err)
 			}
+			addChangedSourcePaths(changedSourcePaths, indexResult.Updates)
 			changed += count
 		}
-		if features.Indexes || features.Frontmatter || features.Format || features.Reverse {
-			refreshPlan, err := links.Track(scope.RepositoryRoot)
+		if len(changedSourcePaths) > 0 {
+			paths := sortedChangedSourcePaths(changedSourcePaths)
+			var refreshPlan links.Plan
+			if features.Links {
+				// Link selection keeps its repository-wide refresh so links into
+				// newly generated indexes and other selected link diagnostics retain
+				// their existing behavior.
+				refreshPlan, err = links.Track(scope.RepositoryRoot)
+			} else {
+				refreshPlan, err = links.TrackSources(scope.RepositoryRoot, paths)
+			}
 			if err != nil {
 				return fail(errOut, err)
 			}
-			if features.TrackLinks || refreshPlan.Initialized {
+			if refreshPlan.Initialized {
 				if err := links.Save(refreshPlan); err != nil {
 					return fail(errOut, err)
 				}
@@ -644,6 +659,27 @@ func selectedFeatures(flags commonFlags, c config.Config) watch.Features {
 		TrackLinks:  linksSelected,
 		Reverse:     flags.reverseOnly,
 	}
+}
+
+func addChangedSourcePaths(paths map[string]bool, updates []model.FileUpdate) {
+	for _, update := range updates {
+		paths[filepath.Clean(update.Path)] = true
+	}
+}
+
+func sortedChangedSourcePaths(paths map[string]bool) []string {
+	result := make([]string, 0, len(paths))
+	for path := range paths {
+		result = append(result, path)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		left, right := result[i], result[j]
+		if runtime.GOOS == "windows" {
+			left, right = strings.ToLower(left), strings.ToLower(right)
+		}
+		return left < right
+	})
+	return result
 }
 
 func writeMessages(out io.Writer, messages []string) {

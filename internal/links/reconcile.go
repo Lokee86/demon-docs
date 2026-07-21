@@ -29,7 +29,15 @@ func Reconcile(repositoryRoot string) (Plan, error) {
 // Track refreshes persistent file and link identity without planning user-file
 // rewrites. It is used while automatic link maintenance is disabled.
 func Track(repositoryRoot string) (Plan, error) {
-	return reconcileWithOptions(repositoryRoot, false)
+	plan, err := reconcileWithOptions(repositoryRoot, false)
+	if err != nil {
+		return Plan{}, err
+	}
+	plan.Suppressions, err = LoadPendingSuppressions(repositoryRoot)
+	if err != nil {
+		return Plan{}, err
+	}
+	return plan, nil
 }
 
 func reconcileWithOptions(repositoryRoot string, repair bool) (Plan, error) {

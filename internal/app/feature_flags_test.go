@@ -37,10 +37,67 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(root, "INDEX.md")); err != nil {
 			t.Fatalf("indexes-only run did not create an index: %v", err)
 		}
-		if _, err := os.Stat(filepath.Join(root, ".ddocs", "objects")); !os.IsNotExist(err) {
-			t.Fatalf("indexes-only run wrote link state: %v", err)
+		if _, err := os.Stat(filepath.Join(root, ".ddocs")); !os.IsNotExist(err) {
+			t.Fatalf("indexes-only run initialized link state: %v", err)
 		}
 	})
+}
+
+func TestFrontmatterOnlyCleanFixDoesNotRefreshLinkState(t *testing.T) {
+	root := t.TempDir()
+	configText := strings.Replace(frontmatterTestConfig(false, "yaml"), "[links]\nenabled = false", "[links]\nenabled = true", 1)
+	writeTestFile(t, filepath.Join(root, ".ddocs", "config.toml"), configText)
+	source := filepath.Join(root, "docs", "source.md")
+	writeTestFile(t, source, "---\nauthor: Test Author\ncreated: 2026-07-20\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: general\nsummary: Existing\n---\n# Source\n\n[Target](target.md)\n")
+	writeTestFile(t, filepath.Join(root, "docs", "target.md"), "# Target\n")
+	var stdout, stderr bytes.Buffer
+	if code := Run(context.Background(), []string{"fix", "--root", root, "--links", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	before := snapshotDirectory(t, filepath.Join(root, ".ddocs"))
+	updated := "---\nauthor: Test Author\ncreated: 2026-07-20\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: general\nsummary: Existing\n---\n# Source\n\n[Target](other.md)\n"
+	writeTestFile(t, source, updated)
+	stdout.Reset()
+	stderr.Reset()
+	if code := Run(context.Background(), []string{"fix", "--root", root, "--frontmatter", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("clean frontmatter code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+	}
+	after := snapshotDirectory(t, filepath.Join(root, ".ddocs"))
+	if len(before) != len(after) {
+		t.Fatalf("clean frontmatter fix changed link state file count: before=%d after=%d", len(before), len(after))
+	}
+	for path, data := range before {
+		if string(after[path]) != string(data) {
+			t.Fatalf("clean frontmatter fix changed link state %s", path)
+		}
+	}
+}
+
+func snapshotDirectory(t *testing.T, root string) map[string][]byte {
+	t.Helper()
+	result := map[string][]byte{}
+	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		relative, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		result[relative] = data
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return result
 }
 
 func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {

@@ -252,22 +252,26 @@ The read-only command may load private state. Enabled link checks do not publish
 
 ### Pre-apply planning
 
-Before the first authored write, `fix` builds only the documentation-index plan when indexes are selected.
+Before the first authored write, `fix` builds the selected link plan first and the documentation-index plan when indexes are selected.
 
-Frontmatter and document-format plans are built immediately before their respective applies so they see any earlier index changes. The link plan is built after those writes. The reverse-index plan is deliberately deferred until every earlier selected subsystem has finished, so reverse inventory and rendering observe the final post-policy and post-link repository state.
+The link plan is built and applied before the other authored-file systems. Frontmatter and document-format plans are built immediately before their respective applies so they see any prepared index content. The reverse-index plan is deliberately deferred until every earlier selected subsystem has finished. The final link-state refresh is not a second repository-wide link pass: when a non-link system changed files, it refreshes only those changed source paths.
 
 ### Mutation order
 
 ```text
-1. apply documentation-index updates
-2. build and apply frontmatter updates and immutable state
-3. build and apply document-format updates and schema history
-4. reconcile links against the resulting repository contents
-5. apply generated link rewrites and publish link/review state
+1. reconcile links against the current repository contents
+2. apply generated link rewrites and publish link/review state
+3. prepare documentation-index updates
+4. build and apply frontmatter updates and immutable state
+5. build and apply document-format updates and schema history
 6. build and apply the reverse-index plan
+7. converge and write documentation indexes last
+8. refresh link state only for source paths changed by steps 3–7
 ```
 
-This order gives each later planner the current post-index and post-policy Markdown content. It also keeps reverse-index application last.
+This order keeps link repair first and documentation-index writes last. The scoped final refresh updates link offsets, fingerprints, and parsed records for files whose content changed after the initial link pass while retaining untouched link state. It performs no generated rewrites, review publication, or watcher-suppression writes.
+
+If indexes, frontmatter, format, or reverse-index planning produces no changed file, the final refresh is skipped entirely; in particular, a clean `fix --frontmatter`, `fix --format`, or index-only fix does not perform repository-wide link tracking. Explicit link selection retains the normal full link reconciliation pass and its review, rollback, and suppression behavior.
 
 ### Changed-file count
 

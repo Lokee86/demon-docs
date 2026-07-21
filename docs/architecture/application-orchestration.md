@@ -37,7 +37,7 @@ The application boundary owns:
 - repository and configuration selection;
 - translation of CLI flags into subsystem options;
 - `--docs`, `--frontmatter`, `--format`, `--links`, and `--reverse` selection semantics;
-- ordering selected reconciliation systems;
+- ordering selected reconciliation systems, with link repair first, documentation-index writes last, and changed-source link-state refresh scoped to the files written by other systems;
 - command output and aggregate success/failure decisions;
 - orphan-document health-check integration for link-enabled checks;
 - explicit stateless move command integration;

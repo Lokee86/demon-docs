@@ -24,6 +24,10 @@ func applyAndSaveWithTimings(plan *Plan) (int, ApplyTimings, error) {
 }
 
 func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
+	pending, err := LoadPendingSuppressions(plan.RepositoryRoot)
+	if err != nil {
+		return 0, err
+	}
 	changeBatch, err := prepareGeneratedChanges(plan)
 	if err != nil {
 		return 0, err
@@ -52,7 +56,7 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 		}
 		return 0, err
 	}
-	plan.Suppressions = suppressions
+	plan.Suppressions = mergeSuppressions(pending, suppressions)
 
 	publicationStarted := time.Now()
 	if err := Save(*plan); err != nil {
