@@ -23,6 +23,10 @@ const (
 	schemaVersion = 1
 )
 
+// ErrScopedReuseUnavailable means that a scoped validation pass cannot prove
+// the untouched active documents are represented by reusable clean entries.
+var ErrScopedReuseUnavailable = errors.New("scoped validation cache reuse unavailable")
+
 // Entry is the durable identity and clean-result state for one document.
 // The two clean flags are merged by frontmatter and document-policy builders.
 type Entry struct {
@@ -128,6 +132,24 @@ func (s *Store) Lookup(path, contentHash, frontmatterPolicyHash, schemaHash, imm
 		entry.ContentSHA256 != contentHash || entry.EngineVersion != EngineVersion ||
 		entry.FrontmatterPolicyHash != frontmatterPolicyHash || entry.EffectiveSchemaHash != schemaHash ||
 		entry.ImmutableSnapshotHash != immutableHash {
+		return Entry{}, false
+	}
+	return cloneEntry(entry), true
+}
+
+// LookupPath returns the current cache entry for path without requiring a
+// content hash. Scoped builders use it for documents they deliberately do not
+// read. Callers must still verify the subsystem-specific clean flag and policy
+// inputs that apply to their validation pass.
+func (s *Store) LookupPath(path string) (Entry, bool) {
+	if s == nil {
+		return Entry{}, false
+	}
+	normalized := NormalizePath(path)
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	entry, ok := s.entries[normalized]
+	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != normalized || entry.EngineVersion != EngineVersion {
 		return Entry{}, false
 	}
 	return cloneEntry(entry), true

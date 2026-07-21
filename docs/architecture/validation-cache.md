@@ -27,6 +27,14 @@ Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the n
 
 The selected schema identity is retained in the record so an unchanged document can verify the current shared and document-specific schema sources without reparsing its Markdown frontmatter. Shared and document-specific schema source changes therefore invalidate the record; changing the engine version also invalidates all records.
 
+Scoped watcher validation uses a normalized-path lookup that does not require a
+new content hash for untouched files. Frontmatter scoped reuse requires a
+current `FrontmatterClean` entry and reuses its cached document identity for
+global duplicate-ID detection. Document-format scoped reuse requires a current
+`FormatClean` entry and reuses its cached schema name and document ID. If any
+active untouched document lacks the required clean state, the watcher reruns
+that subsystem with the full builder.
+
 Because the cache currently keys reuse to the raw whole-document SHA-256, a generated link rewrite, index rewrite, or other body-only edit invalidates both frontmatter and document-format cache entries even when their relevant metadata and heading structure are unchanged. The following validation pass therefore performs a cold parse for that document. A future optimization may split cache identity by owned input surface or refresh the affected validation records from the final published bytes after generated rewrites.
 
 ## Clean-only reuse

@@ -42,6 +42,8 @@ type Plan struct {
 	cacheHits          int
 }
 
+var ErrScopedReuseUnavailable = validationcache.ErrScopedReuseUnavailable
+
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, error) {
 	if !cfg.Format.Enabled {
 		return BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, nil)
@@ -60,10 +62,41 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	return plan, nil
 }
 
+// BuildScoped validates changed Markdown paths while reusing clean cache
+// identities for every other active document.
+func BuildScoped(repoRoot, docsRoot string, cfg config.Config, repair bool, paths []string) (Plan, error) {
+	if !cfg.Format.Enabled {
+		return BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, nil, paths)
+	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return Plan{}, fmt.Errorf("open validation cache: %w", err)
+	}
+	plan, err := BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, paths)
+	if err != nil {
+		return plan, err
+	}
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
+	return plan, nil
+}
+
 // BuildWithValidationCache builds one document-format plan against a
 // caller-owned command cache. Cache publication remains a serialized command
 // concern after parallel planning completes.
 func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, nil)
+}
+
+// BuildScopedWithValidationCache is the caller-owned-cache form of
+// BuildScoped. The full builder above intentionally retains its existing
+// read-and-validate behavior.
+func BuildScopedWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store, paths []string) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, paths)
+}
+
+func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store, scopedPaths []string) (Plan, error) {
 	plan := Plan{
 		invalidatedSchemas: map[string][]byte{},
 		history:            map[string]Schema{},
@@ -126,7 +159,8 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		historyResults[name] = schemaHistoryResult{schema: schema, exists: exists, err: historyErr}
 		return schema, exists, historyErr
 	}
-	sources, err := loadDocumentSources(repoRoot, files, cfg, cache, policyHash, schemaHasher)
+	selected := scopedPathSet(repoRoot, scopedPaths)
+	sources, err := loadDocumentSources(repoRoot, files, cfg, cache, policyHash, schemaHasher, selected)
 	if err != nil {
 		return plan, err
 	}
