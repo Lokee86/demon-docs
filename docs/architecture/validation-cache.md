@@ -16,27 +16,39 @@ Frontmatter and document-body format validation use a durable incremental cache 
 
 ## Record identity
 
-Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the normalized repository-relative path. A record is reusable only when all of these values match:
+Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the normalized repository-relative path. The record contains independent reusable identities for the two validation subsystems.
+
+Frontmatter reuse requires:
 
 - normalized path;
-- raw document content SHA-256;
 - validation engine version;
+- raw leading-frontmatter identity;
 - effective frontmatter policy hash;
 - effective selected shared/document schema hash; and
 - the immutable-value snapshot used by frontmatter validation.
 
-The selected schema identity is retained in the record so an unchanged document can verify the current shared and document-specific schema sources without reparsing its Markdown frontmatter. Shared and document-specific schema source changes therefore invalidate the record; changing the engine version also invalidates all records.
+Document-format reuse requires:
 
-The current cache still uses a raw whole-document SHA-256 as its persisted content identity, but known generated rewrites refresh that identity from the exact final bytes after publication. The refresh is guarded by the expected old content hash, so a stale cache record is never carried across an unrelated edit.
+- normalized path;
+- validation engine version;
+- format-source identity;
+- format-selection policy hash; and
+- effective selected shared/document schema hash.
 
-Rewrite owners declare which validation surfaces they can affect:
+The raw whole-document SHA-256 remains recorded as source-state metadata and as a stale-write guard, but it is no longer the shared reuse identity for both validators. Frontmatter identity hashes the exact leading YAML or TOML block, including its source line endings. Ordinary body prose, link, and heading edits therefore do not invalidate a clean frontmatter result. The identity also distinguishes no block, unterminated blocks, and a newly introduced second leading block so cached clean results cannot hide parser diagnostics.
+
+Document format owns a separate structural identity and separate policy/schema hashes. Its identity includes the selected schema name, document ID and type, validation engine version, and the evaluated H2+ heading tree. The nested tree records heading text, levels, hierarchy, order, and duplicate occurrences. H1 titles, ordinary prose, links, fenced or protected headings, code blocks, and section body content are excluded because the current schema engine does not evaluate them.
+
+Known generated rewrites refresh the raw content hash from the exact final published bytes. Rewrite owners also declare which validation surfaces they may affect:
 
 - link destination rewrites retain both clean frontmatter and document-format results;
 - index generation retains frontmatter results and invalidates document-format results because managed headings may change;
 - document-format repairs retain frontmatter results and invalidate format results; and
 - frontmatter repairs invalidate both results because document identity, type, and schema selection may change.
 
-If every clean result is invalidated, the cache record is removed. Otherwise the unaffected result is retained under the final published content hash. A later split into subsystem-specific identities can make these invalidation rules more precise without changing the post-publication ownership boundary.
+The refresh is guarded by the expected old content hash, so a stale cache record is never carried across an unrelated edit. If every clean result is invalidated, the record is removed; otherwise the unaffected subsystem identity remains reusable under the final raw content hash.
+
+The selected schema metadata remains in the record so either subsystem can verify current shared and document-specific schema sources before reuse. Shared or document-specific schema changes invalidate only the matching subsystem identity. The structural fingerprint has its own version marker, so older whole-document format identities miss safely and rebuild without another durable-record schema change. Validation cache schema version 2 continues to discard older combined-identity entries safely.
 
 ## Clean-only reuse
 
