@@ -6,6 +6,12 @@ It maintains folder indexes, validates and repairs local links, reports orphan d
 
 Configured repositories can also enforce frontmatter fields and document-body structure, create documents from TOML document schemas, and resolve explicit format conflicts without rewriting authored prose.
 
+## Warlock Toolchain
+
+Demon Docs is the first available component of the [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain), a repository intelligence and governance toolchain for preserving repository knowledge, making working context portable, and enforcing durable boundaries for humans and software agents.
+
+**Preserve the lore. Bind the doctrine. Enforce the wards.**
+
 ## Hackathon judge quick path
 
 - Review the [hackathon scope, prior-work boundary, and AI engineering process](HACKATHON.md).
