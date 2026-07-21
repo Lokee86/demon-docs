@@ -28,26 +28,15 @@ func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.Reconci
 		return model.ReconcileResult{}, err
 	}
 	folders := orderedFolders(tree)
-	texts := map[string]string{}
-	entries := map[string][]*model.IndexEntry{}
-	for _, f := range folders {
-		if f.IndexPath == "" {
-			continue
-		}
-		doc, err := textio.Read(f.IndexPath)
-		if os.IsNotExist(err) {
-			continue
-		}
-		if err != nil {
-			return model.ReconcileResult{}, fmt.Errorf("read index %s: %w", f.IndexPath, err)
-		}
-		texts[f.Path] = doc.Text
-		entries[f.Path] = md.ParseEntries(f.IndexPath, doc.Text, c)
-	}
-	childTitles, err := rootChildTitles(tree.Root, folders, texts, c)
+	texts, indexExists, entries, err := loadIndexSources(folders, c)
 	if err != nil {
 		return model.ReconcileResult{}, err
 	}
+	documents, err := loadEditableSources(folders, c)
+	if err != nil {
+		return model.ReconcileResult{}, err
+	}
+	childTitles := parentTitleSources(tree.Root, folders, texts, documents, c)
 	rootTitle := md.ManagedRootTitle(tree.Root, texts[tree.Root], childTitles)
 	title := func(folder string) string {
 		if filepath.Clean(folder) == filepath.Clean(tree.Root) {
@@ -56,13 +45,8 @@ func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.Reconci
 		return md.FolderTitle(folder, texts[folder])
 	}
 	for _, f := range folders {
-		if f.IndexPath == "" {
+		if f.IndexPath == "" || indexExists[f.Path] {
 			continue
-		}
-		if _, err := os.Stat(f.IndexPath); err == nil {
-			continue
-		} else if !os.IsNotExist(err) {
-			return model.ReconcileResult{}, err
 		}
 		parent := ""
 		if f.Path != tree.Root {
@@ -74,47 +58,25 @@ func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.Reconci
 	crossFolders := crossFolderEntries(entries)
 	fileCounts := unmatchedFileCounts(folders, entries, c)
 	folderCounts := unmatchedFolderCounts(folders, entries, c)
-	matched := map[*model.IndexEntry]bool{}
-	result := model.ReconcileResult{}
-	for _, f := range folders {
-		if f.IndexPath != "" {
-			current := texts[f.Path]
-			desired := md.DesiredParent(f.IndexPath, tree.Root, title, c)
-			newText, err := updateSections(f, md.UpdateParent(current, desired, c.ParentLink.Label), entries[f.Path], crossFiles, fileCounts, crossFolders, folderCounts, matched, c)
-			if err != nil {
-				return result, fmt.Errorf("reconcile index %s: %w", f.IndexPath, err)
-			}
-			_, statErr := os.Stat(f.IndexPath)
-			if os.IsNotExist(statErr) || newText != current {
-				var old *string
-				if statErr == nil {
-					x := current
-					old = &x
-				}
-				result.Updates = append(result.Updates, model.FileUpdate{Path: f.IndexPath, OldText: old, NewText: newText})
-			}
-		}
-		if f.IsStubs {
-			continue
-		}
-		for _, p := range append(append([]string{}, f.DirectFiles...), f.StubFiles...) {
-			if !config.IsParentEditable(p, c) {
-				continue
-			}
-			doc, err := textio.Read(p)
-			if os.IsNotExist(err) {
-				continue
-			}
-			if err != nil {
-				return result, fmt.Errorf("read indexed file %s: %w", p, err)
-			}
-			desired := md.DesiredParent(p, tree.Root, title, c)
-			next := md.UpdateParent(doc.Text, desired, c.ParentLink.Label)
-			if next != doc.Text {
-				x := doc.Text
-				result.Updates = append(result.Updates, model.FileUpdate{Path: p, OldText: &x, NewText: next})
-			}
-		}
+	context := treePreparationContext{
+		root:         tree.Root,
+		config:       c,
+		title:        title,
+		texts:        texts,
+		indexExists:  indexExists,
+		documents:    documents,
+		entries:      entries,
+		crossFiles:   crossFiles,
+		fileCounts:   fileCounts,
+		crossFolders: crossFolders,
+		folderCounts: folderCounts,
+	}
+	updates, matched, err := prepareFolderResults(len(folders), func(index int) (folderPreparationResult, error) {
+		return context.prepare(folders[index])
+	})
+	result := model.ReconcileResult{Updates: updates}
+	if err != nil {
+		return result, err
 	}
 	type staleEntry struct {
 		indexPath, section, line string
@@ -342,35 +304,6 @@ func pathOrderKey(path string) string {
 	return path
 }
 
-func rootChildTitles(root string, folders []*model.FolderInfo, texts map[string]string, c config.Config) ([]string, error) {
-	var result []string
-	rootIndex := filepath.Join(root, c.IndexFile)
-	for _, f := range folders {
-		if f.IndexPath != "" {
-			if source, ok := texts[f.Path]; ok {
-				if t := parentTitleForRoot(f.IndexPath, source, rootIndex, c.ParentLink.Label); t != "" {
-					result = append(result, t)
-				}
-			}
-		}
-		for _, p := range append(append([]string{}, f.DirectFiles...), f.StubFiles...) {
-			if !config.IsParentEditable(p, c) {
-				continue
-			}
-			doc, err := textio.Read(p)
-			if os.IsNotExist(err) {
-				continue
-			}
-			if err != nil {
-				return nil, err
-			}
-			if t := parentTitleForRoot(p, doc.Text, rootIndex, c.ParentLink.Label); t != "" {
-				result = append(result, t)
-			}
-		}
-	}
-	return result, nil
-}
 func parentTitleForRoot(path, source, rootIndex, label string) string {
 	for _, line := range strings.Split(source, "\n") {
 		title, target := md.ParentLineParts(line, label)

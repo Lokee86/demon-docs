@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/Lokee86/demon-docs/internal/config"
@@ -16,7 +17,7 @@ import (
 )
 
 var entryPattern = regexp.MustCompile(`^\s*-\s+\[([^\]]+)\]\(([^)]+)\)\s+-\s+(.*)$`)
-var parentPatternCache = map[string]*regexp.Regexp{}
+var parentPatternCache sync.Map
 var sections = []string{"files", "stubs", "folders"}
 
 type heading struct {
@@ -490,11 +491,12 @@ func DesiredParent(path, root string, title func(string) string, c config.Config
 	return fmt.Sprintf("%s: [%s](./%s)", c.ParentLink.Label, title(filepath.Dir(path)), c.IndexFile)
 }
 func UpdateParent(source, desired, label string) string {
-	re := parentPatternCache[label]
-	if re == nil {
-		re = regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(label) + `:\s+.*$`)
-		parentPatternCache[label] = re
+	cached, ok := parentPatternCache.Load(label)
+	if !ok {
+		compiled := regexp.MustCompile(`(?m)^` + regexp.QuoteMeta(label) + `:\s+.*$`)
+		cached, _ = parentPatternCache.LoadOrStore(label, compiled)
 	}
+	re := cached.(*regexp.Regexp)
 	var loc []int
 	ranges := fencedCodeRanges(source)
 	for _, candidate := range re.FindAllStringIndex(source, -1) {

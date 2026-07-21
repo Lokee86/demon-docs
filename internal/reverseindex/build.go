@@ -87,20 +87,58 @@ func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, for
 		selected[folder] = struct{}{}
 	}
 
-	for _, folder := range sortedFolders(selected) {
-		indexPath := filepath.Join(folder, c.IndexFile)
-		block := renderBlock(repositoryRoot, indexPath, folder, folderFiles[folder], collected, c)
-		update, changed, reconcileErr := reconcileIndex(indexPath, folder, block, c)
-		if reconcileErr != nil {
-			return Plan{}, reconcileErr
-		}
-		if changed {
-			plan.Updates = append(plan.Updates, update)
-		}
-		plan.IndexCount++
+	updates, indexCount, err := reconcileSelectedFolders(repositoryRoot, c, folderFiles, collected, selected)
+	if err != nil {
+		return Plan{}, err
 	}
+	plan.Updates = append(plan.Updates, updates...)
+	plan.IndexCount += indexCount
 	sort.Strings(plan.Diagnostics)
 	return plan, nil
+}
+
+type folderReconciliationResult struct {
+	update  model.FileUpdate
+	changed bool
+}
+
+type folderReconciliationPreparation func(repositoryRoot string, c config.Config, folder string, files []string, f facts) (folderReconciliationResult, error)
+
+func reconcileSelectedFolders(repositoryRoot string, c config.Config, folderFiles map[string][]string, f facts, selected map[string]struct{}) ([]model.FileUpdate, int, error) {
+	return reconcileSelectedFoldersWithPreparation(repositoryRoot, c, folderFiles, f, selected, prepareFolderReconciliation)
+}
+
+func reconcileSelectedFoldersWithPreparation(repositoryRoot string, c config.Config, folderFiles map[string][]string, f facts, selected map[string]struct{}, prepare folderReconciliationPreparation) ([]model.FileUpdate, int, error) {
+	ordered := sortedFolders(selected)
+	results := make([]folderReconciliationResult, len(ordered))
+	errors := runReverseWorkers(len(ordered), func(index int) error {
+		result, err := prepare(repositoryRoot, c, ordered[index], folderFiles[ordered[index]], f)
+		if err == nil {
+			results[index] = result
+		}
+		return err
+	})
+
+	updates := []model.FileUpdate{}
+	for index, err := range errors {
+		if err != nil {
+			return nil, 0, err
+		}
+		if results[index].changed {
+			updates = append(updates, results[index].update)
+		}
+	}
+	return updates, len(ordered), nil
+}
+
+func prepareFolderReconciliation(repositoryRoot string, c config.Config, folder string, files []string, f facts) (folderReconciliationResult, error) {
+	indexPath := filepath.Join(folder, c.IndexFile)
+	block := renderBlock(repositoryRoot, indexPath, folder, files, f, c)
+	update, changed, err := reconcileIndex(indexPath, folder, block, c)
+	if err != nil {
+		return folderReconciliationResult{}, err
+	}
+	return folderReconciliationResult{update: update, changed: changed}, nil
 }
 
 func reconcileIndex(indexPath, folder, block string, c config.Config) (model.FileUpdate, bool, error) {

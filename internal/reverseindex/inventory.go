@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
@@ -25,38 +26,105 @@ var sourceNames = map[string]struct{}{
 	"Dockerfile": {}, "Gemfile": {}, "Makefile": {}, "Procfile": {}, "Rakefile": {},
 }
 
+const reverseWorkerLimit = 16
+
+type inventoryFolderResult struct {
+	files           []string
+	existingManaged bool
+}
+
+type inventoryFolderPreparation func(repositoryRoot string, c config.Config, hierarchy *ignorepolicy.Hierarchy, folder string, f facts) (inventoryFolderResult, error)
+
 func inventoryFolders(repositoryRoot string, c config.Config, hierarchy *ignorepolicy.Hierarchy, folders map[string]struct{}, f facts) (map[string][]string, map[string]struct{}, error) {
+	return inventoryFoldersWithPreparation(repositoryRoot, c, hierarchy, folders, f, prepareInventoryFolder)
+}
+
+func inventoryFoldersWithPreparation(repositoryRoot string, c config.Config, hierarchy *ignorepolicy.Hierarchy, folders map[string]struct{}, f facts, prepare inventoryFolderPreparation) (map[string][]string, map[string]struct{}, error) {
+	ordered := sortedFolders(folders)
+	results := make([]inventoryFolderResult, len(ordered))
+	errors := runReverseWorkers(len(ordered), func(index int) error {
+		result, err := prepare(repositoryRoot, c, hierarchy, ordered[index], f)
+		if err == nil {
+			results[index] = result
+		}
+		return err
+	})
+
 	folderFiles := map[string][]string{}
 	existingManaged := map[string]struct{}{}
-	for _, folder := range sortedFolders(folders) {
-		indexPath := filepath.Join(folder, c.IndexFile)
-		if doc, err := textio.Read(indexPath); err == nil && strings.Contains(doc.Text, markerStart(c)) {
-			existingManaged[folder] = struct{}{}
-		} else if err != nil && !os.IsNotExist(err) {
-			return nil, nil, err
-		}
-
-		entries, err := os.ReadDir(folder)
+	for index, err := range errors {
 		if err != nil {
 			return nil, nil, err
 		}
-		for _, entry := range entries {
-			if entry.IsDir() || entry.Type()&os.ModeSymlink != 0 || !entry.Type().IsRegular() || entry.Name() == c.IndexFile || entry.Name() == ignorepolicy.FileName {
-				continue
-			}
-			path := filepath.Join(folder, entry.Name())
-			ignored, err := hierarchy.Ignored(path, false)
-			if err != nil {
-				return nil, nil, err
-			}
-			if ignored || !indexableCodeFile(repositoryRoot, path, f.exactFiles) {
-				continue
-			}
-			folderFiles[folder] = append(folderFiles[folder], path)
+		folder := ordered[index]
+		if len(results[index].files) > 0 {
+			folderFiles[folder] = results[index].files
 		}
-		sort.Strings(folderFiles[folder])
+		if results[index].existingManaged {
+			existingManaged[folder] = struct{}{}
+		}
 	}
 	return folderFiles, existingManaged, nil
+}
+
+func prepareInventoryFolder(repositoryRoot string, c config.Config, hierarchy *ignorepolicy.Hierarchy, folder string, f facts) (inventoryFolderResult, error) {
+	result := inventoryFolderResult{}
+	indexPath := filepath.Join(folder, c.IndexFile)
+	if doc, err := textio.Read(indexPath); err == nil && strings.Contains(doc.Text, markerStart(c)) {
+		result.existingManaged = true
+	} else if err != nil && !os.IsNotExist(err) {
+		return inventoryFolderResult{}, err
+	}
+
+	entries, err := os.ReadDir(folder)
+	if err != nil {
+		return inventoryFolderResult{}, err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || entry.Type()&os.ModeSymlink != 0 || !entry.Type().IsRegular() || entry.Name() == c.IndexFile || entry.Name() == ignorepolicy.FileName {
+			continue
+		}
+		path := filepath.Join(folder, entry.Name())
+		ignored, err := hierarchy.Ignored(path, false)
+		if err != nil {
+			return inventoryFolderResult{}, err
+		}
+		if ignored || !indexableCodeFile(repositoryRoot, path, f.exactFiles) {
+			continue
+		}
+		result.files = append(result.files, path)
+	}
+	sort.Strings(result.files)
+	return result, nil
+}
+
+func runReverseWorkers(count int, work func(index int) error) []error {
+	if count == 0 {
+		return nil
+	}
+	workerCount := count
+	if workerCount > reverseWorkerLimit {
+		workerCount = reverseWorkerLimit
+	}
+
+	errors := make([]error, count)
+	jobs := make(chan int)
+	var workers sync.WaitGroup
+	workers.Add(workerCount)
+	for worker := 0; worker < workerCount; worker++ {
+		go func() {
+			defer workers.Done()
+			for index := range jobs {
+				errors[index] = work(index)
+			}
+		}()
+	}
+	for index := 0; index < count; index++ {
+		jobs <- index
+	}
+	close(jobs)
+	workers.Wait()
+	return errors
 }
 
 func indexableCodeFile(repositoryRoot, path string, exact map[string]struct{}) bool {

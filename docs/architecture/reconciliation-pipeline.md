@@ -41,11 +41,21 @@ It does not own semantic topic placement, authored prose outside managed blocks,
 ```text
 resolve repository and configuration
 -> scan documentation tree
--> parse existing managed sections
--> plan index and parent-link changes
--> report or apply the plan
+-> read existing indexes and parent-editable documents through bounded workers
+-> parse existing managed sections from the retained source snapshot
+-> prepare independent folder and parent-link plans through bounded workers
+-> merge updates and matched-entry claims serially in folder order
+-> report or apply the plan serially
 -> verify deterministic state on the next pass
 ```
+
+## Parallel preparation
+
+The scanner still produces one deterministic folder order. After scanning, a bounded 16-worker pool reads existing index files and parent-editable documents into detached indexed results. Each source is retained once and reused for root-title discovery, managed-entry parsing, parent-link comparison, and expected-old-content guards.
+
+Once cross-folder preservation facts and unmatched-name counts are computed serially, each folder independently prepares its index update, parent-link updates, and matched-entry claims. Workers read immutable maps and publish only their indexed detached result. Updates and matched claims then merge serially in the original folder order, so completion timing cannot change output ordering, stale-entry reporting, or first-error selection. File application remains serial and retains existing stale-source protections.
+
+The Markdown parent-link regular-expression cache uses concurrent-safe publication because multiple folder preparations may request the same configured label simultaneously.
 
 ## Scan Model
 
@@ -114,6 +124,18 @@ Reconciliation prefers to preserve stable, existing index content when the targe
 
 This preservation is intentionally narrow. Demon Docs matches by the current filesystem model and existing managed entries; it does not try to guess every historical rename pattern.
 
+## Preparation performance
+
+A retained Windows benchmark constructs a stable documentation tree with 128 folders and four Markdown documents per folder, then measures a complete read-only `Tree` plan. The comparison used five one-iteration runs, `GOMAXPROCS=16`, and commit `23b0a3f` as the serial baseline.
+
+Excluding the first sample to reduce host filesystem and antivirus warm-up noise, mean planning time improved from 531.6 milliseconds to 279.7 milliseconds: a 1.90x speedup and 47.4% latency reduction. The benchmark is `BenchmarkTreePreparation` in `internal/reconcile/preparation_benchmark_test.go`.
+
+```bash
+go test ./internal/reconcile -run '^$' -bench '^BenchmarkTreePreparation$' -benchmem -count=5 -benchtime=1x
+```
+
+The optimization targets latency rather than allocation volume. Detached concurrent source and folder results increase transient memory, which remains visible in `-benchmem` output.
+
 ## Markdown Link Behavior
 
 Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links and embeds, supported local HTML targets, stable file IDs, fingerprints, path history, and reverse-link records in the private `.ddocs/` object repository.
@@ -156,8 +178,10 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 ## Code map
 
 - `internal/scan/scan.go` — recursive documentation-tree inventory.
-- `internal/markdown/markdown.go` — managed-section parsing and source-preserving Markdown edits.
-- `internal/reconcile/reconcile.go` — forward-index planning and application.
+- `internal/markdown/markdown.go` — managed-section parsing, concurrent-safe parent-pattern reuse, and source-preserving Markdown edits.
+- `internal/reconcile/reconcile.go` — forward-index orchestration and serial application.
+- `internal/reconcile/source_loading.go` — bounded index and parent-editable document loading with deterministic indexed merge.
+- `internal/reconcile/preparation.go` — independent folder preparation and deterministic serial plan merge.
 - `internal/links/` — repository-local link inventory, resolution, state, diagnostics, rewrites, and stateless move planning.
 - `internal/app/move.go` — explicit `ddocs mv` command orchestration.
 - `internal/app/orphans.go` — link-graph projection used by the orphan health check.
@@ -166,7 +190,7 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 
 ## Tests
 
-Focused coverage includes scan scope, managed Markdown behavior, source preservation, move transitions, configuration, determinism, line endings, and reconciliation scope.
+Focused coverage includes scan scope, managed Markdown behavior, source preservation, move transitions, configuration, deterministic indexed merge and errors, bounded preparation concurrency, parent-cache race safety, line endings, and reconciliation scope.
 
 ```bash
 go test ./internal/scan ./internal/markdown ./internal/reconcile -count=1

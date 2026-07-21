@@ -141,15 +141,29 @@ resolve roots and codemap headings
 -> discover scoped folders and ignore hierarchy
 -> build authored codemap dataset
 -> resolve in-scope file and folder targets
--> inventory eligible files and existing managed indexes
--> render deterministic blocks
--> compare with current index files
--> report or apply file updates
+-> inventory eligible files and existing managed indexes through bounded workers
+-> prepare rendered blocks and current-index comparisons through bounded workers
+-> merge updates and errors serially in sorted folder order
+-> report or apply file updates serially
 ```
 
 `check --reverse` reports pending updates and reverse-index orphans without writing. `fix --reverse` applies only the planned file updates; orphan status is check-only because the command does not invent authored links. `watch --reverse` runs the same build and apply path after relevant filesystem events.
 
+Folder inventory and per-folder reconciliation use one bounded 16-worker preparation seam. Inventory workers read the current managed-marker state, directory entries, and immutable ignore hierarchy, then return sorted detached file lists. Reconciliation workers render one folder block and compare it with the current index source. Results remain indexed by sorted folder path and merge serially, so worker completion order cannot alter update order, index counts, or first-error selection. No worker writes repository files; `Apply` remains the sole serial publication path.
+
 When reverse indexing is selected together with documentation indexes or links, foreground watch runs the normal watcher and reverse-index watcher concurrently under one command context. This changes scheduling, not correctness or output ownership.
+
+## Preparation performance
+
+A retained Windows benchmark builds a stable reverse-index plan across 128 code folders with four Go files per folder and one authored codemap document per folder. The comparison used five one-iteration runs, `GOMAXPROCS=16`, and commit `23b0a3f` as the serial baseline.
+
+Excluding the first sample to reduce host filesystem and antivirus warm-up noise, mean planning time improved from 326.2 milliseconds to 95.4 milliseconds: a 3.42x speedup and 70.8% latency reduction. The benchmark is `BenchmarkReverseIndexPreparation` in `internal/reverseindex/preparation_benchmark_test.go`.
+
+```bash
+go test ./internal/reverseindex -run '^$' -bench '^BenchmarkReverseIndexPreparation$' -benchmem -count=5 -benchtime=1x
+```
+
+The optimization prioritizes latency and uses additional transient memory for detached concurrent results. Allocation and byte totals remain observable through `-benchmem`.
 
 ## Diagnostics
 
@@ -184,9 +198,9 @@ Eligible files in the selected inventory with no entry in the resolved authored 
 - `internal/reverseindex/paths.go` - configured and command-line root resolution.
 - `internal/reverseindex/scope.go` - root validation and scope normalization.
 - `internal/reverseindex/traversal.go` - folder discovery and nested ignore loading.
-- `internal/reverseindex/inventory.go` - eligible file and existing-index inventory.
+- `internal/reverseindex/inventory.go` - bounded folder inventory, shared worker scheduling, and deterministic indexed merge.
 - `internal/reverseindex/targets.go` - resolved target acceptance and grouping.
-- `internal/reverseindex/build.go` - complete deterministic build and reconciliation plan.
+- `internal/reverseindex/build.go` - complete deterministic build, bounded folder reconciliation preparation, and serial plan merge.
 - `internal/reverseindex/render.go` - managed block and document-link rendering.
 - `internal/reverseindex/apply.go` - file-update application.
 - `internal/reverseindex/watch.go` - reverse-index watch scheduling.
@@ -194,7 +208,7 @@ Eligible files in the selected inventory with no entry in the resolved authored 
 
 ## Tests
 
-Focused coverage includes root scope, nested traversal, target resolution, rendering, managed-block preservation, command integration, and watch behavior.
+Focused coverage includes root scope, nested traversal, target resolution, bounded folder preparation, deterministic update and error order, rendering, managed-block preservation, command integration, and watch behavior.
 
 ```bash
 go test ./internal/reverseindex ./internal/app -count=1

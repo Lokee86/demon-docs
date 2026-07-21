@@ -27,6 +27,7 @@ Demon Docs can:
 - read changed or new link-inventory content through a bounded worker pool while preserving deterministic traversal and merge order;
 - read and parse changed Markdown link sources through bounded workers before serial deterministic target resolution and repair planning;
 - plan independent source rewrites for known target moves through bounded workers before deterministic merge;
+- load and prepare documentation-index and code-folder reverse-index work through bounded workers before deterministic serial merge and write application;
 - retain private `.ddocs/` objects without automatic compaction until readers and writers share a cross-process lock;
 - expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
 - record applied normal repairs with bounded, hash-guarded undo and repair blocks;
@@ -172,9 +173,11 @@ Unchanged clean frontmatter and document-format results can be reused from durab
 
 Link inventory traverses the repository deterministically, reuses unchanged size/mtime metadata, and reads changed or new files through a bounded 16-worker pool. Changed Markdown link sources are also read and parsed through bounded workers; results remain indexed by source path and merge serially before target resolution, identity updates, diagnostics, review policy, and repair planning. For known target moves, each unchanged affected source independently prepares its rewrite plan through the same bounded worker pool, then results merge in source-path order before graph and diagnostic publication. When an index, frontmatter, format, or reverse-index fix changes Markdown after the initial link pass, Demon Docs refreshes only those changed link sources. A clean non-link fix does not run a repository-wide link scan or initialize absent link state. Explicit `--links` still runs the complete reconciliation, review, rollback, and suppression path.
 
+Documentation-index reconciliation reads and parses existing indexes and parent-editable documents through bounded workers, retains one immutable source snapshot per file, and prepares independent folder updates concurrently. Reverse-index reconciliation likewise inventories selected folders and prepares each managed index independently through a bounded worker pool. Both systems merge updates, matched-entry claims, diagnostics, and errors in deterministic path order before any serial write application.
+
 Automatic private-object compaction is currently disabled. The repository demon and CLI run as separate processes, and go-git pack replacement is not safe until private-state readers and writers share a cross-process lock. Normal commands therefore retain loose objects rather than risking a missing pack or referenced object.
 
-Cold frontmatter and document-format validation, link-inventory reads, and changed Markdown source reads and parsing now use bounded worker pools. A changed Markdown source is still reparsed as a whole, and body-only generated rewrites can still invalidate validation cache entries. These remaining performance boundaries are tracked in [Current Product Limitations](docs/limits/current-limitations.md) and the [Roadmap](docs/planning/roadmap.md).
+Cold frontmatter and document-format validation, link-inventory reads, changed Markdown source reads and parsing, documentation-index preparation, and reverse-index preparation now use bounded worker pools. A changed Markdown source is still reparsed as a whole, and body-only generated rewrites can still invalidate validation cache entries. These remaining performance boundaries are tracked in [Current Product Limitations](docs/limits/current-limitations.md) and the [Roadmap](docs/planning/roadmap.md).
 
 ## Performance maturity
 

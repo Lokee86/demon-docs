@@ -40,6 +40,7 @@ This roadmap describes the current product state and the next implementation tra
 - The repository demon provides single-owner detached watcher lifecycle while shell or agent feeders remain active, without becoming a correctness dependency.
 - `-d` / `--docs`, `-i` / `--indexes`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `--docs` includes indexes, frontmatter, and document-body format, while `--indexes` selects indexes only.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
+- Existing index and parent-editable document sources are loaded once through bounded workers; independent folder plans merge serially in deterministic tree order before writes.
 
 ### Document health checks
 
@@ -79,6 +80,7 @@ See [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.
 - Recursive repository-relative roots, repeated `--reverse-root` overrides, nested `.docignore`, and configurable codemap headings are implemented.
 - `check`, `fix`, and `watch` support `-r` / `--reverse` independently or alongside documentation indexes and links.
 - Missing codemap sections, empty matching sections, unresolved targets, and coverage gaps remain explicit diagnostics.
+- Folder inventory and per-folder reverse-index reconciliation use bounded preparation workers, deterministic path-indexed results, and serial write application.
 - Symbol-level projection, move-aware authored-reference repair, and richer coverage reports remain later work.
 
 See [Code-Folder Reverse Indexes](../architecture/reverse-indexes.md).
