@@ -48,13 +48,13 @@ ddocs watch -l
 
 `--once` runs one reconciliation pass and exits. Regular watch mode runs one reconciliation immediately and then observes relevant filesystem changes until the foreground process is stopped.
 
-Documentation-index, frontmatter-only, and document-format-only modes watch the docs root. Link-enabled mode watches the repository root so changes and moves involving non-Markdown targets can trigger link reconciliation.
+`-i` / `--indexes` selects folder indexes only. `-d` / `--docs` selects indexes, frontmatter, and document-body format together. Documentation-index, frontmatter-only, and document-format-only modes watch the docs root. Link-enabled mode watches the repository root so changes and moves involving non-Markdown targets can trigger link reconciliation.
 
 ## What the Watcher Does
 
-The watcher reruns the same selected operations used by `fix` when relevant repository content changes.
+The watcher reruns the same selected operations used by `fix` when relevant repository content changes. Link reconciliation runs before selected policy/index writes, and folder-index convergence runs last. When a non-link operation changes Markdown, only those changed source records are refreshed in link state; a clean non-link pass does not trigger repository-wide link tracking or initialize absent link state.
 
-- It starts with an immediate reconciliation pass.
+- It starts with one stable reconciliation pass; recognized move/content races discard the stale plan and retry after a short quiet delay.
 - It watches the docs root for indexes, frontmatter, or document format, or the repository root when links are enabled.
 - It reacts to relevant file events and directory create, delete, and move events.
 - It debounces event bursts.
@@ -65,10 +65,10 @@ The watcher reruns the same selected operations used by `fix` when relevant repo
 - It observes configured shared and document-specific schema directories when document format is selected, so schema edits trigger a new plan.
 - Explicit external targets add watches on their nearest existing parent directories.
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories.
-- Observer errors are surfaced rather than silently terminating observation.
+- Observer errors are surfaced. Event-buffer overflow is handled specially because it means event detail was lost: the watcher logs it, schedules a complete reconciliation, and keeps observing instead of terminating.
 - Each reconciliation diagnostic is printed as its own watcher message instead of being collapsed into an opaque count.
 
-Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
+Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. Existing unconsumed suppressions are loaded and merged with suppressions from the new batch, so a successful unrelated write cannot discard pending self-write evidence. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
 
 ## Foreground Watch versus Repository Demon
 
@@ -105,9 +105,9 @@ ddocs demon --logs
 
 ## Test Coverage
 
-Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, observer errors, clean cancellation, and self-write convergence.
+Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, transient initial-plan retries, event-buffer overflow recovery, ordinary observer-error propagation, clean cancellation, and self-write convergence.
 
-Repository-demon tests separately cover ownership exclusion and stale recovery, feeder expiry and counting, read-only status snapshots, shell-feeder reuse, bounded logs, shutdown grace, linked-worktree discovery, persistent enablement, and generated shell-hook contracts.
+Repository-demon tests separately cover ownership exclusion and stale recovery, feeder expiry and counting, read-only status snapshots, shell-feeder reuse, bounded logs, shutdown grace, linked-worktree discovery, persistent enablement, generated shell-hook contracts, and real Windows PowerShell parsing of the emitted bootstrap.
 
 ## Code map
 

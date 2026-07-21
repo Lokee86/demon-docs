@@ -193,7 +193,7 @@ scan the managed documentation tree
 -> return file updates without writing
 ```
 
-The plan contains complete replacement text for each changed file. `check` consumes the plan diagnostically; `fix` applies it.
+The plan contains complete replacement text for each changed file. Missing generated indexes are represented by their full planned heading, parent navigation, and managed-section content rather than empty placeholder files. This lets later frontmatter and document-format planning observe the same title and structure that the final index write will publish. `check` consumes the plan diagnostically; `fix` applies it.
 
 ## Description preservation and transitions
 
@@ -255,6 +255,8 @@ create parent directory if required
 
 Forward-index application is not a multi-file transaction. If a later write fails, earlier writes remain. Re-running reconciliation is the recovery mechanism because planning is deterministic and idempotent.
 
+During the combined command lifecycle, the initial index plan is used as input to frontmatter and document-format planning, while final folder-index convergence and publication occurs after those systems. Generated-index frontmatter defaults remain owned by frontmatter policy and apply even when document-format enforcement is disabled.
+
 This differs from generated link rewrites, which use hash guards, temporary files, and a separate rollback boundary.
 
 ## State and data ownership
@@ -284,7 +286,7 @@ This differs from generated link rewrites, which use hash guards, temporary file
 
 Planning fails when required files cannot be read, the documentation tree cannot be scanned, or a managed replacement cannot be formed. No planned update is applied by planning itself.
 
-Application fails on directory creation, reread, encoding input, or file-write errors. The returned changed count identifies how many earlier files completed. The safe recovery procedure is to correct the filesystem or permission problem and run `ddocs fix --docs` again.
+Application fails on directory creation, reread, encoding input, or file-write errors. The returned changed count identifies how many earlier files completed. The safe forward-index-only recovery procedure is to correct the filesystem or permission problem and run `ddocs fix --indexes` again. Use `--docs` when frontmatter and document-body format should also be reconciled.
 
 Malformed blocks are repaired only within the bounded section range. Unsupported authored bullet shapes are not imported as generated entries and may be replaced when they fall inside an owned managed block.
 
@@ -308,6 +310,7 @@ Focused contracts include:
 - `internal/reconcile/preservation_repair_test.go` — stale removal and bounded malformed-block repair;
 - `internal/reconcile/line_endings_test.go` — mixed-ending unmanaged-byte preservation;
 - `internal/reconcile/determinism_test.go` — stable plans and clean second passes;
+- `internal/frontmatter/plan_test.go` — complete generated-index input and generated defaults when document format is disabled;
 - `internal/reconcile/scope_test.go` — containment preflight; and
 - `internal/textio/textio_test.go` — newline decoding and re-encoding.
 

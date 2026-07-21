@@ -53,10 +53,10 @@ demon --help
 Core index, link, health, move, and foreground-watch operations can run without initialization:
 
 ```bash
-ddocs fix --root docs --docs
+ddocs fix --root docs --indexes
 ddocs fix --root docs --links
 ddocs watch --root docs --once
-ddocs check --root docs --docs --links
+ddocs check --root docs --indexes --links
 ```
 
 Without a selected config, built-in defaults apply. The resolved docs root is also the standalone scope boundary, so repository-wide targets outside that root are not part of normal link or reverse-index scope. Link-enabled mutating passes create private state under `docs/.ddocs/`, but no `.ddocs/config.toml` is created.
@@ -117,21 +117,27 @@ ddocs check
 
 The second `fix` should normally be idempotent. `check` should exit successfully when no pending deterministic changes or unresolved link conditions remain.
 
+Once private state exists, unchanged clean frontmatter and document-format checks can reuse durable validation-cache records. Narrow non-link fixes refresh link metadata only for Markdown sources they actually changed; a clean index-, frontmatter-, or format-only fix does not run repository-wide link tracking or initialize missing link state.
+
 ## Select one subsystem
 
 Use selectors when adopting one subsystem at a time:
 
 ```bash
-ddocs check --docs
+ddocs check --indexes
+ddocs check --frontmatter
+ddocs check --format
 ddocs check --links
 ddocs check --reverse
 
-ddocs fix --docs
+ddocs fix --indexes
+ddocs fix --frontmatter
+ddocs fix --format
 ddocs fix --links
 ddocs fix --reverse
 ```
 
-Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run. Link repair follows `[links].enabled`, and reverse indexes also run when roots are configured or supplied.
+`--indexes` selects folder indexes only. `--docs` is the umbrella selector for indexes, frontmatter, and document-body format. Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run. Link repair follows `[links].enabled`, and reverse indexes also run when roots are configured or supplied.
 
 ## Expected result
 

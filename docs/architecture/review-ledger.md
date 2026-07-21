@@ -102,7 +102,7 @@ Every generated rewrite records:
 - individual repair transformations; and
 - related target identities and paths.
 
-Events are Git commits containing `event.json` and optional content blobs. Each event points to its predecessor.
+Events from one append are encoded together in `batch.json` and published through one review commit. The batch carries ordered event payloads and optional before/after snapshots; history APIs expand it back into individual event records that share the batch commit hash. Legacy commits containing `event.json` and optional `before` / `after` blobs remain readable.
 
 ## Undo model
 
@@ -144,7 +144,7 @@ not change the successful append result.
 
 - `internal/review/model.go` - review event, decision, repair, and control models.
 - `internal/review/fingerprint.go` - stable evidence and relationship fingerprints.
-- `internal/review/store.go` - Git object storage and compare-and-swap append.
+- `internal/review/store.go` and `store_batch.go` - Git object storage, single-commit batch encoding, legacy-compatible history expansion, and compare-and-swap append.
 - `internal/review/policy.go` - decision and block replay.
 - `internal/review/undo.go` - bounded undo construction and eligibility.
 - `internal/links/review_suggestions.go` - ambiguous link suggestion generation.
@@ -157,7 +157,7 @@ not change the successful append result.
 
 ## Tests
 
-Focused coverage includes store append/replay, undo eligibility, suggestion CLI, link integration, codemap insertion, blocks, and concurrent history behavior.
+Focused coverage includes single-commit batch append/replay, legacy per-event history compatibility, nil/empty snapshot preservation, constant object growth, compaction retention, undo eligibility, suggestion CLI, link integration, codemap insertion, blocks, and concurrent history behavior.
 
 ```bash
 go test ./internal/review ./internal/links ./internal/app ./internal/codemap -count=1

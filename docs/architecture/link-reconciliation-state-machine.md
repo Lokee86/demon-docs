@@ -84,6 +84,8 @@ If repository-backed state is absent, legacy `files.json` and `links.json` manif
 
 The inventory contains present repository files and directories plus explicitly referenced external targets. Repository traversal obeys permanent exclusions and `.docignore`. Explicit external filesystem targets are not governed by repository ignore rules.
 
+Traversal and job construction remain serial and deterministic. Records whose path, size, and modification time still match reuse stored fingerprints and Markdown `document_id` values. Changed and new regular files are read through a bounded 16-worker pool, with one Markdown read supplying both the content fingerprint and document identity. Detached results merge by traversal index before identity matching.
+
 The inventory reconciles current paths with previous identities. A file that moved can therefore remain the same logical target even though its path changed.
 
 ### Current Markdown sources
@@ -99,6 +101,12 @@ The replayed review policy can block an otherwise deterministic generated repair
 ### File identity
 
 A `FileRecord.ID` is the durable identity for one observed file or directory. Current path is stored separately from identity. Historical paths remain available as move evidence.
+
+### Document-identity alias recovery
+
+Before source reconciliation, absent duplicate private records are grouped by stored Markdown `document_id`. When exactly one present file has that same non-empty identity, the absent records collapse into the live record. Their current and historical paths merge into the canonical file history, source and target references remap to the live file ID, and obsolete duplicate identities are omitted from the new projection.
+
+The collapse is deliberately conservative. No merge occurs when more than one present file shares the `document_id`, when no present owner exists, or when the evidence is otherwise ambiguous.
 
 ### Link identity
 
@@ -117,7 +125,7 @@ Link IDs identify occurrences, not semantic relationships. Moving or editing sur
 
 ## Source processing paths
 
-A Markdown source follows one of three principal paths.
+A Markdown source follows one of four principal paths.
 
 ### Internal moved-target path
 
@@ -131,7 +139,7 @@ A source can bypass full reparsing when all of these are true:
 
 The reconciler reads the unchanged source, calculates replacements directly from stored incoming-link records, applies review-block policy, and creates updated link records and an optional generated rewrite.
 
-This path preserves known occurrence identities and avoids interpreting a Demon Docs repair as an unrelated user edit.
+This path preserves known occurrence identities and avoids interpreting a Demon Docs repair as an unrelated user edit. If stored byte offsets no longer match the current source text even though file metadata reported the source as unchanged, rewrite construction treats that mismatch as a transient filesystem race, abandons the fast path for that source, and lets normal current-source parsing rebuild the repair from fresh offsets.
 
 ### Unchanged-source reuse path
 
@@ -148,6 +156,12 @@ Only `SourcePath` is refreshed. All prior outgoing records are copied into the n
 
 Any non-`valid` status forces the source through parsing on the next pass. This intentionally lets transient repair states converge to the normal current state after a successful write.
 
+### Scoped tracking path
+
+After index, frontmatter, document-format, or reverse-index writes, command orchestration may request `TrackSources` for only the changed Markdown paths. Those sources are read and parsed from current bytes, while every unselected source record, incoming-link group, identity, historical path, and pending watcher suppression remains in the projection. A clean non-link fix skips this path entirely and does not initialize absent link state.
+
+This is a state refresh after known authored-file changes, not full repair discovery. Explicit link selection still uses complete reconciliation.
+
 ### Parsed-source path
 
 All other sources are read and parsed from current bytes. This includes:
@@ -159,7 +173,7 @@ All other sources are read and parsed from current bytes. This includes:
 - sources containing unresolved or transient statuses; and
 - sources whose fingerprints no longer match.
 
-The parsed occurrences replace that source's outgoing graph projection in the new plan.
+The parsed occurrences replace that source's outgoing graph projection in the new plan. Any source-content change currently reparses the complete Markdown document; stored line and byte offsets are not shifted through a line- or chunk-level incremental parser.
 
 ## Target resolution order
 
@@ -175,7 +189,11 @@ An exact target produces `valid`, unless path casing differs from the filesystem
 
 ### Preferred previous identity
 
-When an exact target is absent, the prior occurrence's target file ID is preferred. If that identity is present at a different path, it becomes the sole move candidate.
+When an exact target is absent, the prior occurrence's target file ID is preferred. If that identity is present at a different path, including after unambiguous `document_id` alias collapse, it becomes the sole move candidate.
+
+### Historical path evidence
+
+If the current rendered target matches one unique historical path retained on a present file identity, that file becomes the preferred candidate before generic basename or fingerprint search. This allows an interrupted move or older duplicate-state publication to converge without weakening ambiguity refusal.
 
 ### Candidate discovery
 
@@ -337,7 +355,7 @@ Traversal, ignore-policy, fingerprint, or target-record errors abort planning. N
 
 ### Source read or parse-path failure
 
-Failure to read a required Markdown source aborts planning. Previously prepared in-memory records are discarded with the plan.
+Failure to read a required Markdown source aborts planning. Previously prepared in-memory records are discarded with the plan. A stale stored-offset mismatch during the internal moved-target fast path is handled differently: the fast path is skipped and the source is reparsed from current bytes before the plan is allowed to fail.
 
 ### Concurrent source edit
 
@@ -368,8 +386,10 @@ The current `refs/ddocs/state` projection remains unchanged. Authored source rew
 
 - `internal/links/model.go` — file, link, and plan records.
 - `internal/links/reconcile.go` — state-machine orchestration, source paths, statuses, target candidates, and rewrite planning.
-- `internal/links/inventory.go` — repository and external-target inventory.
-- `internal/links/filemeta.go` — file identity and fingerprint metadata.
+- `internal/links/inventory.go` and `workers.go` — deterministic repository/external inventory with bounded changed-content reads.
+- `internal/links/filemeta.go` — file identity, fingerprint, size/mtime reuse, and Markdown document-identity metadata.
+- `internal/links/document_aliases.go` — unambiguous `document_id` alias collapse, reference remapping, and history merging.
+- `internal/links/scoped_tracking.go` — changed-source-only graph refresh after non-link writes.
 - `internal/links/target.go` — local target resolution and candidate discovery.
 - `internal/links/syntax_targets.go` — syntax-specific exact and candidate resolution.
 - `internal/links/parser.go` and parser extensions — current Markdown occurrence extraction.
@@ -384,6 +404,9 @@ The current `refs/ddocs/state` projection remains unchanged. Authored source rew
 Focused state-machine coverage includes:
 
 - `internal/links/reconcile_test.go` — baseline, exact resolution, moves, ambiguity, undefined references, and identity behavior.
+- `internal/links/document_aliases_test.go` and `observed_rename_test.go` — duplicate private identity collapse and historical-path recovery.
+- `internal/links/scoped_tracking_test.go` — selected-source refresh and preservation of unselected records and suppressions.
+- `internal/links/inventory_test.go` — deterministic bounded reads and metadata reuse.
 - `internal/links/parser_test.go` — occurrence ordering and syntax extraction.
 - `internal/links/review_integration_test.go` — blocked and stale-block transitions.
 - `internal/links/review_selection_test.go` — selected-candidate and transient-status handling.

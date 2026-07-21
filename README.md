@@ -16,6 +16,9 @@ Demon Docs can:
 - report managed Markdown documents with no meaningful inbound links;
 - move a repository-contained file or directory and rewrite affected links without initialization;
 - retain stable file identities and path history in private `.ddocs/` state, under the standalone docs root or the initialized repository root;
+- reuse durable clean-validation results for unchanged frontmatter and document-body format checks;
+- read changed or new link-inventory content through a bounded worker pool while preserving deterministic traversal and merge order;
+- compact private `.ddocs/` object storage automatically after successful state or review publication crosses bounded loose-object thresholds;
 - expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
 - record applied normal repairs with bounded, hash-guarded undo and repair blocks;
 - explicitly inspect, preview, update, and verify unified managed codemap sections;
@@ -26,6 +29,14 @@ Demon Docs can:
 - run one optional repository-local watcher through the repository demon and feeder lifecycle.
 
 It does not silently rewrite prose outside explicit managed regions, choose among ambiguous targets, remove codemap links by confidence unless configured to do so, or invoke codemap generation through normal watch or daemon automation.
+
+## Documentation as a versioned graph
+
+Most documentation tools treat Markdown as a collection of files located at paths. Demon Docs treats a repository as a versioned document graph with stable identity, history, and deterministic reconciliation.
+
+A document can retain its identity when its path changes. Content hashes determine whether validation and inventory results remain reusable, whether evidence has materially changed, and whether a recorded repair can still be applied safely. Private Git-style objects, references, and transactions preserve repository state, path history, review decisions, and guarded undo data without requiring generated metadata in the documents themselves.
+
+The individual techniques are familiar from version control, content-addressed storage, build systems, and databases. Their composition is the unusual part: stable document identity, content fingerprinting, repository history, managed ownership boundaries, and graph repair work together to make an ordinary Markdown repository behave like a self-maintaining document system.
 
 ## Installation
 
@@ -87,12 +98,12 @@ go build -o bin/demon ./cmd/demon
 Run index, link, health, move, and foreground-watch operations without initializing a repository:
 
 ```bash
-ddocs fix --root docs --docs
+ddocs fix --root docs --indexes
 ddocs fix --root docs --links
 ddocs watch --root docs --once
 ddocs mv --dry-run docs/old.md docs/new.md
 ddocs mv docs/old.md docs/new.md
-ddocs check --root docs --docs --links
+ddocs check --root docs --indexes --links
 ```
 
 In standalone mode, the resolved docs root is also the scope boundary. The first link-enabled mutating pass creates private identity and history state beneath `docs/.ddocs/`; it does not create `.ddocs/config.toml`.
@@ -135,13 +146,24 @@ Subsystem selectors:
 
 ```text
 --docs         documentation indexes, configured frontmatter, and document-body format
+--indexes      documentation indexes only
 --frontmatter  configured frontmatter enforcement only
 --format       document-body format enforcement only
---links    repository-local link validation, repair, and orphan checking
---reverse  code-folder reverse indexes
+--links        repository-local link validation, repair, and orphan checking
+--reverse      code-folder reverse indexes
 ```
 
 Use `ddocs <command> --help` or `ddocs <command> <subcommand> --help` for exact scoped flags and safety behavior. `demon --help` opens the repository-demon command family. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
+
+## Incremental and private-state behavior
+
+Unchanged clean frontmatter and document-format results can be reused from durable `.ddocs/` cache records. Content, policy, schema, immutable-state, duplicate-identity, or validation-engine changes invalidate reuse automatically. A standalone read-only check does not initialize `.ddocs/` merely to save cache data.
+
+Link inventory traverses the repository deterministically, reuses unchanged size/mtime metadata, and reads changed or new files through a bounded 16-worker pool. When an index, frontmatter, format, or reverse-index fix changes Markdown after the initial link pass, Demon Docs refreshes only those changed link sources. A clean non-link fix does not run a repository-wide link scan or initialize absent link state. Explicit `--links` still runs the complete reconciliation, review, rollback, and suppression path.
+
+Successful private state and review writes trigger best-effort compaction only after loose-object thresholds are exceeded. Maintenance preserves everything reachable from all private references, including review history and undo snapshots; a compaction failure does not reverse the completed logical write.
+
+Cold frontmatter and document-format validation is still processed serially, and a changed Markdown source is currently reparsed as a whole. These remaining performance boundaries are tracked in [Current Product Limitations](docs/limits/current-limitations.md) and the [Roadmap](docs/planning/roadmap.md).
 
 ## Safety model
 

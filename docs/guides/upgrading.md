@@ -20,6 +20,22 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
+## Version 0.3.2 behavior changes
+
+Version 0.3.2 changes several execution and private-state details without requiring an authored-document migration:
+
+- `-i` and `--indexes` now select folder indexes only. Use `-d` or `--docs` when the command should also run frontmatter and document-body format policy.
+- Link repair runs before the other selected authored-file systems, folder-index convergence writes last, and non-link systems refresh link state only for Markdown sources they actually changed. Clean index-, frontmatter-, or format-only fixes no longer perform a repository-wide link scan or initialize absent link state.
+- Missing generated indexes are prepared with their complete planned heading and navigation content before frontmatter or document-format planning. Generated index `author` and `summary` repair defaults do not depend on document-format enforcement being enabled.
+- Clean frontmatter and document-format results can be reused from durable validation-cache records. Content, policy, schema, immutable-state, duplicate-identity, or validation-engine changes invalidate reuse.
+- Link inventory reads changed and new files through a bounded 16-worker pool while retaining serial deterministic traversal and ordered result merging.
+- Review events created by one reconciliation run are stored in one `batch.json` review commit. Existing per-event `event.json` commits remain readable; no destructive review-history conversion is required.
+- Private `.ddocs` state and review writes automatically trigger best-effort object compaction after the loose-object count exceeds 256 or loose bytes exceed 8 MiB. Maintenance occurs after logical publication, preserves all referenced review and undo history, and cannot turn a completed write into a failed write.
+- When one live file and stale absent private records share a `document_id`, reconciliation collapses the stale aliases into the live identity, remaps links, merges path history, and uses that historical path evidence before generic filename guessing.
+- Existing pending watcher suppressions are retained and merged with suppressions from a new generated rewrite batch.
+
+Cold frontmatter and format validation remains serial, and changed Markdown sources are still reparsed as complete documents. Those are documented current performance limits rather than upgrade failures.
+
 ## Prerequisites
 
 - The repository's current Git status is understood.
@@ -99,10 +115,14 @@ Current configuration names should be preferred even when compatibility names re
 Start with narrow checks when the upgrade affects a known subsystem:
 
 ```bash
-ddocs check --docs
+ddocs check --indexes
+ddocs check --frontmatter
+ddocs check --format
 ddocs check --links
 ddocs check --reverse
 ```
+
+Use `ddocs check --docs` when indexes, frontmatter, and document-body format should be verified together.
 
 A link check can read legacy JSON state, but it does not publish the current object format. Reverse checking requires configured roots and matching codemap sections.
 
@@ -113,10 +133,14 @@ Review every diagnostic before running a broad mutating command.
 Run the necessary subsystem fixes:
 
 ```bash
-ddocs fix --docs
+ddocs fix --indexes
+ddocs fix --frontmatter
+ddocs fix --format
 ddocs fix --links
 ddocs fix --reverse
 ```
+
+Use `ddocs fix --docs` when all three documentation-policy systems should migrate together.
 
 Or run the configured default set:
 
@@ -130,7 +154,9 @@ Important migrations include:
 - wrapping or normalizing recognized legacy managed-index headings;
 - reading compatibility configuration keys into the current model;
 - normalizing retained codemap entry syntax into the current dataset; and
-- publishing legacy `.ddocs/files.json` and `.ddocs/links.json` into current object state, then removing the old files after a successful save.
+- publishing legacy `.ddocs/files.json` and `.ddocs/links.json` into current object state, then removing the old files after a successful save;
+- reading legacy per-event review commits alongside current batched review commits without rewriting the old history; and
+- collapsing stale duplicate private file identities only when one present file with the same `document_id` is unambiguous.
 
 Review the Git diff and command output. Private-state publication must not be mistaken for permission to accept unexpected authored-file changes.
 
@@ -159,8 +185,10 @@ External adapters should reacquire new feeder tokens. Do not reuse pre-upgrade t
 - The intended binary version is active.
 - Configuration selection remains correct.
 - Authored files contain only reviewed deterministic changes.
-- Current private state is readable.
+- Current private state and legacy review commits are readable.
 - Legacy link JSON is removed only after successful current-state publication.
+- Validation-cache records are reused only when all identity inputs still match.
+- Private-object compaction, when triggered, preserves state, review history, and undo snapshots.
 - A second fix is idempotent.
 - `ddocs check` succeeds.
 - Watcher automation is re-enabled only after static verification.

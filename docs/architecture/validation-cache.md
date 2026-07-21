@@ -27,6 +27,8 @@ Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the n
 
 The selected schema identity is retained in the record so an unchanged document can verify the current shared and document-specific schema sources without reparsing its Markdown frontmatter. Shared and document-specific schema source changes therefore invalidate the record; changing the engine version also invalidates all records.
 
+Because the cache currently keys reuse to the raw whole-document SHA-256, a generated link rewrite, index rewrite, or other body-only edit invalidates both frontmatter and document-format cache entries even when their relevant metadata and heading structure are unchanged. The following validation pass therefore performs a cold parse for that document. A future optimization may split cache identity by owned input surface or refresh the affected validation records from the final published bytes after generated rewrites.
+
 ## Clean-only reuse
 
 Only a document with no diagnostics and no pending repair is recorded as clean. A cache hit restores no authored output; it contributes the same empty diagnostic result and skips document parsing and evaluation. Within one validation pass, selected schema-source hashes, shared schemas, and schema history are memoized and reused across documents selecting the same inputs. A later pass creates a fresh snapshot and therefore observes schema-file changes.

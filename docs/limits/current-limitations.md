@@ -232,6 +232,55 @@ Removal condition:
 
 A complete cross-platform symlink ownership and containment policy is implemented. Silent traversal should remain prohibited.
 
+## Cold frontmatter and format validation is serial
+
+The durable validation cache makes repeated clean checks fast, but a cold or invalidated frontmatter/document-format pass still enumerates and processes applicable Markdown documents serially.
+
+Impact:
+
+- first-run cost scales with the number and complexity of documents;
+- broad policy or schema changes invalidate many cache entries at once;
+- link, index, or other body-only rewrites change the raw whole-document hash and force fresh frontmatter and format scans even when their relevant inputs did not change; and
+- available CPU parallelism is not yet used for document reads, parsing, and per-document evaluation.
+
+Workaround:
+
+Adopt policy in bounded scopes, retain `.ddocs/` cache state, and avoid deleting private state as routine cleanup. Use narrow `--frontmatter` or `--format` checks when diagnosing one policy system.
+
+Owning docs:
+
+- [Validation Cache](../architecture/validation-cache.md)
+- [Markdown Link Performance](../research/link-performance.md)
+- [Roadmap](../planning/roadmap.md)
+
+Removal condition:
+
+A bounded document-worker pool is implemented, deterministic result merging and duplicate-ID behavior remain protected, and Windows-focused benchmarks establish a conservative default worker count. Cache identity is also narrowed to the validation-relevant document surfaces, or affected cache records are safely refreshed after final generated rewrites, so body-only link changes do not cause unrelated cold validation.
+
+## Changed Markdown sources are reparsed as whole documents
+
+Unchanged source fingerprints reuse stored link records, offsets, lines, and columns. Any content change currently causes the complete Markdown source to be parsed again.
+
+Impact:
+
+- inserting one line into a large document reparses every link occurrence in that document;
+- stored offsets are not shifted through a line- or chunk-diff model; and
+- large frequently edited Markdown files can dominate incremental link-refresh cost.
+
+Workaround:
+
+No correctness workaround is required. Keep generated bulk content out of managed Markdown sources when practical and rely on unchanged-source reuse for files that did not change.
+
+Owning docs:
+
+- [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
+- [Link Reconciliation State Machine](../architecture/link-reconciliation-state-machine.md)
+- [Markdown Link Performance](../research/link-performance.md)
+
+Removal condition:
+
+Line or bounded-chunk hashes, safe offset shifting, changed-region parsing, parser-state synchronization, and conservative full-parse fallbacks are implemented and benchmarked.
+
 ## Related docs
 
 - [Limits](INDEX.md)

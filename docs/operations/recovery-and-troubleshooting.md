@@ -40,7 +40,9 @@ demon --logs
 ddocs status
 ddocs config paths
 ddocs config show
-ddocs check --docs
+ddocs check --indexes
+ddocs check --frontmatter
+ddocs check --format
 ddocs check --links
 ddocs check --reverse
 ```
@@ -79,6 +81,8 @@ run ddocs check --links
 ```
 
 Do not rename candidates merely to force the algorithm to guess differently unless the repository naming itself is wrong.
+
+When stale private records and one live file share the same `document_id`, current reconciliation collapses the absent aliases into the live identity, remaps stored links, and merges path history. Historical path matches are considered before generic filename candidates. Preserve the failing `.ddocs/` state when this does not converge; do not manually edit private records.
 
 ## First-pass link limitations
 
@@ -128,6 +132,23 @@ Likely differences include:
 - `.docignore` contents; and
 - generated or untracked files present in only one environment.
 
+## Validation cache and private-object maintenance
+
+Validation-cache records are optimization state. A content, policy, schema, immutable-state, duplicate-identity, or validation-engine change invalidates reuse automatically. Deleting only the cache records after all Demon Docs processes stop is safe, but normally unnecessary; the next pass simply reparses the affected documents.
+
+Private state and review publication may trigger automatic compaction after more than 256 loose objects or more than 8 MiB of loose object data. Compaction runs only after the logical reference write succeeds and preserves all objects reachable from private references, including review history and undo snapshots. A maintenance failure is non-fatal to the completed write and is retried after a later successful publication.
+
+An error from the project's normal `.git` maintenance is separate from Demon Docs' private `.ddocs` maintenance. Diagnose the path named in the message before deleting or repairing either repository.
+
+## Repository demon stops during a move burst
+
+Current watcher recovery treats two move-related conditions as rebuild signals rather than fatal corruption:
+
+- `fsnotify: queue or buffer overflow` logs that event detail was lost and schedules a complete reconciliation while retaining the recursive root observer;
+- source-hash or missing-file races during the initial daemon pass discard the stale plan and retry after a short quiet delay until the repository stabilizes or startup is cancelled.
+
+Use `ddocs demon --logs` to distinguish these recoverable conditions from a non-transient planning, permission, configuration, or state-decoding failure. After a large migration settles, verify both `ddocs check --links` and `ddocs check --indexes`; link rewrites occur earlier in one watcher pass than final index convergence, so inspecting the tree mid-pass can show repaired links before indexes finish.
+
 ## Damaged private state
 
 Before resetting:
@@ -142,7 +163,7 @@ try the narrowest read-only command
 
 If state cannot be decoded or recovered and no targeted repair exists, move or delete `.ddocs/`, reinitialize, and establish a new baseline.
 
-Consequences include losing prior move identity/history and resetting repository-demon runtime state.
+Consequences include losing prior move identity/history, validation-cache state, review and undo evidence, and repository-demon runtime state. Prefer a targeted cache reset or preserved-state diagnosis over deleting the complete directory.
 
 ## Verification after recovery
 

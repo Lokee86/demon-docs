@@ -246,6 +246,62 @@ func TestDocumentIDsPreserveLinkIdentityAcrossModifiedMassMoves(t *testing.T) {
 	}
 }
 
+func TestStaleStoredOffsetsFallBackToCurrentSourceParsing(t *testing.T) {
+	root := t.TempDir()
+	sourcePath := filepath.Join(root, "README.md")
+	targetPath := filepath.Join(root, "docs", "guide.md")
+	writeTestFile(t, sourcePath, "[guide](docs/guide.md)\n")
+	writeTestFile(t, targetPath, "# Guide\n")
+
+	baseline, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(baseline.Links.Links) != 1 {
+		t.Fatalf("expected one baseline link: %#v", baseline.Links.Links)
+	}
+
+	writeTestFile(t, sourcePath, "---\nsummary: Generated documentation folder index.\n---\n[guide](docs/guide.md)\n")
+	fingerprint, err := fileFingerprint(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for index := range baseline.Files.Files {
+		record := &baseline.Files.Files[index]
+		if record.Path == "README.md" {
+			record.Fingerprint = fingerprint
+			record.Size = info.Size()
+			record.ModifiedUnixNano = info.ModTime().UnixNano()
+		}
+	}
+	if err := Save(baseline); err != nil {
+		t.Fatal(err)
+	}
+
+	movedPath := filepath.Join(root, "manual", "guide.md")
+	if err := os.MkdirAll(filepath.Dir(movedPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(targetPath, movedPath); err != nil {
+		t.Fatal(err)
+	}
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Unresolved != 0 || len(plan.Updates) != 1 {
+		t.Fatalf("stale offsets did not fall back to current parsing: unresolved=%d updates=%d messages=%v", plan.Unresolved, len(plan.Updates), plan.Messages)
+	}
+	if !strings.Contains(plan.Updates[0].NewText, "manual/guide.md") {
+		t.Fatalf("reparsed source did not repair moved target: %q", plan.Updates[0].NewText)
+	}
+}
+
 func TestAbsoluteExternalTargetCanMoveIntoRepository(t *testing.T) {
 	root := t.TempDir()
 	external := t.TempDir()

@@ -37,7 +37,7 @@ Demon Docs treats that target as authored evidence. It does not infer ownership 
 ### 1. Choose the scope
 Core docs-scoped behavior does not require initialization. A narrow standalone adoption could begin with:
 ```bash
-ddocs fix --root docs --docs
+ddocs fix --root docs --indexes
 ddocs fix --root docs --links
 ddocs watch --root docs --once
 ```
@@ -50,7 +50,7 @@ ddocs status
 ```
 Initialization creates repository-root `.ddocs/config.toml`, starter schemas, and a repository-wide scope boundary. `status` confirms the repository root, docs root, config path, and `.docignore` path. Authored documentation remains normal Markdown; private identities and history live beneath the repository-root `.ddocs/`.
 ### 2. Stage adoption for existing docs
-A new config enables indexes, links, frontmatter, format policy, and repository-demon eligibility. Existing documentation may not match the starter metadata or body schemas.
+A new config enables indexes, links, frontmatter, format policy, and repository-demon eligibility. Existing documentation may not match the starter metadata or body schemas. `--indexes` selects only generated navigation, while `--docs` selects indexes together with frontmatter and document-body format.
 
 For a narrow first pass, temporarily change:
 ```toml
@@ -63,7 +63,7 @@ enabled = false
 Leave indexes and links enabled. Re-enable policy enforcement after adapting the schemas to the repository. This avoids mixing navigation adoption with a metadata and body-format migration.
 ### 3. Generate indexes
 ```bash
-ddocs fix --docs
+ddocs fix --indexes
 ```
 With frontmatter and format disabled, the fixture reports:
 ```text
@@ -213,7 +213,7 @@ TODO
 ```
 Replace the placeholders, then update the folder index:
 ```bash
-ddocs fix --docs
+ddocs fix --indexes
 ```
 The new guide still needs meaningful inbound evidence. Add this to `installation.md`:
 ```markdown

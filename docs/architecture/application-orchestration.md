@@ -36,7 +36,7 @@ The application boundary owns:
 - scoped help and shared version behavior;
 - repository and configuration selection;
 - translation of CLI flags into subsystem options;
-- `--docs`, `--frontmatter`, `--format`, `--links`, and `--reverse` selection semantics;
+- `--docs`, `--indexes`, `--frontmatter`, `--format`, `--links`, and `--reverse` selection semantics;
 - ordering selected reconciliation systems, with link repair first, documentation-index writes last, and changed-source link-state refresh scoped to the files written by other systems;
 - command output and aggregate success/failure decisions;
 - orphan-document health-check integration for link-enabled checks;
@@ -44,8 +44,9 @@ The application boundary owns:
 - suggestion selection/decline and applied-change inspection/undo command integration;
 - foreground watch startup;
 - explicit codemap fix, check, inspect, export, benchmark, and precision command integration;
-- repository-demon public and hidden commands; and
-- command aliases such as `-i` / `--indexes` and the `demon` executable.
+- repository-demon public and hidden commands;
+- short/long flag pairs such as `-i` / `--indexes`; and
+- compatibility entry points such as the `demon` executable.
 
 ## Does not own
 

@@ -54,7 +54,8 @@ A test passing does not authorize undocumented contract changes. A document clai
 | Stable descriptions survive normal reconciliation | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestExistingDescriptionsAndRootDisplayTitleRemainStable` | fixture matrix |
 | Direct/stub and unique cross-folder transitions preserve descriptions without ambiguous guessing | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `transitions_moves_test.go` | fixture matrix |
 | LF, CRLF, mixed endings, trailing spaces, and final-newline state are preserved as documented | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `line_endings_test.go`, `source_preservation_test.go`, `textio_test.go` | Linux and Windows CI |
-| Planning is deterministic, idempotent, and non-mutating | [Reconciliation Model](../architecture/reconciliation-pipeline.md) | `determinism_test.go`, `TestCheckPlanningDoesNotMutate` | `ddocs fix --docs` followed by clean `ddocs check --docs` |
+| Planning is deterministic, idempotent, and non-mutating | [Reconciliation Model](../architecture/reconciliation-pipeline.md) | `determinism_test.go`, `TestCheckPlanningDoesNotMutate` | `ddocs fix --indexes` followed by clean `ddocs check --indexes` |
+| Missing generated indexes expose their complete planned content to later policy stages, and generated index defaults do not depend on format enforcement | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md), [Front Matter Schemas](../reference/frontmatter.md) | `TestFreshRepositoryGeneratedIndexConverges`, `TestGeneratedIndexesReceiveFrontmatterInSameFix`, `TestBuildUsesGeneratedIndexDefaultsWithoutFormat` | `go test ./internal/app ./internal/frontmatter -count=1` |
 | No forward-index write escapes the managed docs root | [Managed Markdown Transformation](../architecture/managed-markdown-transformation.md) | `TestApplyWithinRejectsOutsideWriteBeforeMutation` | full Go suite |
 
 ## Frontmatter and document-format contracts
@@ -76,9 +77,13 @@ A test passing does not authorize undocumented contract changes. A document clai
 | --- | --- | --- | --- |
 | Supported link syntax is parsed without treating protected code as links | [Supported Link Syntax](../reference/supported-link-syntax.md), [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `internal/links/parser_test.go` and syntax-specific tests | `go test ./internal/links -count=1` |
 | First link pass records a baseline before identity-based repair | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget`, `TestBrokenLinkGuessWaitsUntilAfterInitialScan` | repository link fixture checks |
+| One live `document_id` collapses stale absent private aliases, remaps links, merges history, and restores historical-path repair without weakening ambiguity refusal | [Link Reconciliation State Machine](../architecture/link-reconciliation-state-machine.md) | `TestCollapseDocumentIdentityAliasesRemapsLinksAndMergesHistory`, document-alias reconciliation tests, `TestDocumentIDsPreserveLinkIdentityAcrossModifiedMassMoves` | `go test ./internal/links -count=1` |
 | Ambiguous targets are reported rather than selected automatically | [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md) | `TestAmbiguousGuessIsLeftForTheUser`, wiki ambiguity tests | `ddocs check --links` |
+| Stale stored link offsets abandon the internal move fast path and rebuild from current source parsing | [Link Reconciliation State Machine](../architecture/link-reconciliation-state-machine.md) | `TestStaleStoredOffsetsFallBackToCurrentSourceParsing` | `go test ./internal/links -count=1` |
 | Batch preflight prevents every generated source write when any source changed | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestApplyGeneratedPreflightFailurePreventsAllWrites` | `go test ./internal/links -count=1` |
 | Generated replacement preserves suppression order and deterministic plans | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestApplyGeneratedPreservesSuppressionOrder`, concurrency tests | link integration suite |
+| Watch startup retries recognized stale move plans, and event-buffer overflow requests a complete reconciliation without terminating observation | [Watch Scheduler and Reconciliation Serialization](../architecture/watch-scheduler.md), [Repository Demon](../operations/repository-demon.md) | `TestInitialReconciliationRetriesTransientFilesystemRaces`, `TestWatcherRecoversFromEventOverflowWithFullReconciliation` | `go test ./internal/watch -count=1` |
+| New generated rewrites and scoped tracking preserve unrelated pending watcher suppressions | [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md), [Watcher and Automation](../operations/watcher-and-automation.md) | suppression merge tests, `TestTrackSourcesRefreshesOnlySelectedSourceRecords` | `go test ./internal/links -count=1` |
 | Policy and index fixes skip clean-run link tracking and refresh only changed source paths | [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md) | `TestFrontmatterOnlyCleanFixDoesNotRefreshLinkState`, `TestTrackSourcesRefreshesOnlySelectedSourceRecords` | `go test ./internal/app ./internal/links -count=1` |
 | Rollback never overwrites content created after Demon Docs' write | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRollbackGeneratedRefusesToOverwriteNewerContent` | full Go suite |
 | Review-publication failure restores generated source content | [Review Ledger](../architecture/review-ledger.md) | `TestApplyAndSaveRestoresSourcesWhenReviewBatchFails`, `TestRollbackAfterReviewFailureRestoresUndoSource` | review CLI integration suite |
@@ -91,7 +96,8 @@ A test passing does not authorize undocumented contract changes. A document clai
 | --- | --- | --- | --- |
 | Private state transactions reject stale bases | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRepositoryRejectsStaleTransaction` | `go test ./internal/ddrepo -count=1` |
 | One record update rewrites only its deterministic shard and root | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestSingleRecordUpdateOnlyChangesItsShard`, codec tests | private-state package suite |
-| Review event batches publish a complete chain or nothing | [Review Ledger](../architecture/review-ledger.md) | `store_batch_test.go` | `go test ./internal/review ./internal/links ./internal/app -count=1` |
+| Review event batches publish one complete `batch.json` commit or nothing, while legacy per-event commits remain readable | [Review Ledger](../architecture/review-ledger.md), [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md) | `store_batch_test.go` batch object-count, nil/empty snapshot, legacy history, and compaction cases | `go test ./internal/review ./internal/links ./internal/app -count=1` |
+| Private object compaction runs after durable publication, preserves every referenced state/review/undo object, and is non-fatal to the logical write | [Private Object Repository](../architecture/private-object-repository.md) | `internal/ddrepo/compaction_test.go`, review compaction retention tests | `go test ./internal/ddrepo ./internal/review -count=1` |
 | Declines remain effective until their evidence fingerprint changes | [Review Ledger](../architecture/review-ledger.md) | `TestPolicyKeepsDeclineUntilFingerprintChanges` | review CLI integration suite |
 | User selection applies only the chosen candidate after preflight | [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md) | `TestSuggestionsSelectPreflightsAndAppliesOnlyChosenRepair`, `TestPrepareSelectionPlanRemovesAutomaticWritesAndRestoresRecords` | review CLI integration suite |
 | Undo can target one repair while preserving unrelated transformations | [Review Ledger](../architecture/review-ledger.md) | `TestBuildUndoDataSupportsOneRepairWithinFileChange`, review CLI tests | full Go suite |
@@ -146,8 +152,9 @@ A test passing does not authorize undocumented contract changes. A document clai
 | --- | --- | --- | --- |
 | `check` reports drift without writing | [CLI Reference](../reference/cli.md), [Application Orchestration](../architecture/application-orchestration.md) | `TestCheckReportsDriftWithoutWriting` and feature-selection tests | fixture matrix |
 | `check` and `fix` select and order indexes, frontmatter, body format, links, and reverse indexes as documented | [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md) | `app_test.go`, `feature_flags_test.go`, frontmatter/format integration tests | `go test ./internal/app ./internal/frontmatter ./internal/documentpolicy -count=1` |
-| Feature selectors run only requested systems | [CLI Reference](../reference/cli.md) | `feature_flags_test.go` | CLI regression suite |
+| Feature selectors run only requested systems; `--indexes` is index-only and `--docs` is the indexes/frontmatter/format umbrella | [CLI Reference](../reference/cli.md), [Compatibility and Migrations](../reference/compatibility-and-migrations.md) | `feature_flags_test.go`, help tests | CLI regression suite |
 | Every public and nested command has scoped side-effect-free help | [Testing and Fixtures](testing-and-fixtures.md) | `help_test.go`, `help_nested_test.go`, `cmd/demon/main_test.go` | smoke gate |
+| The documented PowerShell shell-hook command emits one native-output object, installs under Windows PowerShell, and preserves complete repository paths and shell counts | [Repository Demon](../operations/repository-demon.md) | `TestShellHookUsesTokenLeaveAndValidPowerShellInstallation`, `TestPowerShellHookBootstrapInstallsFunctions` | Windows app tests |
 | Codemap fix permits an optional root; check and inspect require one; singular and plural command names route to the same implementation | [CLI Reference](../reference/cli.md), [Codemap Managed Execution](../architecture/codemap-managed-execution.md) | `TestCodemapExecutionHelpAndRequiredRoots` | executable help smoke and app suite |
 | Configuration selection and compatibility aliases retain documented precedence | [Configuration Reference](../reference/configuration.md), [Compatibility and Migrations](../reference/compatibility-and-migrations.md) | config behavior and alias tests | Linux and Windows CI |
 | Config mutation preserves unrelated comments, keys, and formatting | [Configuration Reference](../reference/configuration.md) | demon-run atomic edit tests | config package suite |
@@ -165,8 +172,10 @@ It combines package tests, fixture regression, vet, builds, and executable smoke
 Documentation-only changes should still run:
 
 ```bash
-go run ./cmd/ddocs fix --docs
-go run ./cmd/ddocs check --docs
+go run ./cmd/ddocs fix --indexes
+go run ./cmd/ddocs check --indexes
+go run ./cmd/ddocs check --frontmatter
+go run ./cmd/ddocs check --format
 go run ./cmd/ddocs check --links
 go test ./... -count=1
 go vet ./...

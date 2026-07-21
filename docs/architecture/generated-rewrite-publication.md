@@ -210,15 +210,17 @@ After every source verifies in its new state, `recordGeneratedChanges` publishes
 `review.Store.AppendBatch` first validates and encodes every request. It then:
 
 ```text
-reads refs/ddocs/review
--> writes one commit per event, chained in request order
--> includes event.json and optional before/after blobs
--> advances refs/ddocs/review once with compare-and-swap
+encode ordered events and optional before/after snapshots into batch.json
+-> read refs/ddocs/review
+-> write one batch blob, one tree, and one review commit
+-> advance refs/ddocs/review once with compare-and-swap
 ```
 
-The reference update exposes either the complete event chain or none of it. Unreferenced objects written during a failed compare-and-swap are not part of visible review history.
+Every event in one reconciliation batch shares the resulting commit hash, while history and undo APIs expand the stored batch back into individual event-addressable records. Nil and empty snapshots remain distinguishable. Legacy commits containing `event.json` plus optional `before` and `after` blobs remain readable.
 
-When another process changes the review reference concurrently, the store rebuilds the chain from the new head and retries, up to three attempts. Exhaustion returns `review history changed during append`.
+The reference update exposes either the complete batch or none of it. Unreferenced batch objects written during a failed compare-and-swap are not part of visible review history.
+
+When another process changes the review reference concurrently, the store rebuilds the single batch commit from the new head and retries, up to three attempts. Exhaustion returns `review history changed during append`.
 
 ### Review publication failure
 
@@ -231,11 +233,11 @@ Link-state refresh and publication do not run after review publication failure.
 
 ## Suppression staging
 
-Only after review publication succeeds are the generated suppressions assigned to `plan.Suppressions`.
+Before generated source application, existing pending suppressions are loaded from private link state. Only after review publication succeeds are newly verified suppressions merged with those existing records by source identity and assigned to `plan.Suppressions`.
 
-At this point suppressions are still memory-only. They become durable only when the later link-state publication writes `write/<source-file-id>` records under `refs/ddocs/state`.
+At this point suppressions are still memory-only. They become durable only when the later link-state publication writes `write/<source-file-id>` records under `refs/ddocs/state`. A new generated write replaces the pending record for the same source; unrelated pending suppressions remain intact.
 
-This ordering means a failed review append cannot leave durable suppressions for source writes that were rolled back.
+This ordering means a failed review append cannot leave durable suppressions for source writes that were rolled back, while a successful unrelated batch cannot accidentally discard suppressions that have not yet been consumed.
 
 ## Generated-source refresh
 
@@ -303,7 +305,7 @@ The implementation does not roll authored content back after state-publication f
 | --- | --- | --- |
 | One authored source | Same-directory atomic replacement plus hash verification. | None by itself. |
 | Authored rewrite batch | All sources preflight before first write; attempted writes roll back on filesystem failure where current hashes permit. | Review and state are not included. |
-| Review event batch | One compare-and-swap exposes the full commit chain or none. | Authored files are rolled back if review append fails. |
+| Review event batch | One compare-and-swap exposes one complete batch commit or none; history expands it into individual events. | Authored files are rolled back if review append fails. |
 | Link-state projection | One private root-reference update publishes all owned records. | Authored files and review history are not rolled back if state publication fails. |
 | All three surfaces | Ordered publication and targeted compensation. | No single atomic transaction spans them. |
 
@@ -356,7 +358,7 @@ Do not undo the authored change merely because private state is stale. The revie
 - `internal/links/review_record.go` — run/change/transformation construction and review append requests.
 - `internal/links/state.go` — desired link-state projection and suppression records.
 - `internal/filetxn/replace_unix.go` and `replace_windows.go` — shared platform replacement seam.
-- `internal/review/store_batch.go` — review event preparation, commit-chain creation, compare-and-swap, and retries.
+- `internal/review/store_batch.go` — review event preparation, single-commit `batch.json` encoding, compare-and-swap, legacy-compatible history expansion, and retries.
 - `internal/ddrepo/transaction.go` — sharded state-root transaction and conflict detection.
 - `internal/watch/` and `internal/links/suppression.go` — later suppression consumption; not publication ownership.
 
@@ -369,7 +371,7 @@ Focused coverage includes:
 - `internal/links/rewrite_concurrency_test.go` — complete preflight barrier and suppression order.
 - `internal/links/rewrite_transaction_test.go` — rollback after write failure and refusal over changed content.
 - `internal/links/review_record_transaction_test.go` — source rollback when review publication fails.
-- `internal/review/store_batch_test.go` — complete history-chain publication and batch preflight.
+- `internal/review/store_batch_test.go` — single-commit batch publication, nil/empty snapshot preservation, constant object growth, legacy history compatibility, compaction retention, and batch preflight.
 - `internal/review/store_test.go` — retained before/after blobs and visible review history.
 - `internal/ddrepo/repository_test.go` — private-state transactions and conflict behavior.
 - `internal/links/reconcile_test.go` and integration tests — end-to-end link-state convergence.

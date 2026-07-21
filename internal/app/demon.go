@@ -16,7 +16,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/watch"
 )
 
-const demonStartupTimeout = 30 * time.Second
+const demonStartupTimeout = 2 * time.Minute
 
 func demonHelp(w io.Writer) {
 	fmt.Fprintln(w, "usage: demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n       ddocs demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  acquire --client NAME [PATH] register an external agent feeder\n  heartbeat --token TOKEN [PATH]\n                               refresh an external agent feeder\n  release --token TOKEN [PATH] release an external agent feeder\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\noptions:\n  -h, --help                   show this help message and exit\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership. Run `demon <command> --help` or `ddocs demon <command> --help` for exact feeder and lifecycle behavior.")
@@ -564,38 +564,7 @@ __ddocs_demon_tick() {
 	case ";${PROMPT_COMMAND[*]}" in *"__ddocs_demon_tick"*) ;; *) PROMPT_COMMAND="__ddocs_demon_tick${PROMPT_COMMAND:+;$PROMPT_COMMAND}" ;; esac`+"\n")
 		return 0
 	}
-	_, _ = io.WriteString(out, `# Demon Docs shell integration. Add: Invoke-Expression (& ddocs demon __shell-hook powershell)
-$global:__DdocsDemonRepo = ""
-$global:__DdocsDemonToken = ""
-function Leave-DdocsDemon {
-  if ($global:__DdocsDemonRepo -and $global:__DdocsDemonToken) {
-    & ddocs demon __leave $global:__DdocsDemonRepo $global:__DdocsDemonToken *> $null
-  }
-  $global:__DdocsDemonRepo = ""
-  $global:__DdocsDemonToken = ""
-}
-function Invoke-DdocsDemonHook {
-  $candidate = (Get-Location).Path
-  $status = @(& ddocs demon --status $candidate 2>$null)
-  $repo = ($status | Where-Object { $_ -like "repository: *" } | ForEach-Object { $_.Substring(13) })
-  if ($repo -eq $global:__DdocsDemonRepo) { return }
-  Leave-DdocsDemon
-  if (-not $repo) { return }
-  $enter = (& ddocs demon __enter $repo shell 2>$null | Select-Object -Last 1).Trim()
-  $token = if ($enter -match 'token=([^ ]+)') { $Matches[1] } else { "" }
-  $claimed = if ($enter -match 'claimed=([^ ]+)') { $Matches[1] } else { "false" }
-  if (-not $token) { return }
-  $global:__DdocsDemonRepo = $repo
-  $global:__DdocsDemonToken = $token
-  $after = @(& ddocs demon --status $repo 2>$null)
-  $count = ($after | Where-Object { $_ -like "active shells: *" } | ForEach-Object { $_.Substring(16) })
-  if ($claimed -eq "true") { Write-Host "document demon summoned for $repo" }
-  if ($count -eq "1") { Write-Host "1 active shell feeding the demon" } else { Write-Host "$count active shells feeding the demon" }
-}
-if (-not (Get-Variable __DdocsOriginalPrompt -Scope Global -ErrorAction SilentlyContinue)) {
-  $global:__DdocsOriginalPrompt = $function:prompt
-  function global:prompt { Invoke-DdocsDemonHook; & $global:__DdocsOriginalPrompt }
-}`+"\n")
+	_, _ = io.WriteString(out, powershellHookOutput())
 	return 0
 }
 

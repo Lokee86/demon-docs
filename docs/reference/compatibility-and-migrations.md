@@ -20,6 +20,8 @@ Demon Docs accepts a bounded set of previous names and formats so repositories c
 
 Automatic migration is permitted only when the old format can be translated deterministically. Unsupported private-state schemas fail explicitly rather than being guessed.
 
+Version 0.3.2 changed feature selection: `-i` / `--indexes` means indexes only, while `-d` / `--docs` means indexes plus frontmatter and document-body format. Scripts that previously used `--indexes` as an alias for the full documentation-policy group must switch to `--docs` explicitly.
+
 ## Configuration filenames
 
 Selection accepts current and compatibility paths in this order:
@@ -100,13 +102,23 @@ Migration occurs through a normal successful state save, such as a link-enabled 
 
 Both legacy files must be present and decodable. A partial pair or invalid JSON fails explicitly.
 
+When stale absent file records and exactly one present Markdown file share the same non-empty `document_id`, current reconciliation treats the absent records as aliases of the live identity. Paths and history merge, stored link references remap, and historical path evidence is considered before generic filename candidates. Ambiguous duplicate live identities are never collapsed.
+
+## Review-history compatibility
+
+Current review publication writes one `batch.json` payload in one commit for all events in a reconciliation batch. History, inspection, undo, and policy replay expand that batch into individual events.
+
+Older review commits containing `event.json` with optional `before` and `after` blobs remain readable in the same history. They are not rewritten into the batch format. Nil and empty snapshots remain distinct when a current batch is decoded.
+
 ## Current private-state schemas
 
 Current link state records include schema versions. An unsupported stored schema returns an error such as an unsupported link-state schema rather than silently rebuilding over the unreadable state.
 
 Preserve the failing `.ddocs/` directory and command output before reset. Reinitializing private state loses historical identity evidence and should remain a deliberate recovery step.
 
-Review-ledger events are append-only Git objects under the private review reference. Undo eligibility settings may change without deleting audit history.
+Review-ledger events are append-only Git objects under the private review reference. Current batched and legacy per-event commits can coexist. Undo eligibility settings may change without deleting audit history.
+
+Private object compaction is format-preserving maintenance rather than a schema migration. It runs only after a successful state or review reference update crosses the configured internal thresholds and retains all objects reachable from every private reference.
 
 ## Linked-worktree bootstrap compatibility
 
@@ -114,17 +126,18 @@ A linked Git worktree whose primary worktree is initialized can copy the primary
 
 This is a bootstrap operation, not ongoing synchronization.
 
-## Command aliases
+## Command compatibility and selectors
 
-Current compatibility aliases include:
+Current selector behavior is:
 
 ```text
 -i, --indexes   selects documentation indexes only
+-d, --docs      selects indexes, frontmatter, and document-body format
 ```
 
-`demon` and `ddocs demon` expose the same repository-demon application boundary.
+These are distinct current selectors, not interchangeable aliases. `demon` and `ddocs demon` expose the same repository-demon application boundary.
 
-Aliases may remain supported without being preferred in new documentation.
+Deprecated names may remain supported without being preferred in new documentation.
 
 ## Upgrade and downgrade behavior
 

@@ -262,33 +262,35 @@ func markdownFiles(repoRoot, docsRoot string) ([]string, error) {
 
 func schemaForDocument(relative string, values map[string]any, cfg config.Config) (config.Frontmatter, error) {
 	schema := cfg.Frontmatter
-	if !cfg.Format.Enabled {
-		return schema, nil
-	}
-	selectionValues := values
-	if value, present := values["document_type"]; present {
-		if !emptyValue(value) {
-			return schema, nil
-		}
-		selectionValues = make(map[string]any, len(values)-1)
-		for name, existing := range values {
-			if name != "document_type" {
-				selectionValues[name] = existing
-			}
-		}
-	}
-	selected, err := config.SelectFormatSchema(relative, selectionValues, cfg.Format)
-	if err != nil {
-		return schema, err
-	}
 	fields := make(map[string]config.FrontmatterField, len(schema.Fields))
 	for name, definition := range schema.Fields {
 		fields[name] = definition
 	}
-	if definition, ok := fields["document_type"]; ok {
-		definition.Default = selected
-		definition.DefaultFrom = ""
-		fields["document_type"] = definition
+	if cfg.Format.Enabled {
+		selectionValues := values
+		if value, present := values["document_type"]; present {
+			if !emptyValue(value) {
+				selectionValues = nil
+			} else {
+				selectionValues = make(map[string]any, len(values)-1)
+				for name, existing := range values {
+					if name != "document_type" {
+						selectionValues[name] = existing
+					}
+				}
+			}
+		}
+		if selectionValues != nil {
+			selected, err := config.SelectFormatSchema(relative, selectionValues, cfg.Format)
+			if err != nil {
+				return schema, err
+			}
+			if definition, ok := fields["document_type"]; ok {
+				definition.Default = selected
+				definition.DefaultFrom = ""
+				fields["document_type"] = definition
+			}
+		}
 	}
 	if strings.EqualFold(filepath.Base(filepath.FromSlash(relative)), cfg.IndexFile) {
 		if definition, ok := fields["author"]; ok && !hasConfiguredSource(definition, schema) {

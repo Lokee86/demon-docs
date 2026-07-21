@@ -109,7 +109,7 @@ Projects may replace this schema. No document type, status system, team model, o
 
 When document-body format enforcement is enabled and `document_type` is missing, frontmatter repair resolves the configured format path rules and then `default_schema`, and writes that selected schema name. Existing non-empty `document_type` metadata remains authoritative. This keeps generated indexes and path-classified planning or service documents from being stamped with the generic frontmatter default before body-format enforcement runs.
 
-Generated folder indexes are Demon Docs-owned files. When such an index lacks required `author` or `summary` values and those fields have no configured source, repair uses `TODO` for the author and `Generated documentation folder index.` for the summary. A configured literal default or non-empty `default_author` takes precedence.
+Generated folder indexes are Demon Docs-owned files. When such an index lacks required `author` or `summary` values and those fields have no configured source, repair uses `TODO` for the author and `Generated documentation folder index.` for the summary. A configured literal default or non-empty `default_author` takes precedence. These generated-index defaults apply whenever frontmatter enforcement is selected; they do not depend on document-body format enforcement being enabled.
 
 ## Field definitions
 
@@ -155,9 +155,14 @@ Unchanged clean documents may be served from the durable validation cache under 
 
 ## Check and fix behavior
 
-Front matter runs with the documentation system during default reconciliation and `--docs` selection.
+Front matter runs with the documentation system during default reconciliation and `--docs` selection. It can also run independently with `--frontmatter`; `--indexes` does not select frontmatter.
 
 ```bash
+ddocs check --frontmatter
+ddocs fix --frontmatter
+ddocs watch --frontmatter
+
+# indexes + frontmatter + document-body format
 ddocs check --docs
 ddocs fix --docs
 ddocs watch --docs
@@ -179,7 +184,7 @@ A repair can write fixable fields while still returning a non-zero status for un
 
 The default `document_id` is a generated UUIDv7. `check` reports duplicate IDs without writing. `fix` can safely resolve duplicates when `document_id` remains a generated UUID field: it preserves the document already recorded as the ID owner, falls back to the lexicographically first path when no owner is recorded, and assigns fresh UUIDs to every other duplicate. Duplicate values are never recorded as shared immutable truth. Immutable values are stored in the private `.ddocs/` object repository, keyed by a unique document ID when available and by path otherwise. This lets immutable history follow an identified document across a move without putting private state in normal Git history.
 
-Document IDs provide a stable identity seam for future link-continuity recovery. Normal Markdown paths remain the human-facing link format.
+Document IDs provide a stable identity seam used by link inventory and reconciliation. An unambiguous live document can retain identity across a content-changing move, and stale absent private aliases with the same ID can collapse into that live record with merged path history. Normal Markdown paths remain the human-facing link format.
 
 ## Rendering guarantees and limits
 

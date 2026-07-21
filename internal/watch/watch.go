@@ -2,6 +2,7 @@ package watch
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -191,7 +192,14 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		}
 		return nil
 	}
-	if err := run(); err != nil {
+	initialRetryDelay := time.Duration(seconds * float64(time.Second))
+	if initialRetryDelay < 100*time.Millisecond {
+		initialRetryDelay = 100 * time.Millisecond
+	}
+	if initialRetryDelay > time.Second {
+		initialRetryDelay = time.Second
+	}
+	if err := runInitialUntilStable(ctx, run, initialRetryDelay, out); err != nil {
 		return err
 	}
 	if once {
@@ -263,6 +271,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		case err, ok := <-w.Errors():
 			if !ok {
 				return nil
+			}
+			if errors.Is(err, fsnotify.ErrEventOverflow) {
+				fmt.Fprintf(out, "%s ddocs watch event buffer overflow; scheduling a complete reconciliation\n", timestamp())
+				scheduler.MarkChanged()
+				continue
 			}
 			if err != nil {
 				return fmt.Errorf("watch %s: %w", watchRoot, err)
@@ -501,6 +514,26 @@ func formatDiagnostic(diagnostic documentpolicy.Diagnostic) string {
 		status = "repaired"
 	}
 	return fmt.Sprintf("Document format %s at %s: %s", status, location, diagnostic.Message)
+}
+
+func runInitialUntilStable(ctx context.Context, run func() error, retryDelay time.Duration, out io.Writer) error {
+	for {
+		err := run()
+		if err == nil {
+			return nil
+		}
+		if !links.IsTransientFilesystemRace(err) {
+			return err
+		}
+		fmt.Fprintf(out, "%s ddocs watch deferred stale initial reconciliation plan: %v\n", timestamp(), err)
+		timer := time.NewTimer(retryDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return ctx.Err()
+		case <-timer.C:
+		}
+	}
 }
 
 func timestamp() string { return time.Now().Format("2006-01-02T15:04:05") }

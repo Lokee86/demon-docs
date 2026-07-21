@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7707-bda4-29732e04ffa1
 document_type: general
 policy_exempt: false
-summary: This document records retained performance measurements for high-fanout target moves, real Space Rocks moves, and repeated full-corpus mass renames.
+summary: This document records retained measurements for incremental link inventory, scoped post-write refresh, warmed validation-cache passes, high-fanout target moves, and repeated corpus-wide renames.
 ---
 # Markdown Link Performance
 
@@ -12,11 +12,11 @@ Parent index: [Research](./INDEX.md)
 
 ## Purpose
 
-This document records retained performance measurements for high-fanout target moves, real Space Rocks moves, and repeated full-corpus mass renames.
+This document records retained performance measurements for incremental link inventory, scoped post-write refresh, warmed validation-cache passes, high-fanout target moves, real Space Rocks moves, and repeated full-corpus mass renames.
 
 ## Overview
 
-The measurements expose scanning, planning, storage, and generated-write regressions under realistic and synthetic link volumes. They are engineering evidence for the tested hardware, corpus, and implementation revision rather than universal latency guarantees.
+The measurements expose scanning, validation, planning, storage, scoped refresh, and generated-write regressions under realistic and synthetic documentation volumes. They are engineering evidence for the tested hardware, corpus, and implementation revision rather than universal latency guarantees.
 
 ## Link Inventory Content Reads
 
@@ -29,6 +29,27 @@ The incremental inventory benchmark is `BenchmarkSingleFileIncrementalUpdate`; t
 ```bash
 go test ./internal/links -run '^$' -bench '^(BenchmarkInitialIndexing|BenchmarkSingleFileIncrementalUpdate)$' -benchmem -count=5
 ```
+
+## Scoped post-write link refresh
+
+Index, frontmatter, document-format, and reverse-index writes no longer force a complete link reconciliation after they apply. The application layer collects the Markdown paths actually changed and calls scoped tracking for only those sources. Existing file identities, unselected source records, incoming-link groups, historical paths, and pending watcher suppressions remain in the projection. A clean non-link fix skips link tracking entirely and does not initialize absent link state.
+
+Explicit `--links` remains a full reconciliation path. The optimization changes post-write refresh scope, not repair evidence, review publication, rollback, or generated-write verification.
+
+## Warm validation-cache measurements
+
+A synthetic 1,000-document corpus measured the warmed clean-validation path after revision `ee256e5`:
+
+| Operation | Elapsed time |
+|---|---:|
+| Frontmatter check | 0.099 s |
+| Frontmatter no-op fix | 0.105 s |
+| Document-format check | 0.067 s |
+| Document-format no-op fix | 0.080 s |
+
+Repeated warmed passes created no additional loose private objects. These measurements demonstrate cache-hit behavior on the development host; they are not cold-pass numbers or universal guarantees.
+
+Cold or invalidated frontmatter and document-format passes still process documents serially. Unchanged Markdown link sources reuse stored link records, but any source-content change still reparses the complete document. Both remaining opportunities are tracked in [Current Product Limitations](../limits/current-limitations.md) and the [Roadmap](../planning/roadmap.md).
 
 ## Research status
 

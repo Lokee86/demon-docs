@@ -3,6 +3,7 @@ package watch
 import (
 	"bytes"
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,6 +30,27 @@ func (l *blockingLocker) Lock() {
 }
 
 func (l *blockingLocker) Unlock() {}
+
+func TestInitialReconciliationRetriesTransientFilesystemRaces(t *testing.T) {
+	attempts := 0
+	var out bytes.Buffer
+	err := runInitialUntilStable(context.Background(), func() error {
+		attempts++
+		if attempts < 3 {
+			return errors.New("rewrite source changed before apply during move")
+		}
+		return nil
+	}, time.Millisecond, &out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attempts != 3 {
+		t.Fatalf("attempts=%d", attempts)
+	}
+	if !strings.Contains(out.String(), "deferred stale initial reconciliation plan") {
+		t.Fatalf("retry was not logged: %q", out.String())
+	}
+}
 
 func TestSchedulerDebouncesAndRunsFollowup(t *testing.T) {
 	now := time.Unix(0, 0)

@@ -107,8 +107,11 @@ func TestShellHookUsesTokenLeaveAndValidPowerShellInstallation(t *testing.T) {
 	if code := Run(context.Background(), []string{"demon", "__shell-hook", "powershell"}, &out, &errOut); code != 0 {
 		t.Fatal(errOut.String())
 	}
-	powershell := out.String()
-	if !strings.Contains(powershell, "Invoke-Expression (& ddocs demon __shell-hook powershell)") || !strings.Contains(powershell, "__DdocsDemonToken") || !strings.Contains(powershell, "claimed=") || strings.Contains(powershell, "<(ddocs") {
-		t.Fatalf("invalid PowerShell hook: %s", powershell)
+	powershell := strings.TrimSpace(out.String())
+	if strings.Contains(powershell, "\n") || !strings.HasPrefix(powershell, "Invoke-Expression ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('") {
+		t.Fatalf("PowerShell hook was not emitted as one native-command output line: %s", powershell)
+	}
+	if !strings.Contains(powershellHookScript, "Invoke-Expression (& ddocs demon __shell-hook powershell)") || !strings.Contains(powershellHookScript, "__DdocsDemonToken") || !strings.Contains(powershellHookScript, "claimed=") || !strings.Contains(powershellHookScript, "-replace '^repository: ', ''") || !strings.Contains(powershellHookScript, "-replace '^active shells: ', ''") || strings.Contains(powershellHookScript, "<(ddocs") {
+		t.Fatalf("invalid decoded PowerShell hook: %s", powershellHookScript)
 	}
 }

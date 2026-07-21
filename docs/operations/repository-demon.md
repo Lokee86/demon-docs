@@ -94,7 +94,7 @@ ddocs demon heartbeat --token TOKEN
 ddocs demon release --token TOKEN
 ```
 
-`ddocs demon run` ensures the demon is enabled, registers the current shell as a feeder, and starts the detached watcher when necessary. It does not return until the initial reconciliation has completed and every configured filesystem watcher is registered, so an immediately following filesystem change cannot fall into a startup gap.
+`ddocs demon run` ensures the demon is enabled, registers the current shell as a feeder, and starts the detached watcher when necessary. It does not return until the initial reconciliation has completed and every configured filesystem watcher is registered, so an immediately following filesystem change cannot fall into a startup gap. Readiness remains bounded by a two-minute deadline, which accommodates cold initial reconciliation on large repositories while still reporting a startup that cannot converge.
 
 `ddocs demon run --false` persists `[demon].run = false`, removes current feeders, and requests shutdown.
 
@@ -133,6 +133,8 @@ PowerShell profiles can install it with:
 ```powershell
 Invoke-Expression (& ddocs demon __shell-hook powershell)
 ```
+
+The PowerShell command emits one physical bootstrap line, even though the decoded hook is multiline. This keeps Windows PowerShell 5.1 from converting native-command output into an `Object[]` that `Invoke-Expression` cannot execute. Repository and active-shell values are parsed by removing their named prefixes rather than fixed character offsets, preserving Windows drive letters and single-digit counts.
 
 The hook tracks its repository root and feeder token. Entering a Demon Docs repository registers one shell feeder. Moving to another repository or leaving the repository removes the old feeder rather than issuing a repository-wide shutdown request.
 
@@ -184,6 +186,8 @@ The demon stops when any of these conditions apply:
 Expired feeder records do not count as active. Normal status inspection does not create runtime directories, delete stale feeder files, bootstrap a linked worktree, or otherwise mutate the repository.
 
 A live feeder can recover a stale or missing owner by claiming the lease and starting a replacement watcher. Re-enabling the demon clears an earlier shutdown request so the new owner does not immediately exit.
+
+During watcher startup, transient source movement or content-hash races discard the stale plan and retry after a bounded quiet delay instead of terminating the owner. Once observation is active, an operating-system event-buffer overflow is treated as lost event detail: the watcher schedules a complete reconciliation and continues using the recursive root observer rather than stopping the demon.
 
 ## Configuration
 

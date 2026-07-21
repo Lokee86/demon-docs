@@ -129,7 +129,7 @@ After the callback returns, the scheduler reacquires the mutex and sets:
 running = false
 ```
 
-The callback result is returned to the watcher loop. A non-nil error terminates the watch operation rather than being silently retried in place.
+The callback result is returned to the watcher loop. A non-nil error normally terminates the watch operation. Transient filesystem races caused by files moving or changing during a scheduled run are the bounded exception: the watcher marks another full run pending and waits for the next quiet interval rather than applying the stale plan.
 
 ## Follow-up behavior
 
@@ -154,11 +154,13 @@ The scheduler does not guarantee that every intermediate filesystem state is rec
 
 ## Initial reconciliation ordering
 
-The normal watcher performs one reconciliation synchronously before creating the filesystem observer.
+The normal watcher performs one stable reconciliation synchronously before creating the filesystem observer.
 
 ```text
 construct selected reconciliation callback
--> run callback once
+-> run callback
+-> if a source moved or changed during planning/application, discard the stale plan
+-> wait a bounded quiet delay and retry until success or cancellation
 -> return immediately for --once
 -> otherwise load ignore policy
 -> create observer
@@ -166,9 +168,9 @@ construct selected reconciliation callback
 -> start event loop
 ```
 
-This ordering prevents an observer from reacting to generated writes produced by the initial baseline before suppression and state have converged. It also means observer-construction failure can occur only after the initial reconciliation has completed successfully.
+This ordering prevents an observer from reacting to generated writes produced by the initial baseline before suppression and state have converged. It also means observer-construction failure can occur only after the initial reconciliation has completed successfully. A daemon started in the middle of a folder migration therefore waits for one stable plan rather than exiting on a generated-rewrite hash mismatch.
 
-The initial run is not admitted through `Scheduler`; it directly invokes the same reconciliation callback.
+The initial run is not admitted through `Scheduler`; it directly invokes the same reconciliation callback through the transient-race retry boundary.
 
 ## Polling cadence
 
@@ -188,10 +190,13 @@ The base reconciliation callback can run documentation indexes, frontmatter, doc
 The order is fixed:
 
 ```text
-documentation indexes, when selected
+link reconciliation or identity tracking, when selected
+-> prepare missing generated indexes for policy input
 -> frontmatter, when selected
 -> document-body format, when selected
--> link reconciliation, when selected
+-> reverse-index application, when selected in the base callback
+-> final folder-index convergence, when selected
+-> refresh link state from final authored bytes
 -> output summary and individual diagnostics
 ```
 
@@ -261,16 +266,16 @@ The scheduler therefore does not contain self-write logic. Its contract assumes 
 
 The watch loop treats these as terminal errors:
 
-- selected reconciliation planning or application failure;
+- non-transient selected reconciliation planning or application failure;
 - external-watch addition failure;
 - ignore-policy loading or reload failure;
 - dynamic directory-watch addition failure;
 - suppression-consumption failure;
 - observer creation failure;
-- observer error-channel values; and
+- observer error-channel values other than event-buffer overflow; and
 - reverse-index refresh or reconciliation failure.
 
-A terminal error returns to the foreground command or repository-demon owner. The repository demon may later be restarted through its own lease lifecycle, but the watcher itself does not swallow the error and continue with uncertain state.
+A transient filesystem race discards the stale plan and retries after the repository settles. An `fsnotify` event-buffer overflow means individual event detail was lost, not that the observer or repository is unusable; the watcher logs the overflow, marks a complete reconciliation pending, and continues. Other terminal errors return to the foreground command or repository-demon owner.
 
 Closed observer event or error channels terminate the base watcher cleanly when no explicit error is available.
 
@@ -292,7 +297,8 @@ The scheduler and serialization design must preserve these invariants:
 - One `Scheduler` never invokes its callback concurrently with itself.
 - Events arriving during a run are not discarded.
 - Mixed base and reverse reconciliation callbacks never overlap.
-- The initial reconciliation completes before observer creation.
+- One stable initial reconciliation completes before observer creation; transient move races are retried until success or cancellation.
+- Event-buffer overflow schedules a complete reconciliation instead of terminating the watcher.
 - Generated-write suppression cannot hide content that no longer matches the generated expectation.
 - Reconciliation errors are surfaced and terminate the current watch lifecycle.
 - Cancellation does not leave an observer or refresh worker intentionally running.
@@ -316,7 +322,7 @@ Preserve the latest-event quiet-period rule and follow-up behavior for events ar
 
 ### Adding retry behavior
 
-Retries must not be added inside the scheduler without defining idempotency, source preconditions, private-state publication, diagnostic repetition, and cancellation. Current behavior surfaces the error and ends the watch lifecycle.
+Retries must not be added inside the scheduler without defining idempotency, source preconditions, private-state publication, diagnostic repetition, and cancellation. Current retry ownership is deliberately narrow: initial and scheduled reconciliation may retry only recognized transient filesystem races, and observer overflow may request one complete rebuild because event detail was lost. Other errors still end the watch lifecycle.
 
 ## Verification
 
@@ -332,7 +338,8 @@ Important contracts include:
 - base reconciliation serialization through the run lock;
 - initial reconciliation before observer creation;
 - clean cancellation;
-- observer-error propagation;
+- observer-error propagation and non-terminal event-buffer overflow recovery;
+- transient initial-plan retry during active moves;
 - generated-write convergence without self-write loops; and
 - combined base and reverse watch coordination.
 

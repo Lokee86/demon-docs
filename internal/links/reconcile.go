@@ -256,6 +256,13 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 		transformations := transformationsFor(replacements)
 		rewrite, err := NewGeneratedRewrite(sourceID, sourcePath, document, transformations)
 		if err != nil {
+			if IsTransientFilesystemRace(err) {
+				// Stored link offsets can lag behind the current source text even
+				// when file identity metadata says the source is unchanged. Skip
+				// the internal fast path so normal reconciliation reparses the
+				// current document and rebuilds the repair from fresh offsets.
+				continue
+			}
 			return nil, err
 		}
 		updated := applyReplacements(document.Text, replacements)

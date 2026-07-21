@@ -150,6 +150,36 @@ summary: Existing summary
 	}
 }
 
+func TestBuildUsesGeneratedIndexDefaultsWithoutFormat(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(docs, "!INDEX.md")
+	if err := os.WriteFile(path, []byte("# Docs\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Default()
+	cfg.Root = "docs"
+	cfg.IndexFile = "!INDEX.md"
+	cfg.Frontmatter = schema()
+	cfg.Format.Enabled = false
+
+	plan, err := Build(repo, docs, cfg, true, time.Date(2026, 7, 20, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Failed() || len(plan.Updates) != 1 {
+		t.Fatalf("unexpected repair plan: %+v", plan)
+	}
+	updated := plan.Updates[0].NewText
+	if !strings.Contains(updated, "author: Demon Docs") ||
+		!strings.Contains(updated, "summary: Generated documentation folder index.") {
+		t.Fatalf("index defaults depended on document-format enforcement: %q", updated)
+	}
+}
+
 func TestApplyRejectsLineEndingOnlyChangesAfterPlanning(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")

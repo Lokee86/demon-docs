@@ -130,6 +130,30 @@ func TestInitialFixCompletesBeforeObserverCreation(t *testing.T) {
 	stopFakeWatch(t, cancel, done)
 }
 
+func TestWatcherRecoversFromEventOverflowWithFullReconciliation(t *testing.T) {
+	root := t.TempDir()
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	zero := 0.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &zero, fake)
+
+	page := filepath.Join(root, "overflow-created.md")
+	if err := os.WriteFile(page, []byte("# Overflow Created\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fake.errors <- fsnotify.ErrEventOverflow
+	waitFor(t, 3*time.Second, func() bool {
+		data, err := os.ReadFile(filepath.Join(root, "INDEX.md"))
+		return err == nil && strings.Contains(string(data), "[overflow-created.md](overflow-created.md)")
+	})
+	select {
+	case err := <-done:
+		t.Fatalf("overflow terminated watcher: %v", err)
+	default:
+	}
+	stopFakeWatch(t, cancel, done)
+}
+
 func TestWatcherReportsObserverErrors(t *testing.T) {
 	root := t.TempDir()
 	fake := newFakeWatcher()

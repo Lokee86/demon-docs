@@ -86,7 +86,7 @@ State is stored as deterministic records for file identities, current paths, Mar
 
 A single-file change rewrites only its affected shard or shards; unchanged objects and root entries are reused. The old `.ddocs/files.json` and `.ddocs/links.json` manifests are read only for migration and are removed after the first successful repository-backed publication.
 
-The state is implementation-owned and schema-versioned. Source files are not modified to embed Demon Docs IDs.
+The state is implementation-owned and schema-versioned. Source files are not modified to embed Demon Docs file IDs. When exactly one present file carries a `document_id` that also appears on absent duplicate private records, reconciliation collapses those stale aliases into the live file identity, remaps stored source and target references, and merges historical paths before ordinary candidate discovery.
 
 ## First Scan
 
@@ -100,11 +100,12 @@ After the baseline exists, later passes can repair links using recorded identity
 
 Demon Docs prefers deterministic evidence in this order:
 
-1. the previous target file ID still resolves to a present file;
-2. the target remains at the recorded path, including a case-only correction;
-3. an exact, unique content fingerprint identifies a moved file;
-4. a unique filename candidate exists inside the repository; or
-5. a bounded search near a missing external target finds a unique candidate.
+1. the previous target file ID still resolves to a present file, including a canonical live identity recovered from an unambiguous `document_id` alias;
+2. the target remains at the recorded current path, including a case-only correction;
+3. one merged historical path record identifies the new target location;
+4. an exact, unique content fingerprint identifies a moved file;
+5. a unique filename candidate exists inside the repository; or
+6. a bounded search near a missing external target finds a unique candidate.
 
 A unique candidate can be rewritten automatically and recorded as an applied change. Multiple candidates are recorded as `link_repair` suggestions, and the source link remains unchanged until the user selects a candidate.
 
@@ -114,15 +115,21 @@ Relative links remain relative. Absolute filesystem links remain absolute. Link 
 
 User-authored Markdown changes and Demon Docs-generated repairs follow separate paths.
 
-For an external edit, Demon Docs fingerprints the changed source, parses its current Markdown, compares the resulting outgoing links with the stored source record, and replaces that source's graph edges.
+Repository traversal remains serial and deterministic. Files whose path, size, and modification time still match reuse stored fingerprints and `document_id` values. Changed and new regular files are read through a bounded 16-worker pool; Markdown content is read once for both fingerprinting and document-identity extraction, and results merge in traversal order.
+
+For an external edit, Demon Docs fingerprints the changed source, parses its current Markdown, compares the resulting outgoing links with the stored source record, and replaces that source's graph edges. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
 
 For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
+
+If stored occurrence offsets no longer match current source text despite unchanged file metadata, Demon Docs abandons that internal fast path and reparses the current source before rebuilding the repair. It does not fail the entire reconciliation or write using stale offsets.
 
 Before writing, every source must still match its expected old hash. Writes use a same-directory temporary file and atomic replacement. The known graph mutation is then published directly. Reparsing the rewritten source is limited to verifying the expected links and refreshing byte offsets, line numbers, and fingerprints.
 
 If a source changed concurrently, the generated rewrite aborts without overwriting the user's content. The next reconciliation processes that source through the external-edit path.
 
-Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing, single-file incremental updates, high-fanout target moves, and repeated whole-corpus filename renames so storage, scanning, planning, and write regressions remain visible.
+After index, frontmatter, document-format, or reverse-index writes, application orchestration calls scoped link tracking only for Markdown source paths that actually changed. Unselected source records, incoming groups, path history, and pending suppressions are retained. A clean non-link fix skips link tracking entirely and does not initialize absent link state. Explicit link selection still performs complete reconciliation.
+
+Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing, single-file incremental updates, high-fanout target moves, repeated whole-corpus filename renames, scoped post-write refresh, and warmed validation reuse so storage, scanning, planning, and write regressions remain visible.
 
 Generated source rewrites are planned deterministically first, then applied through a bounded worker pool. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change the planned output, stored identities, or diagnostic ordering.
 
@@ -138,21 +145,31 @@ ddocs fix
 ddocs watch
 ```
 
-Run only one subsystem with either the short or long selector:
+Run only one subsystem with either the short or long selector. `-i` / `--indexes` selects indexes only; `-d` / `--docs` selects indexes, frontmatter, and document-body format together:
 
 ```bash
+ddocs check -i
+ddocs check --indexes
 ddocs check -d
 ddocs check --docs
+ddocs check --frontmatter
+ddocs check --format
 ddocs check -l
 ddocs check --links
 ddocs check -r
 ddocs check --reverse
 
+ddocs fix -i
 ddocs fix -d
+ddocs fix --frontmatter
+ddocs fix --format
 ddocs fix -l
 ddocs fix -r
 
+ddocs watch -i
 ddocs watch -d
+ddocs watch --frontmatter
+ddocs watch --format
 ddocs watch -l
 ddocs watch -r
 ```
@@ -165,7 +182,7 @@ When links are enabled, watch mode observes the repository root because moves of
 
 ## Code map
 
-- `internal/links/` — parsing, target resolution, identity state, diagnostics, generated rewrites, and bounded workers.
+- `internal/links/` — parsing, target resolution, identity state, diagnostics, generated rewrites, scoped tracking, document-identity alias recovery, and bounded workers.
 - `internal/links/wiki_links.go` — path-based wiki links, aliases, embeds, and extensionless Markdown resolution.
 - `internal/links/html_links.go` — supported local HTML `href`, `src`, and `poster` targets.
 - `internal/links/reference_labels.go` — explicit and collapsed reference-label validation.
