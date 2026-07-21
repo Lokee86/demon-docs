@@ -146,6 +146,46 @@ func TestWatcherHandlesFileRenameSourceAndDestination(t *testing.T) {
 	stopFakeWatch(t, cancel, done)
 }
 
+func TestWatcherAttemptsObservedRenameBeforeDebouncedValidation(t *testing.T) {
+	root := t.TempDir()
+	oldPath := filepath.Join(root, "old.md")
+	newPath := filepath.Join(root, "new.md")
+	if err := os.WriteFile(oldPath, []byte("# Old\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	originalRepair := repairObservedRename
+	called := make(chan [2]string, 1)
+	repairObservedRename = func(_ string, oldName, newName string) (bool, int, error) {
+		called <- [2]string{filepath.Clean(oldName), filepath.Clean(newName)}
+		return true, 1, nil
+	}
+	t.Cleanup(func() { repairObservedRename = originalRepair })
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	longDebounce := 10.0
+	go func() {
+		done <- RootSelected(ctx, root, root, config.Default(), Features{Links: true}, &longDebounce, false, nil)
+	}()
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(root) })
+	if err := os.Rename(oldPath, newPath); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: oldPath, Op: fsnotify.Rename}
+	fake.events <- fsnotify.Event{Name: newPath, Op: fsnotify.Create}
+	select {
+	case pair := <-called:
+		if pair != [2]string{filepath.Clean(oldPath), filepath.Clean(newPath)} {
+			t.Fatalf("observed rename=%v", pair)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("observed rename repair waited for the debounce interval")
+	}
+	stopFakeWatch(t, cancel, done)
+}
+
 func TestWatcherAddsNewNestedDirectories(t *testing.T) {
 	root := t.TempDir()
 	fake := newFakeWatcher()

@@ -41,6 +41,8 @@ var createWatcher = func() (eventWatcher, error) {
 	return fsnotifyWatcher{w}, nil
 }
 
+var repairObservedRename = links.RepairObservedRename
+
 func Root(ctx context.Context, root string, c config.Config, debounce *float64, once bool, out io.Writer) error {
 	return RootWithIgnoreRoot(ctx, root, root, c, debounce, once, out)
 }
@@ -212,6 +214,14 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		}
 	}
 	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
+	pendingRenames := map[string]time.Time{}
+	runObservedRename := func(oldPath, newPath string) (bool, int, error) {
+		if runLock != nil {
+			runLock.Lock()
+			defer runLock.Unlock()
+		}
+		return repairObservedRename(repositoryRoot, oldPath, newPath)
+	}
 	interval := 100 * time.Millisecond
 	if seconds > 0 {
 		interval = time.Duration(seconds * float64(time.Second) / 2)
@@ -277,6 +287,40 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				}
 			}
 			wasDirectory := watchedDirs[event.Name] || formatWatched[event.Name]
+			if features.Links && repository.Contains(repositoryRoot, event.Name) {
+				now := time.Now()
+				for path, observedAt := range pendingRenames {
+					if now.Sub(observedAt) > 5*time.Second {
+						delete(pendingRenames, path)
+					}
+				}
+				if event.Op&fsnotify.Rename != 0 && !wasDirectory {
+					pendingRenames[filepath.Clean(event.Name)] = now
+				}
+				if event.Op&fsnotify.Create != 0 {
+					if info, statErr := os.Lstat(event.Name); statErr == nil && info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 {
+						newDirectory := filepath.Clean(filepath.Dir(event.Name))
+						oldPath := ""
+						var newest time.Time
+						for candidate, observedAt := range pendingRenames {
+							if strings.EqualFold(filepath.Clean(filepath.Dir(candidate)), newDirectory) && (oldPath == "" || observedAt.After(newest)) {
+								oldPath = candidate
+								newest = observedAt
+							}
+						}
+						if oldPath != "" {
+							delete(pendingRenames, oldPath)
+							handled, changed, repairErr := runObservedRename(oldPath, event.Name)
+							if repairErr != nil {
+								return fmt.Errorf("repair observed rename %s -> %s: %w", oldPath, event.Name, repairErr)
+							}
+							if handled {
+								fmt.Fprintf(out, "%s ddocs watch repaired rename immediately: %s -> %s; updated %d file(s)\n", timestamp(), oldPath, event.Name, changed)
+							}
+						}
+					}
+				}
+			}
 			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 {
 				if wasDirectory {
 					delete(watchedDirs, event.Name)
