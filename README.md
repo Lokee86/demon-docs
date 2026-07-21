@@ -12,6 +12,10 @@ Demon Docs is the first available component of the [Warlock Toolchain](https://g
 
 **Preserve the lore. Bind the doctrine. Enforce the wards.**
 
+## Current release
+
+Version `0.3.5` adds path-scoped watcher validation for ordinary Markdown edits, independent frontmatter and document-format cache identities, selective cache refresh after generated rewrites, and an explicit `ddocs fix --all` mode for policy mutation. Bare `ddocs fix` now remains focused on indexes, links, and configured reverse indexes.
+
 ## Hackathon judge quick path
 
 - Review the [hackathon scope, prior-work boundary, and AI engineering process](HACKATHON.md).
@@ -190,9 +194,9 @@ Cold frontmatter and document-format validation, link-inventory reads, changed M
 
 The current implementation is a correctness-first hackathon prototype. It is serviceable on modest repositories, but it is not yet optimized for low-latency operation on large or high-churn trees.
 
-Watcher debounce only delays admission of a reconciliation pass. A burst of filesystem events resets that quiet period repeatedly, directory moves may produce many events, and the admitted callback can still perform broad repository scanning and several selected reconciliation stages serially. As a result, a configured debounce measured in fractions of a second can still produce visible repair latency measured in seconds.
+Watcher debounce only delays admission of a reconciliation pass. A burst of filesystem events resets that quiet period repeatedly, and directory moves may produce many events. Ordinary Markdown create and write events now carry changed paths into frontmatter and document-format validation, allowing untouched documents to reuse clean cache state without being read or parsed. Link and folder-index reconciliation remain broader, while schema, control-file, directory, removal, rename, overflow, and uncertain events can still force conservative full validation. Visible repair latency can therefore remain longer than the configured debounce.
 
-The intended production direction is path-aware dirty tracking, feature-specific incremental reconciliation, fewer repeated state reads and writes, and benchmark-guided scheduling. Until then, `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain the authoritative operational surfaces; the watcher and repository demon are convenience automation rather than performance guarantees.
+The intended production direction is path-aware dirty tracking for link and index reconciliation, shared command snapshots, fewer repeated state reads and writes, and benchmark-guided scheduling. Until then, `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain the authoritative operational surfaces; the watcher and repository demon are convenience automation rather than performance guarantees.
 
 ## Safety model
 
@@ -376,4 +380,4 @@ See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 
 ## License
 
-See [LICENSE](LICENSE).
+The current Demon Docs source tree is licensed under the [Apache License, Version 2.0](LICENSE). Attribution information is recorded in [NOTICE](NOTICE). Historical tags and release archives retain the license distributed with that version.

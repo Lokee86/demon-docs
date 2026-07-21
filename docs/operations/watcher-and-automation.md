@@ -74,9 +74,9 @@ Generated Markdown rewrites record their expected content hash and affected link
 
 `debounce_seconds` is a quiet-period setting, not a maximum time-to-repair guarantee. Each relevant event restarts it, and a directory move may produce many events before the repository becomes quiet. Bulk recognized renames also wait for at least 500 milliseconds without another rename before the normal reconciliation pass proceeds.
 
-After scheduling, the selected reconciliation callback still runs to completion. Depending on enabled features, that callback may scan broad repository scope, repair links, validate policy, converge indexes, refresh link state, and publish private state serially. Detached logs show the completion timestamp, so this execution time can be mistaken for an unusually large debounce.
+After scheduling, the selected reconciliation callback still runs to completion. Ordinary Markdown create and write events scope frontmatter and document-format validation to affected paths while untouched documents reuse clean cache entries. Link and folder-index work remains broader, and schema, directory, removal, rename, overflow, startup, or uncertain events may request a full validation pass. Detached logs show the completion timestamp, so execution time can be mistaken for an unusually large debounce.
 
-The current watcher is serviceable convenience automation for modest repositories and a correctness-first hackathon prototype. It is not currently a low-latency incremental daemon for large or continuously changing repositories. Lowering debounce alone does not address broad reconciliation cost and can cause more follow-up work.
+The current watcher is serviceable convenience automation for modest repositories and a correctness-first hackathon prototype. It is not yet a fully incremental low-latency daemon for large or continuously changing repositories. Lowering debounce alone does not address remaining link and index scope or follow-up work.
 
 Use explicit `ddocs mv` for planned refactors and retain `ddocs check` or `ddocs fix` as the authoritative verification and recovery step.
 

@@ -232,19 +232,20 @@ Removal condition:
 
 A complete cross-platform symlink ownership and containment policy is implemented. Silent traversal should remain prohibited.
 
-## Watcher latency is dominated by broad reconciliation
+## Watcher latency still includes broad link and index work
 
 The configured watcher debounce is only the quiet interval before work is admitted. It is not an end-to-end repair-latency target.
 
-Current event handling records that relevant work exists but does not retain a complete path-scoped dirty set for every reconciliation subsystem. Repeated filesystem events reset the quiet interval, directory moves can emit large create, rename, and remove bursts, and bulk file renames use an additional quiet period of at least 500 milliseconds. Only the first recognized file rename in one batch receives the immediate targeted repair path; remaining changes converge through the normal selected reconciliation callback.
+Ordinary regular-file Markdown create and write events now retain changed paths for frontmatter and document-format validation. Untouched documents reuse clean cache records without being read or parsed. Missing cache coverage, duplicate document identities, schema or control-file changes, directory events, removals, renames, overflow, startup handoff, and uncertain events still request conservative full validation.
 
-That callback may scan broad repository scope and run link reconciliation, frontmatter, document format, folder indexes, and final link-state refresh serially. Execution time is added after debounce and scheduler polling, so a sub-second configuration can still appear to take several seconds.
+Link and folder-index reconciliation remain repository- or documentation-scope operations. Repeated filesystem events reset the quiet interval, directory moves can emit large create, rename, and remove bursts, and bulk file renames use an additional quiet period of at least 500 milliseconds. Only the first recognized file rename in one batch receives the immediate targeted repair path; remaining changes converge through the normal selected reconciliation callback. Execution time is added after debounce and scheduler polling, so a sub-second configuration can still appear to take several seconds.
 
 Impact:
 
 - `debounce_seconds` should not be interpreted as maximum repair latency;
 - lowering debounce further may increase churn without materially reducing broad-pass execution time;
 - large directory moves or rapid editor-generated changes may schedule expensive follow-up passes;
+- ordinary Markdown frontmatter and format validation is incremental only while reusable cache evidence remains complete;
 - detached demon logs report completion after reconciliation, which can make processing time look like debounce time; and
 - current watcher performance is suitable for a correctness-first hackathon prototype and modest repositories, not a production low-latency claim for large or high-churn trees.
 
@@ -261,7 +262,7 @@ Owning docs:
 
 Removal condition:
 
-Watch events produce path-aware dirty sets, each subsystem can reconcile only affected sources and targets, repeated state reads and writes are reduced or batched, large moves have bounded targeted handling, and retained benchmarks establish end-to-end latency expectations across representative repository sizes and event bursts.
+Link and index watch events produce path-aware dirty sets, each remaining broad subsystem can reconcile only affected sources and targets, repeated state reads and writes are reduced or batched, large moves have bounded targeted handling, and retained benchmarks establish end-to-end latency expectations across representative repository sizes and event bursts.
 
 ## Cold validation retains serial coordination stages
 
@@ -289,7 +290,7 @@ Owning docs:
 
 Removal condition:
 
-Command-scoped source snapshots remove duplicate reads and parsing across selected validators, metadata-assisted hits avoid unnecessary file reads safely, and known generated rewrites refresh affected cache records from their final bytes. Any further parallel coordination changes preserve deterministic duplicate-ID behavior, schema-history decisions, diagnostic ordering, and publication safety under retained benchmarks.
+Command-scoped source snapshots remove duplicate reads and parsing across selected validators, and metadata-assisted hits avoid unnecessary file reads safely. Any further parallel coordination changes preserve deterministic duplicate-ID behavior, schema-history decisions, diagnostic ordering, and publication safety under retained benchmarks.
 
 ## Changed Markdown sources are reparsed as whole documents
 

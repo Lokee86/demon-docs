@@ -101,8 +101,8 @@ jobs:
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_windows_amd64/ddocs.exe ./cmd/ddocs
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "${ldflags}" -o package/demon-docs_windows_amd64/demon.exe ./cmd/demon
 
-          cp LICENSE README.md package/demon-docs_linux_amd64/
-          cp LICENSE README.md package/demon-docs_windows_amd64/
+          cp LICENSE NOTICE README.md package/demon-docs_linux_amd64/
+          cp LICENSE NOTICE README.md package/demon-docs_windows_amd64/
 
           ./package/demon-docs_linux_amd64/ddocs --version | grep -Fx "ddocs ${VERSION}"
           ./package/demon-docs_linux_amd64/ddocs --help >/dev/null

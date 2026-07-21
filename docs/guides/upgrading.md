@@ -20,6 +20,12 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
+## Licensing change after version 0.3.5
+
+The repository license changed from MIT to the Apache License, Version 2.0 after the `v0.3.5` release. Existing tags and release archives retain the license text distributed with those versions. New source distributions and release archives include both `LICENSE` and `NOTICE`.
+
+No code, configuration, authored-document, or private-state migration is required.
+
 ## Version 0.3.5 incremental validation update
 
 Version 0.3.5 separates frontmatter and document-format cache identities, refreshes unaffected validation results after generated rewrites, and adds path-scoped frontmatter and format validation to the watcher. Unrelated prose, link, code-block, and section-body edits no longer invalidate clean policy results, while schema, policy, identity, and structural-heading changes still force validation.

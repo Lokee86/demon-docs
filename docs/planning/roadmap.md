@@ -20,7 +20,7 @@ The roadmap is a sequencing and status document. Current product summaries link 
 
 ## Current status
 
-Active roadmap. The current branch includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, document-format schemas, reverse-index health, and explicit production codemap execution with schema-governed missing-section creation. Polyglot code intelligence and context delivery remain back-burnered or later work.
+Active roadmap. Version 0.3.5 includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, document-format schemas, reverse-index health, explicit production codemap execution with schema-governed missing-section creation, independent validation cache identities, generated-rewrite cache refresh, and path-scoped watcher validation for ordinary Markdown edits. Polyglot code intelligence and context delivery remain back-burnered or later work.
 
 ## Ownership boundary
 
@@ -57,6 +57,9 @@ See [Document Health Checks](../guides/document-health-checks.md).
 - Cold document-format source reads, frontmatter parsing, Markdown parsing, and schema enforcement use the same bounded pool.
 - Results remain indexed by deterministic file order and merge serially before duplicate-document-ID handling, immutable-state decisions, diagnostics, repair planning, cache publication, and schema-history publication.
 - The durable clean-validation cache remains the fastest repeated path; parallel workers reduce the cost when that cache is absent or invalidated.
+- Frontmatter and document-format reuse have independent identities, so unrelated prose, link, code-block, and section-body edits no longer invalidate both systems.
+- Known generated rewrites refresh the final raw source hash and retain or invalidate only the validation surfaces they can affect.
+- Ordinary Markdown create and write events carry changed paths into scoped watcher validation; untouched clean documents reuse cache state without being read or parsed, with conservative full-pass fallback when cache or event evidence is incomplete.
 
 See [Validation Cache](../architecture/validation-cache.md) and [Markdown Link Performance](../research/link-performance.md).
 
@@ -153,8 +156,8 @@ The following work is independent of the larger code-graph track:
 
 ### Remaining validation and link-scan performance opportunities
 
-- **Path-scoped watcher reconciliation:** the watcher currently coalesces events into pending work but does not preserve a complete feature-specific dirty-path set. Introduce changed-source and changed-target batches, route them to incremental subsystem entry points, retain full reconciliation as an overflow and uncertainty fallback, and benchmark end-to-end move latency separately from configured debounce. Large directory moves should not require repeated broad repository passes when deterministic identity and event evidence are sufficient.
-- **Refresh validation caches after generated rewrites:** frontmatter and document-format identities are independent, and format now uses schema-selection metadata plus the evaluated heading tree rather than whole-document bytes. After link fixes, index generation, frontmatter repair, or format repair publishes final bytes, refresh the raw source hash and preserve or invalidate only the subsystem surfaces actually changed.
+- **Path-scoped link and index reconciliation:** ordinary Markdown edits now scope frontmatter and document-format validation, but links and folder indexes still reconcile across broader repository or documentation scope. Introduce changed-source and changed-target batches for those subsystems, retain full reconciliation as an overflow and uncertainty fallback, and benchmark end-to-end move latency separately from configured debounce.
+- **Shared command snapshots and metadata-assisted cache hits:** selected validators still perform overlapping file reads and parsing, and format cache candidates still read frontmatter selection metadata plus the complete heading structure. Read each active Markdown source once per command where practical, share immutable derived data across planners, and use filesystem metadata only as a safe fast-rejection layer before authoritative hashes.
 - **Incremental changed-source link parsing:** unchanged source fingerprints already reuse stored link records, offsets, lines, and columns, but any source-content change currently reparses the complete Markdown document. Persist line or bounded-chunk hashes and enough synchronization metadata to diff changed regions, shift stored byte and line locations for unchanged regions, and reparse only affected regions plus context. Fall back to a full parse when edits may change non-local Markdown state, including frontmatter boundaries, fenced-code delimiters, reference definitions, HTML constructs, or parser-version changes.
 
 - stress the single-owner lease path and retain race-focused coverage;
