@@ -45,11 +45,17 @@ func loadReviewRuntime(ctx context.Context, errOut io.Writer) (reviewRuntime, in
 	if err != nil {
 		return reviewRuntime{}, fail(errOut, err)
 	}
-	codemapSuggestions, err := currentCodemapSuggestions(ctx, scope, resolved)
-	if err != nil {
-		return reviewRuntime{}, fail(errOut, err)
+	codemapSuggestions, codemapErr := currentCodemapSuggestions(ctx, scope, resolved)
+	all := mergeReviewSuggestions(linkSuggestions, codemapSuggestions, codemapErr, errOut)
+	return reviewRuntime{config: resolved, scope: scope, linkPlan: plan, suggestions: all}, 0
+}
+
+func mergeReviewSuggestions(linkSuggestions, codemapSuggestions []review.Suggestion, codemapErr error, errOut io.Writer) []review.Suggestion {
+	if codemapErr != nil {
+		fmt.Fprintf(errOut, "warning: codemap suggestions unavailable: %v\n", codemapErr)
+		codemapSuggestions = nil
 	}
-	all := append(linkSuggestions, codemapSuggestions...)
+	all := append(append([]review.Suggestion(nil), linkSuggestions...), codemapSuggestions...)
 	sort.Slice(all, func(i, j int) bool {
 		if all[i].SourcePath != all[j].SourcePath {
 			return all[i].SourcePath < all[j].SourcePath
@@ -59,7 +65,7 @@ func loadReviewRuntime(ctx context.Context, errOut io.Writer) (reviewRuntime, in
 		}
 		return all[i].ID < all[j].ID
 	})
-	return reviewRuntime{config: resolved, scope: scope, linkPlan: plan, suggestions: all}, 0
+	return all
 }
 
 func currentCodemapSuggestions(ctx context.Context, scope repository.Scope, resolved config.Config) ([]review.Suggestion, error) {
