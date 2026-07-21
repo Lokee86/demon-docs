@@ -125,7 +125,27 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 		}
 	}
 
-	for _, source := range markdownSources(inventory) {
+	sources := markdownSources(inventory)
+	changedSources := make([]bool, len(sources))
+	changedSourceIndexes := make([]int, 0, len(sources))
+	for index, source := range sources {
+		if _, ok := internal[source.record.ID]; ok {
+			continue
+		}
+		previousSource := previousByID[source.record.ID]
+		previousRecords := previousBySource[source.record.ID]
+		if initialized && sourceUnchanged(previousSource, source.record) && previousSource.LinkParserVersion == linkParserVersion && recordsReusable(previousRecords) && !recordsReferenceChangedTarget(previousRecords, previousByID, currentByID) {
+			continue
+		}
+		changedSources[index] = true
+		changedSourceIndexes = append(changedSourceIndexes, index)
+	}
+	preparedSources, err := prepareMarkdownSources(sources, changedSourceIndexes)
+	if err != nil {
+		return Plan{}, err
+	}
+
+	for index, source := range sources {
 		if rewrite, ok := internal[source.record.ID]; ok {
 			if rewrite.rewrite.SourceFileID != "" {
 				plan.Rewrites = append(plan.Rewrites, rewrite.rewrite)
@@ -138,16 +158,15 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 			plan.Unresolved += rewrite.unresolved
 			continue
 		}
-		previousSource := previousByID[source.record.ID]
 		previousRecords := previousBySource[source.record.ID]
-		if initialized && sourceUnchanged(previousSource, source.record) && previousSource.LinkParserVersion == linkParserVersion && recordsReusable(previousRecords) && !recordsReferenceChangedTarget(previousRecords, previousByID, currentByID) {
+		if !changedSources[index] {
 			for _, record := range previousRecords {
 				record.SourcePath = source.record.Path
 				plan.Links.Links = append(plan.Links.Links, record)
 			}
 			continue
 		}
-		if err := reconcileMarkdownSource(&plan, inventory, source, previousRecords, initialized, repair, policy); err != nil {
+		if err := reconcilePreparedMarkdownSource(&plan, inventory, source, preparedSources[index], previousRecords, initialized, repair, policy); err != nil {
 			return Plan{}, err
 		}
 	}
@@ -279,11 +298,16 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 }
 
 func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized, repair bool, policy review.Policy) error {
-	document, err := textio.Read(source.path)
+	prepared, err := prepareMarkdownSource(source)
 	if err != nil {
-		return fmt.Errorf("read Markdown source %s: %w", source.path, err)
+		return err
 	}
-	parsed := parseMarkdownDocument(document.Text)
+	return reconcilePreparedMarkdownSource(plan, inventory, source, prepared, previousRecords, initialized, repair, policy)
+}
+
+func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, prepared preparedMarkdownSource, previousRecords []LinkRecord, initialized, repair bool, policy review.Policy) error {
+	document := prepared.document
+	parsed := prepared.parsed
 	source.record.LinkParserVersion = linkParserVersion
 	var replacements []replacement
 	ordinal := 0

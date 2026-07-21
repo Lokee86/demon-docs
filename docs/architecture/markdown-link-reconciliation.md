@@ -117,7 +117,7 @@ User-authored Markdown changes and Demon Docs-generated repairs follow separate 
 
 Repository traversal remains serial and deterministic. Files whose path, size, and modification time still match reuse stored fingerprints and `document_id` values. Changed and new regular files are read through a bounded 16-worker pool; Markdown content is read once for both fingerprinting and document-identity extraction, and results merge in traversal order.
 
-For an external edit, Demon Docs fingerprints the changed source, parses its current Markdown, compares the resulting outgoing links with the stored source record, and replaces that source's graph edges. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
+For external edits, Demon Docs first identifies every source that cannot reuse stored link records. Those changed sources are read and parsed through a bounded 16-worker pool. Each worker writes only to its assigned source-result slot; results then merge in deterministic source-path order before target resolution, file-identity mutation, diagnostics, review-policy decisions, and repair planning. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
 
 For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
 

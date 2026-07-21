@@ -24,6 +24,20 @@ Link inventory keeps directory traversal serial so ignore decisions, nested-work
 
 Files whose recorded size and modification timestamp are unchanged reuse their existing fingerprint and document identity. Retained external regular-file records use the same metadata check; missing or changed content is refreshed best-effort as before. Content-read failures for repository files remain scan errors, while external-target fingerprint failures remain non-fatal.
 
+Changed Markdown sources that cannot reuse stored link records enter a second bounded worker stage for file reading and complete Markdown parsing. Results are stored by deterministic source index. Target resolution, external-target discovery, file-identity mutation, diagnostics, review policy, generated-rewrite construction, and final manifest assembly remain serial and ordered.
+
+## Changed-source preparation worker measurements
+
+A controlled Windows comparison used the 250-document `BenchmarkInitialIndexing` fixture, `GOMAXPROCS=16`, the v0.3.4 baseline, and the bounded changed-source preparation implementation. The table reports the mean of the final four samples from a five-run warmed-host repetition, excluding the first sample to reduce filesystem and antivirus warm-up noise.
+
+| Benchmark phase | v0.3.4 baseline | Parallel preparation | Improvement |
+|---|---:|---:|---:|
+| Reconciliation planning | 31.8 ms | 14.5 ms | 2.19x |
+| Complete reconciliation | 90.7 ms | 68.5 ms | 1.33x |
+| Complete benchmark operation | 170.7 ms | 145.0 ms | 1.18x |
+
+The total operation includes inventory, planning, filesystem application, and private-state publication, so its improvement is smaller than the isolated planning improvement. The worker change primarily removes serial source-read and Markdown-parse time; it does not parallelize target resolution or publication.
+
 The incremental inventory benchmark is `BenchmarkSingleFileIncrementalUpdate`; the initial repository benchmark is `BenchmarkInitialIndexing`. Run both with:
 
 ```bash

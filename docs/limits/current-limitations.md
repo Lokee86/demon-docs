@@ -293,7 +293,7 @@ Cache identity is narrowed to validation-relevant document surfaces, or affected
 
 ## Changed Markdown sources are reparsed as whole documents
 
-Unchanged source fingerprints reuse stored link records, offsets, lines, and columns. Any content change currently causes the complete Markdown source to be parsed again.
+Unchanged source fingerprints reuse stored link records, offsets, lines, and columns. Changed sources are read and parsed concurrently through a bounded 16-worker pool, then merged in source order before serial target resolution and repair planning. Any content change still causes the complete individual Markdown source to be parsed again.
 
 Impact:
 
