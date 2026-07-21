@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/reconcile"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -70,7 +72,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 	var watcher eventWatcher
 	externalWatched := map[string]bool{}
 	var externalDirectories []string
-	run := func() error {
+	run := func(changedPaths []string, fullValidation bool) error {
 		if runLock != nil {
 			runLock.Lock()
 			defer runLock.Unlock()
@@ -80,6 +82,23 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		unresolved := 0
 		frontmatterUnresolved := 0
 		formatUnresolved := 0
+		validationPathSet := map[string]bool{}
+		addValidationPath := func(path string) {
+			if repository.Contains(docsRoot, path) && strings.EqualFold(filepath.Ext(path), ".md") {
+				validationPathSet[filepath.Clean(path)] = true
+			}
+		}
+		for _, path := range changedPaths {
+			addValidationPath(path)
+		}
+		validationPaths := func() []string {
+			paths := make([]string, 0, len(validationPathSet))
+			for path := range validationPathSet {
+				paths = append(paths, path)
+			}
+			sort.Strings(paths)
+			return paths
+		}
 		if features.TrackLinks {
 			var plan links.Plan
 			var err error
@@ -97,6 +116,12 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 					return err
 				}
 				changed += count
+				for _, rewrite := range plan.Rewrites {
+					addValidationPath(rewrite.Path)
+				}
+				for _, update := range plan.Updates {
+					addValidationPath(update.Path)
+				}
 				diagnostics = append(diagnostics, plan.Messages...)
 				unresolved = plan.Unresolved
 			} else if err := links.Save(plan); err != nil {
@@ -117,38 +142,68 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			if err := reconcile.PrepareMissingWithin(result, docsRoot); err != nil {
 				return err
 			}
+			for _, update := range result.Updates {
+				addValidationPath(update.Path)
+			}
 		}
 		if features.Frontmatter {
-			plan, err := frontmatter.Build(repositoryRoot, docsRoot, c, true, time.Now())
-			if err != nil {
-				return err
-			}
-			count, err := frontmatter.Apply(repositoryRoot, docsRoot, plan)
-			if err != nil {
-				return err
-			}
-			changed += count
-			for _, diagnostic := range plan.Diagnostics {
-				diagnostics = append(diagnostics, frontmatterDiagnostic(diagnostic))
-				if !diagnostic.Warning && !diagnostic.Resolved {
-					frontmatterUnresolved++
+			paths := validationPaths()
+			if fullValidation || len(paths) > 0 {
+				var plan frontmatter.Plan
+				var err error
+				if fullValidation {
+					plan, err = frontmatter.Build(repositoryRoot, docsRoot, c, true, time.Now())
+				} else {
+					plan, err = frontmatter.BuildScoped(repositoryRoot, docsRoot, c, true, time.Now(), paths)
+					if errors.Is(err, validationcache.ErrScopedReuseUnavailable) {
+						plan, err = frontmatter.Build(repositoryRoot, docsRoot, c, true, time.Now())
+					}
+				}
+				if err != nil {
+					return err
+				}
+				count, err := frontmatter.Apply(repositoryRoot, docsRoot, plan)
+				if err != nil {
+					return err
+				}
+				changed += count
+				for _, update := range plan.Updates {
+					addValidationPath(update.Path)
+				}
+				for _, diagnostic := range plan.Diagnostics {
+					diagnostics = append(diagnostics, frontmatterDiagnostic(diagnostic))
+					if !diagnostic.Warning && !diagnostic.Resolved {
+						frontmatterUnresolved++
+					}
 				}
 			}
 		}
 		if features.Format {
-			plan, err := documentpolicy.Build(repositoryRoot, docsRoot, c, true)
-			if err != nil {
-				return err
-			}
-			count, err := documentpolicy.Apply(plan, docsRoot)
-			if err != nil {
-				return err
-			}
-			changed += count
-			for _, diagnostic := range plan.Diagnostics {
-				diagnostics = append(diagnostics, formatDiagnostic(diagnostic))
-				if !diagnostic.Warning && !diagnostic.Resolved {
-					formatUnresolved++
+			paths := validationPaths()
+			if fullValidation || len(paths) > 0 {
+				var plan documentpolicy.Plan
+				var err error
+				if fullValidation {
+					plan, err = documentpolicy.Build(repositoryRoot, docsRoot, c, true)
+				} else {
+					plan, err = documentpolicy.BuildScoped(repositoryRoot, docsRoot, c, true, paths)
+					if errors.Is(err, validationcache.ErrScopedReuseUnavailable) {
+						plan, err = documentpolicy.Build(repositoryRoot, docsRoot, c, true)
+					}
+				}
+				if err != nil {
+					return err
+				}
+				count, err := documentpolicy.Apply(plan, docsRoot)
+				if err != nil {
+					return err
+				}
+				changed += count
+				for _, diagnostic := range plan.Diagnostics {
+					diagnostics = append(diagnostics, formatDiagnostic(diagnostic))
+					if !diagnostic.Warning && !diagnostic.Resolved {
+						formatUnresolved++
+					}
 				}
 			}
 		}
@@ -199,7 +254,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 	if initialRetryDelay > time.Second {
 		initialRetryDelay = time.Second
 	}
-	if err := runInitialUntilStable(ctx, run, initialRetryDelay, out); err != nil {
+	if err := runInitialUntilStable(ctx, func() error { return run(nil, true) }, initialRetryDelay, out); err != nil {
 		return err
 	}
 	if once {
@@ -233,9 +288,9 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			return fmt.Errorf("watch document schemas: %w", err)
 		}
 	}
-	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
+	scheduler := NewScopedScheduler(run, time.Duration(seconds*float64(time.Second)))
 	// Close the startup handoff gap with one pass after watch registration.
-	scheduler.MarkChanged()
+	scheduler.MarkFullPass()
 	if ready != nil {
 		if err := ready(); err != nil {
 			return fmt.Errorf("mark watcher ready: %w", err)
@@ -276,7 +331,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 			if errors.Is(err, fsnotify.ErrEventOverflow) {
 				fmt.Fprintf(out, "%s ddocs watch event buffer overflow; scheduling a complete reconciliation\n", timestamp())
-				scheduler.MarkChanged()
+				scheduler.MarkFullPass()
 				continue
 			}
 			if err != nil {
@@ -305,7 +360,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				if err := addTree(w, watchRoot, watchRoot, c, policy, watchedDirs); err != nil {
 					return err
 				}
-				scheduler.MarkChanged()
+				scheduler.MarkFullPass()
 				continue
 			}
 			if features.Format && event.Op&fsnotify.Create != 0 && formatSchemaEvent(event.Name, repositoryRoot, c, false) {
@@ -327,6 +382,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				}
 			}
 			wasDirectory := watchedDirs[event.Name] || formatWatched[event.Name]
+			if !wasDirectory && event.Op&fsnotify.Create != 0 {
+				if info, statErr := os.Stat(event.Name); statErr == nil {
+					wasDirectory = info.IsDir()
+				}
+			}
 			if features.Links && repository.Contains(repositoryRoot, event.Name) {
 				now := time.Now()
 				for path, observedAt := range pendingRenames {
@@ -374,9 +434,16 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 					removeWatchTree(w, event.Name, formatWatched)
 				}
 			}
-			relevant := isExternal || relevantSelectedWithPolicy(event.Name, c, policy, docsRoot, repositoryRoot, features, wasDirectory)
+			path, full, relevant := validationBatchForEvent(event, c, policy, docsRoot, repositoryRoot, features, wasDirectory, isExternal)
 			if relevant {
-				scheduler.MarkChanged()
+				switch {
+				case full:
+					scheduler.MarkFullPass()
+				case path != "":
+					scheduler.MarkChangedPath(path)
+				default:
+					scheduler.MarkScopedPass()
+				}
 			}
 		case <-ticker.C:
 			if bulkRenameObserved && time.Since(lastObservedRename) < bulkRenameQuietPeriod {

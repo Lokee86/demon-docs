@@ -319,7 +319,7 @@ CLI flags override the selected base config. The reconciliation selectors are op
 - `-r` / `--reverse` selects code-folder reverse indexes.
 - `-i` / `--indexes` selects documentation indexes only; `-d` / `--docs` additionally selects frontmatter and document-body format.
 - When any selector is supplied, only selected systems run.
-- Without selectors, indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
+- Without selectors, `fix` runs indexes and links, plus reverse indexes when roots are configured or supplied with `--reverse-root`; it skips frontmatter and document-body format. `check` and `watch` retain the full configured default selection. `-a`/`--all` explicitly selects every configured system.
 - The selectors apply to `check`, `fix`, and `watch`.
 
 Examples include:

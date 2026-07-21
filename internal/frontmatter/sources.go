@@ -11,17 +11,18 @@ import (
 )
 
 type plannedSource struct {
-	path        string
-	relative    string
-	document    textio.Document
-	parsed      Document
-	parseErr    error
-	contentHash string
-	cacheHit    bool
-	cacheEntry  validationcache.Entry
+	path                string
+	relative            string
+	document            textio.Document
+	parsed              Document
+	parseErr            error
+	contentHash         string
+	frontmatterIdentity string
+	cacheHit            bool
+	cacheEntry          validationcache.Entry
 }
 
-func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store, schemaHasher *validationcache.SchemaHasher) ([]plannedSource, map[string]bool, error) {
+func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store, schemaHasher *validationcache.SchemaHasher, selected map[string]bool) ([]plannedSource, map[string]bool, error) {
 	sources := make([]plannedSource, len(files))
 	policyHash := validationcache.FrontmatterPolicyHash(cfg)
 	errors := validationworkers.Run(len(files), func(index int) error {
@@ -30,24 +31,43 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 		if err != nil {
 			return err
 		}
+		relativePath := filepath.ToSlash(relative)
+		if selected != nil && !selected[validationcache.NormalizePath(path)] {
+			entry, ok := cache.LookupPath(relativePath)
+			if !ok || !entry.FrontmatterClean || entry.FrontmatterPolicyHash != policyHash {
+				return validationcache.ErrScopedReuseUnavailable
+			}
+			sources[index] = plannedSource{
+				path: path, relative: relativePath, contentHash: entry.ContentSHA256,
+				cacheHit: true, cacheEntry: entry,
+				parsed: Document{Values: map[string]any{"document_id": entry.DocumentID, "document_type": entry.DocumentType}, HasBlock: true},
+			}
+			return nil
+		}
 		document, err := textio.Read(path)
 		if err != nil {
 			return fmt.Errorf("read frontmatter source %s: %w", path, err)
 		}
 		source := plannedSource{
-			path:        path,
-			relative:    filepath.ToSlash(relative),
-			document:    document,
-			contentHash: validationcache.ContentHash(document.RawBytes()),
+			path:                path,
+			relative:            relativePath,
+			document:            document,
+			contentHash:         validationcache.ContentHash(document.RawBytes()),
+			frontmatterIdentity: IdentityHash(document.RawBytes()),
 		}
-		if candidate, ok := cache.Candidate(source.relative, source.contentHash, policyHash); ok && candidate.FrontmatterClean {
+		if candidate, ok := cache.CandidateFrontmatter(source.relative, source.frontmatterIdentity, policyHash); ok {
 			schemaHash := schemaHasher.Effective(candidate.SchemaName, candidate.DocumentID)
 			recorded := immutable.values(source.relative, map[string]any{"document_id": candidate.DocumentID}, true)
 			immutableHash := validationcache.Hash(recorded)
-			if entry, valid := cache.Lookup(source.relative, source.contentHash, policyHash, schemaHash, immutableHash); valid {
+			if entry, valid := cache.LookupFrontmatter(source.relative, source.frontmatterIdentity, policyHash, schemaHash, immutableHash); valid {
 				source.cacheHit = true
 				source.cacheEntry = entry
 				source.parsed = Document{Values: map[string]any{"document_id": entry.DocumentID, "document_type": entry.DocumentType}, HasBlock: true}
+				if entry.ContentSHA256 != source.contentHash {
+					entry.ContentSHA256 = source.contentHash
+					entry.FormatClean = false
+					cache.Merge(entry)
+				}
 			}
 		}
 		if !source.cacheHit {
@@ -79,9 +99,16 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 			duplicates[path] = true
 		}
 	}
+	if selected != nil && len(duplicateIDs) > 0 {
+		for _, source := range sources {
+			if duplicateIDs[sourceDocumentID(source)] && !selected[validationcache.NormalizePath(source.path)] {
+				return nil, nil, validationcache.ErrScopedReuseUnavailable
+			}
+		}
+	}
 	duplicateSources := make([]int, 0)
 	for index := range sources {
-		if sources[index].cacheHit && duplicateIDs[sourceDocumentID(sources[index])] {
+		if selected == nil && sources[index].cacheHit && duplicateIDs[sourceDocumentID(sources[index])] {
 			duplicateSources = append(duplicateSources, index)
 		}
 	}
@@ -92,6 +119,20 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 		return nil
 	})
 	return sources, duplicates, nil
+}
+
+func scopedPathSet(repoRoot string, paths []string) map[string]bool {
+	if paths == nil {
+		return nil
+	}
+	selected := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(repoRoot, path)
+		}
+		selected[validationcache.NormalizePath(path)] = true
+	}
+	return selected
 }
 
 func sourceDocumentID(source plannedSource) string {

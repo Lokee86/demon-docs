@@ -16,15 +16,7 @@ func TestOpenWithoutPrivateRepositoryDoesNotInitializeState(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	store.Merge(Entry{
-		Path:                  "docs/guide.md",
-		ContentSHA256:         ContentHash([]byte("content")),
-		EngineVersion:         EngineVersion,
-		FrontmatterPolicyHash: Hash("frontmatter"),
-		EffectiveSchemaHash:   Hash("schema"),
-		ImmutableSnapshotHash: Hash(nil),
-		FrontmatterClean:      true,
-	})
+	store.Merge(frontmatterEntry("docs/guide.md", "frontmatter", "content"))
 	if err := store.Save(); err != nil {
 		t.Fatal(err)
 	}
@@ -38,23 +30,12 @@ func TestRetainDeletesRecordsOutsideActiveScope(t *testing.T) {
 	if _, err := ddrepo.Init(root); err != nil {
 		t.Fatal(err)
 	}
-	identity := func(path string) Entry {
-		return Entry{
-			Path:                  path,
-			ContentSHA256:         ContentHash([]byte(path)),
-			EngineVersion:         EngineVersion,
-			FrontmatterPolicyHash: Hash("frontmatter"),
-			EffectiveSchemaHash:   Hash("schema"),
-			ImmutableSnapshotHash: Hash(nil),
-			FrontmatterClean:      true,
-		}
-	}
 	store, err := Open(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	store.Merge(identity("docs/keep.md"))
-	store.Merge(identity("docs/remove.md"))
+	store.Merge(frontmatterEntry("docs/keep.md", "keep-frontmatter", "keep-content"))
+	store.Merge(frontmatterEntry("docs/remove.md", "remove-frontmatter", "remove-content"))
 	if err := store.Save(); err != nil {
 		t.Fatal(err)
 	}
@@ -70,12 +51,12 @@ func TestRetainDeletesRecordsOutsideActiveScope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	keep := identity("docs/keep.md")
-	if _, ok := store.Lookup(keep.Path, keep.ContentSHA256, keep.FrontmatterPolicyHash, keep.EffectiveSchemaHash, keep.ImmutableSnapshotHash); !ok {
+	keep := frontmatterEntry("docs/keep.md", "keep-frontmatter", "keep-content")
+	if _, ok := store.LookupFrontmatter(keep.Path, keep.FrontmatterIdentitySHA256, keep.FrontmatterPolicyHash, keep.FrontmatterSchemaHash, keep.ImmutableSnapshotHash); !ok {
 		t.Fatal("active cache record was removed")
 	}
-	removed := identity("docs/remove.md")
-	if _, ok := store.Lookup(removed.Path, removed.ContentSHA256, removed.FrontmatterPolicyHash, removed.EffectiveSchemaHash, removed.ImmutableSnapshotHash); ok {
+	removed := frontmatterEntry("docs/remove.md", "remove-frontmatter", "remove-content")
+	if _, ok := store.LookupFrontmatter(removed.Path, removed.FrontmatterIdentitySHA256, removed.FrontmatterPolicyHash, removed.FrontmatterSchemaHash, removed.ImmutableSnapshotHash); ok {
 		t.Fatal("stale cache record remained reachable")
 	}
 }
@@ -85,15 +66,7 @@ func TestMergeDoesNotDirtyAnUnchangedEntry(t *testing.T) {
 	if _, err := ddrepo.Init(root); err != nil {
 		t.Fatal(err)
 	}
-	entry := Entry{
-		Path:                  "docs/guide.md",
-		ContentSHA256:         ContentHash([]byte("content")),
-		EngineVersion:         EngineVersion,
-		FrontmatterPolicyHash: Hash("frontmatter"),
-		EffectiveSchemaHash:   Hash("schema"),
-		ImmutableSnapshotHash: Hash(nil),
-		FrontmatterClean:      true,
-	}
+	entry := frontmatterEntry("docs/guide.md", "frontmatter", "content")
 	store, err := Open(root)
 	if err != nil {
 		t.Fatal(err)
@@ -149,19 +122,13 @@ func TestEntryRoundTripsAndSchemaSourceChangesInvalidate(t *testing.T) {
 		t.Fatal(err)
 	}
 	firstSchemaHash := EffectiveSchemaHash(root, format, "general", "")
+	entry := frontmatterEntry("docs/Guide.md", "frontmatter", "content")
+	entry.FrontmatterSchemaHash = firstSchemaHash
 	store, err := Open(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	store.Merge(Entry{
-		Path:                  "docs/Guide.md",
-		ContentSHA256:         ContentHash([]byte("content")),
-		EngineVersion:         EngineVersion,
-		FrontmatterPolicyHash: Hash("frontmatter"),
-		EffectiveSchemaHash:   firstSchemaHash,
-		ImmutableSnapshotHash: Hash(nil),
-		FrontmatterClean:      true,
-	})
+	store.Merge(entry)
 	if err := store.Save(); err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +140,7 @@ func TestEntryRoundTripsAndSchemaSourceChangesInvalidate(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		lookupPath = "docs/guide.md"
 	}
-	if _, ok := reopened.Lookup(lookupPath, ContentHash([]byte("content")), Hash("frontmatter"), firstSchemaHash, Hash(nil)); !ok {
+	if _, ok := reopened.LookupFrontmatter(lookupPath, entry.FrontmatterIdentitySHA256, entry.FrontmatterPolicyHash, firstSchemaHash, entry.ImmutableSnapshotHash); !ok {
 		t.Fatal("stored validation entry did not round-trip through ddrepo")
 	}
 	if err := os.WriteFile(schemaPath, []byte("name = 'general'\ndescription = 'changed'\n"), 0o644); err != nil {
@@ -181,5 +148,18 @@ func TestEntryRoundTripsAndSchemaSourceChangesInvalidate(t *testing.T) {
 	}
 	if EffectiveSchemaHash(root, format, "general", "") == firstSchemaHash {
 		t.Fatal("schema source change did not change effective schema hash")
+	}
+}
+
+func frontmatterEntry(path, frontmatter, content string) Entry {
+	return Entry{
+		Path:                      path,
+		ContentSHA256:             ContentHash([]byte(content)),
+		EngineVersion:             EngineVersion,
+		FrontmatterIdentitySHA256: ContentHash([]byte(frontmatter)),
+		FrontmatterPolicyHash:     Hash("frontmatter-policy"),
+		FrontmatterSchemaHash:     Hash("schema"),
+		ImmutableSnapshotHash:     Hash(nil),
+		FrontmatterClean:          true,
 	}
 }

@@ -24,6 +24,15 @@ When forward indexes or links are watched together with reverse indexes, two obs
 
 The scheduler owns timing and run admission. It does not own filesystem scope, reconciliation planning, file replacement, link-state transactions, reverse-index rendering, repository-demon leases, or process lifetime.
 
+For the base watcher, an admitted batch also carries a deterministic set of
+changed Markdown paths and a full-pass flag. Ordinary regular-file Markdown
+create and write events use that path set for frontmatter and document-format
+validation; indexes and links still run at repository scope. Link-target or
+non-Markdown events may run those subsystems without validation unless they
+produce Markdown rewrites. Control files, schema changes, documentation
+directory and remove/rename events, overflow, startup handoff, and uncertain
+Markdown events request a full validation pass.
+
 ## Primary ownership
 
 The scheduling boundary owns:
@@ -35,6 +44,8 @@ The scheduling boundary owns:
 - clearing the admitted event batch before execution;
 - retaining events that arrive during execution as later pending work;
 - returning reconciliation errors to the watcher loop;
+- coalescing changed Markdown paths and conservatively overriding them with a
+  full-pass request when event detail is unsafe; and
 - accepting an optional shared run lock for serialization with another watcher; and
 - allowing context cancellation and observer shutdown to terminate the surrounding watch loop cleanly.
 
@@ -56,7 +67,7 @@ Those responsibilities remain with `internal/watch`, `internal/reverseindex`, th
 
 ## Scheduler state model
 
-`internal/watch.Scheduler` maintains five pieces of mutable state under a mutex:
+`internal/watch.Scheduler` maintains the following mutable state under a mutex:
 
 ```text
 pending   number of relevant events admitted since the last run began
@@ -64,6 +75,8 @@ running   whether this scheduler currently owns a reconciliation run
 last      timestamp of the most recent admitted event
 debounce  required quiet interval after the most recent event
 run       reconciliation callback
+paths     coalesced changed-path set for a scoped callback
+fullPass  whether the admitted batch requires full validation
 ```
 
 The effective states are:
@@ -93,14 +106,21 @@ There is no dedicated goroutine inside `Scheduler`. The outer watcher loop perio
 
 ## Event admission
 
-`MarkChanged` performs one atomic state update:
+`MarkChanged` performs one atomic full-pass state update:
 
 ```text
 lock
 pending++
+fullPass = true
+paths = empty
 last = now()
 unlock
 ```
+
+`MarkChangedPath` records one normalized path for a scoped batch. Repeated paths
+coalesce, paths are sorted when the batch is snapshotted, and `MarkFullPass`
+retains the conservative full-validation override. Paths admitted while a run
+is executing remain pending for the follow-up batch.
 
 Every admitted event resets the quiet-period reference point. The pending count records that work exists; it is not used to run reconciliation once per event.
 
@@ -198,9 +218,13 @@ time until the final relevant filesystem event
 
 Every admitted event updates the latest-event timestamp, so noisy editor saves or directory operations can extend the quiet interval repeatedly. File moves observed as paired rename/create events have one targeted immediate-repair allowance per scheduled batch. Additional recognized renames mark the batch as bulk activity and wait until no new observed rename has arrived for a quiet period equal to the configured debounce, with a minimum of 500 milliseconds.
 
-The scheduler currently retains only pending work count and latest-event time. It does not pass a complete set of changed paths into each reconciliation subsystem. After the quiet period, the callback may therefore perform broad selected work rather than a path-scoped update. A low debounce value does not eliminate repository scanning, serial feature execution, state publication, or generated-write refresh cost.
-
-This is an explicit current performance limitation. The watcher is designed first for deterministic convergence and bounded mutation ownership. Path-aware dirty tracking and incremental subsystem execution remain future optimization work.
+The watcher passes the path snapshot to scoped frontmatter and document-format
+builders. Those builders may walk the Markdown tree to retain active cache
+paths, but they do not read untouched Markdown files when reusable clean cache
+entries exist. Missing clean reuse requests a conservative full validation pass.
+Indexes and links retain their repository-wide behavior, and generated link
+rewrites plus newly prepared index files are added to the validation path set
+when their paths are available.
 
 ## Selected-feature execution
 

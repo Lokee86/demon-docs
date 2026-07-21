@@ -11,6 +11,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/repository"
+	"github.com/fsnotify/fsnotify"
 )
 
 type Features struct {
@@ -20,6 +21,38 @@ type Features struct {
 	Links       bool
 	TrackLinks  bool
 	Reverse     bool
+}
+
+// validationBatchForEvent classifies the validation consequence of one
+// relevant filesystem event. Link and index scheduling remains independent of
+// this classification.
+func validationBatchForEvent(event fsnotify.Event, c config.Config, policy ignorepolicy.Policy, docsRoot, repositoryRoot string, features Features, wasDirectory, isExternal bool) (string, bool, bool) {
+	if !isExternal && !relevantSelectedWithPolicy(event.Name, c, policy, docsRoot, repositoryRoot, features, wasDirectory) {
+		return "", false, false
+	}
+	schemaEvent := features.Format && formatSchemaEvent(event.Name, repositoryRoot, c, wasDirectory)
+	if policy.IsControlFile(event.Name) || schemaEvent {
+		return "", true, true
+	}
+	if isExternal || !repository.Contains(docsRoot, event.Name) {
+		return "", false, true
+	}
+	removeOrRename := event.Op&(fsnotify.Remove|fsnotify.Rename) != 0
+	if wasDirectory || removeOrRename {
+		return "", true, true
+	}
+	if !strings.EqualFold(filepath.Ext(event.Name), ".md") {
+		return "", false, true
+	}
+	ordinaryMarkdown := event.Op&(fsnotify.Create|fsnotify.Write) != 0
+	if ordinaryMarkdown {
+		info, err := os.Stat(event.Name)
+		ordinaryMarkdown = err == nil && info.Mode().IsRegular()
+	}
+	if !ordinaryMarkdown {
+		return "", true, true
+	}
+	return filepath.Clean(event.Name), false, true
 }
 
 func modelResult(updates []model.FileUpdate) model.ReconcileResult {

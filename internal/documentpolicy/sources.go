@@ -13,40 +13,41 @@ import (
 )
 
 type documentSource struct {
-	path        string
-	relative    string
-	data        []byte
-	text        string
-	contentHash string
-	candidate   validationcache.Entry
-	cacheHit    bool
-	parsed      frontmatter.Document
-	parseErr    error
-	schemaName  string
-	schemaErr   error
-	bodyStart   int
-	document    markdownDocument
+	path           string
+	relative       string
+	data           []byte
+	text           string
+	contentHash    string
+	formatIdentity string
+	candidate      validationcache.Entry
+	cacheHit       bool
+	parsed         frontmatter.Document
+	parseErr       error
+	schemaName     string
+	schemaErr      error
+	bodyStart      int
+	document       markdownDocument
 }
 
 type documentEvaluation struct {
-	path         string
-	relative     string
-	data         []byte
-	text         string
-	contentHash  string
-	candidate    validationcache.Entry
-	schemaName   string
-	documentID   string
-	documentType string
-	bodyStart    int
-	document     markdownDocument
-	current      Schema
-	previous     Schema
-	hasPrevious  bool
-	result       enforcementResult
+	path           string
+	relative       string
+	data           []byte
+	text           string
+	contentHash    string
+	formatIdentity string
+	schemaName     string
+	documentID     string
+	documentType   string
+	bodyStart      int
+	document       markdownDocument
+	current        Schema
+	previous       Schema
+	hasPrevious    bool
+	result         enforcementResult
 }
 
-func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cache *validationcache.Store, policyHash string, schemaHasher *validationcache.SchemaHasher) ([]documentSource, error) {
+func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cache *validationcache.Store, policyHash string, schemaHasher *validationcache.SchemaHasher, selected map[string]bool) ([]documentSource, error) {
 	sources := make([]documentSource, len(files))
 	errors := validationworkers.Run(len(files), func(index int) error {
 		path := files[index]
@@ -54,25 +55,28 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 		if err != nil {
 			return err
 		}
+		relativePath := filepath.ToSlash(relative)
+		if selected != nil && !selected[validationcache.NormalizePath(path)] {
+			entry, ok := cache.LookupPath(relativePath)
+			if !ok || !entry.FormatClean || entry.FormatPolicyHash != policyHash || entry.SchemaName == "" {
+				return validationcache.ErrScopedReuseUnavailable
+			}
+			sources[index] = documentSource{
+				path: path, relative: relativePath, contentHash: entry.ContentSHA256,
+				candidate: entry, cacheHit: true,
+			}
+			return nil
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read document format source %s: %w", path, err)
 		}
 		source := documentSource{
 			path:        path,
-			relative:    filepath.ToSlash(relative),
+			relative:    relativePath,
 			data:        data,
 			text:        string(data),
 			contentHash: validationcache.ContentHash(data),
-		}
-		source.candidate, _ = cache.Candidate(source.relative, source.contentHash, policyHash)
-		if source.candidate.FormatClean && source.candidate.SchemaName != "" {
-			schemaHash := schemaHasher.Effective(source.candidate.SchemaName, source.candidate.DocumentID)
-			if _, valid := cache.Lookup(source.relative, source.contentHash, policyHash, schemaHash, source.candidate.ImmutableSnapshotHash); valid {
-				source.cacheHit = true
-				sources[index] = source
-				return nil
-			}
 		}
 		source.parsed, source.parseErr = frontmatter.Parse(source.text, cfg.Frontmatter.AllowedFormats)
 		if source.parseErr != nil {
@@ -86,6 +90,24 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 		}
 		source.bodyStart = frontmatter.LeadingBlockEnd(source.text)
 		source.document = parseMarkdown(source.text[source.bodyStart:])
+		documentID, _ := source.parsed.Values["document_id"].(string)
+		documentType, _ := source.parsed.Values["document_type"].(string)
+		source.formatIdentity = formatIdentity(source.schemaName, documentID, documentType, source.document)
+		if candidate, ok := cache.CandidateFormat(source.relative, source.formatIdentity, policyHash); ok {
+			schemaHash := schemaHasher.Effective(source.schemaName, documentID)
+			if entry, valid := cache.LookupFormat(source.relative, source.formatIdentity, policyHash, schemaHash); valid {
+				source.cacheHit = true
+				source.candidate = entry
+				if entry.ContentSHA256 != source.contentHash {
+					entry.ContentSHA256 = source.contentHash
+					entry.FrontmatterClean = false
+					cache.Merge(entry)
+					source.candidate = entry
+				}
+			} else {
+				source.candidate = candidate
+			}
+		}
 		sources[index] = source
 		return nil
 	})
@@ -95,6 +117,20 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 		}
 	}
 	return sources, nil
+}
+
+func scopedPathSet(repoRoot string, paths []string) map[string]bool {
+	if paths == nil {
+		return nil
+	}
+	selected := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(repoRoot, path)
+		}
+		selected[validationcache.NormalizePath(path)] = true
+	}
+	return selected
 }
 
 func runDocumentEvaluations(evaluations []documentEvaluation, repair bool) {

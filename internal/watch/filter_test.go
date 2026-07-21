@@ -7,6 +7,7 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
+	"github.com/fsnotify/fsnotify"
 )
 
 func TestRelevantEventFiltering(t *testing.T) {
@@ -100,5 +101,61 @@ func TestRelevantDirectoryAndConfiguredIgnores(t *testing.T) {
 	c.Watch.IgnoredDirs = append(c.Watch.IgnoredDirs, "guide")
 	if Relevant(dir, c, root) {
 		t.Fatal("configured ignored directory was relevant")
+	}
+}
+
+func TestValidationBatchClassifiesScopedAndConservativeEvents(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	schemaDir := filepath.Join(repositoryRoot, ".ddocs", "schemas")
+	for _, directory := range []string{docsRoot, schemaDir} {
+		if err := os.MkdirAll(directory, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	page := filepath.Join(docsRoot, "page.md")
+	if err := os.WriteFile(page, []byte("# Page\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	schema := filepath.Join(schemaDir, "general.toml")
+	if err := os.WriteFile(schema, []byte("name = 'general'\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(docsRoot, "nested"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	policy, err := ignorepolicy.Load(repositoryRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := config.Default()
+	c.Format.Enabled = true
+	code := filepath.Join(repositoryRoot, "main.go")
+	if err := os.WriteFile(code, []byte("package main\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	features := Features{Indexes: true, Frontmatter: true, Format: true, TrackLinks: true}
+	cases := []struct {
+		name     string
+		event    fsnotify.Event
+		full     bool
+		path     string
+		isDir    bool
+		external bool
+	}{
+		{"markdown write", fsnotify.Event{Name: page, Op: fsnotify.Write}, false, page, false, false},
+		{"code write", fsnotify.Event{Name: code, Op: fsnotify.Write}, false, "", false, false},
+		{"external target", fsnotify.Event{Name: filepath.Join(t.TempDir(), "target.txt"), Op: fsnotify.Write}, false, "", false, true},
+		{"control file", fsnotify.Event{Name: filepath.Join(repositoryRoot, ".docignore"), Op: fsnotify.Write}, true, "", false, false},
+		{"schema change", fsnotify.Event{Name: schema, Op: fsnotify.Write}, true, "", false, false},
+		{"directory", fsnotify.Event{Name: filepath.Join(docsRoot, "nested"), Op: fsnotify.Create}, true, "", true, false},
+		{"remove", fsnotify.Event{Name: page, Op: fsnotify.Remove}, true, "", false, false},
+		{"rename", fsnotify.Event{Name: page, Op: fsnotify.Rename}, true, "", false, false},
+	}
+	for _, tc := range cases {
+		path, full, relevant := validationBatchForEvent(tc.event, c, policy, docsRoot, repositoryRoot, features, tc.isDir, tc.external)
+		if !relevant || full != tc.full || path != tc.path {
+			t.Errorf("%s: path=%q full=%v relevant=%v", tc.name, path, full, relevant)
+		}
 	}
 }

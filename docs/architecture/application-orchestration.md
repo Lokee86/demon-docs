@@ -98,7 +98,7 @@ Command parsing must not become an alternative source of repository truth. Resol
 ## Invariants and safety boundaries
 
 - Supplying any subsystem selector runs only selected systems.
-- Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run; link repair follows `[links].enabled`, and reverse indexes join when configured.
+- Without selectors, `fix` runs configured documentation indexes and link tracking, plus reverse indexes when configured; it skips frontmatter and document-body format. `check` and `watch` retain the full configured default selection. `-a`/`--all` explicitly selects every configured system.
 - Read-only commands do not apply authored-file reconciliation writes.
 - Ambiguous subsystem diagnostics are not converted into guessed fixes by the application layer.
 - Both executable names must expose compatible behavior unless a command is intentionally alias-specific.

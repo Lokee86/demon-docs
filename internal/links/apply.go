@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/textio"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 func ApplyAndSave(plan *Plan) (int, error) {
@@ -64,6 +65,17 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 		return 0, err
 	}
 	timings.DdocsPublication = time.Since(publicationStarted)
+	published := make([]validationcache.PublishedRewrite, len(plan.Rewrites))
+	for index, rewrite := range plan.Rewrites {
+		published[index] = validationcache.PublishedRewrite{
+			Path:    rewrite.Path,
+			OldData: rewrite.OldData(),
+			NewData: rewrite.NewData(),
+		}
+	}
+	if err := validationcache.RefreshPublished(plan.RepositoryRoot, published); err != nil {
+		return len(plan.Rewrites), fmt.Errorf("refresh validation cache after generated link rewrites: %w", err)
+	}
 
 	return len(plan.Rewrites), nil
 }

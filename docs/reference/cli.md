@@ -86,7 +86,7 @@ Mutation scope: no authored-file writes. Internal read/cache behavior remains im
 
 ### `ddocs fix`
 
-Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation.
+Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation. With no selector, it runs configured documentation indexes and links, plus reverse indexes when roots are configured; it deliberately skips frontmatter and document-body format. Use `-a` or `--all` to run every configured reconciliation system.
 
 Link repair runs first. After frontmatter, document format, reverse indexes, and documentation indexes apply, link state is refreshed only for source paths that changed. A clean frontmatter-only, format-only, or index-only fix does not run repository-wide link tracking. Explicit `--links` retains the full link reconciliation path, including its review history, rollback, and watcher-suppression behavior.
 
@@ -101,6 +101,7 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
 ## Subsystem selectors
 
 ```text
+-a, --all     every configured reconciliation system
 -d, --docs     documentation indexes, configured frontmatter, and document-body format
     --frontmatter
                configured frontmatter only
@@ -110,7 +111,7 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
 -i, --indexes  reconcile documentation indexes only
 ```
 
-When any selector is supplied, only selected systems run. Without selectors, documentation indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when reverse roots are configured or supplied.
+When any selector is supplied, only selected systems run. Bare `fix` runs documentation indexes and links, plus reverse indexes when reverse roots are configured or supplied; it skips frontmatter and document-body format. Bare `check` and `watch` run documentation indexes, configured frontmatter, document-body format, and links, plus configured reverse indexes. `-a`/`--all` selects every configured system.
 
 Selectors apply to `check`, `fix`, and `watch` where supported.
 
@@ -306,6 +307,7 @@ ddocs check --root docs --docs --links
 # Optionally initialize a repository-wide configuration and state boundary.
 ddocs init --root docs/
 ddocs fix
+ddocs fix --all
 ddocs check
 
 # Preview and apply an explicit link-aware move.

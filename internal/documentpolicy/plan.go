@@ -42,6 +42,8 @@ type Plan struct {
 	cacheHits          int
 }
 
+var ErrScopedReuseUnavailable = validationcache.ErrScopedReuseUnavailable
+
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, error) {
 	if !cfg.Format.Enabled {
 		return BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, nil)
@@ -60,10 +62,41 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	return plan, nil
 }
 
+// BuildScoped validates changed Markdown paths while reusing clean cache
+// identities for every other active document.
+func BuildScoped(repoRoot, docsRoot string, cfg config.Config, repair bool, paths []string) (Plan, error) {
+	if !cfg.Format.Enabled {
+		return BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, nil, paths)
+	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return Plan{}, fmt.Errorf("open validation cache: %w", err)
+	}
+	plan, err := BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, paths)
+	if err != nil {
+		return plan, err
+	}
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
+	return plan, nil
+}
+
 // BuildWithValidationCache builds one document-format plan against a
 // caller-owned command cache. Cache publication remains a serialized command
 // concern after parallel planning completes.
 func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, nil)
+}
+
+// BuildScopedWithValidationCache is the caller-owned-cache form of
+// BuildScoped. The full builder above intentionally retains its existing
+// read-and-validate behavior.
+func BuildScopedWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store, paths []string) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, cache, paths)
+}
+
+func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, cache *validationcache.Store, scopedPaths []string) (Plan, error) {
 	plan := Plan{
 		invalidatedSchemas: map[string][]byte{},
 		history:            map[string]Schema{},
@@ -102,7 +135,7 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 	}
 	cache.Retain(activePaths)
-	policyHash := validationcache.FrontmatterPolicyHash(cfg)
+	policyHash := validationcache.FormatPolicyHash(cfg)
 	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
 	sharedSchemas := map[string]Schema{}
 	sharedErrors := map[string]error{}
@@ -126,7 +159,8 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		historyResults[name] = schemaHistoryResult{schema: schema, exists: exists, err: historyErr}
 		return schema, exists, historyErr
 	}
-	sources, err := loadDocumentSources(repoRoot, files, cfg, cache, policyHash, schemaHasher)
+	selected := scopedPathSet(repoRoot, scopedPaths)
+	sources, err := loadDocumentSources(repoRoot, files, cfg, cache, policyHash, schemaHasher, selected)
 	if err != nil {
 		return plan, err
 	}
@@ -250,20 +284,20 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			}
 		}
 		evaluations = append(evaluations, documentEvaluation{
-			path:         source.path,
-			relative:     relative,
-			data:         source.data,
-			text:         source.text,
-			contentHash:  source.contentHash,
-			candidate:    source.candidate,
-			schemaName:   schemaName,
-			documentID:   documentID,
-			documentType: documentType,
-			bodyStart:    source.bodyStart,
-			document:     source.document,
-			current:      shared,
-			previous:     previous,
-			hasPrevious:  hasPrevious,
+			path:           source.path,
+			relative:       relative,
+			data:           source.data,
+			text:           source.text,
+			contentHash:    source.contentHash,
+			formatIdentity: source.formatIdentity,
+			schemaName:     schemaName,
+			documentID:     documentID,
+			documentType:   documentType,
+			bodyStart:      source.bodyStart,
+			document:       source.document,
+			current:        shared,
+			previous:       previous,
+			hasPrevious:    hasPrevious,
 		})
 	}
 
@@ -287,16 +321,16 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 		if len(result.Diagnostics) == 0 && !result.Changed {
 			cache.Merge(validationcache.Entry{
-				Path:                  evaluation.relative,
-				ContentSHA256:         evaluation.contentHash,
-				EngineVersion:         validationcache.EngineVersion,
-				FrontmatterPolicyHash: policyHash,
-				EffectiveSchemaHash:   schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
-				ImmutableSnapshotHash: evaluation.candidate.ImmutableSnapshotHash,
-				DocumentID:            strings.TrimSpace(evaluation.documentID),
-				DocumentType:          strings.TrimSpace(evaluation.documentType),
-				SchemaName:            evaluation.schemaName,
-				FormatClean:           true,
+				Path:                 evaluation.relative,
+				ContentSHA256:        evaluation.contentHash,
+				EngineVersion:        validationcache.EngineVersion,
+				FormatIdentitySHA256: evaluation.formatIdentity,
+				FormatPolicyHash:     policyHash,
+				FormatSchemaHash:     schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
+				DocumentID:           strings.TrimSpace(evaluation.documentID),
+				DocumentType:         strings.TrimSpace(evaluation.documentType),
+				SchemaName:           evaluation.schemaName,
+				FormatClean:          true,
 			})
 		}
 	}
@@ -356,6 +390,9 @@ func Apply(plan Plan, docsRoot string) (int, error) {
 			return 0, errors.Join(err, rollbackErr)
 		}
 		return 0, err
+	}
+	if err := validationcache.RefreshTransactions(plan.repositoryRoot, plan.rewrites, validationcache.SurfaceFormat); err != nil {
+		return len(plan.rewrites) + len(removed), fmt.Errorf("refresh validation cache after document-format rewrites: %w", err)
 	}
 	return len(plan.rewrites) + len(removed), nil
 }
