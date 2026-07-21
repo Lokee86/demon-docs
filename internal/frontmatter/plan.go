@@ -229,6 +229,13 @@ func Apply(repoRoot, docsRoot string, plan Plan) (int, error) {
 		}
 		return 0, fmt.Errorf("save frontmatter immutable state: %w; rewrites rolled back", err)
 	}
+	if err := validationcache.RefreshTransactions(
+		repoRoot,
+		plan.rewrites,
+		validationcache.SurfaceFrontmatter|validationcache.SurfaceFormat,
+	); err != nil {
+		return len(plan.rewrites), fmt.Errorf("refresh validation cache after frontmatter rewrites: %w", err)
+	}
 	return len(plan.rewrites), nil
 }
 

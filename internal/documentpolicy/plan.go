@@ -357,5 +357,8 @@ func Apply(plan Plan, docsRoot string) (int, error) {
 		}
 		return 0, err
 	}
+	if err := validationcache.RefreshTransactions(plan.repositoryRoot, plan.rewrites, validationcache.SurfaceFormat); err != nil {
+		return len(plan.rewrites) + len(removed), fmt.Errorf("refresh validation cache after document-format rewrites: %w", err)
+	}
 	return len(plan.rewrites) + len(removed), nil
 }
