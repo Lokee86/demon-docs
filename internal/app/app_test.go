@@ -11,7 +11,7 @@ import (
 
 func TestVersionAndUnknownCommandExitCodes(t *testing.T) {
 	var out, err bytes.Buffer
-	if code := Run(context.Background(), []string{"--version"}, &out, &err); code != 0 || out.String() != "ddocs 0.3.3\n" {
+	if code := Run(context.Background(), []string{"--version"}, &out, &err); code != 0 || out.String() != "ddocs 0.3.4\n" {
 		t.Fatalf("code=%d out=%q err=%q", code, out.String(), err.String())
 	}
 	out.Reset()
