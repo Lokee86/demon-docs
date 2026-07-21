@@ -42,7 +42,7 @@ Demon Docs `v0.3.5` is the initial public release of the Go implementation: a de
 - Prebuilt 64-bit Windows and Linux archives.
 - SHA-256 checksums for release artifacts.
 - Windows and Linux CI, packaged-binary verification, Go tests, vet, and smoke-harness gates.
-- Apache License 2.0.
+- The `v0.3.5` release artifacts are distributed under the MIT License. The repository was relicensed under Apache License 2.0 after this tag.
 
 ### Known limitations
 
