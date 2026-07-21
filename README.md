@@ -260,6 +260,9 @@ See [CI and Automation](docs/guides/ci-and-automation.md) and [Repository Demon]
 - [Research](docs/research/INDEX.md)
 - [Planning](docs/planning/INDEX.md)
 - [Development](docs/development/INDEX.md)
+- [Release history](CHANGELOG.md)
+- [Security policy](SECURITY.md)
+- [Contributors](CONTRIBUTORS.md)
 
 Current behavior, future work, and benchmark evidence are intentionally separated. The [Roadmap](docs/planning/roadmap.md) summarizes sequencing but is not the canonical reference for shipped behavior.
 
