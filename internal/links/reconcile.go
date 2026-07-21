@@ -571,7 +571,7 @@ func candidatePaths(inventory *inventory, missingPath, preferredID string) []str
 	if !strings.EqualFold(filepath.Dir(missingPath), inventory.root) {
 		candidates = append(candidates, discoverExternalCandidates(missingPath, base, kind, fingerprint)...)
 	}
-	return uniquePaths(candidates)
+	return rankPathAwareCandidates(inventory.root, missingPath, uniquePaths(candidates))
 }
 
 func displayPaths(root string, paths []string) []string {
