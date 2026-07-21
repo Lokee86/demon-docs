@@ -35,6 +35,17 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	refreshStarted := time.Now()
+	if err := refreshGeneratedSources(plan); err != nil {
+		timings.GeneratedSourceRefresh = time.Since(refreshStarted)
+		if rollbackErr := RollbackGenerated(plan.Rewrites); rollbackErr != nil {
+			return 0, errors.Join(err, fmt.Errorf("restore source files after generated rewrite verification failure: %w", rollbackErr))
+		}
+		return 0, err
+	}
+	timings.GeneratedSourceRefresh = time.Since(refreshStarted)
+
 	if err := recordGeneratedChanges(plan, changeBatch); err != nil {
 		if rollbackErr := RollbackGenerated(plan.Rewrites); rollbackErr != nil {
 			return 0, errors.Join(err, fmt.Errorf("restore source files after review history failure: %w", rollbackErr))
@@ -42,13 +53,6 @@ func applyAndSave(plan *Plan, timings *ApplyTimings) (int, error) {
 		return 0, err
 	}
 	plan.Suppressions = suppressions
-
-	refreshStarted := time.Now()
-	if err := refreshGeneratedSources(plan); err != nil {
-		timings.GeneratedSourceRefresh = time.Since(refreshStarted)
-		return 0, err
-	}
-	timings.GeneratedSourceRefresh = time.Since(refreshStarted)
 
 	publicationStarted := time.Now()
 	if err := Save(*plan); err != nil {
