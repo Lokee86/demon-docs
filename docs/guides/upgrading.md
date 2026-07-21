@@ -24,7 +24,7 @@ Use a clean branch or worktree for the first upgrade pass. Do not upgrade while 
 
 Version 0.3.4 parallelizes cold or invalidated frontmatter and document-format validation through a bounded 16-worker pool. Frontmatter source reads and parsing now run concurrently. Document-format source reads, frontmatter parsing, Markdown parsing, and per-document schema enforcement also run concurrently.
 
-Repository-wide coordination remains deterministic and serial where required: duplicate document-ID handling, immutable-state decisions, shared-schema and schema-history decisions, diagnostic ordering, rewrite planning, cache publication, and private-state publication.
+Repository-wide coordination remains deterministic and serial where required: duplicate document-ID handling, immutable-state decisions, shared-schema and schema-history decisions, diagnostic ordering, final rewrite ordering, cache publication, and private-state publication.
 
 No configuration or private-state migration is required. Existing validation-cache entries remain compatible. On the retained 1,000-document Windows fixture, warmed-host cold-pass means improved from 157.5 ms to 56.1 ms for frontmatter and from 314.4 ms to 171.6 ms for document format.
 

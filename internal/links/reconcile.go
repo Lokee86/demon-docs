@@ -12,7 +12,6 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/review"
-	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
 type replacement struct {
@@ -174,127 +173,6 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 	sortManifests(&plan.Files, &plan.Links)
 	timings.Planning = time.Since(planningStarted)
 	return plan, nil
-}
-
-type internalRewritePlan struct {
-	rewrite    GeneratedRewrite
-	update     model.FileUpdate
-	records    []LinkRecord
-	messages   []string
-	unresolved int
-}
-
-func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRecord, previousByID, currentByID map[string]*FileRecord, policy review.Policy) (map[string]internalRewritePlan, error) {
-	movedTargets := make(map[string]*FileRecord)
-	for id, current := range currentByID {
-		previous := previousByID[id]
-		if previous == nil || !current.Present || (previous.Scope == current.Scope && previous.Path == current.Path) {
-			continue
-		}
-		movedTargets[id] = current
-	}
-	result := make(map[string]internalRewritePlan)
-	for sourceID, previousRecords := range previousBySource {
-		previousSource := previousByID[sourceID]
-		currentSource := currentByID[sourceID]
-		if !sourceUnchanged(previousSource, currentSource) || !recordsReusable(previousRecords) {
-			continue
-		}
-		hasMovedTarget := false
-		for _, record := range previousRecords {
-			if movedTargets[record.TargetFileID] != nil {
-				hasMovedTarget = true
-				break
-			}
-		}
-		if !hasMovedTarget {
-			continue
-		}
-		sourcePath := recordAbsolute(root, *currentSource)
-		document, err := textio.Read(sourcePath)
-		if err != nil {
-			return nil, fmt.Errorf("read internal rewrite source %s: %w", sourcePath, err)
-		}
-		records := append([]LinkRecord(nil), previousRecords...)
-		var replacements []replacement
-		var messages []string
-		unresolved := 0
-		metadataChanged := false
-		for index := range records {
-			target := movedTargets[records[index].TargetFileID]
-			if target == nil {
-				records[index].SourcePath = currentSource.Path
-				continue
-			}
-			targetPath := recordAbsolute(root, *target)
-			_, style, local := resolveLocalTarget(records[index].RawPath, sourcePath, records[index].Angle)
-			if !local {
-				continue
-			}
-			newPath := renderTargetForSyntax(records[index].Syntax, records[index].RawPath, style, sourcePath, targetPath)
-			if newPath == records[index].RawPath {
-				records[index].SourcePath = currentSource.Path
-				records[index].ResolvedPath = target.Path
-				records[index].Status = "valid"
-				metadataChanged = true
-				continue
-			}
-			if state, decision := reviewRepairPolicy(policy, sourceID, currentSource.Path, records[index], records[index].RawPath, newPath, target.ID); state != review.MatchNone {
-				records[index].SourcePath = currentSource.Path
-				records[index].Candidates = []string{target.Path}
-				records[index].Status = "blocked"
-				label := "Blocked"
-				if state == review.MatchStale {
-					records[index].Status = "stale_block"
-					label = "Stale blocked"
-				}
-				messages = append(messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, currentSource.Path, records[index].Line, records[index].RawPath, newPath, reviewReason(decision.Reason)))
-				unresolved++
-				continue
-			}
-			replacements = append(replacements, replacement{
-				linkID:   records[index].ID,
-				start:    records[index].Start,
-				end:      records[index].End,
-				oldValue: records[index].RawPath,
-				newValue: newPath,
-			})
-			records[index].SourcePath = currentSource.Path
-			records[index].RawPath = newPath
-			records[index].Target = newPath + records[index].Suffix
-			records[index].ResolvedPath = target.Path
-			records[index].Status = "moved"
-			messages = append(messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", currentSource.Path, records[index].Line, replacements[len(replacements)-1].oldValue, newPath))
-		}
-		if len(replacements) == 0 {
-			if metadataChanged || unresolved > 0 {
-				result[sourceID] = internalRewritePlan{records: records, messages: messages, unresolved: unresolved}
-			}
-			continue
-		}
-		transformations := transformationsFor(replacements)
-		rewrite, err := NewGeneratedRewrite(sourceID, sourcePath, document, transformations)
-		if err != nil {
-			if IsTransientFilesystemRace(err) {
-				// Stored link offsets can lag behind the current source text even
-				// when file identity metadata says the source is unchanged. Skip
-				// the internal fast path so normal reconciliation reparses the
-				// current document and rebuilds the repair from fresh offsets.
-				continue
-			}
-			return nil, err
-		}
-		updated := applyReplacements(document.Text, replacements)
-		old := document.Text
-		result[sourceID] = internalRewritePlan{
-			rewrite:    rewrite,
-			update:     model.FileUpdate{Path: sourcePath, OldText: &old, NewText: updated},
-			records:    records,
-			messages:   messages,
-			unresolved: unresolved,
-		}
-	}
-	return result, nil
 }
 
 func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, previousRecords []LinkRecord, initialized, repair bool, policy review.Policy) error {

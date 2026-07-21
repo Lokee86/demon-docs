@@ -26,6 +26,7 @@ Demon Docs can:
 - reuse durable clean-validation results for unchanged frontmatter and document-body format checks;
 - read changed or new link-inventory content through a bounded worker pool while preserving deterministic traversal and merge order;
 - read and parse changed Markdown link sources through bounded workers before serial deterministic target resolution and repair planning;
+- plan independent source rewrites for known target moves through bounded workers before deterministic merge;
 - retain private `.ddocs/` objects without automatic compaction until readers and writers share a cross-process lock;
 - expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
 - record applied normal repairs with bounded, hash-guarded undo and repair blocks;
@@ -167,7 +168,7 @@ Use `ddocs <command> --help` or `ddocs <command> <subcommand> --help` for exact 
 
 Unchanged clean frontmatter and document-format results can be reused from durable `.ddocs/` cache records. Content, policy, schema, immutable-state, duplicate-identity, or validation-engine changes invalidate reuse automatically. A standalone read-only check does not initialize `.ddocs/` merely to save cache data.
 
-Link inventory traverses the repository deterministically, reuses unchanged size/mtime metadata, and reads changed or new files through a bounded 16-worker pool. Changed Markdown link sources are also read and parsed through bounded workers; results remain indexed by source path and merge serially before target resolution, identity updates, diagnostics, review policy, and repair planning. When an index, frontmatter, format, or reverse-index fix changes Markdown after the initial link pass, Demon Docs refreshes only those changed link sources. A clean non-link fix does not run a repository-wide link scan or initialize absent link state. Explicit `--links` still runs the complete reconciliation, review, rollback, and suppression path.
+Link inventory traverses the repository deterministically, reuses unchanged size/mtime metadata, and reads changed or new files through a bounded 16-worker pool. Changed Markdown link sources are also read and parsed through bounded workers; results remain indexed by source path and merge serially before target resolution, identity updates, diagnostics, review policy, and repair planning. For known target moves, each unchanged affected source independently prepares its rewrite plan through the same bounded worker pool, then results merge in source-path order before graph and diagnostic publication. When an index, frontmatter, format, or reverse-index fix changes Markdown after the initial link pass, Demon Docs refreshes only those changed link sources. A clean non-link fix does not run a repository-wide link scan or initialize absent link state. Explicit `--links` still runs the complete reconciliation, review, rollback, and suppression path.
 
 Automatic private-object compaction is currently disabled. The repository demon and CLI run as separate processes, and go-git pack replacement is not safe until private-state readers and writers share a cross-process lock. Normal commands therefore retain loose objects rather than risking a missing pack or referenced object.
 

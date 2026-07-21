@@ -113,6 +113,16 @@ Commit `12856e3` introduced a 16-worker bounded rewrite pool. Repeated runs afte
 
 The worker pool reduced filesystem rewrite time by roughly three times, complete apply time by roughly 2.7 times, and the complete benchmark operation by roughly two times. The plan remains deterministic: workers only apply already-planned, independently verified source rewrites.
 
+A later comparison isolated bounded preparation of those 250 independent source rewrite plans. Commit `38e7ca6` was the serial-planning baseline; the worker implementation used the same host, fixture, `GOMAXPROCS=16`, and five one-iteration benchmark repetitions. The table reports the mean of the final four samples to reduce first-run filesystem noise.
+
+| High-fanout phase | Serial planning | Parallel planning | Improvement |
+|---|---:|---:|---:|
+| Reconciliation planning | 25.2 ms | 8.2 ms | 3.09x |
+| Complete reconciliation | 251.8 ms | 221.4 ms | 1.14x |
+| Complete benchmark operation | 1.746 s | 1.645 s | 1.06x |
+
+The isolated planning gain is larger than the end-to-end gain because state loading, filesystem rewrites, generated-source refresh, and private-state publication remain separate costs. Workers prepare detached per-source results; shared graph mutation and final ordering remain serial.
+
 Run the current synthetic benchmark with:
 
 ```bash

@@ -119,7 +119,7 @@ Repository traversal remains serial and deterministic. Files whose path, size, a
 
 For external edits, Demon Docs first identifies every source that cannot reuse stored link records. Those changed sources are read and parsed through a bounded 16-worker pool. Each worker writes only to its assigned source-result slot; results then merge in deterministic source-path order before target resolution, file-identity mutation, diagnostics, review-policy decisions, and repair planning. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
 
-For a known target move, Demon Docs queries stored incoming links by target identity, calculates exact destination replacements from the existing link records, and constructs a generated rewrite without first treating the result as a user edit. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
+For a known target move, Demon Docs queries stored incoming links by target identity and identifies unchanged affected sources. Each source independently reads its document, calculates exact destination replacements from existing link records, consults the read-only review policy, and constructs a detached generated-rewrite plan through the bounded 16-worker pool. Results remain indexed by deterministic source-path order and merge serially before graph records, diagnostics, updates, and rewrites enter the shared plan. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
 
 If stored occurrence offsets no longer match current source text despite unchanged file metadata, Demon Docs abandons that internal fast path and reparses the current source before rebuilding the repair. It does not fail the entire reconciliation or write using stale offsets.
 
@@ -131,7 +131,7 @@ After index, frontmatter, document-format, or reverse-index writes, application 
 
 Unchanged files reuse stored fingerprints when path, size, and modification time agree. Current benchmarks cover initial indexing, single-file incremental updates, high-fanout target moves, repeated whole-corpus filename renames, scoped post-write refresh, and warmed validation reuse so storage, scanning, planning, and write regressions remain visible.
 
-Generated source rewrites are planned deterministically first, then applied through a bounded worker pool. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change the planned output, stored identities, or diagnostic ordering.
+Known-move source rewrites are prepared through bounded workers and merged deterministically before publication. Generated writes then use a separate bounded worker phase. Each source still receives its own expected-hash check, same-directory temporary file, and atomic replacement. Worker completion order does not change planned output, stored identities, or diagnostic ordering.
 
 Recorded Windows measurements show the 16-worker implementation applying a synthetic 250-source high-fanout move in 322–358 ms, compared with 885–954 ms before bounded parallel writes. A copied Space Rocks stress test repaired 3,717 links across 340 Markdown sources in a median 1.93–1.98 seconds per mass-rename pass. See [Markdown Link Performance](../research/link-performance.md) for methodology, phase timings, throughput, and retained artifacts.
 
@@ -183,6 +183,7 @@ When links are enabled, watch mode observes the repository root because moves of
 ## Code map
 
 - `internal/links/` — parsing, target resolution, identity state, diagnostics, generated rewrites, scoped tracking, document-identity alias recovery, and bounded workers.
+- `internal/links/internal_move_rewrites.go` — deterministic job selection, bounded per-source known-move rewrite preparation, and ordered result merge.
 - `internal/links/wiki_links.go` — path-based wiki links, aliases, embeds, and extensionless Markdown resolution.
 - `internal/links/html_links.go` — supported local HTML `href`, `src`, and `poster` targets.
 - `internal/links/reference_labels.go` — explicit and collapsed reference-label validation.

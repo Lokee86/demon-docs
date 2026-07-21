@@ -67,7 +67,7 @@ See [Validation Cache](../architecture/validation-cache.md) and [Markdown Link P
 - Link labels, titles, aliases, angle wrapping, query strings, fragments, source newline style, and surrounding prose are preserved.
 - Undefined explicit or collapsed reference labels are reported.
 - Changed Markdown sources are read and parsed through bounded concurrency before deterministic serial target resolution and repair planning.
-- Generated rewrites use bounded concurrency while retaining deterministic planning, source-hash checks, and atomic per-file replacement.
+- Known-move rewrite planning and generated rewrite application use bounded concurrency while retaining deterministic source ordering, source-hash checks, and atomic per-file replacement.
 - `ddocs mv` explicitly moves a file or directory and rewrites affected incoming and moved-source links without requiring or creating `.ddocs/` state.
 - Move planning supports dry runs, repository boundaries, case-only renames, affected ambiguity refusal, source-hash preflight, and best-effort rollback.
 
