@@ -6,52 +6,9 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
-	"path"
-	"path/filepath"
-	"sort"
 	"strings"
 	"unicode"
-
-	"github.com/Lokee86/demon-docs/internal/evidence"
 )
-
-func collectSymbolDeclarations(root string, files []string) ([]evidence.SymbolDeclaration, error) {
-	declarations := make(map[string]evidence.SymbolDeclaration)
-	for _, file := range files {
-		extension := strings.ToLower(path.Ext(file))
-		if extension != ".go" && extension != ".gd" {
-			continue
-		}
-		contents, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(file)))
-		if err != nil {
-			return nil, err
-		}
-		var symbols []string
-		switch extension {
-		case ".go":
-			symbols = goDeclaredSymbols(file, contents)
-		case ".gd":
-			symbols = gdscriptDeclaredSymbols(contents)
-		}
-		for _, symbol := range symbols {
-			key := file + "\x00" + symbol
-			declarations[key] = evidence.SymbolDeclaration{Path: file, Symbol: symbol}
-		}
-	}
-
-	result := make([]evidence.SymbolDeclaration, 0, len(declarations))
-	for _, declaration := range declarations {
-		result = append(result, declaration)
-	}
-	sort.Slice(result, func(i, j int) bool {
-		if result[i].Path != result[j].Path {
-			return result[i].Path < result[j].Path
-		}
-		return result[i].Symbol < result[j].Symbol
-	})
-	return result, nil
-}
 
 func goDeclaredSymbols(file string, contents []byte) []string {
 	parsed, err := parser.ParseFile(token.NewFileSet(), file, contents, parser.SkipObjectResolution)

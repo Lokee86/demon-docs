@@ -1,9 +1,7 @@
 package codemapcorpus
 
 import (
-	"os"
 	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -15,40 +13,6 @@ type dependencyIndex struct {
 	filesByDir map[string][]string
 	goModules  []goModule
 	godotRoots []string
-}
-
-func collectDependencies(root string, files []string) ([]evidence.DependencyEdge, error) {
-	index, err := newDependencyIndex(root, files)
-	if err != nil {
-		return nil, err
-	}
-	edges := map[string]evidence.DependencyEdge{}
-	for _, source := range files {
-		if !supportedDependencySource(source) {
-			continue
-		}
-		contents, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
-		if err != nil {
-			return nil, err
-		}
-		for _, edge := range index.edgesFor(source, contents) {
-			if edge.Source == edge.Target || edge.Target == "" {
-				continue
-			}
-			key := edge.Source + "\x00" + edge.Target + "\x00" + edge.Relation
-			edges[key] = edge
-		}
-	}
-	result := make([]evidence.DependencyEdge, 0, len(edges))
-	for _, edge := range edges {
-		result = append(result, edge)
-	}
-	sort.Slice(result, func(i, j int) bool {
-		left := result[i].Source + "\x00" + result[i].Target + "\x00" + result[i].Relation
-		right := result[j].Source + "\x00" + result[j].Target + "\x00" + result[j].Relation
-		return left < right
-	})
-	return result, nil
 }
 
 func newDependencyIndex(root string, files []string) (dependencyIndex, error) {

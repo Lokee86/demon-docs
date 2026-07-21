@@ -71,19 +71,16 @@ It does not own:
 It performs:
 
 ```text
-validate every dataset document exists
--> discover repository files
--> derive repository directories
--> read dataset document text
--> project resolved authored targets
--> collect dependencies
--> extract symbols
--> resolve related documents
--> collect bounded history
--> sort and return normalized facts
+discover repository files
+-> derive repository directories and project resolved authored targets
+-> concurrently load dataset documents, collect shared source facts, and collect bounded history
+-> resolve related documents from the completed document set
+-> merge, deduplicate, sort, and return normalized facts
 ```
 
-A dataset document missing from the repository is an error because later evidence would otherwise be built from incomplete or mismatched inputs.
+Document loading and history collection each have an independent bounded task. Dependency and symbol adapters share one bounded 16-worker source pass: each supported source is read once, and its immutable bytes feed every applicable adapter before results merge serially in source-path order. Repository discovery, dependency-index construction, final deduplication, related-document projection, and corpus publication remain serial and deterministic.
+
+Subsystem errors are checked after collection in stable document, source-fact, then history order. A dataset document missing from the repository remains an error because later evidence would otherwise be built from incomplete or mismatched inputs.
 
 ## Repository file discovery
 
@@ -201,6 +198,16 @@ The result is a set of normalized commit IDs and repository paths. Large bulk co
 
 History is bounded evidence, not ownership truth. Squashes, rebases, generated commits, and repository age affect what can be observed.
 
+## Corpus construction performance
+
+A retained Windows benchmark constructs a corpus from 384 Go files, 128 GDScript files, and 96 dataset documents. Every source contributes dependency facts, Go and GDScript sources also contribute symbol facts, and the repository intentionally has no Git history so the measurement includes the normal empty-history fallback. The comparison used `GOMAXPROCS=16`, five one-iteration runs, and commit `41b6f3e` as the serial baseline.
+
+Excluding the first sample to reduce host filesystem and antivirus warm-up noise, mean full-corpus construction improved from 1.546 seconds to 523.3 milliseconds, a 2.95x speedup and 66.2% latency reduction. The retained benchmark is `BenchmarkBuildCorpus` in `internal/codemapcorpus/build_benchmark_test.go`.
+
+```bash
+go test ./internal/codemapcorpus -run '^$' -bench '^BenchmarkBuildCorpus$' -benchmem -count=5 -benchtime=1x
+```
+
 ## State and data ownership
 
 The corpus is an in-memory, rebuildable projection. It does not persist a second repository graph.
@@ -220,7 +227,9 @@ The corpus is an in-memory, rebuildable projection. It does not persist a second
 - Dependency adapters emit local facts only.
 - Ambiguous resolutions are omitted rather than guessed.
 - Symbol ambiguity prevents unique symbol evidence.
-- Collections are deduplicated and sorted.
+- Source workers read immutable repository bytes and publish only indexed detached results.
+- Worker completion order cannot affect returned ordering or first-error selection.
+- Collections are deduplicated and sorted serially after collection.
 - Hidden holdout targets must be removed from related-document inputs before generation.
 
 ## Failure behavior
@@ -232,8 +241,10 @@ Unsupported language syntax normally results in no fact rather than a fatal erro
 ## Code map
 
 - `internal/codemapcorpus/build.go` and `model.go` — corpus assembly and model.
+- `build_collections.go` — concurrent document, source-fact, and history collection with deterministic error priority.
+- `source_facts.go` and `workers.go` — shared bounded source reads, adapter dispatch, indexed results, and serial normalized merge.
 - `files.go`, `paths.go`, and `gitcli.go` — repository discovery and normalized paths.
-- `dependencies.go` — adapter dispatch and local target index.
+- `dependencies.go` — dependency adapter dispatch and local target index.
 - `dependency_go.go` — Go modules and imports.
 - `dependency_scripts.go` — GDScript, JavaScript/TypeScript, Ruby, and Python adapters.
 - `symbols.go` — current declaration extractors.
@@ -245,6 +256,8 @@ Unsupported language syntax normally results in no fact rather than a fatal erro
 Focused tests cover:
 
 - complete corpus input assembly and missing-document refusal;
+- bounded source concurrency, deterministic indexed errors, and one read per supported source;
+- retained large-corpus construction performance;
 - repository paths and tracked parent directories;
 - every supported dependency adapter and local-only resolution;
 - Go and GDScript declarations plus ambiguity/filtering;

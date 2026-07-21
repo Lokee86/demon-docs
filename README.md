@@ -33,7 +33,9 @@ Demon Docs can:
 - explicitly inspect, preview, update, and verify unified managed codemap sections;
 - preserve existing codemap links by default while supporting opt-in confidence pruning;
 - project codemap references onto configured code folders and files;
-- export deterministic codemap datasets through bounded per-document workers with per-build target-hash deduplication, then run benchmark or precision research;
+- export deterministic codemap datasets through bounded per-document workers with per-build target-hash deduplication;
+- build codemap corpora through bounded shared source analysis while document loading and Git-history collection proceed independently;
+- run codemap benchmark or precision research;
 - watch relevant filesystem changes in the foreground; and
 - run one optional repository-local watcher through the repository demon and feeder lifecycle.
 

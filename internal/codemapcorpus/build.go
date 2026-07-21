@@ -19,20 +19,8 @@ func Build(repositoryRoot string, dataset codemap.Dataset, options Options) (Cor
 		return Corpus{}, err
 	}
 	paths := repositoryPaths(files)
-	documents, err := loadDocuments(root, dataset)
-	if err != nil {
-		return Corpus{}, err
-	}
 	targets := resolvedTargets(dataset)
-	dependencies, err := collectDependencies(root, files)
-	if err != nil {
-		return Corpus{}, err
-	}
-	symbols, err := collectSymbolDeclarations(root, files)
-	if err != nil {
-		return Corpus{}, err
-	}
-	commits, err := collectCommits(root, files, options)
+	collections, err := collectCorpusCollections(root, files, dataset, options)
 	if err != nil {
 		return Corpus{}, err
 	}
@@ -40,12 +28,12 @@ func Build(repositoryRoot string, dataset codemap.Dataset, options Options) (Cor
 		RepositoryRoot:     root,
 		RepositoryFiles:    files,
 		RepositoryPaths:    paths,
-		Documents:          documents,
+		Documents:          collections.documents,
 		TargetsByDocument:  targets,
-		DependencyEdges:    dependencies,
-		Commits:            commits,
-		RelatedDocuments:   collectRelatedDocuments(documents, targets),
-		SymbolDeclarations: symbols,
+		DependencyEdges:    collections.dependencies,
+		Commits:            collections.commits,
+		RelatedDocuments:   collectRelatedDocuments(collections.documents, targets),
+		SymbolDeclarations: collections.symbols,
 	}, nil
 }
 
