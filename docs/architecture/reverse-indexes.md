@@ -18,7 +18,7 @@ This document describes the implemented reverse-index projection from authored d
 
 Reverse indexing is the third reconciliation subsystem alongside documentation indexes and local links. It reads explicit targets from configured codemap sections, resolves those targets against the current repository filesystem, inventories selected code roots, and writes deterministic managed blocks into code-folder index files.
 
-The current implementation operates at file and folder level. It does not use the planned polyglot repository graph, symbol adapters, inferred semantic ownership, or LLM judgment.
+The current implementation deliberately operates at file and folder level. General repository relationships and symbol adapters belong to ArcanaGraph; Demon Docs reverse indexes do not infer semantic ownership or use LLM judgment.
 
 ## Code root
 

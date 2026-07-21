@@ -4,21 +4,21 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7ce6-aed3-79734c26ecc7
 document_type: general
 policy_exempt: false
-summary: Back-burnered architecture for a language-neutral provider seam, normalized code facts, symbol references, and bounded graph projections.
+summary: Historical repository-graph, dependency, and symbol-intelligence design transferred from Demon Docs to ArcanaGraph.
 ---
-# Planned Code Intelligence
+# Transferred Code-Intelligence Design
 
 Parent index: [Planning](../INDEX.md)
 
-Back-burnered architecture for a language-neutral provider seam, normalized code facts, symbol references, and bounded graph projections.
+Historical repository-graph, dependency, and symbol-intelligence design transferred from Demon Docs to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Direct Files
 
 <!-- doc-ledger:files:start -->
 
-- [code-dependency-and-entanglement.md](code-dependency-and-entanglement.md) - Planned dependency facts, bounded neighborhoods, entanglement projections, and adapter capabilities.
-- [code-symbol-references.md](code-symbol-references.md) - Planned declaration-level reference contract, resolution states, syntax direction, and rollout strategy.
-- [repository-graph.md](repository-graph.md) - Planned normalized polyglot repository/code graph, provenance, identity, export, and cache boundaries.
+- [code-dependency-and-entanglement.md](code-dependency-and-entanglement.md) - Transferred dependency-fact, bounded-neighborhood, impact, and entanglement design.
+- [code-symbol-references.md](code-symbol-references.md) - Transferred declaration-level reference and symbol-resolution design.
+- [repository-graph.md](repository-graph.md) - Transferred normalized repository-graph, provenance, identity, export, and cache design.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders
@@ -33,4 +33,4 @@ Back-burnered architecture for a language-neutral provider seam, normalized code
 
 ## Notes
 
-These pages describe intended architecture, not currently supported code-intelligence behavior. The polyglot provider seam must precede language-specific implementation.
+These pages preserve design provenance from before ArcanaGraph became a separate tool. They do not describe planned Demon Docs behavior. Current graph implementation and sequencing belong in the ArcanaGraph repository.

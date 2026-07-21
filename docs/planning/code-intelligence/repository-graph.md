@@ -4,29 +4,29 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7e16-a1e9-eb98628a66bf
 document_type: general
 policy_exempt: false
-summary: This document plans the normalized polyglot repository and code graph that may join existing documentation/link facts with provider-supplied code facts.
+summary: Historical normalized repository-graph design transferred from Demon Docs to ArcanaGraph.
 ---
-# Planned Polyglot Repository and Code Graph
+# Transferred Polyglot Repository-Graph Design
 
-Parent index: [Planned Code Intelligence](./INDEX.md)
+Parent index: [Transferred Code-Intelligence Design](./INDEX.md)
 
 ## Purpose
 
-This document plans the normalized polyglot repository and code graph that may join existing documentation/link facts with provider-supplied code facts.
+This document preserves the normalized repository-graph design that was transferred from Demon Docs to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Overview
 
-The future graph is intended to normalize deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, or external code-intelligence providers. It should not rebuild every language analyzer inside Demon Docs.
+The design normalizes deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, or external code-intelligence providers. ArcanaGraph now owns its implementation and should not rebuild every language analyzer internally.
 
 ## Current status
 
-Back-burnered architecture plan. No general polyglot code graph is currently part of baseline reconciliation.
+Transferred historical design. No general polyglot code graph is part of Demon Docs, and none is planned for its baseline reconciliation.
 
 ## Expected ownership
 
-A language-neutral provider and normalized fact contract should own node, edge, provenance, resolution, and invalidation semantics. Language adapters should remain outside the core graph model.
+ArcanaGraph owns the language-neutral relationship model, provider contracts, node and edge semantics, provenance, resolution, invalidation, and graph projections. Language adapters remain outside the normalized graph model.
 
-This document describes the back-burnered language-neutral graph that will join Demon Docs' existing documentation/link facts with bounded code facts from polyglot providers. It is not required for current folder-index reconciliation, link repair, codemap extraction, or the initial reverse-index implementation.
+This document is retained as design provenance. References below to a future Demon Docs graph or graph core are superseded by the ArcanaGraph product boundary. Demon Docs retains its focused Markdown/link model and file/folder documentation projections.
 
 Demon Docs already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
 

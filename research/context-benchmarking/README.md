@@ -1,6 +1,6 @@
 # Context Benchmarking Research
 
-This directory preserves exploratory work for the future Demon Docs context-injection benchmark described in [Context-Injection Benchmarking](../../docs/research/context-injection-benchmarking.md).
+This directory preserves exploratory context-injection benchmark work transferred from Demon Docs to the planned **Grimoire Context** sibling tool. The design record is described in [Context-Injection Benchmarking](../../docs/research/context-injection-benchmarking.md).
 
 This is research material, not a current product subsystem, release requirement, or commitment to fund model trials now. The immediate purpose is to develop a credible experimental design, retain reproducible discovery evidence, and avoid losing useful historical-task work.
 
@@ -15,7 +15,7 @@ The authentic OSS corpus should eventually cover four independently reviewed rep
 
 A deliberately constructed repository should separately act as a harness control with a completely known graph, expected context, and implementation surface.
 
-The synthetic repository is not the experimental control condition. The experimental control is an agent run against the same authentic repository snapshot and task without Demon Docs context. The treatment run uses the same model, task, tools, limits, and snapshot with Demon Docs context injected.
+The synthetic repository is not the experimental control condition. The experimental control is an agent run against the same authentic repository snapshot and task without injected Grimoire Context output. The treatment run uses the same model, task, tools, limits, and snapshot with the deterministic context bundle injected.
 
 Stars are metadata only. They may help locate projects with sufficient issue and pull-request history, but they must not influence code-quality or documentation-quality classification.
 
@@ -52,7 +52,7 @@ Useful preparation does not require paid agent trials:
 - preserve authentic issue/PR tasks at pinned pre-change commits;
 - validate baseline builds and tests;
 - define public task manifests and evaluator-only oracle manifests;
-- build the deterministic context bundles; and
+- build representative deterministic Grimoire Context bundles; and
 - dry-run workspace reset, leakage prevention, logging, and scoring against the synthetic control fixture.
 
 Paired model runs, repeated trials, and statistical conclusions can remain deferred until they are affordable.

@@ -633,7 +633,7 @@ def write_outputs(repos: list[RepoAnalysis], args: argparse.Namespace) -> None:
     accepted = [repo for repo in ordered if not repo.rejection_reasons]
     shortlist = accepted[: args.shortlist]
     lines = [
-        "# Demon Docs Context-Injection Benchmark Shortlist",
+        "# Grimoire Context Benchmark Shortlist",
         "",
         f"Generated: {payload['generated_at']}",
         "",

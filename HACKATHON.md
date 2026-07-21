@@ -76,6 +76,6 @@ Simply put, Demon Docs can attempt to deterministically generate codemaps from e
 
 ## Where it goes next
 
-Reverse indexes already provide a deterministic route from source code to the authored documentation that describes it. A broader polyglot repository graph and bounded agent-context bundler are planned, but they are not part of this submission.
+Reverse indexes already provide a deterministic route from source files and folders to the authored documentation that describes them. Broader repository relationships and polyglot code intelligence are owned by [ArcanaGraph](https://github.com/Lokee86/arcana-graph), while bounded task-context discovery and delivery are owned by the planned **Grimoire Context** sibling tool. They are separate Warlock components rather than unfinished Demon Docs submission features.
 
 Installation, testing instructions, benchmark methodology, and current limitations are documented in the repository README and supporting documentation.

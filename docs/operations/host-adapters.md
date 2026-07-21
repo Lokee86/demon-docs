@@ -200,4 +200,4 @@ go test ./internal/demon ./internal/app -count=1
 
 ## Notes
 
-The feeder protocol is lifecycle plumbing only. Planned deterministic agent-context delivery is a separate product track and must not be inferred from a running agent feeder.
+The feeder protocol is lifecycle plumbing only. Deterministic task-context delivery belongs to the planned Grimoire Context sibling tool and must not be inferred from a running Demon Docs agent feeder.

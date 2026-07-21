@@ -4,37 +4,35 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7c56-a0ce-a8a3c84239ee
 document_type: general
 policy_exempt: false
-summary: This document plans bounded deterministic context bundles and thin host integrations for agents without making an LLM, daemon, or host plugin part of reconciliation correctness.
+summary: Historical bounded-context and host-integration design transferred from Demon Docs to the planned Grimoire Context tool.
 ---
-# Deterministic Agent Context and Integrations
+# Transferred Agent-Context Design
 
 Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
-This document plans bounded deterministic context bundles and thin host integrations for agents without making an LLM, daemon, or host plugin part of reconciliation correctness.
+This document preserves bounded deterministic context and host-integration design transferred from Demon Docs to the planned **Grimoire Context** sibling tool.
 
 ## Overview
 
-The planned context system would project existing repository facts for a temporary task. It is distinct from codemap inference, which asks whether a permanent authored relationship may be missing.
+The transferred context design projects existing repository facts for a temporary task. It remains distinct from Demon Docs codemap inference, which asks whether a permanent authored relationship may be missing.
 
 ## Current status
 
-Back-burnered planning and research. Host-neutral demon feeder lifecycle exists, but graph-based context resolution and delivery are not implemented product behavior.
+Transferred historical design. Graph-based context discovery and delivery are outside the Demon Docs product boundary and belong to Grimoire Context. The existing host-neutral demon feeder remains lifecycle plumbing only.
 
 ## Expected ownership
 
-A static core should own context requests, deterministic resolution, ordering, bounds, provenance, and truncation reporting. Thin host adapters should translate lifecycle and transport concerns only.
+Grimoire Context owns context requests, deterministic resolution, ordering, bounds, provenance, truncation reporting, and delivery. ArcanaGraph owns the general repository relationship model it may consume. Demon Docs owns only its feeder lifecycle and exportable documentation facts.
 
-This document describes the planned graph-based context retrieval layer and its host integrations. Context assembly is not implemented and follows the back-burnered polyglot code-graph provider contract. The repository demon already exposes a generic operational `agent` feeder, but feeder lifecycle is separate from context delivery.
-
-When implemented, one static core will assemble context from deterministic documentation/link facts plus normalized polyglot code facts. CLI, MCP, native plugins, and editor or agent adapters will remain different delivery surfaces around that core. This is not conventional embedding/vector RAG and does not create a second repository model.
+This document is retained as design provenance. References below to `ddocs context`, `ddocs graph`, a Demon Docs context core, or context delivery through the Demon Docs daemon are superseded and must not be treated as implementation commitments.
 
 ## One Core, Thin Adapters
 
-The same static graph and projection APIs should be exposed through:
+The same context-selection contract may eventually be exposed by Grimoire Context through:
 
-- the Demon Docs CLI;
+- its own explicit CLI or service boundary;
 - MCP for broad interoperability;
 - Hermes;
 - Claude Code;
@@ -112,21 +110,9 @@ The system must never inject ambiguous or oversized context silently. Ambiguous 
 
 Context may refresh after concrete agent activity such as selecting a candidate, changing the current directory, reading or editing a file, changing an active-file set, or changing Git state. Refresh invalidates affected seeds and projections and reassembles from the updated graph inputs. It must not treat an unqualified follow-up as permission to broaden scope indefinitely.
 
-## Illustrative Public Operations
+## Public Operations Boundary
 
-Names and final schemas are open, but the static CLI may expose operations shaped like:
-
-```text
-ddocs context --mode orientation --path docs/INDEX.md --format json
-ddocs context --mode implementation --symbol src/ledger/index.go::Reconcile --budget 12000
-ddocs context --mode change-impact --git-range HEAD~1..HEAD --format json
-ddocs context --mode documentation --concept "reverse index" --candidates
-
-ddocs graph query --path src/ledger --edges references,contains --depth 2
-ddocs graph export --format json
-```
-
-An MCP adapter may expose corresponding tools such as `doc_ledger_context`, `doc_ledger_candidates`, `doc_ledger_graph_query`, and `doc_ledger_status`. These names and request/response schemas are illustrative. The adapter should return the same canonical identities, provenance, ordering, diagnostics, and truncation metadata as the CLI rather than implementing a parallel resolver.
+No `ddocs context` or `ddocs graph` command is planned. Final Grimoire Context CLI, MCP, plugin, and request/response contracts belong in that tool's repository. Any integration should preserve canonical identities, provenance, deterministic ordering, diagnostics, and truncation metadata rather than implementing a competing resolver.
 
 ## Automatic Delivery and Plugin Status
 
@@ -179,7 +165,7 @@ See [Context-Injection Benchmarking](../research/context-injection-benchmarking.
 
 ## Benchmark and Validation Direction
 
-The context system should eventually be tested against authentic historical OSS tasks across independently assessed code-quality and documentation-quality quadrants. Each treatment run should be paired with the same repository snapshot and task without Demon Docs context, while a deliberately constructed repository validates the harness itself.
+Grimoire Context should eventually be tested against authentic historical OSS tasks across independently assessed code-quality and documentation-quality quadrants. Each treatment run should be paired with the same repository snapshot and task without injected context, while a deliberately constructed repository validates the harness itself.
 
 The benchmark is future research rather than a current implementation gate. Corpus preparation, pinned task manifests, deterministic bundle inspection, leakage checks, and harness dry runs can proceed before repeated paid model trials. See [Context-Injection Benchmarking](../research/context-injection-benchmarking.md).
 
@@ -211,13 +197,15 @@ The design is ready for implementation planning when focused fixtures and adapte
 - The minimum common adapter surface versus host-specific hooks for Hermes, Claude Code, Codex, Cursor, Gemini, and other hosts.
 - LLM provider configuration and the provenance format for summaries or proposals derived from deterministic context.
 
-## Implementation sequence
+## Transferred implementation sequence
+
+This sequence now belongs to ArcanaGraph and Grimoire Context rather than the Demon Docs roadmap:
 
 ```text
-stabilize repository/code fact provider contracts
--> define context request/response schema
+stabilize repository relationship contracts in ArcanaGraph
+-> define Grimoire Context request/response schema
 -> implement deterministic bounded selection
--> expose CLI/MCP delivery
+-> expose Grimoire Context delivery surfaces
 -> add thin host adapters
 -> evaluate with paired historical tasks
 ```
@@ -226,7 +214,7 @@ stabilize repository/code fact provider contracts
 
 - [Planning](INDEX.md)
 - [Roadmap](roadmap.md)
-- [Planned Code Intelligence](code-intelligence/INDEX.md)
+- [Transferred Code-Intelligence Design](code-intelligence/INDEX.md)
 - [Context-Injection Benchmarking](../research/context-injection-benchmarking.md)
 - [Repository Demon](../operations/repository-demon.md)
 

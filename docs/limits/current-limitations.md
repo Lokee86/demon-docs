@@ -110,16 +110,16 @@ Removal condition:
 
 A separately scoped, opt-in network checker is implemented without entering deterministic path-repair ownership.
 
-## Reverse indexes are file and folder level
+## Reverse indexes deliberately remain file and folder level
 
-Current reverse indexes project authored targets onto files and folders. They do not resolve authored declaration identities or produce symbol-level backlinks.
+Current reverse indexes project authored targets onto files and folders. General declaration identity and symbol-level repository projections are owned by ArcanaGraph rather than treated as unfinished Demon Docs behavior.
 
 Impact:
 
-- overloaded files cannot identify one declaration as the documented target;
-- rename-aware symbol repair is unavailable;
+- Demon Docs codemaps cannot identify one declaration inside an overloaded file as their managed target;
+- rename-aware symbol repair is unavailable inside Demon Docs;
 - dependency and call relationships are not part of reverse coverage; and
-- generated output should not be described as a code graph.
+- generated reverse indexes must not be described as a repository code graph.
 
 Workaround:
 
@@ -128,11 +128,11 @@ Target the narrowest current file or folder and use prose to name the declaratio
 Owning docs:
 
 - [Reverse Index Architecture](../architecture/reverse-indexes.md)
-- [Planned Code Intelligence](../planning/code-intelligence/INDEX.md)
+- [Transferred Code-Intelligence Design](../planning/code-intelligence/INDEX.md)
 
-Removal condition:
+Boundary:
 
-The language-neutral provider seam, symbol identity contract, authored syntax, resolution diagnostics, tests, and projections are implemented.
+This is not scheduled for removal inside Demon Docs. [ArcanaGraph](https://github.com/Lokee86/arcana-graph) owns language-independent repository relationships and symbol-level projections. Demon Docs may later exchange explicit facts with it without adopting the graph implementation.
 
 ## Codemap generation quality is corpus-dependent
 
@@ -161,29 +161,30 @@ Removal condition:
 
 This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, repository-specific evaluation, and improved evidence providers.
 
-## Agent context delivery is not implemented
+## Agent context delivery is outside Demon Docs
 
-The repository demon exposes lifecycle feeders for agents, but it does not currently build or deliver deterministic task-context bundles.
+The repository demon exposes lifecycle feeders for agents, but it does not build or deliver task-context bundles. Context discovery, selection, packaging, and delivery are owned by the planned **Grimoire Context** sibling tool.
 
 Impact:
 
-- an active `agent` feeder only keeps watcher automation alive;
+- an active `agent` feeder only keeps Demon Docs watcher automation alive;
 - host adapters receive no context payload from the demon;
-- there is no current CLI/MCP context request contract; and
-- codemap suggestions must not be conflated with temporary task context.
+- Demon Docs has no context request or delivery command contract; and
+- codemap suggestions remain permanent documentation-link candidates, not temporary task context.
 
-Workaround:
+Operational guidance:
 
-Use the feeder protocol only for lifecycle integration and rely on existing host tooling for context until the planned static context core exists.
+Use the feeder protocol only for lifecycle integration. Context-producing hosts or sibling tools should use an explicit integration contract rather than extending the Demon Docs daemon into a context service.
 
 Owning docs:
 
 - [Host Adapter Feeder Integration](../operations/host-adapters.md)
-- [Deterministic Agent Context and Integrations](../planning/agent-context-and-integrations.md)
+- [Transferred Agent-Context Design](../planning/agent-context-and-integrations.md)
+- [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain)
 
-Removal condition:
+Boundary:
 
-A deterministic bounded context core, request/response schema, delivery adapters, provenance, truncation reporting, and evaluation are implemented.
+This is not a missing Demon Docs feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
 
 ## Machine-readable health output is not a stable public contract
 

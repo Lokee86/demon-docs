@@ -28,9 +28,11 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Broader diagnostics remain incomplete.
-- Polyglot code intelligence remains planned.
-- Deterministic agent-context integration remains planned.
+- Broader Demon Docs diagnostics remain incomplete.
+- Link and index watcher reconciliation still has broader-than-ideal scope.
+- Markdown heading-fragment validation and stable machine-readable diagnostics remain unimplemented.
+
+Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 
 Use [Current Limitations](../limits/current-limitations.md) and [Roadmap](../planning/roadmap.md) for canonical status.
 

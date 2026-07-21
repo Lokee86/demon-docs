@@ -4,31 +4,29 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-74a7-917f-aa3b6e202737
 document_type: general
 policy_exempt: false
-summary: This document plans normalized dependency facts, bounded neighborhoods, impact projections, and entanglement indicators supplied through the future polyglot provider seam.
+summary: Historical dependency, impact, and entanglement design transferred from Demon Docs to ArcanaGraph.
 ---
 # Deterministic Code, Dependency, and Entanglement Facts
 
-Parent index: [Planned Code Intelligence](./INDEX.md)
+Parent index: [Transferred Code-Intelligence Design](./INDEX.md)
 
 ## Purpose
 
-This document plans normalized dependency facts, bounded neighborhoods, impact projections, and entanglement indicators supplied through the future polyglot provider seam.
+This document preserves normalized dependency, bounded-neighborhood, impact, and entanglement design transferred to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Overview
 
-The planned system would expose observed dependency and relationship facts without claiming that graph density alone proves architectural quality or semantic ownership.
+The transferred design exposes observed dependency and relationship facts without claiming that graph density alone proves architectural quality or semantic ownership.
 
 ## Current status
 
-Back-burnered architecture plan. Existing codemap corpus adapters collect bounded repository evidence, but there is no general product code-dependency graph or impact-report contract.
+Transferred historical design. Existing Demon Docs codemap corpus adapters collect bounded evidence for codemap ranking, but general dependency graphs and impact projections are ArcanaGraph responsibilities.
 
 ## Expected ownership
 
-Language adapters should provide normalized observed facts and capability metadata. Core projections should own deterministic ordering, bounds, unresolved states, and report composition.
+ArcanaGraph owns normalized observed facts, capability metadata, deterministic graph projections, bounds, unresolved states, and report composition.
 
-This document describes the back-burnered polyglot code-graph track: bounded code and dependency facts plus projections over those facts. It is optional analysis layered beside the existing documentation/link graph. It is not required for current documentation-folder reconciliation, link repair, codemap extraction, or the initial file/folder reverse-index implementation.
-
-The adapter seam comes before any language implementation. Demon Docs normalizes deterministic facts from existing parsers, compiler tooling, SCIP-style indexes, language servers, or external code-intelligence providers instead of rebuilding those systems inside the project.
+This document is retained as design provenance. References below to a future Demon Docs code graph are superseded. Demon Docs does not require these capabilities for documentation-folder reconciliation, link repair, codemap extraction, or file/folder reverse indexes.
 
 ## Scope and Deterministic Basis
 

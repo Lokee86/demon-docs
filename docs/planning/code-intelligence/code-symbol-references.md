@@ -4,31 +4,29 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-71b2-a949-b6557ef7de3c
 document_type: general
 policy_exempt: false
-summary: This document plans declaration-level code-symbol references, provider resolution states, graph edges, user-facing syntax direction, and move/rename behavior.
+summary: Historical declaration-reference and symbol-resolution design transferred from Demon Docs to ArcanaGraph.
 ---
 # Code-Symbol References
 
-Parent index: [Planned Code Intelligence](./INDEX.md)
+Parent index: [Transferred Code-Intelligence Design](./INDEX.md)
 
 ## Purpose
 
-This document plans declaration-level code-symbol references, provider resolution states, graph edges, user-facing syntax direction, and move/rename behavior.
+This document preserves declaration-reference, provider-resolution, and symbol-identity design transferred to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Overview
 
-Symbol references would let documentation identify code declarations more precisely than file or folder paths while preserving deterministic unresolved and ambiguous states.
+The transferred design allows documentation systems to identify code declarations more precisely than file or folder paths while preserving deterministic unresolved and ambiguous states.
 
 ## Current status
 
-Back-burnered architecture plan. Current reverse indexes and codemap evidence operate at existing file/folder and extracted-symbol evidence boundaries; authored declaration references are not yet a supported product contract.
+Transferred historical design. Demon Docs reverse indexes and authored codemap targets remain file/folder based; general symbol identity and declaration-reference contracts belong to ArcanaGraph.
 
 ## Expected ownership
 
-The normalized provider seam should own declaration identities and resolution. Markdown syntax and generated projections should consume those facts without becoming language-specific parsers.
+ArcanaGraph owns declaration identities, provider resolution, and symbol-level relationship facts. Documentation tools may consume explicit versioned facts without becoming language-specific parsers.
 
-This document defines the planned deterministic references from authored documentation to specific declarations in source code. Symbol references are not implemented and belong to the back-burnered polyglot code-graph track. They extend file- and path-level references without replacing them.
-
-The language-neutral provider seam must be implemented before any production language adapter. Symbol facts will feed the projections described in [Code-Folder Reverse Indexes](../../architecture/reverse-indexes.md) and the broader [Code, Dependency, and Entanglement Facts](./code-dependency-and-entanglement.md) work.
+This document is retained as design provenance. References below to implementing symbol identities or declaration-level graph projections inside Demon Docs are superseded. Demon Docs continues to own explicit Markdown and file/folder codemap behavior.
 
 ## Goals
 

@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7366-a679-359c693253d2
 document_type: general
 policy_exempt: false
-summary: This document summarizes shipped product areas, active work, near-term hardening, back-burnered architecture, and later product tracks without acting as the canonical reference for implemented behavior.
+summary: This document summarizes shipped Demon Docs product areas, active work, and near-term documentation-engine hardening without claiming ownership of adjacent Warlock tools.
 ---
 # Demon Docs Roadmap
 
@@ -12,7 +12,7 @@ Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
-This document summarizes shipped product areas, active work, near-term hardening, back-burnered architecture, and later product tracks without acting as the canonical reference for implemented behavior.
+This document summarizes shipped Demon Docs product areas, active work, and near-term documentation-engine hardening without acting as the canonical reference for implemented behavior.
 
 ## Overview
 
@@ -20,13 +20,13 @@ The roadmap is a sequencing and status document. Current product summaries link 
 
 ## Current status
 
-Active roadmap. Version 0.3.5 includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, document-format schemas, reverse-index health, explicit production codemap execution with schema-governed missing-section creation, independent validation cache identities, generated-rewrite cache refresh, and path-scoped watcher validation for ordinary Markdown edits. Polyglot code intelligence and context delivery remain back-burnered or later work.
+Active roadmap. Version 0.3.5 includes stateless refactoring, orphan health checks, the review ledger, strict frontmatter policy, document-format schemas, reverse-index health, explicit production codemap execution with schema-governed missing-section creation, independent validation cache identities, generated-rewrite cache refresh, and path-scoped watcher validation for ordinary Markdown edits. Polyglot repository intelligence and task-context delivery are no longer Demon Docs roadmap items; they are owned by sibling Warlock tools.
 
 ## Ownership boundary
 
-This roadmap owns project sequencing and status summaries. It does not own exact CLI contracts, current implementation mechanics, benchmark methodology, or operational recovery procedures.
+This roadmap owns Demon Docs sequencing and status summaries. It does not own exact CLI contracts, current implementation mechanics, benchmark methodology, operational recovery procedures, or the roadmaps of adjacent Warlock components.
 
-This roadmap describes the current product state and the next implementation tracks. It separates shipped behavior, active tuning work, bounded near-term work, and larger back-burnered architecture so planned work is not mistaken for released functionality.
+Demon Docs owns deterministic documentation maintenance: Markdown links, indexes, schemas, frontmatter and document-format policy, authored codemaps, file/folder reverse indexes, review history, and watcher automation. [ArcanaGraph](https://github.com/Lokee86/arcana-graph) owns the language-independent repository relationship graph. **Grimoire Context** owns repository context discovery, selection, packaging, and delivery. The [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain) owns shared terminology, integration direction, and cross-tool contracts.
 
 ## Current Product: Implemented in the Current Branch
 
@@ -84,7 +84,7 @@ See [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.
 - `check`, `fix`, and `watch` support `-r` / `--reverse` independently or alongside documentation indexes and links.
 - Missing codemap sections, empty matching sections, unresolved targets, and coverage gaps remain explicit diagnostics.
 - Folder inventory and per-folder reverse-index reconciliation use bounded preparation workers, deterministic path-indexed results, and serial write application.
-- Symbol-level projection, move-aware authored-reference repair, and richer coverage reports remain later work.
+- Richer file/folder coverage reports and move-aware authored-reference repair remain possible Demon Docs hardening. General symbol identity and symbol-level repository projections belong to ArcanaGraph.
 
 See [Code-Folder Reverse Indexes](../architecture/reverse-indexes.md).
 
@@ -148,11 +148,11 @@ Near-term goals are:
 
 ### Daemon host adapters
 
-The generic `agent` feeder protocol is implemented inside Demon Docs. Thin MCP, Codex, Hermes, or other host adapters still need to register before a job and unregister on success, failure, cancellation, timeout, and spawn failure. These adapters are lifecycle plumbing only; they do not require the future code graph or context builder.
+The generic `agent` feeder protocol is implemented inside Demon Docs. Thin MCP, Codex, Hermes, or other host adapters may register before a job and unregister on success, failure, cancellation, timeout, and spawn failure. These adapters are lifecycle plumbing only; they do not assemble or deliver task context.
 
 ## Near-Term Hardening
 
-The following work is independent of the larger code-graph track:
+The following work remains inside the Demon Docs documentation-maintenance boundary:
 
 ### Remaining validation and link-scan performance opportunities
 
@@ -168,45 +168,19 @@ The following work is independent of the larger code-graph track:
 - stress review-ledger history, undo depth, and concurrent append behavior on larger repositories; and
 - keep CLI help, README examples, and focused design documents synchronized with shipped behavior.
 
-## Back-Burnered Major Track: Polyglot Code Graph
+## Warlock Toolchain Boundaries
 
-The planned code graph is larger than a single short implementation stream and is intentionally not the immediate critical path.
+Several larger ideas originally explored in this repository now have separate product owners:
 
-The important architectural decisions are:
+- [ArcanaGraph](https://github.com/Lokee86/arcana-graph) owns normalized repository relationships, polyglot code facts, symbol identities and references, dependency and impact projections, and graph queries.
+- **Grimoire Context** owns bounded task-context discovery, selection, packaging, provenance, truncation, and delivery to agents or other hosts.
+- The [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain) owns shared integration contracts and cross-tool direction.
 
-- the existing Markdown/link graph remains the link-reconciliation model;
-- the future code graph exists to add definitions, references, calls, imports, implementations, containment, and other bounded code relationships;
-- the code graph must be polyglot at the adapter boundary from its first implementation step;
-- Demon Docs should normalize facts from existing parsers, compiler tooling, SCIP-style indexes, or external code-intelligence providers rather than rebuilding every language analyzer; and
-- graph-derived evidence may improve the codemap algorithm and later context selection, but inferred suggestions do not become authored graph truth.
-
-The first implementation step, when this track resumes, is the language-neutral provider and normalized fact contract. A Go-only graph embedded directly into the core is not an acceptable architectural starting point.
-
-See [Deterministic Typed Repository Graph](./code-intelligence/repository-graph.md), [Code-Symbol References](./code-intelligence/code-symbol-references.md), and [Code, Dependency, and Entanglement Facts](./code-intelligence/code-dependency-and-entanglement.md).
-
-## Later Track: Context Bundles and Agent Integrations
-
-Bounded deterministic context remains planned, but it follows a stable repository/code evidence contract. The same graph and explicit repository facts may support two separate consumers:
-
-- codemap inference, which asks what permanent authored links may be missing; and
-- context projection, which asks what existing information should be shown for a temporary task.
-
-Those scoring paths must remain distinct. A useful context item is not automatically a valid permanent codemap link.
-
-Later work includes:
-
-- deterministic context-request and response contracts;
-- bounded ordering and token or byte budgets;
-- provenance and truncation reporting;
-- CLI and MCP delivery;
-- thin Codex, Hermes, Claude Code, and other host adapters; and
-- paired historical-task benchmarking with leakage controls.
-
-See [Deterministic Agent Context and Integrations](./agent-context-and-integrations.md) and [Context-Injection Benchmarking](../research/context-injection-benchmarking.md).
+Demon Docs may export deterministic documentation facts or consume explicitly versioned facts from sibling tools, but it does not absorb their implementation responsibilities. The retained [code-intelligence](./code-intelligence/INDEX.md), [agent-context](./agent-context-and-integrations.md), and [context-benchmark](../research/context-injection-benchmarking.md) documents are historical design inputs transferred to those sibling tools, not active Demon Docs roadmap commitments.
 
 ## Optional LLM Assistance
 
-Optional LLM assistance may eventually propose documentation changes from deterministic diffs, codemap evidence, and graph facts. It remains outside correctness and cannot be required for indexing, link repair, codemap extraction, graph construction, validation, or context delivery.
+Optional LLM assistance may eventually propose documentation changes from deterministic diffs and codemap evidence. It remains outside correctness and cannot be required for indexing, link repair, codemap extraction, validation, or any other Demon Docs operation.
 
 ## Principles
 
@@ -214,10 +188,10 @@ Optional LLM assistance may eventually propose documentation changes from determ
 - **Managed ownership is explicit:** generated indexes, reverse indexes, and adopted codemap sections own only their declared managed surfaces.
 - **Missing-link generation remains one-directional:** it does not label an existing link irrelevant; confidence pruning is a separate opt-in execution policy disabled by default.
 - **Remember declines:** unchanged declined additions remain suppressed; materially changed evidence may be reconsidered.
-- **Polyglot seams before language implementations:** future code-intelligence providers normalize into one contract rather than becoming core-specific special cases.
-- **Reuse existing analysis:** Demon Docs should not rebuild a general parser, compiler, call-graph platform, or graph database when an adapter can consume an existing deterministic source.
-- **Static core remains authoritative:** watchers, daemons, MCP, and plugins automate or expose the same rebuildable core.
-- **Thin integrations:** hosts translate lifecycle and request/response concerns without creating competing repository models.
+- **Tool boundaries remain explicit:** documentation maintenance stays in Demon Docs; repository graph intelligence and context delivery stay in their sibling tools.
+- **Exchange facts through contracts:** integrations should use versioned, attributable data rather than duplicating another tool's internal model.
+- **Static core remains authoritative:** watchers, daemons, and host adapters automate or expose the same rebuildable Demon Docs core.
+- **Thin lifecycle integrations:** host adapters may maintain feeder state without becoming context engines or competing repository models.
 - **No semantic prose generation in core:** deterministic behavior maintains structure, paths, references, evidence, and bounded projections.
 
 ## Explicit Non-Goals
@@ -249,7 +223,7 @@ Optional LLM assistance may eventually propose documentation changes from determ
 
 ## Implementation sequence
 
-Near-term work should prioritize bounded document-engine capabilities, reviewable suggestion decisions, diagnostics, and hardening that do not depend on the future polyglot graph. The provider seam is the first step when code-intelligence work resumes.
+Near-term work should prioritize bounded document-engine capabilities, reviewable suggestion decisions, diagnostics, performance, and operational hardening. Repository-graph and context-delivery implementation belongs in ArcanaGraph and Grimoire Context rather than this sequence.
 
 ## Related docs
 
@@ -261,8 +235,8 @@ Near-term work should prioritize bounded document-engine capabilities, reviewabl
 - [Codemap Managed Execution](../architecture/codemap-managed-execution.md)
 - [Managing Codemaps](../guides/managing-codemaps.md)
 - [Current Product Limitations](../limits/current-limitations.md)
-- [Planned Code Intelligence](code-intelligence/INDEX.md)
-- [Planned Agent Context and Integrations](agent-context-and-integrations.md)
+- [Transferred Code-Intelligence Design](code-intelligence/INDEX.md)
+- [Transferred Agent-Context Design](agent-context-and-integrations.md)
 
 ## Notes
 

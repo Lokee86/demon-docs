@@ -4,27 +4,27 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-71be-844f-43c55077f6ee
 document_type: general
 policy_exempt: false
-summary: Future, unresolved, proposed, partially implemented, or back-burnered work. Planning pages are not canonical references for shipped behavior.
+summary: Active Demon Docs planning plus retained design records whose implementation ownership has moved to sibling Warlock tools.
 ---
 # Planning
 
 Parent index: [Demon Docs Documentation](../INDEX.md)
 
-Future, unresolved, proposed, partially implemented, or back-burnered work. Planning pages are not canonical references for shipped behavior.
+Active Demon Docs planning plus retained design records whose implementation ownership has moved to sibling Warlock tools. Planning pages are not canonical references for shipped behavior.
 
 ## Direct Files
 
 <!-- doc-ledger:files:start -->
 
-- [agent-context-and-integrations.md](agent-context-and-integrations.md) - Planned deterministic context bundles, host integrations, security boundaries, and evaluation direction.
-- [roadmap.md](roadmap.md) - Current product summary, active work, near-term hardening, and later tracks.
+- [agent-context-and-integrations.md](agent-context-and-integrations.md) - Historical context-delivery design transferred to Grimoire Context.
+- [roadmap.md](roadmap.md) - Current Demon Docs product summary, active work, hardening, and toolchain boundaries.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders
 
 <!-- doc-ledger:folders:start -->
 
-- [Code Intelligence](code-intelligence/INDEX.md) - Back-burnered polyglot provider, graph, dependency, and symbol-reference architecture.
+- [Code Intelligence](code-intelligence/INDEX.md) - Historical repository-graph and symbol-intelligence design transferred to ArcanaGraph.
 <!-- doc-ledger:folders:end -->
 
 ## Stub Files
@@ -34,4 +34,4 @@ Future, unresolved, proposed, partially implemented, or back-burnered work. Plan
 
 ## Notes
 
-When planned work ships, current facts move into guides, reference, architecture, operations, or development docs. Plans retain only status, unresolved decisions, sequencing, and implemented references.
+When Demon Docs work ships, current facts move into guides, reference, architecture, operations, or development docs. Transferred design records remain only to preserve provenance and must not be interpreted as Demon Docs implementation commitments.

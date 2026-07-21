@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7e4a-a048-7d24a81a2014
 document_type: general
 policy_exempt: false
-summary: This document defines the historical-task research design for evaluating deterministic context injection against no-context controls without benchmark leakage.
+summary: Historical context-injection benchmark design transferred from Demon Docs to the planned Grimoire Context tool.
 ---
 # Context-Injection Benchmarking
 
@@ -12,15 +12,15 @@ Parent index: [Research](./INDEX.md)
 
 ## Purpose
 
-This document defines the historical-task research design for evaluating deterministic context injection against no-context controls without benchmark leakage.
+This document preserves the historical-task research design for evaluating deterministic context injection against no-context controls without benchmark leakage. Ownership has transferred to the planned **Grimoire Context** sibling tool.
 
 ## Overview
 
-Demon Docs eventually needs evidence that deterministic context bundles improve real agent work. Context delivery is not implemented, but corpus preparation is underway: discovery artifacts, three pinned historical task fixtures, validation manifests, and fixture-preparation tools are retained in the repository. Paid or large-scale paired model trials remain deferred.
+Grimoire Context will need evidence that deterministic context bundles improve real agent work. Context delivery is outside Demon Docs, but historical corpus preparation artifacts, three pinned task fixtures, validation manifests, and fixture-preparation tools remain here as transferred research provenance. Paid or large-scale paired model trials remain deferred.
 
 ## Research status
 
-Active research design with retained discovery artifacts and validated historical-task fixtures. It does not describe a shipped context-delivery product.
+Transferred research design with retained discovery artifacts and validated historical-task fixtures. It does not describe shipped or planned Demon Docs behavior.
 
 ## Benchmark framing
 
@@ -30,7 +30,7 @@ The benchmark asks whether bounded deterministic repository context improves tas
 
 The primary question is:
 
-> Does Demon Docs context reduce repository discovery work and improve implementation correctness without adding harmful noise?
+> Does bounded Grimoire Context output reduce repository discovery work and improve implementation correctness without adding harmful noise?
 
 The benchmark must distinguish context quality from model quality, repository familiarity, task difficulty, and documentation quality.
 
@@ -41,13 +41,13 @@ Repository selection should cover a two-axis matrix rather than ranking projects
 | Code quality | Documentation quality | Intended test |
 |---|---|---|
 | Good | Good | Detect unnecessary or noisy context when the repository already communicates itself well. |
-| Good | Poor | Test whether Demon Docs reconstructs missing architectural and ownership context. |
+| Good | Poor | Test whether Grimoire Context reconstructs missing architectural and ownership context. |
 | Poor | Good | Test whether accurate documentation helps an agent navigate tangled or inconsistent implementation. |
 | Poor | Poor | Stress-test discovery, prioritization, ambiguity handling, and incomplete repository knowledge. |
 
 A fifth repository or task set should act as a **harness control fixture**. It may be a small intentionally constructed repository where the expected graph, selected context, and implementation surface are exactly known. This validates workspace reset, graph construction, context delivery, leakage prevention, logging, and scoring; it does not replace authentic OSS repositories.
 
-The harness control is distinct from the **experimental control condition**. For every authentic task, the experimental control is the same repository snapshot, task, model, prompt, tools, and limits with no Demon Docs context. The treatment differs only by receiving the deterministic context bundle.
+The harness control is distinct from the **experimental control condition**. For every authentic task, the experimental control is the same repository snapshot, task, model, prompt, tools, and limits with no injected Grimoire Context output. The treatment differs only by receiving the deterministic context bundle.
 
 Stars are metadata only. They may help identify repositories with enough issue and pull-request history, but they are not evidence of code quality and must not affect quadrant assignment.
 
@@ -106,12 +106,12 @@ The accepted upstream implementation is evidence, not necessarily the only valid
 
 At minimum, each task should be attempted under two matched conditions:
 
-1. **Control:** repository and task only, with no Demon Docs context bundle.
-2. **Treatment:** the same repository snapshot, task, model, prompt, limits, and tools, with Demon Docs context injected.
+1. **Control:** repository and task only, with no injected Grimoire Context bundle.
+2. **Treatment:** the same repository snapshot, task, model, prompt, limits, and tools, with the deterministic Grimoire Context bundle injected.
 
-A later third condition may compare Demon Docs with ordinary repository search or a generic retrieval system:
+A later third condition may compare Grimoire Context with ordinary repository search or a generic retrieval system:
 
-3. **Naive retrieval:** repository search or generic RAG without Demon Docs deterministic graph assembly.
+3. **Naive retrieval:** repository search or generic RAG without deterministic ArcanaGraph-backed context assembly.
 
 Runs must not share conversational memory or prior task discoveries. Model, version, temperature or equivalent sampling controls, prompt, token budget, tool access, timeout, and verification commands should remain fixed within a comparison.
 

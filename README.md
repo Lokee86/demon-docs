@@ -1,6 +1,15 @@
 # Demon Docs
 
+[![CI](https://github.com/Lokee86/demon-docs/actions/workflows/ci.yml/badge.svg)](https://github.com/Lokee86/demon-docs/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Lokee86/demon-docs)](https://github.com/Lokee86/demon-docs/releases/latest)
+[![Go](https://img.shields.io/github/go-mod/go-version/Lokee86/demon-docs)](go.mod)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 Demon Docs is a deterministic documentation maintenance engine for repository-owned Markdown.
+
+[**Watch the Demon Docs demo on YouTube**](https://www.youtube.com/watch?v=bvfZl25QhnY)
+
+[![Demon Docs demonstration](https://img.youtube.com/vi/bvfZl25QhnY/maxresdefault.jpg)](https://www.youtube.com/watch?v=bvfZl25QhnY)
 
 It maintains folder indexes, validates and repairs local links, reports orphan documents, supports explicit link-aware moves, manages configured codemap sections, projects codemap references back onto code folders, and records reviewable repairs while limiting ownership to explicit managed surfaces.
 
@@ -10,6 +19,8 @@ Configured repositories can also enforce frontmatter fields and document-body st
 
 Demon Docs is the first available component of the [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain), a repository intelligence and governance toolchain for preserving repository knowledge, making working context portable, and enforcing durable boundaries for humans and software agents.
 
+Demon Docs owns documentation integrity and maintenance. [ArcanaGraph](https://github.com/Lokee86/arcana-graph) owns language-independent repository relationships and code intelligence. The planned **Grimoire Context** tool owns context discovery, selection, packaging, and delivery. These are composable sibling tools, not unfinished Demon Docs feature areas.
+
 **Preserve the lore. Bind the doctrine. Enforce the wards.**
 
 ## Current release
@@ -18,10 +29,12 @@ Version `0.3.5` adds path-scoped watcher validation for ordinary Markdown edits,
 
 ## Hackathon judge quick path
 
-- Review the [hackathon scope, prior-work boundary, and AI engineering process](HACKATHON.md).
-- Install the [latest prebuilt release](https://github.com/Lokee86/demon-docs/releases/latest), or build from source below.
-- Run the [adoption walkthrough](tutorial/adoption-demo/README.md) against its disposable fixture.
-- Review the [current limitations](#current-limitations) and verify the repository with `go test ./... -count=1` and `go run ./cmd/ddocs check`.
+1. **[Watch the demo](https://www.youtube.com/watch?v=bvfZl25QhnY)** to see link repair, managed documentation maintenance, and the repository workflow in action.
+2. **[Download the latest prebuilt release](https://github.com/Lokee86/demon-docs/releases/latest)** for Windows or Linux; no Go installation is required.
+3. **[Run the adoption walkthrough](tutorial/adoption-demo/README.md)** against its disposable fixture.
+4. **Inspect the implementation:** [architecture](docs/architecture/INDEX.md), [hackathon scope and AI engineering process](HACKATHON.md), and [current limitations](docs/limits/current-limitations.md).
+
+For source verification, run `go test ./... -count=1` and `go run ./cmd/ddocs check`.
 
 ## Core behavior
 
@@ -374,7 +387,7 @@ See [Testing and Fixtures](docs/development/testing-and-fixtures.md) and [Reposi
 
 ## Project status
 
-Repository indexing, frontmatter enforcement, document-body format enforcement, schema-based creation, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, schema-aware codemap execution with schema-driven missing-section placement, and codemap research tooling are implemented. Broader diagnostics, polyglot code intelligence, and deterministic agent context remain incomplete or planned.
+Repository indexing, frontmatter enforcement, document-body format enforcement, schema-based creation, local-link reconciliation, orphan health checks, stateless moves, reverse indexes, suggestion decisions, applied-change history, watcher/demon lifecycle, schema-aware codemap execution with schema-driven missing-section placement, and codemap research tooling are implemented. Remaining Demon Docs work is documentation-engine hardening: diagnostics, performance, watcher scope, link and anchor validation, reverse-index reporting, and review-history resilience. Polyglot repository intelligence and deterministic task-context delivery belong to ArcanaGraph and Grimoire Context.
 
 See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 

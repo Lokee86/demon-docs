@@ -1,4 +1,4 @@
-# Demon Docs Context-Injection Benchmark Shortlist
+# Grimoire Context Benchmark Shortlist
 
 Generated: 2026-07-19T00:06:30.616005+00:00
 
