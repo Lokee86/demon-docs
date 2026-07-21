@@ -44,7 +44,8 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		return plan, fmt.Errorf("open validation cache: %w", err)
 	}
 	cache.Retain(relativeValidationPaths(repoRoot, files))
-	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache)
+	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
+	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache, schemaHasher)
 	if err != nil {
 		return plan, err
 	}
@@ -59,10 +60,13 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		if source.cacheHit {
 			plan.cacheHits++
 			if repair && len(source.cacheEntry.ImmutableValues) > 0 {
-				plan.immutable[relative] = cloneValues(source.cacheEntry.ImmutableValues)
-				cacheEntry := source.cacheEntry
-				cacheEntry.ImmutableSnapshotHash = validationcache.Hash(cacheEntry.ImmutableValues)
-				cache.Merge(cacheEntry)
+				current := immutable.values(relative, map[string]any{"document_id": source.cacheEntry.DocumentID}, true)
+				if validationcache.Hash(current) != validationcache.Hash(source.cacheEntry.ImmutableValues) {
+					plan.immutable[relative] = cloneValues(source.cacheEntry.ImmutableValues)
+					cacheEntry := source.cacheEntry
+					cacheEntry.ImmutableSnapshotHash = validationcache.Hash(cacheEntry.ImmutableValues)
+					cache.Merge(cacheEntry)
+				}
 			}
 			if id := sourceDocumentID(source); id != "" {
 				ids[id] = append(ids[id], relative)
@@ -137,7 +141,7 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 				ContentSHA256:         source.contentHash,
 				EngineVersion:         validationcache.EngineVersion,
 				FrontmatterPolicyHash: validationcache.FrontmatterPolicyHash(cfg),
-				EffectiveSchemaHash:   selectedSchemaHash(repoRoot, relative, parsed.Values, cfg),
+				EffectiveSchemaHash:   selectedSchemaHash(schemaHasher, relative, parsed.Values, cfg),
 				ImmutableSnapshotHash: validationcache.Hash(immutableSnapshot),
 				DocumentID:            documentID(outcome.Values),
 				DocumentType:          stringValue(outcome.Values["document_type"]),
@@ -322,8 +326,8 @@ func selectedSchemaName(relative string, values map[string]any, cfg config.Confi
 	return name
 }
 
-func selectedSchemaHash(repoRoot, relative string, values map[string]any, cfg config.Config) string {
-	return validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, selectedSchemaName(relative, values, cfg), documentID(values))
+func selectedSchemaHash(schemaHasher *validationcache.SchemaHasher, relative string, values map[string]any, cfg config.Config) string {
+	return schemaHasher.Effective(selectedSchemaName(relative, values, cfg), documentID(values))
 }
 
 func relativeValidationPaths(repoRoot string, files []string) []string {

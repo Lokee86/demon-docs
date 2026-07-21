@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
@@ -44,6 +45,29 @@ type Store struct {
 	entries    map[string]Entry
 	dirty      map[string]Entry
 	deleted    map[string]bool
+}
+
+type SchemaHasher struct {
+	repoRoot string
+	format   config.Format
+	hashes   map[string]string
+}
+
+func NewSchemaHasher(repoRoot string, format config.Format) *SchemaHasher {
+	return &SchemaHasher{repoRoot: repoRoot, format: format, hashes: map[string]string{}}
+}
+
+func (h *SchemaHasher) Effective(schemaName, documentID string) string {
+	if h == nil {
+		return ""
+	}
+	key := strings.TrimSpace(schemaName) + "\x00" + strings.TrimSpace(documentID)
+	if hash, ok := h.hashes[key]; ok {
+		return hash
+	}
+	hash := effectiveSchemaHash(h.repoRoot, h.format, schemaName, documentID)
+	h.hashes[key] = hash
+	return hash
 }
 
 func Open(repoRoot string) (*Store, error) {
@@ -115,7 +139,8 @@ func (s *Store) Merge(entry Entry) {
 	}
 	entry.SchemaVersion = schemaVersion
 	entry.Path = NormalizePath(entry.Path)
-	if previous, ok := s.entries[entry.Path]; ok && sameIdentity(previous, entry) {
+	previous, exists := s.entries[entry.Path]
+	if exists && sameIdentity(previous, entry) {
 		entry.FrontmatterClean = entry.FrontmatterClean || previous.FrontmatterClean
 		entry.FormatClean = entry.FormatClean || previous.FormatClean
 		if entry.DocumentID == "" {
@@ -132,6 +157,10 @@ func (s *Store) Merge(entry Entry) {
 		}
 	}
 	s.entries[entry.Path] = entry
+	if exists && reflect.DeepEqual(previous, entry) {
+		delete(s.dirty, entry.Path)
+		return
+	}
 	s.dirty[entry.Path] = entry
 }
 
@@ -229,6 +258,10 @@ func NormalizePath(path string) string {
 // schema sources. Missing shared sources are built-in engine inputs and are
 // invalidated by EngineVersion; missing local sources are explicit selections.
 func EffectiveSchemaHash(repoRoot string, format config.Format, schemaName, documentID string) string {
+	return effectiveSchemaHash(repoRoot, format, schemaName, documentID)
+}
+
+func effectiveSchemaHash(repoRoot string, format config.Format, schemaName, documentID string) string {
 	if !format.Enabled || strings.TrimSpace(schemaName) == "" {
 		return Hash("format-disabled")
 	}

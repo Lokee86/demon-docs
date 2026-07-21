@@ -29,7 +29,7 @@ The selected schema identity is retained in the record so an unchanged document 
 
 ## Clean-only reuse
 
-Only a document with no diagnostics and no pending repair is recorded as clean. A cache hit restores no authored output; it contributes the same empty diagnostic result and skips document parsing and evaluation. Format schema loading and private-state bookkeeping still occur where needed for history publication.
+Only a document with no diagnostics and no pending repair is recorded as clean. A cache hit restores no authored output; it contributes the same empty diagnostic result and skips document parsing and evaluation. Within one validation pass, selected schema-source hashes, shared schemas, and schema history are memoized and reused across documents selecting the same inputs. A later pass creates a fresh snapshot and therefore observes schema-file changes.
 
 Frontmatter cache candidates retain the document ID and immutable values needed to preserve duplicate-ID detection and immutable publication. If duplicate IDs are present, all affected candidates are reparsed before evaluation. A fix can also publish immutable values retained by a clean check cache hit.
 
@@ -39,7 +39,7 @@ YAML and TOML behavior, diagnostic ordering, and deterministic repair ordering a
 
 `check` may update cache records only when the repository already has an initialized `.ddocs` private object store; standalone checks do not initialize one merely to persist cache data. It never writes authored Markdown or schema files. `fix` writes the same cache records in addition to its existing guarded authored-file and immutable-state publication. Cache records use the existing `ddrepo` transaction and do not create commits on the user's normal Git branch.
 
-Each validation pass also removes cache records whose normalized paths are no longer in the active Markdown scope. A rename or deletion therefore does not leave permanently reachable stale records.
+Each validation pass also removes cache records whose normalized paths are no longer in the active Markdown scope. A rename or deletion therefore does not leave permanently reachable stale records. Re-merging an identical cache entry does not publish a private-state transaction, and a repeated clean frontmatter fix does not republish immutable values that already match durable state.
 
 ## Related docs
 

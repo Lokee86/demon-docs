@@ -25,6 +25,12 @@ type Diagnostic struct {
 	Warning  bool
 }
 
+type schemaHistoryResult struct {
+	schema Schema
+	exists bool
+	err    error
+}
+
 type Plan struct {
 	Updates            []model.FileUpdate
 	Diagnostics        []Diagnostic
@@ -78,6 +84,29 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 	}
 	cache.Retain(activePaths)
 	policyHash := validationcache.FrontmatterPolicyHash(cfg)
+	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
+	sharedSchemas := map[string]Schema{}
+	sharedErrors := map[string]error{}
+	sharedLoaded := map[string]bool{}
+	loadSharedOnce := func(name string) (Schema, error) {
+		if sharedLoaded[name] {
+			return sharedSchemas[name], sharedErrors[name]
+		}
+		sharedLoaded[name] = true
+		schema, _, loadErr := LoadShared(repoRoot, cfg.Format, name)
+		sharedSchemas[name] = schema
+		sharedErrors[name] = loadErr
+		return schema, loadErr
+	}
+	historyResults := map[string]schemaHistoryResult{}
+	loadHistoryOnce := func(name string) (Schema, bool, error) {
+		if result, ok := historyResults[name]; ok {
+			return result.schema, result.exists, result.err
+		}
+		schema, exists, historyErr := loadSchemaHistory(repoRoot, name)
+		historyResults[name] = schemaHistoryResult{schema: schema, exists: exists, err: historyErr}
+		return schema, exists, historyErr
+	}
 	for _, path := range files {
 		relative, _ := filepath.Rel(repoRoot, path)
 		relative = filepath.ToSlash(relative)
@@ -89,15 +118,15 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		contentHash := validationcache.ContentHash(data)
 		candidate, hasCandidate := cache.Candidate(relative, contentHash, policyHash)
 		if hasCandidate && candidate.FormatClean && candidate.SchemaName != "" {
-			schemaHash := validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, candidate.SchemaName, candidate.DocumentID)
+			schemaHash := schemaHasher.Effective(candidate.SchemaName, candidate.DocumentID)
 			if _, valid := cache.Lookup(relative, contentHash, policyHash, schemaHash, candidate.ImmutableSnapshotHash); valid {
-				shared, _, loadErr := LoadShared(repoRoot, cfg.Format, candidate.SchemaName)
+				shared, loadErr := loadSharedOnce(candidate.SchemaName)
 				if loadErr != nil {
 					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: loadErr.Error()})
 					continue
 				}
 				plan.history[candidate.SchemaName] = shared
-				if _, _, historyErr := loadSchemaHistory(repoRoot, candidate.SchemaName); historyErr != nil {
+				if _, _, historyErr := loadHistoryOnce(candidate.SchemaName); historyErr != nil {
 					return plan, historyErr
 				}
 				plan.cacheHits++
@@ -119,13 +148,13 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 		if schemaName == "" {
 			continue
 		}
-		shared, _, err := LoadShared(repoRoot, cfg.Format, schemaName)
+		shared, err := loadSharedOnce(schemaName)
 		if err != nil {
 			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
 			continue
 		}
 		plan.history[schemaName] = shared
-		previous, hasPrevious, err := loadSchemaHistory(repoRoot, schemaName)
+		previous, hasPrevious, err := loadHistoryOnce(schemaName)
 		if err != nil {
 			return plan, err
 		}
@@ -233,7 +262,7 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool) (Plan, err
 				ContentSHA256:         contentHash,
 				EngineVersion:         validationcache.EngineVersion,
 				FrontmatterPolicyHash: policyHash,
-				EffectiveSchemaHash:   validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, schemaName, documentID),
+				EffectiveSchemaHash:   schemaHasher.Effective(schemaName, documentID),
 				ImmutableSnapshotHash: candidate.ImmutableSnapshotHash,
 				DocumentID:            strings.TrimSpace(documentID),
 				DocumentType:          strings.TrimSpace(documentType),

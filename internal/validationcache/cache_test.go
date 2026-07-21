@@ -79,6 +79,61 @@ func TestRetainDeletesRecordsOutsideActiveScope(t *testing.T) {
 	}
 }
 
+func TestMergeDoesNotDirtyAnUnchangedEntry(t *testing.T) {
+	root := t.TempDir()
+	if _, err := ddrepo.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	entry := Entry{
+		Path:                  "docs/guide.md",
+		ContentSHA256:         ContentHash([]byte("content")),
+		EngineVersion:         EngineVersion,
+		FrontmatterPolicyHash: Hash("frontmatter"),
+		EffectiveSchemaHash:   Hash("schema"),
+		ImmutableSnapshotHash: Hash(nil),
+		FrontmatterClean:      true,
+	}
+	store, err := Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store.Merge(entry)
+	if err := store.Save(); err != nil {
+		t.Fatal(err)
+	}
+	store, err = Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store.Merge(entry)
+	if len(store.dirty) != 0 {
+		t.Fatalf("unchanged cache entry was marked dirty: %#v", store.dirty)
+	}
+}
+
+func TestSchemaHasherMemoizesOneValidationPass(t *testing.T) {
+	root := t.TempDir()
+	format := config.Format{Enabled: true, SchemaDir: "schemas", DocumentSchemaDir: "document-schemas"}
+	if err := os.MkdirAll(filepath.Join(root, "schemas"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "schemas", "general.toml")
+	if err := os.WriteFile(path, []byte("name = 'general'\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	hasher := NewSchemaHasher(root, format)
+	first := hasher.Effective("general", "")
+	if err := os.WriteFile(path, []byte("name = 'general'\ndescription = 'changed'\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if second := hasher.Effective("general", ""); second != first {
+		t.Fatalf("one validation pass observed inconsistent schema hashes: %s != %s", second, first)
+	}
+	if refreshed := NewSchemaHasher(root, format).Effective("general", ""); refreshed == first {
+		t.Fatal("new validation pass did not observe changed schema source")
+	}
+}
+
 func TestEntryRoundTripsAndSchemaSourceChangesInvalidate(t *testing.T) {
 	root := t.TempDir()
 	if _, err := ddrepo.Init(root); err != nil {

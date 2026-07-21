@@ -138,4 +138,11 @@ func TestFixPublishesImmutableValuesRetainedByCheckCache(t *testing.T) {
 	if final.cacheHits != 1 || final.Failed() {
 		t.Fatalf("immutable publication changed clean cache result: hits=%d diagnostics=%v", final.cacheHits, final.Diagnostics)
 	}
+	repeatFix, err := Build(root, docs, cfg, true, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if repeatFix.cacheHits != 1 || len(repeatFix.immutable) != 0 {
+		t.Fatalf("repeated clean fix republished immutable state: hits=%d immutable=%v", repeatFix.cacheHits, repeatFix.immutable)
+	}
 }

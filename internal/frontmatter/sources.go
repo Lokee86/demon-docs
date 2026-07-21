@@ -20,7 +20,7 @@ type plannedSource struct {
 	cacheEntry  validationcache.Entry
 }
 
-func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store) ([]plannedSource, map[string]bool, error) {
+func loadSources(repoRoot string, files []string, allowedFormats []string, cfg config.Config, immutable immutableIndex, cache *validationcache.Store, schemaHasher *validationcache.SchemaHasher) ([]plannedSource, map[string]bool, error) {
 	sources := make([]plannedSource, 0, len(files))
 	for _, path := range files {
 		relative, err := filepath.Rel(repoRoot, path)
@@ -39,7 +39,7 @@ func loadSources(repoRoot string, files []string, allowedFormats []string, cfg c
 		}
 		policyHash := validationcache.FrontmatterPolicyHash(cfg)
 		if candidate, ok := cache.Candidate(source.relative, source.contentHash, policyHash); ok && candidate.FrontmatterClean {
-			schemaHash := validationcache.EffectiveSchemaHash(repoRoot, cfg.Format, candidate.SchemaName, candidate.DocumentID)
+			schemaHash := schemaHasher.Effective(candidate.SchemaName, candidate.DocumentID)
 			recorded := immutable.values(source.relative, map[string]any{"document_id": candidate.DocumentID}, true)
 			immutableHash := validationcache.Hash(recorded)
 			if entry, valid := cache.Lookup(source.relative, source.contentHash, policyHash, schemaHash, immutableHash); valid {
