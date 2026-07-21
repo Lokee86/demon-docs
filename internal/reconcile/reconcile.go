@@ -16,6 +16,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
 	"github.com/Lokee86/demon-docs/internal/textio"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 func Tree(root string, c config.Config) (model.ReconcileResult, error) {
@@ -189,6 +190,7 @@ const maxIndexConvergencePasses = 8
 func ConvergeWithin(root, ignoreRoot string, c config.Config) (model.ReconcileResult, int, error) {
 	changed := 0
 	messages := []string{}
+	var cache *validationcache.Store
 	for pass := 0; pass < maxIndexConvergencePasses; pass++ {
 		result, err := TreeWithIgnoreRoot(root, ignoreRoot, c)
 		if err != nil {
@@ -197,9 +199,20 @@ func ConvergeWithin(root, ignoreRoot string, c config.Config) (model.ReconcileRe
 		messages = append(messages, result.Messages...)
 		if len(result.Updates) == 0 {
 			result.Messages = messages
+			if cache != nil {
+				if err := cache.Save(); err != nil {
+					return result, changed, fmt.Errorf("save validation cache after index rewrites: %w", err)
+				}
+			}
 			return result, changed, nil
 		}
-		count, err := ApplyWithin(result, root)
+		if cache == nil {
+			cache, err = validationcache.Open(ignoreRoot)
+			if err != nil {
+				return result, changed, fmt.Errorf("open validation cache for index rewrites: %w", err)
+			}
+		}
+		count, err := applyWithinWithValidationCache(result, root, ignoreRoot, cache)
 		if err != nil {
 			return result, changed, err
 		}
@@ -211,6 +224,11 @@ func ConvergeWithin(root, ignoreRoot string, c config.Config) (model.ReconcileRe
 	}
 	messages = append(messages, result.Messages...)
 	result.Messages = messages
+	if cache != nil {
+		if err := cache.Save(); err != nil {
+			return result, changed, fmt.Errorf("save validation cache after index rewrites: %w", err)
+		}
+	}
 	if len(result.Updates) > 0 {
 		return result, changed, fmt.Errorf("index reconciliation did not converge after %d passes", maxIndexConvergencePasses)
 	}
@@ -261,6 +279,37 @@ func applyWithin(result model.ReconcileResult) (int, error) {
 	return changed, nil
 }
 
+func applyWithinWithValidationCache(result model.ReconcileResult, root, repositoryRoot string, cache *validationcache.Store) (int, error) {
+	changed := 0
+	for _, update := range result.Updates {
+		if update.OldText != nil && *update.OldText == update.NewText {
+			continue
+		}
+		parentExists, err := existingParent(update.Path)
+		if err != nil {
+			return changed, err
+		}
+		if !parentExists {
+			continue
+		}
+		written, oldData, newData, err := applyUpdateWithContent(update, true)
+		if err != nil {
+			return changed, err
+		}
+		if !written {
+			continue
+		}
+		changed++
+		if oldData == nil {
+			continue
+		}
+		if _, err := cache.RefreshPublished(repositoryRoot, update.Path, oldData, newData, validationcache.SurfaceFormat); err != nil {
+			return changed, fmt.Errorf("refresh validation cache after index rewrite %s: %w", update.Path, err)
+		}
+	}
+	return changed, nil
+}
+
 func existingParent(path string) (bool, error) {
 	parent := filepath.Dir(path)
 	info, err := os.Stat(parent)
@@ -277,42 +326,49 @@ func existingParent(path string) (bool, error) {
 }
 
 func applyUpdate(update model.FileUpdate, rejectStale bool) (bool, error) {
+	written, _, _, err := applyUpdateWithContent(update, rejectStale)
+	return written, err
+}
+
+func applyUpdateWithContent(update model.FileUpdate, rejectStale bool) (bool, []byte, []byte, error) {
 	data := textio.EncodeNew(update.NewText)
+	var oldData []byte
 	if update.OldText == nil {
 		if rejectStale {
 			file, err := os.OpenFile(update.Path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 			if os.IsExist(err) {
-				return false, nil
+				return false, nil, nil, nil
 			}
 			if err != nil {
-				return false, fmt.Errorf("create %s: %w", update.Path, err)
+				return false, nil, nil, fmt.Errorf("create %s: %w", update.Path, err)
 			}
 			if _, err := file.Write(data); err != nil {
 				_ = file.Close()
-				return false, fmt.Errorf("write %s: %w", update.Path, err)
+				return false, nil, nil, fmt.Errorf("write %s: %w", update.Path, err)
 			}
 			if err := file.Close(); err != nil {
-				return false, fmt.Errorf("close %s: %w", update.Path, err)
+				return false, nil, nil, fmt.Errorf("close %s: %w", update.Path, err)
 			}
-			return true, nil
+			return true, nil, data, nil
 		}
 	} else {
 		doc, err := textio.Read(update.Path)
 		if os.IsNotExist(err) && rejectStale {
-			return false, nil
+			return false, nil, nil, nil
 		}
 		if err != nil {
-			return false, fmt.Errorf("read before write %s: %w", update.Path, err)
+			return false, nil, nil, fmt.Errorf("read before write %s: %w", update.Path, err)
 		}
 		if rejectStale && doc.Text != *update.OldText {
-			return false, nil
+			return false, nil, nil, nil
 		}
+		oldData = doc.RawBytes()
 		data = doc.Encode(update.NewText)
 	}
 	if err := os.WriteFile(update.Path, data, 0o644); err != nil {
-		return false, fmt.Errorf("write %s: %w", update.Path, err)
+		return false, nil, nil, fmt.Errorf("write %s: %w", update.Path, err)
 	}
-	return true, nil
+	return true, oldData, data, nil
 }
 
 func orderedFolders(tree model.DocsTree) []*model.FolderInfo {
