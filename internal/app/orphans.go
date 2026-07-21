@@ -26,7 +26,7 @@ func findOrphanDocuments(scope repository.Scope, c config.Config, plan links.Pla
 		}
 		filesByPath[orphanPathKey(record.Path)] = record
 		absolute := filepath.Join(scope.RepositoryRoot, filepath.FromSlash(record.Path))
-		if strings.EqualFold(filepath.Base(absolute), c.IndexFile) || isDraftDocument(scope.DocsRoot, absolute, c.Draft.Folder) {
+		if isDraftDocument(scope.DocsRoot, absolute, c.Draft.Folder) {
 			excludedSources[record.ID] = struct{}{}
 		}
 	}

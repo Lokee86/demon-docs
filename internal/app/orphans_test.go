@@ -11,7 +11,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/repository"
 )
 
-func TestFindOrphanDocumentsIgnoresIndexesDraftsAndSelfLinks(t *testing.T) {
+func TestFindOrphanDocumentsCountsIndexesButIgnoresDraftsAndSelfLinks(t *testing.T) {
 	repositoryRoot := t.TempDir()
 	docsRoot := filepath.Join(repositoryRoot, "docs")
 	for _, path := range []string{
@@ -62,7 +62,7 @@ func TestFindOrphanDocumentsIgnoresIndexesDraftsAndSelfLinks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"docs/orphan.md", "docs/self-only.md"}
+	want := []string{"docs/self-only.md"}
 	if !reflect.DeepEqual(orphans, want) {
 		t.Fatalf("orphans=%v want=%v", orphans, want)
 	}
