@@ -66,6 +66,39 @@ func TestStoreMergesIndependentSubsystemResultsConcurrently(t *testing.T) {
 	}
 }
 
+func TestPartialFormatRefreshPreservesNewerFrontmatterResult(t *testing.T) {
+	store := &Store{
+		entries: map[string]Entry{},
+		dirty:   map[string]Entry{},
+		deleted: map[string]bool{},
+	}
+	path := "docs/guide.md"
+	oldFrontmatter := frontmatterEntry(path, "old-frontmatter", "old-content")
+	store.Merge(oldFrontmatter)
+	store.Merge(Entry{
+		Path:                 path,
+		ContentSHA256:        ContentHash([]byte("old-content")),
+		FormatIdentitySHA256: Hash("format-identity"),
+		FormatPolicyHash:     Hash("format-policy"),
+		FormatSchemaHash:     Hash("format-schema"),
+		FormatClean:          true,
+	})
+	staleFormatSnapshot, ok := store.LookupFormat(path, Hash("format-identity"), Hash("format-policy"), Hash("format-schema"))
+	if !ok {
+		t.Fatal("format result was not reachable")
+	}
+
+	newFrontmatter := frontmatterEntry(path, "new-frontmatter", "new-content")
+	store.Merge(newFrontmatter)
+	staleFormatSnapshot.ContentSHA256 = ContentHash([]byte("new-content"))
+	staleFormatSnapshot.FrontmatterClean = false
+	store.Merge(staleFormatSnapshot)
+
+	if _, ok := store.LookupFrontmatter(path, newFrontmatter.FrontmatterIdentitySHA256, newFrontmatter.FrontmatterPolicyHash, newFrontmatter.FrontmatterSchemaHash, newFrontmatter.ImmutableSnapshotHash); !ok {
+		t.Fatal("partial format refresh overwrote newer frontmatter result")
+	}
+}
+
 func TestSubsystemIdentityChangeDoesNotDiscardOtherCleanResult(t *testing.T) {
 	store := &Store{
 		entries: map[string]Entry{},

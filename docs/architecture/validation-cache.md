@@ -37,9 +37,9 @@ Document-format reuse requires:
 
 The raw whole-document SHA-256 remains recorded as source-state metadata, but it is no longer the shared identity for both validators. Frontmatter identity hashes the exact leading YAML or TOML block, including its source line endings. Ordinary body prose, link, and heading edits therefore do not invalidate a clean frontmatter result. The identity also distinguishes no block, unterminated blocks, and a newly introduced second leading block so cached clean results cannot hide parser diagnostics.
 
-Document format now owns a separate identity field and separate policy/schema hashes. In this slice its source identity remains the raw whole-document SHA-256; the next optimization can replace that field with a heading-structure fingerprint without changing frontmatter cache ownership or the durable record shape.
+Document format owns a separate structural identity and separate policy/schema hashes. Its identity includes the selected schema name, document ID and type, validation engine version, and the evaluated H2+ heading tree. The nested tree records heading text, levels, hierarchy, order, and duplicate occurrences. H1 titles, ordinary prose, links, fenced or protected headings, code blocks, and section body content are excluded because the current schema engine does not evaluate them.
 
-The selected schema metadata remains in the record so either subsystem can verify current shared and document-specific schema sources before reuse. Shared or document-specific schema changes invalidate only the matching subsystem identity. Validation cache schema version 2 discards older combined-identity entries safely and rebuilds them on the next validation pass.
+The selected schema metadata remains in the record so either subsystem can verify current shared and document-specific schema sources before reuse. Shared or document-specific schema changes invalidate only the matching subsystem identity. The structural fingerprint has its own version marker, so older whole-document format identities miss safely and rebuild without another durable-record schema change. Validation cache schema version 2 continues to discard older combined-identity entries safely.
 
 ## Clean-only reuse
 

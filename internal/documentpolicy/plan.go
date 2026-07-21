@@ -250,19 +250,20 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			}
 		}
 		evaluations = append(evaluations, documentEvaluation{
-			path:         source.path,
-			relative:     relative,
-			data:         source.data,
-			text:         source.text,
-			contentHash:  source.contentHash,
-			schemaName:   schemaName,
-			documentID:   documentID,
-			documentType: documentType,
-			bodyStart:    source.bodyStart,
-			document:     source.document,
-			current:      shared,
-			previous:     previous,
-			hasPrevious:  hasPrevious,
+			path:           source.path,
+			relative:       relative,
+			data:           source.data,
+			text:           source.text,
+			contentHash:    source.contentHash,
+			formatIdentity: source.formatIdentity,
+			schemaName:     schemaName,
+			documentID:     documentID,
+			documentType:   documentType,
+			bodyStart:      source.bodyStart,
+			document:       source.document,
+			current:        shared,
+			previous:       previous,
+			hasPrevious:    hasPrevious,
 		})
 	}
 
@@ -289,7 +290,7 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 				Path:                 evaluation.relative,
 				ContentSHA256:        evaluation.contentHash,
 				EngineVersion:        validationcache.EngineVersion,
-				FormatIdentitySHA256: evaluation.contentHash,
+				FormatIdentitySHA256: evaluation.formatIdentity,
 				FormatPolicyHash:     policyHash,
 				FormatSchemaHash:     schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
 				DocumentID:           strings.TrimSpace(evaluation.documentID),
