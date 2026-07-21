@@ -17,7 +17,7 @@ Active Demon Docs planning plus retained design records whose implementation own
 <!-- doc-ledger:files:start -->
 
 - [agent-context-and-integrations.md](agent-context-and-integrations.md) - Historical context-delivery design transferred to Grimoire Context.
-- [roadmap.md](roadmap.md) - Current Demon Docs product summary, active work, hardening, and toolchain boundaries.
+- [roadmap.md](roadmap.md) - Narrow active priorities for Demon Docs correctness, diagnostics, incremental reconciliation, and operational hardening.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders

@@ -353,7 +353,7 @@ The intended model was not “prompt once and accept the result.” It was to us
 
 The repository includes the [raw hackathon development logs](.codex-hackathon/sessions/).
 
-These JSONL files are preserved as unmodified session records rather than edited excerpts. They show implementation prompts, tool activity, agent responses, failures, corrections, and work distributed across multiple sessions.
+These committed JSONL files are preserved as unmodified session records rather than edited excerpts. They show implementation prompts, tool activity, agent responses, failures, corrections, and work distributed across multiple sessions. The committed set is frozen submission evidence; new local session captures are ignored unless deliberately reviewed and added.
 
 They should not be interpreted as a complete transcript of the project. Much of the primary development happened through GPT-5.6 in ChatGPT using the repository MCP server, while the included files primarily preserve the Codex-facing portion of the workflow. Together with the Git history, they provide a direct record of how the project was built rather than only a retrospective description.
 
