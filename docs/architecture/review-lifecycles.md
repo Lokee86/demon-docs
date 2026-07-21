@@ -68,13 +68,18 @@ It does not own:
 
 ## Durable event model
 
-The review reference points to a linear Git commit chain. Each commit contains:
+The review reference points to a linear Git commit chain. New commits contain one `batch.json` blob with an ordered collection of review events and their optional before/after snapshots:
 
 ```text
-event.json
-optional before blob
-optional after blob
+batch.json
+-> event 1 + optional before/after bytes
+-> event 2 + optional before/after bytes
+-> ...
 ```
+
+One append batch therefore creates one blob, one tree, and one commit regardless of how many source files changed. History traversal expands the stored batch back into individual events for inspection, policy replay, and undo.
+
+Legacy commits containing `event.json` plus optional `before` and `after` blobs remain readable.
 
 Two event types are implemented:
 
@@ -260,9 +265,9 @@ Before generated source writes, one `review.Change` is prepared per source rewri
 
 ### Publication
 
-After source files have been replaced and verified, all changes in the batch are appended to review history with one compare-and-swap reference update.
+After source files have been replaced and verified, all changes in the reconciliation run are encoded into one review batch commit and published with one compare-and-swap reference update.
 
-Callers observe the complete chain or none of it. Concurrent reference movement causes the chain to be rebuilt from the new head and retried up to three times.
+Callers observe the complete batch or none of it. Concurrent reference movement causes the single batch commit to be rebuilt from the new head and retried up to three times.
 
 If publication fails, the caller uses guarded generated-rewrite rollback. Review publication never bypasses source hash checks.
 
@@ -421,15 +426,17 @@ History remains append-only regardless of current projection.
 For one attempt:
 
 ```text
-read refs/ddocs/review
--> use current head as first parent
--> write one event commit per request in order
+validate and encode every request
+-> read refs/ddocs/review
+-> use current head as parent
+-> write one batch blob
+-> write one tree and one review commit
 -> advance reference once with compare-and-swap
 ```
 
-Each commit is authored locally as `Demon Docs <ddocs@local>` and contains its event plus optional before/after blobs.
+Each commit is authored locally as `Demon Docs <ddocs@local>`. The batch preserves request order, individual event IDs, per-file change IDs, exact before/after snapshots, and run grouping. `History` returns those entries newest-first as individual `StoredEvent` values, so existing CLI and undo behavior remains event-addressable.
 
-A failed preflight publishes no visible event. A compare-and-swap conflict leaves the newly written objects unreachable, retries from the current head, and does not expose a partial batch.
+A failed preflight publishes no visible event. A compare-and-swap conflict leaves one unreachable batch commit, retries from the current head, and does not expose a partial batch.
 
 ## Failure and recovery
 
@@ -512,7 +519,7 @@ When adding a suggestion kind, decision action, transformation kind, or review c
 Focused coverage includes:
 
 - `internal/review/store_test.go` — history, blobs, decline persistence, staleness, and reconsideration.
-- `internal/review/store_batch_test.go` — complete batch publication and failed-preflight visibility.
+- `internal/review/store_batch_test.go` — single-commit batch publication, constant object growth, legacy history compatibility, snapshot preservation, and failed-preflight visibility.
 - `internal/review/undo_test.go` — eligibility and selective transformation reversal.
 - `internal/links/review_integration_test.go` — ambiguous, blocked, and stale-block link behavior.
 - `internal/links/review_selection_test.go` — selected link candidate transitions.
