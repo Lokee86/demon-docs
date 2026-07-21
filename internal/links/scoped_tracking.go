@@ -157,13 +157,19 @@ func (i *inventory) refreshScopedFile(path string) (*FileRecord, error) {
 	record.Present = true
 	record.Size = info.Size()
 	record.ModifiedUnixNano = info.ModTime().UnixNano()
+	record.DocumentID = ""
+	if isMarkdown(stored) {
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return nil, fmt.Errorf("read tracked source %s: %w", path, readErr)
+		}
+		record.Fingerprint = bytesFingerprint(data)
+		record.DocumentID = markdownDocumentIDBytes(data)
+		return record, nil
+	}
 	record.Fingerprint, err = fileFingerprint(path)
 	if err != nil {
 		return nil, fmt.Errorf("fingerprint tracked source %s: %w", path, err)
-	}
-	record.DocumentID = ""
-	if isMarkdown(stored) {
-		record.DocumentID = markdownDocumentID(path)
 	}
 	return record, nil
 }
