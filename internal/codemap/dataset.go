@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
-	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 )
 
 const DatasetSchemaVersion = 1
@@ -67,84 +65,6 @@ type Dataset struct {
 	Diagnostics   []Diagnostic     `json:"diagnostics"`
 }
 
-// BuildDataset scans Markdown documents under docsRoot, extracts authored code
-// maps, and resolves their targets against repositoryRoot. Output ordering and
-// hashes depend only on repository content and the supplied format.
-func BuildDataset(repositoryRoot, docsRoot string, format Format) (Dataset, error) {
-	repositoryRoot, err := filepath.Abs(repositoryRoot)
-	if err != nil {
-		return Dataset{}, err
-	}
-	docsRoot, err = filepath.Abs(docsRoot)
-	if err != nil {
-		return Dataset{}, err
-	}
-	if !within(repositoryRoot, docsRoot) {
-		return Dataset{}, fmt.Errorf("docs root %s is outside repository root %s", docsRoot, repositoryRoot)
-	}
-	if format.TargetBase == "" {
-		format.TargetBase = TargetBaseRepository
-	}
-	policy, err := ignorepolicy.Load(repositoryRoot)
-	if err != nil {
-		return Dataset{}, err
-	}
-
-	dataset := Dataset{SchemaVersion: DatasetSchemaVersion}
-	err = filepath.WalkDir(docsRoot, func(filePath string, item os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		if filePath != docsRoot {
-			ignored, err := policy.Ignored(filePath, item.IsDir())
-			if err != nil {
-				return err
-			}
-			if ignored {
-				if item.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-		}
-		if item.IsDir() || item.Type()&os.ModeSymlink != 0 || !strings.EqualFold(filepath.Ext(filePath), ".md") {
-			return nil
-		}
-
-		source, err := os.ReadFile(filePath)
-		if err != nil {
-			return err
-		}
-		documentPath, err := repositoryRelative(repositoryRoot, filePath)
-		if err != nil {
-			return err
-		}
-		extracted := Extract(documentPath, string(source), format)
-		dataset.Documents = append(dataset.Documents, DocumentRecord{
-			Path:            documentPath,
-			Size:            int64(len(source)),
-			SHA256:          digest(source),
-			SectionCount:    extracted.SectionCount,
-			EntryCount:      len(extracted.Entries),
-			DiagnosticCount: len(extracted.Diagnostics),
-		})
-		dataset.Diagnostics = append(dataset.Diagnostics, extracted.Diagnostics...)
-		for _, entry := range extracted.Entries {
-			resolution, err := resolveTarget(repositoryRoot, documentPath, entry, format)
-			if err != nil {
-				return err
-			}
-			dataset.Entries = append(dataset.Entries, DatasetEntry{Entry: entry, Resolution: resolution})
-		}
-		return nil
-	})
-	if err != nil {
-		return Dataset{}, err
-	}
-	sortDataset(&dataset)
-	return dataset, nil
-}
-
 func MarshalDataset(dataset Dataset) ([]byte, error) {
 	encoded, err := json.MarshalIndent(dataset, "", "  ")
 	if err != nil {
@@ -165,6 +85,10 @@ func ExportDataset(outputPath string, dataset Dataset) error {
 }
 
 func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Format) (TargetRecord, error) {
+	return resolveTargetWithCache(repositoryRoot, documentPath, entry, format, newTargetContentCache(os.ReadFile))
+}
+
+func resolveTargetWithCache(repositoryRoot, documentPath string, entry Entry, format Format, contentCache *targetContentCache) (TargetRecord, error) {
 	if entry.Kind == TargetSymbol && !strings.Contains(entry.Target, "#") && !strings.Contains(entry.Target, "::") {
 		return TargetRecord{Status: ResolutionUnsupported}, nil
 	}
@@ -183,11 +107,11 @@ func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Form
 		return TargetRecord{Status: ResolutionMissing}, nil
 	}
 	if hasPattern(baseTarget) {
-		primary, err := resolvePatterns(repositoryRoot, candidates[:1])
+		primary, err := resolvePatterns(repositoryRoot, candidates[:1], contentCache)
 		if err != nil || primary.Status == ResolutionPatternResolved || len(candidates) == 1 {
 			return primary, err
 		}
-		return resolvePatterns(repositoryRoot, candidates[1:])
+		return resolvePatterns(repositoryRoot, candidates[1:], contentCache)
 	}
 
 	type existingTarget struct {
@@ -240,11 +164,10 @@ func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Form
 	}
 	record := TargetRecord{ResolvedPath: resolvedPath, Exists: true, Size: info.Size()}
 	if !info.IsDir() {
-		contents, err := os.ReadFile(candidate)
+		record.SHA256, err = contentCache.hashFile(candidate)
 		if err != nil {
 			return TargetRecord{}, err
 		}
-		record.SHA256 = digest(contents)
 	}
 	if hasSymbol {
 		record.Status = ResolutionSymbolUnverified
@@ -298,7 +221,7 @@ func targetCandidates(repositoryRoot, documentPath, target string, format Format
 	return candidates, outside, nil
 }
 
-func resolvePatterns(repositoryRoot string, patternPaths []string) (TargetRecord, error) {
+func resolvePatterns(repositoryRoot string, patternPaths []string, contentCache *targetContentCache) (TargetRecord, error) {
 	record := TargetRecord{Status: ResolutionPatternMissing}
 	seen := map[string]struct{}{}
 	for _, patternPath := range patternPaths {
@@ -332,11 +255,10 @@ func resolvePatterns(repositoryRoot string, patternPaths []string) (TargetRecord
 			}
 			item := TargetMatch{Path: relative, IsDir: info.IsDir(), Size: info.Size()}
 			if !info.IsDir() {
-				contents, err := os.ReadFile(match)
+				item.SHA256, err = contentCache.hashFile(match)
 				if err != nil {
 					return TargetRecord{}, err
 				}
-				item.SHA256 = digest(contents)
 			}
 			record.Matches = append(record.Matches, item)
 		}

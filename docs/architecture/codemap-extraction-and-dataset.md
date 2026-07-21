@@ -35,6 +35,9 @@ The dataset is the boundary between authored code-map syntax and repository anal
 internal/codemap/model.go
 internal/codemap/extractor.go
 internal/codemap/dataset.go
+internal/codemap/dataset_build.go
+internal/codemap/dataset_workers.go
+internal/codemap/target_content_cache.go
 internal/codemap/strip.go
 internal/codemap/insert.go
 internal/app/app.go
@@ -150,7 +153,11 @@ Demon Docs does not choose among ambiguous roots or coerce a directory into a fi
 
 ## Dataset construction
 
-`BuildDataset` walks Markdown documents below the selected docs root under the repository ignore policy.
+`BuildDataset` first walks Markdown documents below the selected docs root under the repository ignore policy. Traversal, ignore evaluation, and document discovery remain serial and deterministic. Discovered document jobs are then sorted by repository-relative path.
+
+A bounded 16-worker pool independently reads, hashes, extracts, and resolves each document. Workers store complete detached results in their assigned job slots. The main goroutine merges documents, entries, diagnostics, and errors in deterministic document-path order before the final canonical sort.
+
+Resolved target files use one concurrent per-build content-hash cache. The first resolver for a target reads and hashes it; other document workers wait for and reuse that result. Different targets can still be read concurrently. The cache is rebuildable, lasts only for one dataset build, and does not become persistent repository state.
 
 It skips:
 
@@ -161,7 +168,17 @@ It skips:
 
 Each document record includes path, byte size, SHA-256, section count, entry count, and diagnostic count. Each extracted entry includes its normalized target plus a `TargetRecord` containing resolution state, resolved path or pattern matches, existence, file size, and file hash when applicable.
 
-Documents and entries are emitted in deterministic path and source order.
+Documents and entries are emitted in deterministic path and source order. Worker completion order cannot affect exported ordering or which error is returned first.
+
+### Dataset construction performance
+
+A retained Windows benchmark builds 500 Markdown documents containing 4,000 total codemap entries that repeatedly reference 64 target files. The comparison used `GOMAXPROCS=16`, five one-iteration runs, and commit `e6917a5` as the serial baseline. Excluding the first sample to reduce host warm-up noise, the mean dataset-build time improved from 1.750 seconds to 198.1 milliseconds, an 8.83x speedup.
+
+The improvement combines parallel document preparation with hashing each repeatedly referenced target only once per build. It does not parallelize directory traversal or alter target-resolution outcomes. The retained benchmark is `BenchmarkBuildDataset` in `internal/codemap/dataset_benchmark_test.go`.
+
+```bash
+go test ./internal/codemap -run '^$' -bench '^BenchmarkBuildDataset$' -benchmem -count=5 -benchtime=1x
+```
 
 ## Dataset serialization
 
@@ -222,7 +239,10 @@ Selected insertion fails when no configured section exists, the target is alread
 
 - `internal/codemap/model.go` — entry, target, syntax, span, format, and diagnostic types.
 - `internal/codemap/extractor.go` — configured-section extraction and normalization.
-- `internal/codemap/dataset.go` — document walk, target resolution, hashes, schema, and export.
+- `internal/codemap/dataset.go` — target resolution, schema records, canonical sorting, and export.
+- `internal/codemap/dataset_build.go` — deterministic discovery, bounded per-document preparation, ordered merge, and dataset assembly.
+- `internal/codemap/dataset_workers.go` — fixed 16-worker execution boundary with indexed errors.
+- `internal/codemap/target_content_cache.go` — concurrent single-read target hashing shared by one dataset build.
 - `internal/codemap/strip.go` — holdout text sanitization.
 - `internal/codemap/insert.go` — explicit selected-target insertion.
 - `internal/app/app.go` — `codemap export` scope and output orchestration.
@@ -234,6 +254,9 @@ Focused coverage includes:
 - `extractor_test.go` — supported syntax, configured headings, boundaries, prose rejection, and symbol forms;
 - `inventory_fixture_test.go` — extraction against retained authored fixtures;
 - `dataset_test.go` — repository/document bases, target roots, ambiguity, templates, hashes, and stable JSON;
+- `dataset_workers_test.go` — bounded concurrency and deterministic indexed errors;
+- `target_content_cache_test.go` — concurrent repeated-target reads collapse to one content read;
+- `dataset_benchmark_test.go` — retained large deterministic dataset-build benchmark;
 - `strip_test.go` — map removal, configured aliases, and fenced-heading exclusion;
 - `insert_test.go` — selected insertion and duplicate rejection; and
 - `internal/app/codemap_export_test.go` — command options and deterministic output.

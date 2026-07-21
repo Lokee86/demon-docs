@@ -103,6 +103,7 @@ See [Repository Demon](../operations/repository-demon.md).
 - Fenced Space Rocks-style maps remain fenced and bullet maps retain their local prefix.
 - File and directory scopes are contained beneath the docs root and publish through content-addressed transactional rewrites.
 - Generic reconciliation, watch, and repository-demon paths never invoke codemap generation.
+- Authored codemap datasets use serial deterministic discovery followed by bounded parallel document reading, hashing, extraction, and target resolution; repeated references share one per-build target-content hash.
 - The repository corpus adapter collects paths, dependency neighbours, declared symbols, source/test relationships, related-document targets, and bounded Git co-change evidence.
 - Holdout and precision tooling consume the same production ranker used by the explicit writer.
 - The public codemap command now uses the document-policy schema provider to create required missing sections at deterministic schema positions.
