@@ -183,6 +183,25 @@ The ticker is a readiness poll, not the debounce source of truth. `RunIfPending`
 
 This may start a run slightly after the exact debounce boundary, bounded by the ticker interval.
 
+## Effective latency and bulk moves
+
+Debounce controls only scheduler admission. End-to-end latency is approximately:
+
+```text
+time until the final relevant filesystem event
++ configured quiet interval
++ scheduler polling delay
++ any bulk-rename quiet period
++ reconciliation execution time
++ any follow-up pass caused by events during execution
+```
+
+Every admitted event updates the latest-event timestamp, so noisy editor saves or directory operations can extend the quiet interval repeatedly. File moves observed as paired rename/create events have one targeted immediate-repair allowance per scheduled batch. Additional recognized renames mark the batch as bulk activity and wait until no new observed rename has arrived for a quiet period equal to the configured debounce, with a minimum of 500 milliseconds.
+
+The scheduler currently retains only pending work count and latest-event time. It does not pass a complete set of changed paths into each reconciliation subsystem. After the quiet period, the callback may therefore perform broad selected work rather than a path-scoped update. A low debounce value does not eliminate repository scanning, serial feature execution, state publication, or generated-write refresh cost.
+
+This is an explicit current performance limitation. The watcher is designed first for deterministic convergence and bounded mutation ownership. Path-aware dirty tracking and incremental subsystem execution remain future optimization work.
+
 ## Selected-feature execution
 
 The base reconciliation callback can run documentation indexes, frontmatter, document-body format, links, or any selected combination. The application owns their ordering; the scheduler only serializes the callback.

@@ -18,7 +18,7 @@ Demon Docs can:
 - retain stable file identities and path history in private `.ddocs/` state, under the standalone docs root or the initialized repository root;
 - reuse durable clean-validation results for unchanged frontmatter and document-body format checks;
 - read changed or new link-inventory content through a bounded worker pool while preserving deterministic traversal and merge order;
-- compact private `.ddocs/` object storage automatically after successful state or review publication crosses bounded loose-object thresholds;
+- retain private `.ddocs/` objects without automatic compaction until readers and writers share a cross-process lock;
 - expose ambiguous repairs and codemap candidates for decline, reconsider, or compatibility selection decisions;
 - record applied normal repairs with bounded, hash-guarded undo and repair blocks;
 - explicitly inspect, preview, update, and verify unified managed codemap sections;
@@ -164,6 +164,14 @@ Link inventory traverses the repository deterministically, reuses unchanged size
 Automatic private-object compaction is currently disabled. The repository demon and CLI run as separate processes, and go-git pack replacement is not safe until private-state readers and writers share a cross-process lock. Normal commands therefore retain loose objects rather than risking a missing pack or referenced object.
 
 Cold frontmatter and document-format validation is still processed serially, and a changed Markdown source is currently reparsed as a whole. These remaining performance boundaries are tracked in [Current Product Limitations](docs/limits/current-limitations.md) and the [Roadmap](docs/planning/roadmap.md).
+
+## Performance maturity
+
+The current implementation is a correctness-first hackathon prototype. It is serviceable on modest repositories, but it is not yet optimized for low-latency operation on large or high-churn trees.
+
+Watcher debounce only delays admission of a reconciliation pass. A burst of filesystem events resets that quiet period repeatedly, directory moves may produce many events, and the admitted callback can still perform broad repository scanning and several selected reconciliation stages serially. As a result, a configured debounce measured in fractions of a second can still produce visible repair latency measured in seconds.
+
+The intended production direction is path-aware dirty tracking, feature-specific incremental reconciliation, fewer repeated state reads and writes, and benchmark-guided scheduling. Until then, `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain the authoritative operational surfaces; the watcher and repository demon are convenience automation rather than performance guarantees.
 
 ## Safety model
 

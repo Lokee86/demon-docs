@@ -70,6 +70,16 @@ The watcher reruns the same selected operations used by `fix` when relevant repo
 
 Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. Existing unconsumed suppressions are loaded and merged with suppressions from the new batch, so a successful unrelated write cannot discard pending self-write evidence. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
 
+## Latency expectations
+
+`debounce_seconds` is a quiet-period setting, not a maximum time-to-repair guarantee. Each relevant event restarts it, and a directory move may produce many events before the repository becomes quiet. Bulk recognized renames also wait for at least 500 milliseconds without another rename before the normal reconciliation pass proceeds.
+
+After scheduling, the selected reconciliation callback still runs to completion. Depending on enabled features, that callback may scan broad repository scope, repair links, validate policy, converge indexes, refresh link state, and publish private state serially. Detached logs show the completion timestamp, so this execution time can be mistaken for an unusually large debounce.
+
+The current watcher is serviceable convenience automation for modest repositories and a correctness-first hackathon prototype. It is not currently a low-latency incremental daemon for large or continuously changing repositories. Lowering debounce alone does not address broad reconciliation cost and can cause more follow-up work.
+
+Use explicit `ddocs mv` for planned refactors and retain `ddocs check` or `ddocs fix` as the authoritative verification and recovery step.
+
 ## Foreground Watch versus Repository Demon
 
 Use foreground `watch` when you want standalone operation, a process attached to the current terminal, directly visible output, or manually controlled lifetime.
