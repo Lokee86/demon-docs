@@ -67,16 +67,17 @@ func runSelectedWatch(
 	debounce *float64,
 	once bool,
 	out io.Writer,
+	ready func() error,
 ) error {
 	if !features.Reverse {
-		return watch.RootSelected(ctx, scope.DocsRoot, scope.RepositoryRoot, c, features, debounce, once, out)
+		return watch.RootSelectedWithRunLock(ctx, scope.DocsRoot, scope.RepositoryRoot, c, features, debounce, once, out, nil, ready)
 	}
 	seconds := c.Watch.DebounceSeconds
 	if debounce != nil {
 		seconds = *debounce
 	}
 	if !features.Indexes && !features.Frontmatter && !features.Links && !features.TrackLinks {
-		return reverseindex.Watch(
+		return reverseindex.WatchWithRunLock(
 			ctx,
 			scope.RepositoryRoot,
 			scope.DocsRoot,
@@ -86,6 +87,8 @@ func runSelectedWatch(
 			time.Duration(seconds*float64(time.Second)),
 			once,
 			out,
+			nil,
+			ready,
 		)
 	}
 	baseFeatures := features
@@ -112,8 +115,19 @@ func runSelectedWatch(
 	errors := make(chan error, 2)
 	safeOut := &synchronizedWriter{writer: out}
 	runLock := &sync.Mutex{}
+	readyLock := &sync.Mutex{}
+	readyCount := 0
+	markReady := func() error {
+		readyLock.Lock()
+		defer readyLock.Unlock()
+		readyCount++
+		if readyCount == 2 && ready != nil {
+			return ready()
+		}
+		return nil
+	}
 	go func() {
-		errors <- watch.RootSelectedWithRunLock(watchContext, scope.DocsRoot, scope.RepositoryRoot, c, baseFeatures, debounce, false, safeOut, runLock)
+		errors <- watch.RootSelectedWithRunLock(watchContext, scope.DocsRoot, scope.RepositoryRoot, c, baseFeatures, debounce, false, safeOut, runLock, markReady)
 	}()
 	go func() {
 		errors <- reverseindex.WatchWithRunLock(
@@ -127,6 +141,7 @@ func runSelectedWatch(
 			false,
 			safeOut,
 			runLock,
+			markReady,
 		)
 	}()
 	first := <-errors

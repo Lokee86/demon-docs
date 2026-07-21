@@ -20,6 +20,7 @@ type fakeWatcher struct {
 	errors  chan error
 	mu      sync.Mutex
 	added   []string
+	removed []string
 	failAdd func(string) error
 }
 
@@ -34,6 +35,12 @@ func (w *fakeWatcher) Add(path string) error {
 	if w.failAdd != nil {
 		return w.failAdd(path)
 	}
+	return nil
+}
+func (w *fakeWatcher) Remove(path string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.removed = append(w.removed, filepath.Clean(path))
 	return nil
 }
 func (w *fakeWatcher) Close() error                  { return nil }
@@ -57,16 +64,33 @@ func (w *fakeWatcher) hasWatch(path string) bool {
 	return false
 }
 
+func (w *fakeWatcher) removedWatch(path string) bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	path = filepath.Clean(path)
+	for _, removed := range w.removed {
+		if removed == path {
+			return true
+		}
+	}
+	return false
+}
+
 func installFakeWatcher(t *testing.T, fake *fakeWatcher, beforeCreate func()) {
 	t.Helper()
 	original := createWatcher
+	originalRecursive := useRecursiveTreeWatches
+	useRecursiveTreeWatches = false
 	createWatcher = func() (eventWatcher, error) {
 		if beforeCreate != nil {
 			beforeCreate()
 		}
 		return fake, nil
 	}
-	t.Cleanup(func() { createWatcher = original })
+	t.Cleanup(func() {
+		createWatcher = original
+		useRecursiveTreeWatches = originalRecursive
+	})
 }
 
 func startFakeWatch(t *testing.T, root string, c config.Config, debounce *float64, fake *fakeWatcher) (context.CancelFunc, <-chan error) {
@@ -186,6 +210,65 @@ func TestWatcherAttemptsObservedRenameBeforeDebouncedValidation(t *testing.T) {
 	stopFakeWatch(t, cancel, done)
 }
 
+func TestWatcherLimitsImmediateRenameRepairDuringBurst(t *testing.T) {
+	root := t.TempDir()
+	oldPaths := []string{
+		filepath.Join(root, "old-one.md"),
+		filepath.Join(root, "old-two.md"),
+		filepath.Join(root, "old-three.md"),
+	}
+	newPaths := []string{
+		filepath.Join(root, "new-one.md"),
+		filepath.Join(root, "new-two.md"),
+		filepath.Join(root, "new-three.md"),
+	}
+	for _, path := range oldPaths {
+		if err := os.WriteFile(path, []byte("# Page\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	originalRepair := repairObservedRename
+	called := make(chan [2]string, len(oldPaths))
+	repairObservedRename = func(_ string, oldName, newName string) (bool, int, error) {
+		called <- [2]string{filepath.Clean(oldName), filepath.Clean(newName)}
+		return true, 1, nil
+	}
+	t.Cleanup(func() { repairObservedRename = originalRepair })
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	longDebounce := 10.0
+	go func() {
+		done <- RootSelected(ctx, root, root, config.Default(), Features{Links: true}, &longDebounce, false, nil)
+	}()
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(root) })
+	for index := range oldPaths {
+		if err := os.Rename(oldPaths[index], newPaths[index]); err != nil {
+			t.Fatal(err)
+		}
+		fake.events <- fsnotify.Event{Name: oldPaths[index], Op: fsnotify.Rename}
+		fake.events <- fsnotify.Event{Name: newPaths[index], Op: fsnotify.Create}
+	}
+	select {
+	case pair := <-called:
+		want := [2]string{filepath.Clean(oldPaths[0]), filepath.Clean(newPaths[0])}
+		if pair != want {
+			t.Fatalf("first observed rename=%v want=%v", pair, want)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("first observed rename was not repaired immediately")
+	}
+	time.Sleep(100 * time.Millisecond)
+	select {
+	case pair := <-called:
+		t.Fatalf("rename burst used another synchronous repair: %v", pair)
+	default:
+	}
+	stopFakeWatch(t, cancel, done)
+}
+
 func TestWatcherAddsNewNestedDirectories(t *testing.T) {
 	root := t.TempDir()
 	fake := newFakeWatcher()
@@ -290,6 +373,37 @@ func TestWatcherReconcilesDeletedWatchedDirectory(t *testing.T) {
 	waitFor(t, 3*time.Second, func() bool {
 		data, err := os.ReadFile(index)
 		return err == nil && !bytes.Contains(data, []byte("guide/INDEX.md"))
+	})
+	stopFakeWatch(t, cancel, done)
+}
+
+func TestWatcherRemovesDescendantWatchesWhenDirectoryMoves(t *testing.T) {
+	root := t.TempDir()
+	oldTree := filepath.Join(root, "old")
+	nested := filepath.Join(oldTree, "nested", "deep")
+	newTree := filepath.Join(root, "new")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	fake := newFakeWatcher()
+	installFakeWatcher(t, fake, nil)
+	longDebounce := 10.0
+	cancel, done := startFakeWatch(t, root, config.Default(), &longDebounce, fake)
+	waitFor(t, 2*time.Second, func() bool { return fake.hasWatch(nested) })
+
+	if err := os.Rename(oldTree, newTree); err != nil {
+		t.Fatal(err)
+	}
+	fake.events <- fsnotify.Event{Name: oldTree, Op: fsnotify.Rename}
+	fake.events <- fsnotify.Event{Name: newTree, Op: fsnotify.Create}
+
+	waitFor(t, 2*time.Second, func() bool {
+		return fake.removedWatch(oldTree) &&
+			fake.removedWatch(filepath.Join(oldTree, "nested")) &&
+			fake.removedWatch(nested)
+	})
+	waitFor(t, 2*time.Second, func() bool {
+		return fake.hasWatch(filepath.Join(newTree, "nested", "deep"))
 	})
 	stopFakeWatch(t, cancel, done)
 }

@@ -19,6 +19,9 @@ func TestDemonAgentCommandLifecycle(t *testing.T) {
 			t.Fatalf("seed owner: won=%t err=%v", won, err)
 		}
 		defer runtime.Release(owner)
+		if err := runtime.MarkReady(owner); err != nil {
+			t.Fatalf("mark owner ready: %v", err)
+		}
 
 		var out, errOut bytes.Buffer
 		code := Run(context.Background(), []string{"demon", "acquire", "--client", "mcp"}, &out, &errOut)

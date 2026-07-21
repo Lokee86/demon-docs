@@ -12,8 +12,8 @@ import (
 )
 
 type inventoryNode struct {
-	abs, stored, kind, fingerprint string
-	size, modified                 int64
+	abs, stored, kind, fingerprint, documentID string
+	size, modified                             int64
 }
 
 type inventory struct {
@@ -78,10 +78,12 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		stored := storePath(root, path)
 		modified := info.ModTime().UnixNano()
 		fingerprint := ""
+		documentID := ""
 		if previousIndex, ok := previousByPath[pathKey(stored)]; ok {
 			previousRecord := previous.Files[previousIndex]
 			if previousRecord.Present && previousRecord.Kind == "file" && previousRecord.Size == info.Size() && previousRecord.ModifiedUnixNano == modified {
 				fingerprint = previousRecord.Fingerprint
+				documentID = previousRecord.DocumentID
 			}
 		}
 		if fingerprint == "" {
@@ -90,7 +92,10 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 				return err
 			}
 		}
-		nodes = append(nodes, inventoryNode{abs: filepath.Clean(path), stored: stored, kind: "file", fingerprint: fingerprint, size: info.Size(), modified: modified})
+		if documentID == "" && isMarkdown(stored) {
+			documentID = markdownDocumentID(path)
+		}
+		nodes = append(nodes, inventoryNode{abs: filepath.Clean(path), stored: stored, kind: "file", fingerprint: fingerprint, documentID: documentID, size: info.Size(), modified: modified})
 		return nil
 	})
 	if err != nil {
@@ -98,18 +103,26 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 	}
 	sort.Slice(nodes, func(i, j int) bool { return nodes[i].stored < nodes[j].stored })
 	currentCounts := map[string]int{}
+	currentDocumentCounts := map[string]int{}
 	for _, node := range nodes {
 		if node.fingerprint != "" {
 			currentCounts[node.fingerprint]++
 		}
+		if node.documentID != "" {
+			currentDocumentCounts[node.documentID]++
+		}
 	}
 	previousByFingerprint := map[string][]int{}
+	previousByDocumentID := map[string][]int{}
 	for index, record := range previous.Files {
 		if record.Scope == "repository" {
 			previousByPath[pathKey(record.Path)] = index
 		}
 		if record.Kind == "file" && record.Fingerprint != "" {
 			previousByFingerprint[record.Fingerprint] = append(previousByFingerprint[record.Fingerprint], index)
+		}
+		if record.DocumentID != "" {
+			previousByDocumentID[record.DocumentID] = append(previousByDocumentID[record.DocumentID], index)
 		}
 	}
 	used := map[int]bool{}
@@ -119,8 +132,32 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 	}
 	for index, node := range nodes {
 		if previousIndex, ok := previousByPath[pathKey(node.stored)]; ok && !used[previousIndex] {
+			previousRecord := previous.Files[previousIndex]
+			if node.documentID != "" && previousRecord.DocumentID != "" && node.documentID != previousRecord.DocumentID {
+				continue
+			}
 			matched[index] = previousIndex
 			used[previousIndex] = true
+		}
+	}
+	for index, node := range nodes {
+		if matched[index] >= 0 || node.documentID == "" || currentDocumentCounts[node.documentID] != 1 {
+			continue
+		}
+		candidates := previousByDocumentID[node.documentID]
+		available := -1
+		for _, candidate := range candidates {
+			if !used[candidate] {
+				if available >= 0 {
+					available = -1
+					break
+				}
+				available = candidate
+			}
+		}
+		if available >= 0 {
+			matched[index] = available
+			used[available] = true
 		}
 	}
 	for index, node := range nodes {
@@ -158,6 +195,7 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 			}
 			record.ID = id
 		}
+		record.DocumentID = node.documentID
 		record.Path = node.stored
 		record.Scope = "repository"
 		record.Kind = node.kind
@@ -236,7 +274,10 @@ func (i *inventory) rebuild() {
 	i.byFold = map[string][]int{}
 	for index, record := range i.manifest.Files {
 		abs := recordAbsolute(i.root, record)
-		i.byAbs[pathKey(abs)] = index
+		key := pathKey(abs)
+		if existing, ok := i.byAbs[key]; !ok || (!i.manifest.Files[existing].Present && record.Present) {
+			i.byAbs[key] = index
+		}
 		fold := strings.ToLower(filepath.Clean(abs))
 		i.byFold[fold] = append(i.byFold[fold], index)
 	}
@@ -300,6 +341,9 @@ func (i *inventory) ensureTarget(path, preferredID string) (*FileRecord, string,
 		record.Fingerprint, err = fileFingerprint(clean)
 		if err != nil {
 			return nil, "", err
+		}
+		if isMarkdown(record.Path) {
+			record.DocumentID = markdownDocumentID(clean)
 		}
 	}
 	if preferredID != "" {

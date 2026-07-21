@@ -16,10 +16,10 @@ import (
 )
 
 func Watch(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, debounce time.Duration, once bool, out io.Writer) error {
-	return WatchWithRunLock(ctx, repositoryRoot, docsRoot, roots, c, format, debounce, once, out, nil)
+	return WatchWithRunLock(ctx, repositoryRoot, docsRoot, roots, c, format, debounce, once, out, nil, nil)
 }
 
-func WatchWithRunLock(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, debounce time.Duration, once bool, out io.Writer, runLock sync.Locker) error {
+func WatchWithRunLock(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, debounce time.Duration, once bool, out io.Writer, runLock sync.Locker, ready func() error) error {
 	if out == nil {
 		out = io.Discard
 	}
@@ -73,6 +73,11 @@ func WatchWithRunLock(ctx context.Context, repositoryRoot, docsRoot string, root
 	}
 	if err := refresh(); err != nil {
 		return err
+	}
+	if ready != nil {
+		if err := ready(); err != nil {
+			return fmt.Errorf("mark reverse-index watcher ready: %w", err)
+		}
 	}
 	refreshRequests := make(chan struct{}, 1)
 	refreshResults := make(chan error, 1)

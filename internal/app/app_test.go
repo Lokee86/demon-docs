@@ -11,7 +11,7 @@ import (
 
 func TestVersionAndUnknownCommandExitCodes(t *testing.T) {
 	var out, err bytes.Buffer
-	if code := Run(context.Background(), []string{"--version"}, &out, &err); code != 0 || out.String() != "ddocs 0.3.0\n" {
+	if code := Run(context.Background(), []string{"--version"}, &out, &err); code != 0 || out.String() != "ddocs 0.3.1\n" {
 		t.Fatalf("code=%d out=%q err=%q", code, out.String(), err.String())
 	}
 	out.Reset()
@@ -175,6 +175,93 @@ func TestInitRequiresExistingDocsRoot(t *testing.T) {
 			if code := Run(context.Background(), args, &out, &errOut); code != 2 {
 				t.Fatalf("args=%v code=%d out=%q err=%q", args, code, out.String(), errOut.String())
 			}
+		}
+	})
+}
+
+func TestFixRepairsLinksBeforeFrontmatterAndRefreshesFinalFingerprints(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	writeTestFile(t, filepath.Join(repo, ".ddocs", "config.toml"), `docs_root = "docs"
+index_file = "INDEX.md"
+
+[index]
+enabled = true
+
+[links]
+enabled = true
+
+[frontmatter]
+enabled = true
+default_format = "yaml"
+allowed_formats = ["yaml"]
+unknown_fields = "remove"
+
+[frontmatter.fields.created]
+type = "date"
+required = true
+immutable = true
+generated = true
+
+[format]
+enabled = false
+`)
+	writeTestFile(t, filepath.Join(docs, "source.md"), "[target](old/target.md)\n")
+	writeTestFile(t, filepath.Join(docs, "old", "target.md"), "# Original target\n")
+	writeTestFile(t, filepath.Join(docs, "decoy", "target.md"), "# Decoy target\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"fix", "--links"}, &out, &errOut); code != 0 {
+			t.Fatalf("baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+
+		moved := filepath.Join(docs, "moved", "target.md")
+		if err := os.MkdirAll(filepath.Dir(moved), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(filepath.Join(docs, "old", "target.md"), moved); err != nil {
+			t.Fatal(err)
+		}
+
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 0 {
+			t.Fatalf("combined fix code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		source, err := os.ReadFile(filepath.Join(docs, "source.md"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(source), "(moved/target.md)") {
+			t.Fatalf("link was not repaired before frontmatter changed the moved target fingerprint:\n%s", source)
+		}
+		movedText, err := os.ReadFile(moved)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.HasPrefix(string(movedText), "---\n") || !strings.Contains(string(movedText), "created:") {
+			t.Fatalf("frontmatter was not applied after link repair:\n%s", movedText)
+		}
+
+		final := filepath.Join(docs, "final", "target.md")
+		if err := os.MkdirAll(filepath.Dir(final), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(moved, final); err != nil {
+			t.Fatal(err)
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--links"}, &out, &errOut); code != 0 {
+			t.Fatalf("second move code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		source, err = os.ReadFile(filepath.Join(docs, "source.md"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(source), "(final/target.md)") {
+			t.Fatalf("post-rewrite fingerprint state was not refreshed:\n%s", source)
 		}
 	})
 }

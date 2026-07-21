@@ -94,7 +94,7 @@ ddocs demon heartbeat --token TOKEN
 ddocs demon release --token TOKEN
 ```
 
-`ddocs demon run` ensures the demon is enabled, registers the current shell as a feeder, and starts the detached watcher when necessary.
+`ddocs demon run` ensures the demon is enabled, registers the current shell as a feeder, and starts the detached watcher when necessary. It does not return until the initial reconciliation has completed and every configured filesystem watcher is registered, so an immediately following filesystem change cannot fall into a startup gap.
 
 `ddocs demon run --false` persists `[demon].run = false`, removes current feeders, and requests shutdown.
 
@@ -110,7 +110,7 @@ ddocs demon release --token TOKEN
 
 - repository root;
 - configured enablement;
-- running, stale, or stopped ownership state;
+- starting, running, stale, or stopped ownership state;
 - detached demon PID;
 - active shell and agent counts;
 - last owner heartbeat; and
@@ -154,6 +154,7 @@ Runtime files live below `.ddocs/runtime/`:
 .ddocs/runtime/
   owner.json
   owner-heartbeat
+  ready.json
   shutdown-request
   feeders/
   logs/
@@ -164,7 +165,7 @@ Runtime files live below `.ddocs/runtime/`:
     demon.log.4
 ```
 
-The owner record stores the ownership token, detached PID, startup time, and last heartbeat. Feeder files store their token, kind, optional external client name, process information, and last heartbeat.
+The owner record stores the ownership token, detached PID, startup time, and last heartbeat. `ready.json` is token-scoped startup state written only after the initial reconciliation completes and all configured filesystem watches are registered. Feeder files store their token, kind, optional external client name, process information, and last heartbeat.
 
 Runtime state is operational and disposable. It is excluded from document traversal and is separate from the schema-versioned `.ddocs/` object repository used for link and repository state.
 

@@ -17,6 +17,7 @@ import (
 const (
 	OwnerFile          = "owner.json"
 	OwnerHeartbeat     = "owner-heartbeat"
+	ReadyFile          = "ready.json"
 	ShutdownRequest    = "shutdown-request"
 	FeedersDir         = "feeders"
 	LogsDir            = "logs"
@@ -41,15 +42,16 @@ func DefaultTiming() Timing {
 }
 
 type Paths struct {
-	Root, Config, Runtime, Owner, Heartbeat, Shutdown, Feeders, Logs, Log string
+	Root, Config, Runtime, Owner, Heartbeat, Ready, Shutdown, Feeders, Logs, Log string
 }
 
 func NewPaths(root string) Paths {
 	runtimeRoot := filepath.Join(root, ".ddocs", "runtime")
 	return Paths{Root: root, Config: filepath.Join(root, ".ddocs", "config.toml"), Runtime: runtimeRoot,
 		Owner: filepath.Join(runtimeRoot, OwnerFile), Heartbeat: filepath.Join(runtimeRoot, OwnerHeartbeat),
-		Shutdown: filepath.Join(runtimeRoot, ShutdownRequest), Feeders: filepath.Join(runtimeRoot, FeedersDir),
-		Logs: filepath.Join(runtimeRoot, LogsDir), Log: filepath.Join(runtimeRoot, LogsDir, DemonLog)}
+		Ready: filepath.Join(runtimeRoot, ReadyFile), Shutdown: filepath.Join(runtimeRoot, ShutdownRequest),
+		Feeders: filepath.Join(runtimeRoot, FeedersDir), Logs: filepath.Join(runtimeRoot, LogsDir),
+		Log: filepath.Join(runtimeRoot, LogsDir, DemonLog)}
 }
 
 type Owner struct {
@@ -57,6 +59,10 @@ type Owner struct {
 	PID       int       `json:"pid"`
 	StartedAt time.Time `json:"started_at"`
 	Heartbeat time.Time `json:"heartbeat"`
+}
+
+type readyState struct {
+	Token string `json:"token"`
 }
 
 type Feeder struct {
@@ -212,6 +218,7 @@ func (r *Runtime) Claim(pid int) (Owner, bool, error) {
 		}
 		return Owner{}, false, err
 	}
+	_ = os.Remove(r.Paths.Ready)
 	_ = os.WriteFile(r.Paths.Heartbeat, []byte(now.Format(time.RFC3339Nano)+"\n"), 0o644)
 	return owner, true, nil
 }
@@ -284,6 +291,65 @@ func (r *Runtime) OwnerFresh() (Owner, bool) {
 	return owner, err == nil && owner.Token != "" && time.Since(owner.Heartbeat) <= r.Timing.OwnerLease
 }
 
+func (r *Runtime) MarkReady(owner Owner) error {
+	current, err := r.ReadOwner()
+	if err != nil {
+		return err
+	}
+	if current.Token != owner.Token {
+		return fmt.Errorf("demon ownership token mismatch")
+	}
+	return atomicJSON(r.Paths.Ready, readyState{Token: owner.Token})
+}
+
+func (r *Runtime) Ready(owner Owner) bool {
+	data, err := os.ReadFile(r.Paths.Ready)
+	if err != nil {
+		return false
+	}
+	var state readyState
+	return json.Unmarshal(data, &state) == nil && state.Token != "" && state.Token == owner.Token
+}
+
+func (r *Runtime) WaitReady(ctx context.Context, owner Owner, timeout time.Duration) error {
+	if timeout <= 0 {
+		timeout = 30 * time.Second
+	}
+	timer := time.NewTimer(timeout)
+	defer timer.Stop()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		if r.Ready(owner) {
+			return nil
+		}
+		current, err := r.ReadOwner()
+		if os.IsNotExist(err) {
+			return fmt.Errorf("demon stopped before its watcher became ready")
+		}
+		if err != nil {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-timer.C:
+				return fmt.Errorf("timed out waiting for demon watcher readiness after %s: last owner read: %w", timeout, err)
+			case <-ticker.C:
+				continue
+			}
+		}
+		if current.Token != owner.Token {
+			return fmt.Errorf("demon ownership changed before its watcher became ready")
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-timer.C:
+			return fmt.Errorf("timed out waiting for demon watcher readiness after %s", timeout)
+		case <-ticker.C:
+		}
+	}
+}
+
 func (r *Runtime) Heartbeat(owner Owner) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -348,6 +414,7 @@ func (r *Runtime) Release(owner Owner) error {
 		return err
 	}
 	_ = os.Remove(r.Paths.Heartbeat)
+	_ = os.Remove(r.Paths.Ready)
 	return nil
 }
 

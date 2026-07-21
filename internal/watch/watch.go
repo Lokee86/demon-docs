@@ -23,24 +23,14 @@ import (
 
 type eventWatcher interface {
 	Add(string) error
+	Remove(string) error
 	Close() error
 	Events() <-chan fsnotify.Event
 	Errors() <-chan error
 }
 
-type fsnotifyWatcher struct{ *fsnotify.Watcher }
-
-func (w fsnotifyWatcher) Events() <-chan fsnotify.Event { return w.Watcher.Events }
-func (w fsnotifyWatcher) Errors() <-chan error          { return w.Watcher.Errors }
-
-var createWatcher = func() (eventWatcher, error) {
-	w, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, err
-	}
-	return fsnotifyWatcher{w}, nil
-}
-
+var createWatcher = newEventWatcher
+var useRecursiveTreeWatches = platformRecursiveTreeWatches
 var repairObservedRename = links.RepairObservedRename
 
 func Root(ctx context.Context, root string, c config.Config, debounce *float64, once bool, out io.Writer) error {
@@ -52,10 +42,10 @@ func RootWithIgnoreRoot(ctx context.Context, root, ignoreRoot string, c config.C
 }
 
 func RootSelected(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer) error {
-	return RootSelectedWithRunLock(ctx, docsRoot, repositoryRoot, c, features, debounce, once, out, nil)
+	return RootSelectedWithRunLock(ctx, docsRoot, repositoryRoot, c, features, debounce, once, out, nil, nil)
 }
 
-func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer, runLock sync.Locker) error {
+func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot string, c config.Config, features Features, debounce *float64, once bool, out io.Writer, runLock sync.Locker, ready func() error) error {
 	if features.Frontmatter {
 		if err := frontmatter.ValidateConfig(c.Frontmatter); err != nil {
 			return err
@@ -89,17 +79,43 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		unresolved := 0
 		frontmatterUnresolved := 0
 		formatUnresolved := 0
+		if features.TrackLinks {
+			var plan links.Plan
+			var err error
+			if features.Links {
+				plan, err = links.Reconcile(repositoryRoot)
+			} else {
+				plan, err = links.Track(repositoryRoot)
+			}
+			if err != nil {
+				return err
+			}
+			if features.Links {
+				count, err := links.ApplyAndSave(&plan)
+				if err != nil {
+					return err
+				}
+				changed += count
+				diagnostics = append(diagnostics, plan.Messages...)
+				unresolved = plan.Unresolved
+			} else if err := links.Save(plan); err != nil {
+				return err
+			}
+			externalDirectories = externalWatchDirectories(plan.Files)
+			if watcher != nil {
+				if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
+					return fmt.Errorf("watch external link targets: %w", err)
+				}
+			}
+		}
 		if features.Indexes {
 			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
 			if err != nil {
 				return err
 			}
-			count, err := reconcile.ApplyWithin(result, docsRoot)
-			if err != nil {
+			if err := reconcile.PrepareMissingWithin(result, docsRoot); err != nil {
 				return err
 			}
-			changed += count
-			diagnostics = append(diagnostics, result.Messages...)
 		}
 		if features.Frontmatter {
 			plan, err := frontmatter.Build(repositoryRoot, docsRoot, c, true, time.Now())
@@ -135,32 +151,28 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				}
 			}
 		}
-		if features.TrackLinks {
-			var plan links.Plan
-			var err error
-			if features.Links {
-				plan, err = links.Reconcile(repositoryRoot)
-			} else {
-				plan, err = links.Track(repositoryRoot)
-			}
+		if features.Indexes {
+			result, count, err := reconcile.ConvergeWithin(docsRoot, repositoryRoot, c)
 			if err != nil {
 				return err
 			}
-			if features.Links {
-				count, err := links.ApplyAndSave(&plan)
-				if err != nil {
-					return err
-				}
-				changed += count
-				diagnostics = append(diagnostics, plan.Messages...)
-				unresolved = plan.Unresolved
-			} else if err := links.Save(plan); err != nil {
+			changed += count
+			diagnostics = append(diagnostics, result.Messages...)
+		}
+		if features.Indexes || features.Frontmatter || features.Format {
+			refreshPlan, err := links.Track(repositoryRoot)
+			if err != nil {
 				return err
 			}
-			externalDirectories = externalWatchDirectories(plan.Files)
-			if watcher != nil {
-				if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
-					return fmt.Errorf("watch external link targets: %w", err)
+			if features.TrackLinks || refreshPlan.Initialized {
+				if err := links.Save(refreshPlan); err != nil {
+					return err
+				}
+				externalDirectories = externalWatchDirectories(refreshPlan.Files)
+				if watcher != nil {
+					if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
+						return fmt.Errorf("watch external link targets: %w", err)
+					}
 				}
 			}
 		}
@@ -213,8 +225,21 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			return fmt.Errorf("watch document schemas: %w", err)
 		}
 	}
+	if ready != nil {
+		if err := ready(); err != nil {
+			return fmt.Errorf("mark watcher ready: %w", err)
+		}
+	}
 	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
 	pendingRenames := map[string]time.Time{}
+	immediateRenameRepairs := 0
+	bulkRenameObserved := false
+	lastObservedRename := time.Time{}
+	bulkRenameQuietPeriod := time.Duration(seconds * float64(time.Second))
+	if bulkRenameQuietPeriod < 500*time.Millisecond {
+		bulkRenameQuietPeriod = 500 * time.Millisecond
+	}
+	const immediateRenameRepairLimit = 1
 	runObservedRename := func(oldPath, newPath string) (bool, int, error) {
 		if runLock != nil {
 			runLock.Lock()
@@ -310,12 +335,18 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 						}
 						if oldPath != "" {
 							delete(pendingRenames, oldPath)
-							handled, changed, repairErr := runObservedRename(oldPath, event.Name)
-							if repairErr != nil {
-								return fmt.Errorf("repair observed rename %s -> %s: %w", oldPath, event.Name, repairErr)
-							}
-							if handled {
-								fmt.Fprintf(out, "%s ddocs watch repaired rename immediately: %s -> %s; updated %d file(s)\n", timestamp(), oldPath, event.Name, changed)
+							lastObservedRename = time.Now()
+							if immediateRenameRepairs < immediateRenameRepairLimit {
+								immediateRenameRepairs++
+								handled, changed, repairErr := runObservedRename(oldPath, event.Name)
+								if repairErr != nil {
+									return fmt.Errorf("repair observed rename %s -> %s: %w", oldPath, event.Name, repairErr)
+								}
+								if handled {
+									fmt.Fprintf(out, "%s ddocs watch repaired rename immediately: %s -> %s; updated %d file(s)\n", timestamp(), oldPath, event.Name, changed)
+								}
+							} else {
+								bulkRenameObserved = true
 							}
 						}
 					}
@@ -323,13 +354,9 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 			if event.Op&(fsnotify.Remove|fsnotify.Rename) != 0 {
 				if wasDirectory {
-					delete(watchedDirs, event.Name)
-				}
-				if externalWatched[event.Name] {
-					delete(externalWatched, event.Name)
-				}
-				if formatWatched[event.Name] {
-					delete(formatWatched, event.Name)
+					removeWatchTree(w, event.Name, watchedDirs)
+					removeWatchTree(w, event.Name, externalWatched)
+					removeWatchTree(w, event.Name, formatWatched)
 				}
 			}
 			relevant := isExternal || relevantSelectedWithPolicy(event.Name, c, policy, docsRoot, repositoryRoot, features, wasDirectory)
@@ -337,14 +364,41 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				scheduler.MarkChanged()
 			}
 		case <-ticker.C:
-			if _, err := scheduler.RunIfPending(); err != nil {
+			if bulkRenameObserved && time.Since(lastObservedRename) < bulkRenameQuietPeriod {
+				continue
+			}
+			ran, err := scheduler.RunIfPending()
+			if err != nil {
+				if links.IsTransientFilesystemRace(err) {
+					fmt.Fprintf(out, "%s ddocs watch deferred stale reconciliation plan: %v\n", timestamp(), err)
+					scheduler.MarkChanged()
+					continue
+				}
 				return err
+			}
+			if ran {
+				immediateRenameRepairs = 0
+				bulkRenameObserved = false
+				lastObservedRename = time.Time{}
 			}
 		}
 	}
 }
 
 func addTree(w eventWatcher, root, start string, c config.Config, policy ignorepolicy.Policy, watched map[string]bool) error {
+	if useRecursiveTreeWatches {
+		start = filepath.Clean(start)
+		for watchedRoot := range watched {
+			if repository.Contains(watchedRoot, start) {
+				return nil
+			}
+		}
+		if err := w.Add(start); err != nil {
+			return fmt.Errorf("watch directory tree %s: %w", start, err)
+		}
+		watched[start] = true
+		return nil
+	}
 	return filepath.WalkDir(start, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err

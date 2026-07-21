@@ -153,7 +153,75 @@ func ApplyWithin(result model.ReconcileResult, root string) (int, error) {
 			return 0, fmt.Errorf("refusing to write outside docs root: %s", update.Path)
 		}
 	}
-	return apply(result)
+	return applyWithin(result)
+}
+
+// PrepareMissingWithin creates empty placeholders for indexes that do not yet
+// exist. It never recreates a missing parent directory: a directory move can
+// invalidate a prepared reconciliation plan while the daemon is still running.
+func PrepareMissingWithin(result model.ReconcileResult, root string) error {
+	for _, update := range result.Updates {
+		if update.OldText != nil {
+			continue
+		}
+		if !repository.Contains(root, update.Path) {
+			return fmt.Errorf("refusing to prepare index outside docs root: %s", update.Path)
+		}
+		parentExists, err := existingParent(update.Path)
+		if err != nil {
+			return err
+		}
+		if !parentExists {
+			continue
+		}
+		file, err := os.OpenFile(update.Path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if os.IsExist(err) {
+			continue
+		}
+		if err != nil {
+			return fmt.Errorf("prepare index %s: %w", update.Path, err)
+		}
+		if err := file.Close(); err != nil {
+			return fmt.Errorf("close prepared index %s: %w", update.Path, err)
+		}
+	}
+	return nil
+}
+
+const maxIndexConvergencePasses = 8
+
+// ConvergeWithin rebuilds and applies index plans until the tree is stable.
+// Prepared placeholder indexes can require a follow-up pass once their titles
+// and parent relationships become available.
+func ConvergeWithin(root, ignoreRoot string, c config.Config) (model.ReconcileResult, int, error) {
+	changed := 0
+	messages := []string{}
+	for pass := 0; pass < maxIndexConvergencePasses; pass++ {
+		result, err := TreeWithIgnoreRoot(root, ignoreRoot, c)
+		if err != nil {
+			return result, changed, err
+		}
+		messages = append(messages, result.Messages...)
+		if len(result.Updates) == 0 {
+			result.Messages = messages
+			return result, changed, nil
+		}
+		count, err := ApplyWithin(result, root)
+		if err != nil {
+			return result, changed, err
+		}
+		changed += count
+	}
+	result, err := TreeWithIgnoreRoot(root, ignoreRoot, c)
+	if err != nil {
+		return result, changed, err
+	}
+	messages = append(messages, result.Messages...)
+	result.Messages = messages
+	if len(result.Updates) > 0 {
+		return result, changed, fmt.Errorf("index reconciliation did not converge after %d passes", maxIndexConvergencePasses)
+	}
+	return result, changed, nil
 }
 
 func apply(result model.ReconcileResult) (int, error) {
@@ -165,20 +233,93 @@ func apply(result model.ReconcileResult) (int, error) {
 		if err := os.MkdirAll(filepath.Dir(u.Path), 0o755); err != nil {
 			return changed, fmt.Errorf("create parent for %s: %w", u.Path, err)
 		}
-		data := textio.EncodeNew(u.NewText)
-		if u.OldText != nil {
-			doc, err := textio.Read(u.Path)
-			if err != nil {
-				return changed, fmt.Errorf("read before write %s: %w", u.Path, err)
-			}
-			data = doc.Encode(u.NewText)
+		written, err := applyUpdate(u, false)
+		if err != nil {
+			return changed, err
 		}
-		if err := os.WriteFile(u.Path, data, 0o644); err != nil {
-			return changed, fmt.Errorf("write %s: %w", u.Path, err)
+		if written {
+			changed++
 		}
-		changed++
 	}
 	return changed, nil
+}
+
+func applyWithin(result model.ReconcileResult) (int, error) {
+	changed := 0
+	for _, update := range result.Updates {
+		if update.OldText != nil && *update.OldText == update.NewText {
+			continue
+		}
+		parentExists, err := existingParent(update.Path)
+		if err != nil {
+			return changed, err
+		}
+		if !parentExists {
+			continue
+		}
+		written, err := applyUpdate(update, true)
+		if err != nil {
+			return changed, err
+		}
+		if written {
+			changed++
+		}
+	}
+	return changed, nil
+}
+
+func existingParent(path string) (bool, error) {
+	parent := filepath.Dir(path)
+	info, err := os.Stat(parent)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("inspect parent for %s: %w", path, err)
+	}
+	if !info.IsDir() {
+		return false, fmt.Errorf("parent is not a directory for %s", path)
+	}
+	return true, nil
+}
+
+func applyUpdate(update model.FileUpdate, rejectStale bool) (bool, error) {
+	data := textio.EncodeNew(update.NewText)
+	if update.OldText == nil {
+		if rejectStale {
+			file, err := os.OpenFile(update.Path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+			if os.IsExist(err) {
+				return false, nil
+			}
+			if err != nil {
+				return false, fmt.Errorf("create %s: %w", update.Path, err)
+			}
+			if _, err := file.Write(data); err != nil {
+				_ = file.Close()
+				return false, fmt.Errorf("write %s: %w", update.Path, err)
+			}
+			if err := file.Close(); err != nil {
+				return false, fmt.Errorf("close %s: %w", update.Path, err)
+			}
+			return true, nil
+		}
+	} else {
+		doc, err := textio.Read(update.Path)
+		if os.IsNotExist(err) && rejectStale {
+			return false, nil
+		}
+		if err != nil {
+			return false, fmt.Errorf("read before write %s: %w", update.Path, err)
+		}
+		if rejectStale && doc.Text != *update.OldText {
+			return false, nil
+		}
+		data = doc.Encode(update.NewText)
+	}
+	if err := os.WriteFile(update.Path, data, 0o644); err != nil {
+		return false, fmt.Errorf("write %s: %w", update.Path, err)
+	}
+	return true, nil
 }
 
 func orderedFolders(tree model.DocsTree) []*model.FolderInfo {

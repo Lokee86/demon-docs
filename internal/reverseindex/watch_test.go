@@ -58,7 +58,7 @@ func TestWatchWithRunLockSerializesReconciliation(t *testing.T) {
 	locker := newBlockingLocker()
 	done := make(chan error, 1)
 	go func() {
-		done <- WatchWithRunLock(context.Background(), repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat(), 0, true, nil, locker)
+		done <- WatchWithRunLock(context.Background(), repositoryRoot, docsRoot, []string{codeRoot}, config.Default(), codemap.DefaultFormat(), 0, true, nil, locker, nil)
 	}()
 
 	select {

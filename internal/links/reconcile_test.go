@@ -194,6 +194,58 @@ func TestAmbiguousGuessIsLeftForTheUser(t *testing.T) {
 	}
 }
 
+func TestDocumentIDsPreserveLinkIdentityAcrossModifiedMassMoves(t *testing.T) {
+	root := t.TempDir()
+	sourceID := "019f8255-9bee-7350-ad3a-330b3b2c1132"
+	targetID := "019f8255-9bee-7817-83e2-e9b0cc0eb5a2"
+	decoyID := "019f8255-9bee-7a00-b6fd-967bd0e6ab15"
+	writeTestFile(t, filepath.Join(root, "docs", "source", "guide.md"), "---\ndocument_id: "+sourceID+"\n---\n# Guide\n\n[Overview](../target/overview.md)\n")
+	writeTestFile(t, filepath.Join(root, "docs", "target", "overview.md"), "---\ndocument_id: "+targetID+"\n---\n# Intended overview\n")
+	writeTestFile(t, filepath.Join(root, "docs", "other", "overview.md"), "---\ndocument_id: "+decoyID+"\n---\n# Different overview\n")
+
+	first, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Unresolved != 0 || len(first.Links.Links) != 1 {
+		t.Fatalf("baseline did not resolve exactly: unresolved=%d links=%#v messages=%v", first.Unresolved, first.Links.Links, first.Messages)
+	}
+	originalSourceFileID := first.Links.Links[0].SourceFileID
+	originalTargetFileID := first.Links.Links[0].TargetFileID
+	if err := Save(first); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(root, "docs", "archive"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "docs", "reference"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(root, "docs", "source"), filepath.Join(root, "docs", "archive", "source")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(root, "docs", "target"), filepath.Join(root, "docs", "reference", "target")); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(root, "docs", "archive", "source", "guide.md"), "---\ndocument_id: "+sourceID+"\n---\n# Guide\n\nSource changed during policy reconciliation.\n\n[Overview](../target/overview.md)\n")
+	writeTestFile(t, filepath.Join(root, "docs", "reference", "target", "overview.md"), "---\ndocument_id: "+targetID+"\n---\n# Intended overview\n\nTarget changed during policy reconciliation.\n")
+
+	second, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Unresolved != 0 || len(second.Updates) != 1 {
+		t.Fatalf("document identities did not disambiguate mass moves: unresolved=%d updates=%d messages=%v links=%#v", second.Unresolved, len(second.Updates), second.Messages, second.Links.Links)
+	}
+	if !strings.Contains(second.Updates[0].NewText, "../../reference/target/overview.md") {
+		t.Fatalf("link was not rewritten to the document-ID target: %q", second.Updates[0].NewText)
+	}
+	if len(second.Links.Links) != 1 || second.Links.Links[0].SourceFileID != originalSourceFileID || second.Links.Links[0].TargetFileID != originalTargetFileID {
+		t.Fatalf("private link identities did not follow document IDs: before source=%s target=%s after=%#v", originalSourceFileID, originalTargetFileID, second.Links.Links)
+	}
+}
+
 func TestAbsoluteExternalTargetCanMoveIntoRepository(t *testing.T) {
 	root := t.TempDir()
 	external := t.TempDir()

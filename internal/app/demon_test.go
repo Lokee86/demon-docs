@@ -41,6 +41,38 @@ func TestDemonStatusIsReadOnly(t *testing.T) {
 	})
 }
 
+func TestDemonStatusDistinguishesStartingFromReady(t *testing.T) {
+	root := initializedDemonRepo(t)
+	withWorkingDirectory(t, root, func(string) {
+		r := demon.New(root)
+		owner, won, err := r.Claim(os.Getpid())
+		if err != nil || !won {
+			t.Fatalf("claim: owner=%+v won=%t err=%v", owner, won, err)
+		}
+		defer r.Release(owner)
+
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"demon", "--status"}, &out, &errOut); code != 0 {
+			t.Fatalf("starting status code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if !strings.Contains(out.String(), "demon: starting") {
+			t.Fatalf("status did not report starting owner: %s", out.String())
+		}
+
+		if err := r.MarkReady(owner); err != nil {
+			t.Fatal(err)
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"demon", "--status"}, &out, &errOut); code != 0 {
+			t.Fatalf("ready status code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if !strings.Contains(out.String(), "demon: running") {
+			t.Fatalf("status did not report ready owner: %s", out.String())
+		}
+	})
+}
+
 func TestDisableThenEnableClearsShutdownRequest(t *testing.T) {
 	root := initializedDemonRepo(t)
 	withWorkingDirectory(t, root, func(string) {

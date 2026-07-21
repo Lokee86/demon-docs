@@ -16,9 +16,9 @@ This guide reviews unresolved repair suggestions, records accept or decline deci
 
 ## Overview
 
-Demon Docs separates unresolved choices, persisted decisions, and concrete repairs. Ambiguous link targets and codemap missing-link candidates appear as suggestions. Selecting a candidate converts it into the compatibility hash-guarded repair path and records the applied repair in the private review ledger.
+Demon Docs separates unresolved choices, persisted decisions, and concrete repairs. Ambiguous link targets appear through `ddocs suggestions`. Selecting a candidate converts it into the compatibility hash-guarded repair path and records the applied repair in the private review ledger.
 
-Production `codemap fix` uses the same current codemap suggestions and persisted decline policy but does not require a prior selection. It automatically adds selected non-declined recommendations through the codemap managed-section transaction. Those foreground codemap rewrites are reviewed through Git and command output rather than being published as ordinary `ddocs changes` events.
+Codemap recommendations are generated only by the explicit `ddocs codemaps` command family. They are reviewed through codemap command output and Git rather than being mixed into ordinary link suggestions or published as `ddocs changes` events.
 
 Deterministic single-target link repairs remain automatic and are recorded through the normal generated-repair lifecycle.
 
@@ -55,8 +55,6 @@ A candidate may be identified by its displayed number or target path. The candid
 
 Selection immediately creates and applies the concrete compatibility repair. There is no permanent accepted-suggestion state.
 
-Codemap generation does not require selection. Use selection only when deliberately applying one candidate through the recorded repair lifecycle instead of running the unified codemap command.
-
 ## Decline or reconsider
 
 ```bash
@@ -65,8 +63,6 @@ ddocs suggestions reconsider SUGGESTION
 ```
 
 Declining a candidate suppresses only that candidate. Declining without a candidate suppresses the whole issue.
-
-For codemap generation, an unchanged declined candidate is filtered before managed-section reconciliation. A decline does not remove a link already present in the codemap, and manual deletion does not automatically create a decline.
 
 Decisions are keyed by stable relationship and evidence fingerprint. Unchanged evidence remains suppressed. Materially changed evidence becomes stale and is shown for review rather than silently reappearing or remaining permanently hidden.
 

@@ -163,14 +163,15 @@ ddocs watch --docs
 - removes unknown fields only when configured for `remove`;
 - preserves existing valid mutable values;
 - restores immutable values from recorded Demon Docs state when possible;
-- replaces an invalid immutable value only when a recorded or generated replacement exists; and
+- replaces an invalid immutable value only when a recorded or generated replacement exists;
+- resolves duplicate generated `document_id` values by preserving the recorded owner, or the lexicographically first path when no owner is recorded, and assigning new UUIDs to the other documents; and
 - leaves invalid mutable values unresolved for the author to correct.
 
 A repair can write fixable fields while still returning a non-zero status for unresolved required fields, such as a missing summary with no configured default.
 
 ## Identity and private state
 
-The default `document_id` is a generated UUIDv7. Duplicate IDs are errors and are not recorded as immutable truth. Immutable values are stored in the private `.ddocs/` object repository, keyed by a unique document ID when available and by path otherwise. This lets immutable history follow an identified document across a move without putting private state in normal Git history.
+The default `document_id` is a generated UUIDv7. `check` reports duplicate IDs without writing. `fix` can safely resolve duplicates when `document_id` remains a generated UUID field: it preserves the document already recorded as the ID owner, falls back to the lexicographically first path when no owner is recorded, and assigns fresh UUIDs to every other duplicate. Duplicate values are never recorded as shared immutable truth. Immutable values are stored in the private `.ddocs/` object repository, keyed by a unique document ID when available and by path otherwise. This lets immutable history follow an identified document across a move without putting private state in normal Git history.
 
 Document IDs provide a stable identity seam for future link-continuity recovery. Normal Markdown paths remain the human-facing link format.
 

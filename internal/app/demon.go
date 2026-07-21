@@ -16,16 +16,18 @@ import (
 	"github.com/Lokee86/demon-docs/internal/watch"
 )
 
+const demonStartupTimeout = 30 * time.Second
+
 func demonHelp(w io.Writer) {
 	fmt.Fprintln(w, "usage: demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n       ddocs demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  acquire --client NAME [PATH] register an external agent feeder\n  heartbeat --token TOKEN [PATH]\n                               refresh an external agent feeder\n  release --token TOKEN [PATH] release an external agent feeder\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\noptions:\n  -h, --help                   show this help message and exit\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership. Run `demon <command> --help` or `ddocs demon <command> --help` for exact feeder and lifecycle behavior.")
 }
 
 func demonRunHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: demon run [-h] [--true|--false] [PATH]\n       ddocs demon run [-h] [--true|--false] [PATH]\n\nCheck configured enablement and, when enabled, register the current shell as a feeder and start the detached watcher when no fresh owner exists. Repeated calls from the same parent shell reuse its feeder.\n\noptions:\n  -h, --help  show this help message and exit\n  --true      persist [demon].run = true, clear a shutdown request, and continue startup\n  --false     persist [demon].run = false, remove all feeders, request shutdown, and exit\n\nPATH defaults to the current directory and may point anywhere inside the repository. A linked worktree is bootstrapped on its first mutating demon entry.")
+	fmt.Fprintln(w, "usage: demon run [-h] [--true|--false] [PATH]\n       ddocs demon run [-h] [--true|--false] [PATH]\n\nCheck configured enablement and, when enabled, register the current shell as a feeder and start the detached watcher when no fresh owner exists. Startup returns only after the watcher has completed its initial reconciliation and registered its filesystem watches. Repeated calls from the same parent shell reuse its feeder.\n\noptions:\n  -h, --help  show this help message and exit\n  --true      persist [demon].run = true, clear a shutdown request, and continue startup\n  --false     persist [demon].run = false, remove all feeders, request shutdown, and exit\n\nPATH defaults to the current directory and may point anywhere inside the repository. A linked worktree is bootstrapped on its first mutating demon entry.")
 }
 
 func demonStatusHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: demon --status [-h] [PATH]\n       ddocs demon --status [-h] [PATH]\n\nRead repository demon status without creating runtime state, cleaning expired feeder files, or bootstrapping a linked worktree.\n\noptions:\n  -h, --help  show this help message and exit\n\nThe report includes repository root, configured enablement, running/stale/stopped ownership state, detached PID, active shell and agent counts, last owner heartbeat, and watched docs root.")
+	fmt.Fprintln(w, "usage: demon --status [-h] [PATH]\n       ddocs demon --status [-h] [PATH]\n\nRead repository demon status without creating runtime state, cleaning expired feeder files, or bootstrapping a linked worktree.\n\noptions:\n  -h, --help  show this help message and exit\n\nThe report includes repository root, configured enablement, starting/running/stale/stopped ownership state, detached PID, active shell and agent counts, last owner heartbeat, and watched docs root.")
 }
 
 func demonLogsHelp(w io.Writer) {
@@ -41,9 +43,9 @@ func runDemon(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "run":
 		return demonRun(ctx, args[1:], out, errOut)
 	case "acquire":
-		return demonAcquire(args[1:], out, errOut)
+		return demonAcquire(ctx, args[1:], out, errOut)
 	case "heartbeat":
-		return demonHeartbeat(args[1:], out, errOut)
+		return demonHeartbeat(ctx, args[1:], out, errOut)
 	case "release":
 		return demonRelease(args[1:], out, errOut)
 	case "--status":
@@ -57,7 +59,7 @@ func runDemon(ctx context.Context, args []string, out, errOut io.Writer) int {
 	case "__shutdown":
 		return demonShutdown(args[1:], out, errOut)
 	case "__enter":
-		return demonEnter(args[1:], out, errOut)
+		return demonEnter(ctx, args[1:], out, errOut)
 	case "__leave":
 		return demonLeave(args[1:], out, errOut)
 	case "__shell-hook":
@@ -183,13 +185,24 @@ func demonRun(ctx context.Context, args []string, out, errOut io.Writer) int {
 			return fail(errOut, err)
 		}
 		_ = r.SetPID(owner.Token, pid)
-		fmt.Fprintf(out, "document demon summoned for %s\n", location.Root)
 	}
 	if !feederExists {
 		if _, err := startDetached("__feed", location.Root, feeder.Token); err != nil {
 			_ = r.RemoveFeeder(feeder.Token)
 			return fail(errOut, err)
 		}
+	}
+	if err := r.WaitReady(ctx, owner, demonStartupTimeout); err != nil {
+		if claimed {
+			_ = r.RequestShutdown()
+		}
+		if !feederExists {
+			_ = r.RemoveFeeder(feeder.Token)
+		}
+		return fail(errOut, err)
+	}
+	if claimed {
+		fmt.Fprintf(out, "document demon summoned for %s\n", location.Root)
 	}
 	feeders, _ := r.ListFeeders()
 	shells, _ := demon.CountKinds(feeders)
@@ -198,7 +211,6 @@ func demonRun(ctx context.Context, args []string, out, errOut io.Writer) int {
 	} else {
 		fmt.Fprintf(out, "%d active shells feeding the demon\n", shells)
 	}
-	_ = ctx
 	return 0
 }
 
@@ -225,7 +237,10 @@ func demonStatus(args []string, out, errOut io.Writer) int {
 	if _, err := r.ReadOwner(); err == nil {
 		state = "stale"
 		if fresh {
-			state = "running"
+			state = "starting"
+			if r.Ready(owner) {
+				state = "running"
+			}
 		}
 	}
 	feeders, err := r.SnapshotFeeders()
@@ -329,7 +344,9 @@ func demonServe(ctx context.Context, args []string, out, errOut io.Writer) int {
 				return resolveErr
 			}
 		}
-		return runSelectedWatch(wctx, scope, c, features, reverse, nil, false, w)
+		return runSelectedWatch(wctx, scope, c, features, reverse, nil, false, w, func() error {
+			return r.MarkReady(owner)
+		})
 	}, logger)
 	if err != nil {
 		_, _ = fmt.Fprintf(logger, "%s demon stopped: %v\n", time.Now().UTC().Format(time.RFC3339), err)
@@ -419,7 +436,7 @@ func demonShutdown(args []string, out, errOut io.Writer) int {
 	return 0
 }
 
-func demonEnter(args []string, out, errOut io.Writer) int {
+func demonEnter(ctx context.Context, args []string, out, errOut io.Writer) int {
 	if len(args) != 2 || (args[1] != "shell" && args[1] != "agent") {
 		fmt.Fprintln(errOut, "usage: ddocs demon __enter PATH {shell|agent}")
 		return 2
@@ -473,6 +490,15 @@ func demonEnter(args []string, out, errOut io.Writer) int {
 			_ = r.RemoveFeeder(feeder.Token)
 			return fail(errOut, err)
 		}
+	}
+	if err := r.WaitReady(ctx, owner, demonStartupTimeout); err != nil {
+		if claimed {
+			_ = r.RequestShutdown()
+		}
+		if !feederExists {
+			_ = r.RemoveFeeder(feeder.Token)
+		}
+		return fail(errOut, err)
 	}
 	fmt.Fprintf(out, "token=%s claimed=%t\n", feeder.Token, claimed)
 	return 0

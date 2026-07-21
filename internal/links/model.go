@@ -9,6 +9,7 @@ const schemaVersion = 2
 
 type FileRecord struct {
 	ID                string   `json:"id"`
+	DocumentID        string   `json:"document_id,omitempty"`
 	Path              string   `json:"path"`
 	Scope             string   `json:"scope"`
 	Kind              string   `json:"kind"`

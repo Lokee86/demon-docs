@@ -29,7 +29,7 @@ import (
 )
 
 // Version is the source-build fallback and is overridden for tagged release binaries.
-var Version = "0.3.0"
+var Version = "0.3.1"
 
 type stringsFlag struct{ values []string }
 
@@ -415,14 +415,14 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		if debounce >= 0 {
 			d = &debounce
 		}
-		if err := runSelectedWatch(ctx, scope, c, features, reverseOptions, d, once, out); err != nil {
+		if err := runSelectedWatch(ctx, scope, c, features, reverseOptions, d, once, out, nil); err != nil {
 			return fail(errOut, err)
 		}
 		return 0
 	}
 
 	indexResult := model.ReconcileResult{}
-	if features.Indexes {
+	if features.Indexes && command != "fix" {
 		indexResult, err = reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
 		if err != nil {
 			return fail(errOut, err)
@@ -440,12 +440,33 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 	}
 	if command == "fix" {
 		changed := 0
-		if features.Indexes {
-			count, err := reconcile.ApplyWithin(indexResult, scope.DocsRoot)
+		if features.TrackLinks {
+			if features.Links {
+				linkPlan, err = links.Reconcile(scope.RepositoryRoot)
+			} else {
+				linkPlan, err = links.Track(scope.RepositoryRoot)
+			}
 			if err != nil {
 				return fail(errOut, err)
 			}
-			changed += count
+			if features.Links {
+				count, err := links.ApplyAndSave(&linkPlan)
+				if err != nil {
+					return fail(errOut, err)
+				}
+				changed += count
+			} else if err := links.Save(linkPlan); err != nil {
+				return fail(errOut, err)
+			}
+		}
+		if features.Indexes {
+			indexResult, err = reconcile.TreeWithIgnoreRoot(scope.DocsRoot, scope.RepositoryRoot, c)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			if err := reconcile.PrepareMissingWithin(indexResult, scope.DocsRoot); err != nil {
+				return fail(errOut, err)
+			}
 		}
 		if features.Frontmatter {
 			frontmatterPlan, err = frontmatter.Build(scope.RepositoryRoot, scope.DocsRoot, c, true, time.Now())
@@ -469,25 +490,6 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			}
 			changed += count
 		}
-		if features.TrackLinks {
-			if features.Links {
-				linkPlan, err = links.Reconcile(scope.RepositoryRoot)
-			} else {
-				linkPlan, err = links.Track(scope.RepositoryRoot)
-			}
-			if err != nil {
-				return fail(errOut, err)
-			}
-			if features.Links {
-				count, err := links.ApplyAndSave(&linkPlan)
-				if err != nil {
-					return fail(errOut, err)
-				}
-				changed += count
-			} else if err := links.Save(linkPlan); err != nil {
-				return fail(errOut, err)
-			}
-		}
 		if features.Reverse {
 			reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
 			if err != nil {
@@ -499,14 +501,36 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			}
 			changed += count
 		}
+		if features.Indexes {
+			var count int
+			indexResult, count, err = reconcile.ConvergeWithin(scope.DocsRoot, scope.RepositoryRoot, c)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			changed += count
+		}
+		if features.Indexes || features.Frontmatter || features.Format || features.Reverse {
+			refreshPlan, err := links.Track(scope.RepositoryRoot)
+			if err != nil {
+				return fail(errOut, err)
+			}
+			if features.TrackLinks || refreshPlan.Initialized {
+				if err := links.Save(refreshPlan); err != nil {
+					return fail(errOut, err)
+				}
+			}
+			if features.Links {
+				linkPlan = refreshPlan
+			}
+		}
 		fmt.Fprintf(out, "ddocs fix updated %d file(s)\n", changed)
-		writeMessages(out, indexResult.Messages)
 		if features.Links {
 			writeMessages(out, linkPlan.Messages)
 		}
 		writeFrontmatterDiagnostics(out, frontmatterPlan.Diagnostics)
 		writeFormatDiagnostics(out, formatPlan.Diagnostics)
 		writeReverseIndexDiagnostics(out, reversePlan.Diagnostics)
+		writeMessages(out, indexResult.Messages)
 		failed := false
 		if features.Links && linkPlan.Unresolved > 0 {
 			fmt.Fprintf(out, "ddocs fix unresolved %d link(s)\n", linkPlan.Unresolved)

@@ -74,6 +74,54 @@ func TestFrontmatterCheckIsReadOnlyAndFixIsIdempotent(t *testing.T) {
 	}
 }
 
+func TestFrontmatterOnlyFixRefreshesExistingLinkIdentity(t *testing.T) {
+	repo := t.TempDir()
+	configText := strings.Replace(frontmatterTestConfig(false, "yaml"), "[links]\nenabled = false", "[links]\nenabled = true", 1)
+	writeTestFile(t, filepath.Join(repo, ".ddocs", "config.toml"), configText)
+	writeTestFile(t, filepath.Join(repo, "docs", "area", "source.md"), "# Source\n\n[Target](../old/target.md)\n")
+	writeTestFile(t, filepath.Join(repo, "docs", "old", "target.md"), "# Intended Target\n")
+	writeTestFile(t, filepath.Join(repo, "docs", "other", "target.md"), "# Other Target\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"fix", "--links"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("link baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix", "--frontmatter"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("frontmatter fix code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+
+		if err := os.MkdirAll(filepath.Join(repo, "docs", "moved", "deep"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.MkdirAll(filepath.Join(repo, "docs", "new"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(filepath.Join(repo, "docs", "area", "source.md"), filepath.Join(repo, "docs", "moved", "deep", "source.md")); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Rename(filepath.Join(repo, "docs", "old", "target.md"), filepath.Join(repo, "docs", "new", "target.md")); err != nil {
+			t.Fatal(err)
+		}
+
+		stdout.Reset()
+		stderr.Reset()
+		if code := Run(context.Background(), []string{"fix", "--links"}, &stdout, &stderr); code != 0 {
+			t.Fatalf("moved link fix code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+		if strings.Contains(stdout.String(), "unresolved") || strings.Contains(stdout.String(), "Ambiguous link") {
+			t.Fatalf("document-ID move became ambiguous: %q", stdout.String())
+		}
+		moved := readTestFile(t, filepath.Join(repo, "docs", "moved", "deep", "source.md"))
+		if !strings.Contains(moved, "[Target](../../new/target.md)") {
+			t.Fatalf("link did not follow the intended document ID:\n%s", moved)
+		}
+	})
+}
+
 func TestFrontmatterFixPreservesExistingTOMLFormat(t *testing.T) {
 	repo := t.TempDir()
 	page := filepath.Join(repo, "docs", "page.md")

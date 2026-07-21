@@ -68,7 +68,7 @@ func TestRootSelectedWithRunLockSerializesReconciliation(t *testing.T) {
 	locker := newBlockingLocker()
 	done := make(chan error, 1)
 	go func() {
-		done <- RootSelectedWithRunLock(context.Background(), root, root, config.Default(), Features{Indexes: true}, nil, true, nil, locker)
+		done <- RootSelectedWithRunLock(context.Background(), root, root, config.Default(), Features{Indexes: true}, nil, true, nil, locker, nil)
 	}()
 
 	select {
@@ -141,6 +141,77 @@ func TestWatchConvergesWithoutSelfWriteLoop(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("watcher did not shut down")
+	}
+}
+
+func TestSelectedWatchRepairsLinksBeforeFrontmatterAndRefreshesFinalFingerprints(t *testing.T) {
+	root := t.TempDir()
+	writeWatchFile := func(path, text string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeWatchFile(filepath.Join(root, "docs", "source.md"), "[target](old/target.md)\n")
+	writeWatchFile(filepath.Join(root, "docs", "old", "target.md"), "# Original target\n")
+	writeWatchFile(filepath.Join(root, "docs", "decoy", "target.md"), "# Decoy target\n")
+
+	c := config.Default()
+	c.Root = "docs"
+	c.Index.Enabled = true
+	c.Links.Enabled = true
+	c.Format.Enabled = false
+	c.Frontmatter = config.Frontmatter{
+		Enabled:        true,
+		DefaultFormat:  "yaml",
+		AllowedFormats: []string{"yaml"},
+		UnknownFields:  "remove",
+		Fields: map[string]config.FrontmatterField{
+			"created": {Type: "date", Required: true, Immutable: true, Generated: true},
+		},
+	}
+	docs := filepath.Join(root, "docs")
+	if err := RootSelected(context.Background(), docs, root, c, Features{Links: true, TrackLinks: true}, nil, true, nil); err != nil {
+		t.Fatal(err)
+	}
+	moved := filepath.Join(docs, "moved", "target.md")
+	if err := os.MkdirAll(filepath.Dir(moved), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(docs, "old", "target.md"), moved); err != nil {
+		t.Fatal(err)
+	}
+	features := Features{Indexes: true, Frontmatter: true, Links: true, TrackLinks: true}
+	if err := RootSelected(context.Background(), docs, root, c, features, nil, true, nil); err != nil {
+		t.Fatal(err)
+	}
+	source, err := os.ReadFile(filepath.Join(docs, "source.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(source), "(moved/target.md)") {
+		t.Fatalf("watch did not repair the link before frontmatter changed the target fingerprint:\n%s", source)
+	}
+
+	final := filepath.Join(docs, "final", "target.md")
+	if err := os.MkdirAll(filepath.Dir(final), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(moved, final); err != nil {
+		t.Fatal(err)
+	}
+	if err := RootSelected(context.Background(), docs, root, c, Features{Links: true, TrackLinks: true}, nil, true, nil); err != nil {
+		t.Fatal(err)
+	}
+	source, err = os.ReadFile(filepath.Join(docs, "source.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(source), "(final/target.md)") {
+		t.Fatalf("watch did not refresh final fingerprint state after frontmatter/index writes:\n%s", source)
 	}
 }
 

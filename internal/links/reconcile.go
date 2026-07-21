@@ -34,18 +34,35 @@ func Track(repositoryRoot string) (Plan, error) {
 
 func reconcileWithOptions(repositoryRoot string, repair bool) (Plan, error) {
 	started := time.Now()
-	var timings ReconcileTimings
-	plan, err := reconcile(repositoryRoot, repair, &timings)
-	timings.Total = time.Since(started)
-	return plan, err
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		var timings ReconcileTimings
+		plan, err := reconcile(repositoryRoot, repair, &timings)
+		timings.Total = time.Since(started)
+		if err == nil || !IsTransientFilesystemRace(err) {
+			return plan, err
+		}
+		lastErr = err
+		time.Sleep(25 * time.Millisecond)
+	}
+	return Plan{}, lastErr
 }
 
 func reconcileWithTimings(repositoryRoot string) (Plan, ReconcileTimings, error) {
 	started := time.Now()
+	var lastErr error
 	var timings ReconcileTimings
-	plan, err := reconcile(repositoryRoot, true, &timings)
-	timings.Total = time.Since(started)
-	return plan, timings, err
+	for attempt := 0; attempt < 3; attempt++ {
+		timings = ReconcileTimings{}
+		plan, err := reconcile(repositoryRoot, true, &timings)
+		timings.Total = time.Since(started)
+		if err == nil || !IsTransientFilesystemRace(err) {
+			return plan, timings, err
+		}
+		lastErr = err
+		time.Sleep(25 * time.Millisecond)
+	}
+	return Plan{}, timings, lastErr
 }
 
 func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (Plan, error) {

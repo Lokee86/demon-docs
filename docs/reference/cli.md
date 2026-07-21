@@ -124,7 +124,7 @@ ddocs suggestions decline SUGGESTION [CANDIDATE] --reason "..."
 ddocs suggestions reconsider SUGGESTION
 ```
 
-These commands inspect current ambiguous link repairs and codemap missing-link candidates, join them with persisted decisions, and convert a selected candidate into the normal hash-guarded repair path. Declines persist by stable relationship and evidence fingerprint.
+These commands inspect current ambiguous link repairs, join them with persisted decisions, and convert a selected candidate into the normal hash-guarded repair path. They do not generate codemap recommendations; those are owned by the explicit `ddocs codemaps` command family. Declines persist by stable relationship and evidence fingerprint.
 
 ## Applied-change commands
 

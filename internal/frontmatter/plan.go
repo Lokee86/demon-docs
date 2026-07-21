@@ -41,6 +41,8 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		return plan, err
 	}
 	immutable := loadImmutableIndex(repoRoot)
+	duplicateOwners := selectDuplicateOwners(sources, immutable)
+	usedIDs := collectDocumentIDs(sources)
 	ids := map[string][]string{}
 	for _, source := range sources {
 		path := source.path
@@ -58,11 +60,38 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 		if err != nil {
 			return plan, fmt.Errorf("resolve frontmatter defaults for %s: %w", relative, err)
 		}
-		recorded := immutable.values(relative, parsed.Values, !duplicateExisting[path])
+		currentID := documentID(parsed.Values)
+		owner, duplicated := duplicateOwners[currentID]
+		duplicateIDChanged := false
+		allowIDHistory := !duplicateExisting[path] || duplicated && relative == owner
+		recorded := immutable.values(relative, parsed.Values, allowIDHistory)
+		if repair && duplicated && relative != owner {
+			replacement, ok, replacementErr := generateUniqueDocumentID(frontmatterSchema, now, usedIDs)
+			if replacementErr != nil {
+				return plan, fmt.Errorf("repair duplicate document_id for %s: %w", relative, replacementErr)
+			}
+			if ok {
+				parsed.Values = cloneValues(parsed.Values)
+				parsed.Values["document_id"] = replacement
+				recorded = cloneValues(recorded)
+				delete(recorded, "document_id")
+				usedIDs[replacement] = struct{}{}
+				duplicateIDChanged = true
+				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
+					Path:     relative,
+					Field:    "document_id",
+					Message:  fmt.Sprintf("duplicate document_id %s also used by %s; fix assigned %s", currentID, owner, replacement),
+					Resolved: true,
+				})
+			}
+		}
 		outcome := Evaluate(relative, parsed, frontmatterSchema, repair, recorded, now)
+		if duplicateIDChanged {
+			outcome.Changed = true
+		}
 		plan.Diagnostics = append(plan.Diagnostics, outcome.Diagnostics...)
-		if value, ok := outcome.Values["document_id"].(string); ok && strings.TrimSpace(value) != "" {
-			ids[value] = append(ids[value], relative)
+		if id := documentID(outcome.Values); id != "" {
+			ids[id] = append(ids[id], relative)
 		}
 		if len(outcome.Immutable) > 0 {
 			plan.immutable[relative] = outcome.Immutable

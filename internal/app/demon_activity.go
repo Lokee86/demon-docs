@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -10,7 +11,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/demon"
 )
 
-func demonAcquire(args []string, out, errOut io.Writer) int {
+func demonAcquire(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs := flag.NewFlagSet("demon acquire", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	client := fs.String("client", "", "external agent client name")
@@ -40,7 +41,7 @@ func demonAcquire(args []string, out, errOut io.Writer) int {
 	if err != nil {
 		return fail(errOut, err)
 	}
-	claimed, err := ensureDemonOwner(runtime, location.Root)
+	claimed, err := ensureDemonOwner(ctx, runtime, location.Root)
 	if err != nil {
 		_ = runtime.RemoveFeeder(feeder.Token)
 		return fail(errOut, err)
@@ -49,7 +50,7 @@ func demonAcquire(args []string, out, errOut io.Writer) int {
 	return 0
 }
 
-func demonHeartbeat(args []string, out, errOut io.Writer) int {
+func demonHeartbeat(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs := flag.NewFlagSet("demon heartbeat", flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	token := fs.String("token", "", "external feeder token")
@@ -78,7 +79,7 @@ func demonHeartbeat(args []string, out, errOut io.Writer) int {
 		return fail(errOut, err)
 	}
 	runtime.ClearShutdown()
-	if _, err := ensureDemonOwner(runtime, location.Root); err != nil {
+	if _, err := ensureDemonOwner(ctx, runtime, location.Root); err != nil {
 		return fail(errOut, err)
 	}
 	_ = out
@@ -109,16 +110,24 @@ func demonRelease(args []string, out, errOut io.Writer) int {
 	return 0
 }
 
-func ensureDemonOwner(runtime *demon.Runtime, root string) (bool, error) {
+func ensureDemonOwner(ctx context.Context, runtime *demon.Runtime, root string) (bool, error) {
 	owner, claimed, err := runtime.Claim(os.Getpid())
-	if err != nil || !claimed {
-		return claimed, err
-	}
-	pid, err := startDetached("__serve", root, owner.Token)
 	if err != nil {
-		_ = runtime.Release(owner)
 		return false, err
 	}
-	_ = runtime.SetPID(owner.Token, pid)
-	return true, nil
+	if claimed {
+		pid, startErr := startDetached("__serve", root, owner.Token)
+		if startErr != nil {
+			_ = runtime.Release(owner)
+			return false, startErr
+		}
+		_ = runtime.SetPID(owner.Token, pid)
+	}
+	if err := runtime.WaitReady(ctx, owner, demonStartupTimeout); err != nil {
+		if claimed {
+			_ = runtime.RequestShutdown()
+		}
+		return false, err
+	}
+	return claimed, nil
 }

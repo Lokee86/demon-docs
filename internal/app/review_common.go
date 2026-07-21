@@ -11,11 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Lokee86/demon-docs/internal/codemap"
-	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
-	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/config"
-	"github.com/Lokee86/demon-docs/internal/evidence"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/review"
@@ -45,70 +41,16 @@ func loadReviewRuntime(ctx context.Context, errOut io.Writer) (reviewRuntime, in
 	if err != nil {
 		return reviewRuntime{}, fail(errOut, err)
 	}
-	codemapSuggestions, codemapErr := currentCodemapSuggestions(ctx, scope, resolved)
-	all := mergeReviewSuggestions(linkSuggestions, codemapSuggestions, codemapErr, errOut)
-	return reviewRuntime{config: resolved, scope: scope, linkPlan: plan, suggestions: all}, 0
-}
-
-func mergeReviewSuggestions(linkSuggestions, codemapSuggestions []review.Suggestion, codemapErr error, errOut io.Writer) []review.Suggestion {
-	if codemapErr != nil {
-		fmt.Fprintf(errOut, "warning: codemap suggestions unavailable: %v\n", codemapErr)
-		codemapSuggestions = nil
-	}
-	all := append(append([]review.Suggestion(nil), linkSuggestions...), codemapSuggestions...)
-	sort.Slice(all, func(i, j int) bool {
-		if all[i].SourcePath != all[j].SourcePath {
-			return all[i].SourcePath < all[j].SourcePath
+	sort.Slice(linkSuggestions, func(i, j int) bool {
+		if linkSuggestions[i].SourcePath != linkSuggestions[j].SourcePath {
+			return linkSuggestions[i].SourcePath < linkSuggestions[j].SourcePath
 		}
-		if all[i].Kind != all[j].Kind {
-			return all[i].Kind < all[j].Kind
+		if linkSuggestions[i].Kind != linkSuggestions[j].Kind {
+			return linkSuggestions[i].Kind < linkSuggestions[j].Kind
 		}
-		return all[i].ID < all[j].ID
+		return linkSuggestions[i].ID < linkSuggestions[j].ID
 	})
-	return all
-}
-
-func currentCodemapSuggestions(ctx context.Context, scope repository.Scope, resolved config.Config) ([]review.Suggestion, error) {
-	if !repository.DocsRootExists(scope) {
-		return nil, nil
-	}
-	format := codemap.DefaultFormat()
-	format.SectionHeadings = append([]string(nil), resolved.Codemap.Headings...)
-	dataset, err := codemap.BuildDataset(scope.RepositoryRoot, scope.DocsRoot, format)
-	if err != nil {
-		return nil, err
-	}
-	if len(dataset.Entries) == 0 {
-		return nil, nil
-	}
-	corpus, err := codemapcorpus.Build(scope.RepositoryRoot, dataset, codemapcorpus.Options{})
-	if err != nil {
-		return nil, fmt.Errorf("build codemap suggestion corpus: %w", err)
-	}
-	policy, err := review.LoadPolicy(scope.RepositoryRoot)
-	if err != nil {
-		return nil, err
-	}
-	result := []review.Suggestion{}
-	for _, document := range dataset.Documents {
-		if document.SectionCount == 0 {
-			continue
-		}
-		if err := ctx.Err(); err != nil {
-			return nil, err
-		}
-		input, err := corpus.Input(document.Path, corpus.KnownTargets(document.Path))
-		if err != nil {
-			return nil, err
-		}
-		input.DocumentText = codemap.StripAuthoredSections(input.DocumentText, format)
-		items := codemaprecommend.SuggestionsFromEvidence(document.Path, evidence.Collect(input))
-		for _, item := range items {
-			suggestion := review.CodemapSuggestion(item.Document, item.Target, item.Score, string(item.Tier), item.Evidence)
-			result = append(result, policy.ApplySuggestion(suggestion))
-		}
-	}
-	return result, nil
+	return reviewRuntime{config: resolved, scope: scope, linkPlan: plan, suggestions: linkSuggestions}, 0
 }
 
 func reviewPath(repositoryRoot, input string) (string, error) {

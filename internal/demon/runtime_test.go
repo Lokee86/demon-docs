@@ -17,6 +17,19 @@ func testRuntime(t *testing.T) *Runtime {
 	return r
 }
 
+func removeWithRetry(t *testing.T, path string) {
+	t.Helper()
+	deadline := time.Now().Add(time.Second)
+	for {
+		if err := os.Remove(path); err == nil {
+			return
+		} else if time.Now().After(deadline) {
+			t.Fatal(err)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+}
+
 func TestClaimAllowsExactlyOneOwner(t *testing.T) {
 	r := testRuntime(t)
 	var wg sync.WaitGroup
@@ -47,6 +60,88 @@ func TestClaimAllowsExactlyOneOwner(t *testing.T) {
 	owner, err := r.ReadOwner()
 	if err != nil || owner.Token == "" {
 		t.Fatalf("owner=%+v err=%v", owner, err)
+	}
+	if err := r.Release(owner); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestWaitReadyRequiresMatchingOwnerAndReleaseClearsState(t *testing.T) {
+	r := testRuntime(t)
+	owner, won, err := r.Claim(1)
+	if err != nil || !won {
+		t.Fatalf("claim: owner=%+v won=%t err=%v", owner, won, err)
+	}
+	if r.Ready(owner) {
+		t.Fatal("new owner was ready before watcher registration")
+	}
+
+	ready := make(chan error, 1)
+	go func() {
+		ready <- r.WaitReady(context.Background(), owner, time.Second)
+	}()
+	select {
+	case err := <-ready:
+		t.Fatalf("wait returned before readiness: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+	if err := r.MarkReady(Owner{Token: "other"}); err == nil {
+		t.Fatal("mismatched owner marked runtime ready")
+	}
+	if err := r.MarkReady(owner); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case err := <-ready:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("wait did not return after readiness")
+	}
+	if err := r.Release(owner); err != nil {
+		t.Fatal(err)
+	}
+	if r.Ready(owner) {
+		t.Fatal("release left stale readiness state")
+	}
+}
+
+func TestWaitReadyRetriesTransientOwnerReadError(t *testing.T) {
+	r := testRuntime(t)
+	owner, won, err := r.Claim(1)
+	if err != nil || !won {
+		t.Fatalf("claim: owner=%+v won=%t err=%v", owner, won, err)
+	}
+	removeWithRetry(t, r.Paths.Owner)
+	if err := os.Mkdir(r.Paths.Owner, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	ready := make(chan error, 1)
+	go func() {
+		ready <- r.WaitReady(context.Background(), owner, time.Second)
+	}()
+	select {
+	case err := <-ready:
+		t.Fatalf("wait returned on transient owner read error: %v", err)
+	case <-time.After(30 * time.Millisecond):
+	}
+
+	removeWithRetry(t, r.Paths.Owner)
+	if err := atomicJSON(r.Paths.Owner, owner); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.MarkReady(owner); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case err := <-ready:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("wait did not recover after transient owner read error")
 	}
 	if err := r.Release(owner); err != nil {
 		t.Fatal(err)
