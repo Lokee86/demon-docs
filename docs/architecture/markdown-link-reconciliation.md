@@ -174,7 +174,7 @@ ddocs watch -l
 ddocs watch -r
 ```
 
-Supplying selectors runs only those systems. Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run; link repair follows `[links].enabled`, and reverse indexes also run when reverse roots are configured or supplied.
+Supplying selectors runs only those systems. Without selectors, `fix` runs configured documentation indexes and link tracking, plus reverse indexes when reverse roots are configured or supplied; it skips frontmatter and document-body format. `check` and `watch` retain the full configured default selection. `-a`/`--all` explicitly selects every configured system.
 
 `check` reports pending rewrites, broken links, ambiguous links, undefined reference labels, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events and prints each reconciliation diagnostic rather than only a message count.
 

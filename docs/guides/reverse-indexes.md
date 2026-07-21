@@ -90,7 +90,7 @@ A generated block lists direct files and nests documentation backlinks below exa
 
 ## Run with other subsystems
 
-Without selectors, normal `fix` and `check` run documentation indexes and links, plus reverse indexes when reverse roots are configured.
+Without selectors, normal `fix` runs documentation indexes and links, plus reverse indexes when reverse roots are configured. Bare `check` also includes configured frontmatter and document-body format. `fix -a`/`fix --all` selects every configured system.
 
 Use explicit selectors for a narrow pass:
 

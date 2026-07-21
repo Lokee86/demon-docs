@@ -137,7 +137,7 @@ ddocs fix --links
 ddocs fix --reverse
 ```
 
-`--indexes` selects folder indexes only. `--docs` is the umbrella selector for indexes, frontmatter, and document-body format. Without selectors, configured documentation indexes, frontmatter, document-body format, and link tracking run. Link repair follows `[links].enabled`, and reverse indexes also run when roots are configured or supplied.
+`--indexes` selects folder indexes only. `--docs` is the umbrella selector for indexes, frontmatter, and document-body format. Bare `fix` runs configured documentation indexes and link tracking, plus reverse indexes when roots are configured or supplied; it skips frontmatter and document-body format. Use `fix -a` or `fix --all` for every configured system. Bare `check` and `watch` retain the full configured default selection.
 
 ## Expected result
 

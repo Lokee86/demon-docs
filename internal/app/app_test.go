@@ -117,7 +117,7 @@ func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
 
 	withWorkingDirectory(t, child, func(string) {
 		var out, errOut bytes.Buffer
-		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 1 || !strings.Contains(out.String(), "unresolved") || !strings.Contains(out.String(), "frontmatter issue") {
+		if code := Run(context.Background(), []string{"fix", "-a"}, &out, &errOut); code != 1 || !strings.Contains(out.String(), "unresolved") || !strings.Contains(out.String(), "frontmatter issue") {
 			t.Fatalf("fix code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 		rootIndex := filepath.Join(docsRoot, "INDEX.md")
@@ -226,7 +226,7 @@ enabled = false
 
 		out.Reset()
 		errOut.Reset()
-		if code := Run(context.Background(), []string{"fix"}, &out, &errOut); code != 0 {
+		if code := Run(context.Background(), []string{"fix", "--all"}, &out, &errOut); code != 0 {
 			t.Fatalf("combined fix code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 		source, err := os.ReadFile(filepath.Join(docs, "source.md"))

@@ -107,24 +107,55 @@ func TestIndexSelectorDoesNotSelectFrontmatterOrFormat(t *testing.T) {
 	configured.Format.Enabled = true
 	configured.Links.Enabled = true
 
-	features := selectedFeatures(commonFlags{indexesOnly: true}, configured)
+	features := selectedFeatures("fix", commonFlags{indexesOnly: true}, configured)
 	if !features.Indexes || features.Frontmatter || features.Format || features.Links || features.TrackLinks || features.Reverse {
 		t.Fatalf("explicit index selector was not index-only: %+v", features)
 	}
 
-	features = selectedFeatures(commonFlags{docsOnly: true}, configured)
+	features = selectedFeatures("fix", commonFlags{docsOnly: true}, configured)
 	if !features.Indexes || !features.Frontmatter || !features.Format || features.Links || features.TrackLinks || features.Reverse {
 		t.Fatalf("explicit docs selector did not select documentation policy systems: %+v", features)
 	}
 }
 
+func TestDefaultFixSkipsFrontmatterAndFormatUnlessAllIsSelected(t *testing.T) {
+	configured := config.Default()
+	configured.Index.Enabled = true
+	configured.Frontmatter.Enabled = true
+	configured.Format.Enabled = true
+	configured.Links.Enabled = true
+	configured.ReverseIndex.Roots = []string{"services"}
+
+	features := selectedFeatures("fix", commonFlags{}, configured)
+	if !features.Indexes || features.Frontmatter || features.Format || !features.Links || !features.TrackLinks || !features.Reverse {
+		t.Fatalf("bare fix did not select only its safe general systems: %+v", features)
+	}
+
+	features = selectedFeatures("fix", commonFlags{all: true}, configured)
+	if !features.Indexes || !features.Frontmatter || !features.Format || !features.Links || !features.TrackLinks || !features.Reverse {
+		t.Fatalf("all selector did not select every configured system: %+v", features)
+	}
+}
+
+func TestDefaultCheckAndWatchStillSelectFrontmatterAndFormat(t *testing.T) {
+	configured := config.Default()
+	configured.Frontmatter.Enabled = true
+	configured.Format.Enabled = true
+	for _, command := range []string{"check", "watch"} {
+		features := selectedFeatures(command, commonFlags{}, configured)
+		if !features.Frontmatter || !features.Format {
+			t.Fatalf("bare %s unexpectedly skipped frontmatter or format: %+v", command, features)
+		}
+	}
+}
+
 func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {
-	features := selectedFeatures(commonFlags{reverseRoots: stringsFlag{values: []string{"services"}}}, config.Default())
+	features := selectedFeatures("fix", commonFlags{reverseRoots: stringsFlag{values: []string{"services"}}}, config.Default())
 	if !features.Indexes || !features.Links || !features.Reverse {
 		t.Fatalf("reverse root override did not enable reverse alongside default systems: %+v", features)
 	}
 
-	features = selectedFeatures(commonFlags{reverseOnly: true}, config.Default())
+	features = selectedFeatures("fix", commonFlags{reverseOnly: true}, config.Default())
 	if features.Indexes || features.Links || features.TrackLinks || !features.Reverse {
 		t.Fatalf("explicit reverse selector was not reverse-only: %+v", features)
 	}
@@ -132,7 +163,7 @@ func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {
 	disabled := config.Default()
 	disabled.Index.Enabled = false
 	disabled.Links.Enabled = false
-	features = selectedFeatures(commonFlags{}, disabled)
+	features = selectedFeatures("fix", commonFlags{}, disabled)
 	if features.Indexes || features.Links || !features.TrackLinks {
 		t.Fatalf("disabled features did not preserve internal link tracking: %+v", features)
 	}
