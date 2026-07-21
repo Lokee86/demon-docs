@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Lokee86/demon-docs/internal/ddrepo"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -140,30 +141,43 @@ func (stored persistedBytes) bytes() []byte {
 }
 
 func (s *Store) appendBatchOnce(prepared []preparedAppend, payload []byte) ([]StoredEvent, bool, error) {
-	current, err := s.repository.Storer.Reference(reviewReference)
-	if errors.Is(err, plumbing.ErrReferenceNotFound) {
-		current = nil
-	} else if err != nil {
-		return nil, false, fmt.Errorf("read review reference: %w", err)
-	}
+	var stored []StoredEvent
+	var conflict bool
+	var commitHash plumbing.Hash
+	err := ddrepo.WithRepositoryWriteLock(s.path, func() error {
+		current, err := s.repository.Storer.Reference(reviewReference)
+		if errors.Is(err, plumbing.ErrReferenceNotFound) {
+			current = nil
+		} else if err != nil {
+			return fmt.Errorf("read review reference: %w", err)
+		}
 
-	parent := plumbing.ZeroHash
-	if current != nil {
-		parent = current.Hash()
-	}
-	stored, commitHash, err := s.writeReviewBatchCommit(prepared, payload, parent)
+		parent := plumbing.ZeroHash
+		if current != nil {
+			parent = current.Hash()
+		}
+		stored, commitHash, err = s.writeReviewBatchCommit(prepared, payload, parent)
+		if err != nil {
+			return err
+		}
+
+		updated := plumbing.NewHashReference(reviewReference, commitHash)
+		if err := s.repository.Storer.CheckAndSetReference(updated, current); err != nil {
+			if errors.Is(err, storage.ErrReferenceHasChanged) {
+				conflict = true
+				return nil
+			}
+			return fmt.Errorf("advance review reference: %w", err)
+		}
+		// The review reference is now durable. Compaction is best effort and
+		// cannot turn a completed logical append into an error.
+		_, _ = ddrepo.CompactIfNeeded(s.repository, s.path, s.compaction)
+		return nil
+	})
 	if err != nil {
 		return nil, false, err
 	}
-
-	updated := plumbing.NewHashReference(reviewReference, commitHash)
-	if err := s.repository.Storer.CheckAndSetReference(updated, current); err != nil {
-		if errors.Is(err, storage.ErrReferenceHasChanged) {
-			return nil, true, nil
-		}
-		return nil, false, fmt.Errorf("advance review reference: %w", err)
-	}
-	return stored, false, nil
+	return stored, conflict, nil
 }
 
 func (s *Store) writeReviewBatchCommit(prepared []preparedAppend, payload []byte, parent plumbing.Hash) ([]StoredEvent, plumbing.Hash, error) {

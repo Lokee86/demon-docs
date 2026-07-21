@@ -46,7 +46,8 @@ The private object repository owns:
 - reusing unchanged shard hashes;
 - writing changed blobs and the replacement root tree;
 - detecting stale transaction bases;
-- compare-and-set publication of the state reference; and
+- compare-and-set publication of the state reference;
+- threshold-triggered native Git-object compaction after successful publication; and
 - surfacing malformed objects, missing state, absent records, closed transactions, and conflicts.
 
 ## Explicit non-ownership
@@ -139,6 +140,29 @@ The repository handle stores:
 - the resolved storage path.
 
 The mutex serializes state-reference reads and commits through that handle. Compare-and-set publication remains the final concurrency authority when multiple handles or processes operate on the same storage.
+
+## Automatic storage compaction
+
+After a successful `refs/ddocs/state` publication, the repository checks the
+loose-object directory. Automatic maintenance starts only when the loose
+object count is strictly greater than 256 or the loose-file byte total is
+strictly greater than 8 MiB. A threshold of zero disables that threshold for
+callers using the storage options API; normal constructors use both defaults.
+
+The same maintenance runs after a successful `refs/ddocs/review` publication.
+It uses native go-git `RepackObjects`, whose object walk starts at every
+reference, then uses go-git's reference-aware prune operation for unreachable
+loose objects. Current state, secondary private references, the complete
+review-commit chain, and every object reachable from them therefore remain
+available. Review undo blobs are part of those reachable commit trees and are
+not discarded by undo-age or undo-depth policy.
+
+State and review writers share one process-local write gate with maintenance.
+Compaction is single-flight through a bounded maintenance slot, and the
+active go-git storer is reindexed after pack replacement. Pack creation and
+deletion do not update private references, so a maintenance failure cannot
+turn an already published logical write into a failed write. Automatic
+maintenance errors are non-fatal; a later successful write can retry.
 
 ## Record namespace
 
@@ -518,6 +542,9 @@ The private object repository must preserve these invariants:
 - A stale transaction cannot replace newer state.
 - One reference update publishes the complete replacement record set.
 - Failed publication does not make newly written unreachable objects authoritative.
+- Compaction starts only after successful reference publication.
+- Compaction preserves objects reachable from every private reference, including review history.
+- Compaction failure is non-fatal to the already completed logical write.
 - Closed transactions cannot be reused.
 - Domain meaning and migration remain outside the storage layer.
 
@@ -569,6 +596,7 @@ Primary implementation:
 
 - `internal/ddrepo/codec.go` — record-name validation, shard assignment, deterministic binary encoding, and strict decoding.
 - `internal/ddrepo/objects.go` — Git blob and root-tree reads and writes.
+- `internal/ddrepo/compaction.go` — loose-object thresholds, bounded maintenance, native repacking, reference-aware pruning, and storer reindexing.
 - `internal/ddrepo/repository.go` — `.ddocs` path resolution, bare repository initialization/opening, state reference access, and callback transaction wrapper.
 - `internal/ddrepo/transaction.go` — lazy shard views, record operations, dirty tracking, optimistic conflict detection, and compare-and-set publication.
 
@@ -576,6 +604,7 @@ Focused tests:
 
 - `internal/ddrepo/codec_test.go`
 - `internal/ddrepo/repository_test.go`
+- `internal/ddrepo/compaction_test.go`
 
 Important consumers:
 

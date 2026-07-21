@@ -28,12 +28,18 @@ var (
 )
 
 type Repository struct {
-	store storage.Storer
-	mu    sync.Mutex
-	path  string
+	store      storage.Storer
+	git        *git.Repository
+	mu         sync.Mutex
+	path       string
+	compaction CompactionThresholds
 }
 
 func Init(path string) (*Repository, error) {
+	return InitWithOptions(path, Options{Compaction: DefaultCompactionThresholds()})
+}
+
+func InitWithOptions(path string, options Options) (*Repository, error) {
 	storagePath, err := ddocsPath(path)
 	if err != nil {
 		return nil, err
@@ -42,7 +48,7 @@ func Init(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	repository := &Repository{store: gitRepository.Storer, path: storagePath}
+	repository := &Repository{store: gitRepository.Storer, git: gitRepository, path: storagePath, compaction: options.Compaction}
 	root, err := writeRoot(repository.store, nil)
 	if err != nil {
 		return nil, fmt.Errorf("write empty ddocs root: %w", err)
@@ -54,6 +60,10 @@ func Init(path string) (*Repository, error) {
 }
 
 func Open(path string) (*Repository, error) {
+	return OpenWithOptions(path, Options{Compaction: DefaultCompactionThresholds()})
+}
+
+func OpenWithOptions(path string, options Options) (*Repository, error) {
 	storagePath, err := ddocsPath(path)
 	if err != nil {
 		return nil, err
@@ -62,7 +72,7 @@ func Open(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Repository{store: gitRepository.Storer, path: storagePath}, nil
+	return &Repository{store: gitRepository.Storer, git: gitRepository, path: storagePath, compaction: options.Compaction}, nil
 }
 
 func (r *Repository) Transaction(fn func(*Transaction) error) error {

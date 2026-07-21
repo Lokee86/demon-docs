@@ -7,6 +7,7 @@ import (
 	"io"
 	"path/filepath"
 
+	"github.com/Lokee86/demon-docs/internal/ddrepo"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -16,14 +17,20 @@ const reviewReference = plumbing.ReferenceName("refs/ddocs/review")
 
 type Store struct {
 	repository *git.Repository
+	path       string
+	compaction ddrepo.CompactionThresholds
 }
 
 func Open(repositoryRoot string) (*Store, error) {
+	return OpenWithCompaction(repositoryRoot, ddrepo.DefaultCompactionThresholds())
+}
+
+func OpenWithCompaction(repositoryRoot string, thresholds ddrepo.CompactionThresholds) (*Store, error) {
 	repository, err := git.PlainOpen(filepath.Join(repositoryRoot, ".ddocs"))
 	if err != nil {
 		return nil, fmt.Errorf("open ddocs review store: %w", err)
 	}
-	return &Store{repository: repository}, nil
+	return &Store{repository: repository, path: filepath.Join(repositoryRoot, ".ddocs"), compaction: thresholds}, nil
 }
 
 func (s *Store) History(limit int) ([]StoredEvent, error) {

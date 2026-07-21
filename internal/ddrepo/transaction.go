@@ -150,44 +150,50 @@ func (tx *Transaction) Commit() error {
 	}
 	defer func() { tx.closed = true }()
 
-	tx.repo.mu.Lock()
-	defer tx.repo.mu.Unlock()
-	current, err := tx.repo.currentReference()
-	if err != nil && !errors.Is(err, ErrMissingState) {
-		return err
-	}
-	if !sameReference(current, tx.base) {
-		return ErrConflict
-	}
-	entries := make(map[string]plumbing.Hash, len(tx.shards))
-	for shard, hash := range tx.shards {
-		entries[shard] = hash
-	}
-	dirty := make([]string, 0, len(tx.dirty))
-	for shard := range tx.dirty {
-		dirty = append(dirty, shard)
-	}
-	sort.Strings(dirty)
-	for _, shard := range dirty {
-		records := tx.loaded[shard]
-		if len(records) == 0 {
-			delete(entries, shard)
-			continue
+	return WithRepositoryWriteLock(tx.repo.path, func() error {
+		tx.repo.mu.Lock()
+		defer tx.repo.mu.Unlock()
+		current, err := tx.repo.currentReference()
+		if err != nil && !errors.Is(err, ErrMissingState) {
+			return err
 		}
-		hash, err := writeShard(tx.repo.store, records)
+		if !sameReference(current, tx.base) {
+			return ErrConflict
+		}
+		entries := make(map[string]plumbing.Hash, len(tx.shards))
+		for shard, hash := range tx.shards {
+			entries[shard] = hash
+		}
+		dirty := make([]string, 0, len(tx.dirty))
+		for shard := range tx.dirty {
+			dirty = append(dirty, shard)
+		}
+		sort.Strings(dirty)
+		for _, shard := range dirty {
+			records := tx.loaded[shard]
+			if len(records) == 0 {
+				delete(entries, shard)
+				continue
+			}
+			hash, err := writeShard(tx.repo.store, records)
+			if err != nil {
+				return err
+			}
+			entries[shard] = hash
+		}
+		rootHash, err := writeRoot(tx.repo.store, entries)
 		if err != nil {
 			return err
 		}
-		entries[shard] = hash
-	}
-	rootHash, err := writeRoot(tx.repo.store, entries)
-	if err != nil {
-		return err
-	}
-	if current != nil && current.Hash() == rootHash {
+		if current != nil && current.Hash() == rootHash {
+			return nil
+		}
+		if err := tx.repo.store.CheckAndSetReference(plumbing.NewHashReference(stateReference, rootHash), current); err != nil {
+			return err
+		}
+		tx.repo.compactAfterWrite()
 		return nil
-	}
-	return tx.repo.store.CheckAndSetReference(plumbing.NewHashReference(stateReference, rootHash), current)
+	})
 }
 
 func (tx *Transaction) loadShard(name string) (map[string][]byte, error) {

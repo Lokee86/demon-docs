@@ -158,6 +158,69 @@ func TestStoreAppendBatchUsesConstantLooseObjectCount(t *testing.T) {
 	}
 }
 
+func TestReviewCompactionPreservesEveryReviewEventAndStateReference(t *testing.T) {
+	root := t.TempDir()
+	state, err := ddrepo.Init(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := state.Transaction(func(tx *ddrepo.Transaction) error {
+		return tx.Write("durable/state", []byte("kept"))
+	}); err != nil {
+		t.Fatal(err)
+	}
+	store, err := OpenWithCompaction(root, ddrepo.CompactionThresholds{LooseFileCount: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var retained plumbing.Hash
+	for index := 0; index < 3; index++ {
+		event := Event{Type: EventDecision, Decision: &Decision{ID: fmt.Sprintf("decision-%d", index), Action: DecisionDeclineIssue}}
+		stored, err := store.Append(event, nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if index == 0 {
+			retained = plumbing.NewHash(stored.CommitHash)
+			if err := store.repository.Storer.SetReference(plumbing.NewHashReference(plumbing.ReferenceName("refs/ddocs/retained"), retained)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+
+	history, err := store.History(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(history) != 3 {
+		t.Fatalf("history length after compaction = %d, want 3", len(history))
+	}
+	if err := store.repository.Storer.HasEncodedObject(retained); err != nil {
+		t.Fatalf("object reachable from secondary reference was lost: %v", err)
+	}
+	count := countLooseObjects(t, root)
+	if count != 0 {
+		t.Fatalf("compaction left %d loose objects", count)
+	}
+
+	reopened, err := ddrepo.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx, err := reopened.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	value, err := tx.Read("durable/state")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(value) != "kept" {
+		t.Fatalf("state value after compaction = %q", value)
+	}
+}
+
 func TestStoreHistoryReadsLegacyPerEventCommit(t *testing.T) {
 	root := t.TempDir()
 	if _, err := ddrepo.Init(root); err != nil {
@@ -261,7 +324,7 @@ func countLooseObjects(t *testing.T, root string) int {
 		if walkErr != nil {
 			return walkErr
 		}
-		if !entry.IsDir() {
+		if !entry.IsDir() && len(filepath.Base(filepath.Dir(path))) == 2 {
 			count++
 		}
 		return nil
