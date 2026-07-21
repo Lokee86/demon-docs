@@ -18,6 +18,18 @@ This document records retained performance measurements for high-fanout target m
 
 The measurements expose scanning, planning, storage, and generated-write regressions under realistic and synthetic link volumes. They are engineering evidence for the tested hardware, corpus, and implementation revision rather than universal latency guarantees.
 
+## Link Inventory Content Reads
+
+Link inventory keeps directory traversal serial so ignore decisions, nested-worktree exclusions, and filesystem discovery retain their existing order. After traversal, changed or new regular files are assigned to a bounded 16-worker pool for fingerprinting and Markdown document-identity extraction. Results are stored by traversal/job index and merged in deterministic path order before identity matching, path-history recovery, and publication.
+
+Files whose recorded size and modification timestamp are unchanged reuse their existing fingerprint and document identity. Retained external regular-file records use the same metadata check; missing or changed content is refreshed best-effort as before. Content-read failures for repository files remain scan errors, while external-target fingerprint failures remain non-fatal.
+
+The incremental inventory benchmark is `BenchmarkSingleFileIncrementalUpdate`; the initial repository benchmark is `BenchmarkInitialIndexing`. Run both with:
+
+```bash
+go test ./internal/links -run '^$' -bench '^(BenchmarkInitialIndexing|BenchmarkSingleFileIncrementalUpdate)$' -benchmem -count=5
+```
+
 ## Research status
 
 Recorded benchmark evidence. New performance changes should preserve the original artifacts and add comparable runs rather than overwriting historical results.

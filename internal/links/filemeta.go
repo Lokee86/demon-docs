@@ -25,6 +25,11 @@ func fileFingerprint(path string) (string, error) {
 	return "sha256:" + hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+func bytesFingerprint(data []byte) string {
+	digest := sha256.Sum256(data)
+	return "sha256:" + hex.EncodeToString(digest[:])
+}
+
 func recordAbsolute(root string, record FileRecord) string {
 	if record.Scope == "repository" {
 		return filepath.Clean(filepath.Join(root, filepath.FromSlash(record.Path)))

@@ -16,6 +16,23 @@ type inventoryNode struct {
 	size, modified                             int64
 }
 
+type inventoryContentJob struct {
+	path     string
+	markdown bool
+}
+
+func readInventoryContent(job inventoryContentJob) (string, string, error) {
+	if !job.markdown {
+		fingerprint, err := fileFingerprint(job.path)
+		return fingerprint, "", err
+	}
+	data, err := os.ReadFile(job.path)
+	if err != nil {
+		return "", "", err
+	}
+	return bytesFingerprint(data), markdownDocumentIDBytes(data), nil
+}
+
 type inventory struct {
 	root     string
 	policy   ignorepolicy.Policy
@@ -38,6 +55,7 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 	}
 	var nodes []inventoryNode
 	var dirs []string
+	var contentJobs []int
 	err = filepath.WalkDir(root, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
@@ -77,29 +95,40 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		}
 		stored := storePath(root, path)
 		modified := info.ModTime().UnixNano()
-		fingerprint := ""
-		documentID := ""
+		node := inventoryNode{abs: filepath.Clean(path), stored: stored, kind: "file", size: info.Size(), modified: modified}
+		contentRequired := true
 		if previousIndex, ok := previousByPath[pathKey(stored)]; ok {
 			previousRecord := previous.Files[previousIndex]
 			if previousRecord.Present && previousRecord.Kind == "file" && previousRecord.Size == info.Size() && previousRecord.ModifiedUnixNano == modified {
-				fingerprint = previousRecord.Fingerprint
-				documentID = previousRecord.DocumentID
+				node.fingerprint = previousRecord.Fingerprint
+				node.documentID = previousRecord.DocumentID
+				contentRequired = node.fingerprint == ""
 			}
 		}
-		if fingerprint == "" {
-			fingerprint, err = fileFingerprint(path)
-			if err != nil {
-				return err
-			}
+		nodeIndex := len(nodes)
+		nodes = append(nodes, node)
+		if contentRequired {
+			contentJobs = append(contentJobs, nodeIndex)
 		}
-		if documentID == "" && isMarkdown(stored) {
-			documentID = markdownDocumentID(path)
-		}
-		nodes = append(nodes, inventoryNode{abs: filepath.Clean(path), stored: stored, kind: "file", fingerprint: fingerprint, documentID: documentID, size: info.Size(), modified: modified})
 		return nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("scan repository for link targets: %w", err)
+	}
+	contentErrors := runLinkWorkers(len(contentJobs), func(index int) error {
+		node := &nodes[contentJobs[index]]
+		fingerprint, documentID, err := readInventoryContent(inventoryContentJob{path: node.abs, markdown: isMarkdown(node.stored)})
+		if err != nil {
+			return err
+		}
+		node.fingerprint = fingerprint
+		node.documentID = documentID
+		return nil
+	})
+	for _, contentErr := range contentErrors {
+		if contentErr != nil {
+			return nil, fmt.Errorf("scan repository for link targets: %w", contentErr)
+		}
 	}
 	sort.Slice(nodes, func(i, j int) bool { return nodes[i].stored < nodes[j].stored })
 	currentCounts := map[string]int{}
@@ -205,6 +234,9 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		record.ModifiedUnixNano = node.modified
 		manifest.Files = append(manifest.Files, record)
 	}
+	var retainedRecords []FileRecord
+	var externalContentJobs []int
+	var externalContentPaths []string
 	for index, record := range previous.Files {
 		if used[index] {
 			continue
@@ -212,12 +244,22 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		if record.Scope == "external" {
 			abs := filepath.FromSlash(record.Path)
 			if info, err := os.Stat(abs); err == nil {
+				previousPresent := record.Present
+				previousKind := record.Kind
+				previousSize := record.Size
+				previousModified := record.ModifiedUnixNano
 				record.Present = true
 				record.Kind = kindFromInfo(info)
 				record.Size = info.Size()
 				record.ModifiedUnixNano = info.ModTime().UnixNano()
 				if info.Mode().IsRegular() {
-					record.Fingerprint, _ = fileFingerprint(abs)
+					unchanged := previousPresent && previousKind == "file" && record.Fingerprint != "" && previousSize == info.Size() && previousModified == info.ModTime().UnixNano()
+					if !unchanged {
+						record.Fingerprint = ""
+						record.DocumentID = ""
+						externalContentJobs = append(externalContentJobs, len(retainedRecords))
+						externalContentPaths = append(externalContentPaths, abs)
+					}
 				}
 			} else {
 				record.Present = false
@@ -225,8 +267,27 @@ func buildInventory(root string, previous FilesManifest) (*inventory, error) {
 		} else {
 			record.Present = false
 		}
-		manifest.Files = append(manifest.Files, record)
+		retainedRecords = append(retainedRecords, record)
 	}
+	externalErrors := runLinkWorkers(len(externalContentJobs), func(index int) error {
+		record := &retainedRecords[externalContentJobs[index]]
+		fingerprint, documentID, err := readInventoryContent(inventoryContentJob{path: externalContentPaths[index], markdown: isMarkdown(record.Path)})
+		if err != nil {
+			return err
+		}
+		record.Fingerprint = fingerprint
+		record.DocumentID = documentID
+		return nil
+	})
+	for index, contentErr := range externalErrors {
+		if contentErr == nil {
+			continue
+		}
+		// External targets are best-effort inventory records, matching the
+		// previous behavior that ignored fingerprint read errors here.
+		retainedRecords[externalContentJobs[index]].Fingerprint = ""
+	}
+	manifest.Files = append(manifest.Files, retainedRecords...)
 	result := &inventory{root: filepath.Clean(root), policy: policy, manifest: manifest, dirs: dirs}
 	result.rebuild()
 	return result, nil

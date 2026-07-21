@@ -15,6 +15,10 @@ func markdownDocumentID(path string) string {
 	if err != nil {
 		return ""
 	}
+	return markdownDocumentIDBytes(data)
+}
+
+func markdownDocumentIDBytes(data []byte) string {
 	document, err := frontmatter.Parse(string(data), []string{frontmatter.FormatYAML, frontmatter.FormatTOML})
 	if err != nil || !document.HasBlock {
 		return ""
