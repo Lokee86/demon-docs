@@ -3,6 +3,7 @@ package reconcile
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Lokee86/demon-docs/internal/model"
@@ -25,6 +26,30 @@ func TestApplyWithinRejectsOutsideWriteBeforeMutation(t *testing.T) {
 	}
 	if _, err := os.Stat(outside); !os.IsNotExist(err) {
 		t.Fatal("outside update was written")
+	}
+}
+
+func TestPrepareMissingWithinWritesPlannedContent(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "area", "INDEX.md")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	result := model.ReconcileResult{Updates: []model.FileUpdate{{
+		Path:    path,
+		NewText: "# Area\n\nPrepared index.\n",
+	}}}
+
+	if err := PrepareMissingWithin(result, root); err != nil {
+		t.Fatal(err)
+	}
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	normalized := strings.ReplaceAll(string(content), "\r\n", "\n")
+	if normalized != "# Area\n\nPrepared index.\n" {
+		t.Fatalf("prepared content = %q", content)
 	}
 }
 

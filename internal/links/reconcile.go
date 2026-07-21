@@ -95,6 +95,8 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 	if err != nil {
 		return Plan{}, err
 	}
+	previousFiles, previousLinks = collapseDocumentIdentityAliases(previousFiles, previousLinks, &inventory.manifest)
+	inventory.rebuild()
 
 	planningStarted := time.Now()
 	plan := Plan{
@@ -581,7 +583,10 @@ func candidatePaths(inventory *inventory, missingPath, preferredID string) []str
 		kind = preferred.Kind
 		fingerprint = preferred.Fingerprint
 	}
-	candidates := inventory.candidates(base, kind)
+	candidates := inventory.historicalCandidates(missingPath, kind)
+	if len(candidates) == 0 {
+		candidates = inventory.candidates(base, kind)
+	}
 	if fingerprint != "" {
 		var exact []string
 		for _, candidate := range candidates {

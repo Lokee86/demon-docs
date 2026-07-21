@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/Lokee86/demon-docs/internal/config"
+	"github.com/Lokee86/demon-docs/internal/ddrepo"
 	"github.com/Lokee86/demon-docs/internal/demon"
 )
 
@@ -31,7 +32,7 @@ func TestIndexesAndLinksCanRunSeparately(t *testing.T) {
 		root := t.TempDir()
 		writeTestFile(t, filepath.Join(root, "page.md"), "# Page\n")
 		var stdout, stderr bytes.Buffer
-		if code := Run(context.Background(), []string{"fix", "--root", root, "--docs", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
+		if code := Run(context.Background(), []string{"fix", "--root", root, "--indexes", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 			t.Fatalf("code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 		}
 		if _, err := os.Stat(filepath.Join(root, "INDEX.md")); err != nil {
@@ -54,50 +55,67 @@ func TestFrontmatterOnlyCleanFixDoesNotRefreshLinkState(t *testing.T) {
 	if code := Run(context.Background(), []string{"fix", "--root", root, "--links", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("baseline code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
-	before := snapshotDirectory(t, filepath.Join(root, ".ddocs"))
-	updated := "---\nauthor: Test Author\ncreated: 2026-07-20\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: general\nsummary: Existing\n---\n# Source\n\n[Target](other.md)\n"
-	writeTestFile(t, source, updated)
+	before := snapshotLinkState(t, root)
+	writeTestFile(t, source, "---\nauthor: Test Author\ncreated: 2026-07-20\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: general\nsummary: Existing\n---\n# Source\n\n[Target](other.md)\n")
 	stdout.Reset()
 	stderr.Reset()
 	if code := Run(context.Background(), []string{"fix", "--root", root, "--frontmatter", "--no-local-config", "--no-global-config"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("clean frontmatter code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
 	}
-	after := snapshotDirectory(t, filepath.Join(root, ".ddocs"))
+	after := snapshotLinkState(t, root)
 	if len(before) != len(after) {
-		t.Fatalf("clean frontmatter fix changed link state file count: before=%d after=%d", len(before), len(after))
+		t.Fatalf("clean frontmatter fix changed link record count: before=%d after=%d", len(before), len(after))
 	}
-	for path, data := range before {
-		if string(after[path]) != string(data) {
-			t.Fatalf("clean frontmatter fix changed link state %s", path)
+	for name, data := range before {
+		if string(after[name]) != string(data) {
+			t.Fatalf("clean frontmatter fix changed link record %s", name)
 		}
 	}
 }
 
-func snapshotDirectory(t *testing.T, root string) map[string][]byte {
+func snapshotLinkState(t *testing.T, root string) map[string][]byte {
 	t.Helper()
-	result := map[string][]byte{}
-	err := filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if entry.IsDir() {
-			return nil
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		relative, err := filepath.Rel(root, path)
-		if err != nil {
-			return err
-		}
-		result[relative] = data
-		return nil
-	})
+	repository, err := ddrepo.Open(filepath.Join(root, ".ddocs"))
 	if err != nil {
 		t.Fatal(err)
 	}
+	tx, err := repository.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := map[string][]byte{}
+	for _, prefix := range []string{"meta/", "file/", "path/", "source/", "incoming/", "write/"} {
+		names, err := tx.Names(prefix)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, name := range names {
+			data, err := tx.Read(name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			result[name] = data
+		}
+	}
 	return result
+}
+
+func TestIndexSelectorDoesNotSelectFrontmatterOrFormat(t *testing.T) {
+	configured := config.Default()
+	configured.Index.Enabled = true
+	configured.Frontmatter.Enabled = true
+	configured.Format.Enabled = true
+	configured.Links.Enabled = true
+
+	features := selectedFeatures(commonFlags{indexesOnly: true}, configured)
+	if !features.Indexes || features.Frontmatter || features.Format || features.Links || features.TrackLinks || features.Reverse {
+		t.Fatalf("explicit index selector was not index-only: %+v", features)
+	}
+
+	features = selectedFeatures(commonFlags{docsOnly: true}, configured)
+	if !features.Indexes || !features.Frontmatter || !features.Format || features.Links || features.TrackLinks || features.Reverse {
+		t.Fatalf("explicit docs selector did not select documentation policy systems: %+v", features)
+	}
 }
 
 func TestReverseSpecificOptionsEnableReverseInDefaultSelection(t *testing.T) {

@@ -183,7 +183,7 @@ func TestGeneratedIndexesReceiveFrontmatterInSameFix(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")
 	writeTestFile(t, filepath.Join(repo, ".ddocs", "config.toml"), frontmatterTestConfig(true, "yaml"))
-	writeTestFile(t, filepath.Join(docs, "page.md"), "# Page\n")
+	writeTestFile(t, filepath.Join(docs, "area", "page.md"), "# Page\n")
 
 	withWorkingDirectory(t, repo, func(string) {
 		var stdout, stderr bytes.Buffer
@@ -192,14 +192,33 @@ func TestGeneratedIndexesReceiveFrontmatterInSameFix(t *testing.T) {
 		}
 	})
 
-	index, err := os.ReadFile(filepath.Join(docs, "INDEX.md"))
-	if err != nil {
-		t.Fatal(err)
+	rootIndex := readTestFile(t, filepath.Join(docs, "INDEX.md"))
+	childIndex := readTestFile(t, filepath.Join(docs, "area", "INDEX.md"))
+	for path, text := range map[string]string{
+		"root":  rootIndex,
+		"child": childIndex,
+	} {
+		normalized := strings.ReplaceAll(text, "\r\n", "\n")
+		if !strings.HasPrefix(normalized, "---\n") || !strings.Contains(normalized, "document_id:") || !strings.Contains(normalized, "doc-ledger:files:start") {
+			t.Fatalf("generated %s index did not receive frontmatter and managed content:\n%s", path, text)
+		}
+		if strings.Count(normalized, "\n---\n") != 1 {
+			t.Fatalf("generated %s index contains duplicate YAML frontmatter:\n%s", path, text)
+		}
 	}
-	text := string(index)
-	if !strings.HasPrefix(text, "---\n") && !strings.HasPrefix(text, "---\r\n") || !strings.Contains(text, "document_id:") || !strings.Contains(text, "doc-ledger:files:start") {
-		t.Fatalf("generated index did not receive frontmatter and managed content:\n%s", text)
+	if !strings.Contains(rootIndex, "# Docs") {
+		t.Fatalf("generated root index lost its planned heading:\n%s", rootIndex)
 	}
+	if !strings.Contains(childIndex, "# Area") || !strings.Contains(childIndex, "Parent index: [Docs](../INDEX.md)") {
+		t.Fatalf("generated child index lost its planned heading or parent title:\n%s", childIndex)
+	}
+
+	withWorkingDirectory(t, repo, func(string) {
+		var stdout, stderr bytes.Buffer
+		if code := Run(context.Background(), []string{"check", "--docs"}, &stdout, &stderr); code != 0 || !strings.Contains(stdout.String(), "check passed") {
+			t.Fatalf("check code=%d stdout=%q stderr=%q", code, stdout.String(), stderr.String())
+		}
+	})
 }
 
 func frontmatterTestConfig(indexEnabled bool, defaultFormat string) string {

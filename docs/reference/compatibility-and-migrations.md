@@ -119,7 +119,7 @@ This is a bootstrap operation, not ongoing synchronization.
 Current compatibility aliases include:
 
 ```text
--i, --indexes   aliases --docs
+-i, --indexes   selects documentation indexes only
 ```
 
 `demon` and `ddocs demon` expose the same repository-demon application boundary.

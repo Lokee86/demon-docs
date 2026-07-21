@@ -317,7 +317,7 @@ CLI flags override the selected base config. The reconciliation selectors are op
 - `--format` selects document-body format enforcement only.
 - `-l` / `--links` selects Markdown link reconciliation.
 - `-r` / `--reverse` selects code-folder reverse indexes.
-- `-i` / `--indexes` remains a compatibility alias for `--docs`.
+- `-i` / `--indexes` selects documentation indexes only; `-d` / `--docs` additionally selects frontmatter and document-body format.
 - When any selector is supplied, only selected systems run.
 - Without selectors, indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when roots are configured or supplied with `--reverse-root`.
 - The selectors apply to `check`, `fix`, and `watch`.

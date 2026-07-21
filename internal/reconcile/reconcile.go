@@ -156,7 +156,7 @@ func ApplyWithin(result model.ReconcileResult, root string) (int, error) {
 	return applyWithin(result)
 }
 
-// PrepareMissingWithin creates empty placeholders for indexes that do not yet
+// PrepareMissingWithin creates planned index content for indexes that do not yet
 // exist. It never recreates a missing parent directory: a directory move can
 // invalidate a prepared reconciliation plan while the daemon is still running.
 func PrepareMissingWithin(result model.ReconcileResult, root string) error {
@@ -174,15 +174,8 @@ func PrepareMissingWithin(result model.ReconcileResult, root string) error {
 		if !parentExists {
 			continue
 		}
-		file, err := os.OpenFile(update.Path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
-		if os.IsExist(err) {
-			continue
-		}
-		if err != nil {
+		if _, err := applyUpdate(update, true); err != nil {
 			return fmt.Errorf("prepare index %s: %w", update.Path, err)
-		}
-		if err := file.Close(); err != nil {
-			return fmt.Errorf("close prepared index %s: %w", update.Path, err)
 		}
 	}
 	return nil
@@ -191,8 +184,8 @@ func PrepareMissingWithin(result model.ReconcileResult, root string) error {
 const maxIndexConvergencePasses = 8
 
 // ConvergeWithin rebuilds and applies index plans until the tree is stable.
-// Prepared placeholder indexes can require a follow-up pass once their titles
-// and parent relationships become available.
+// Newly prepared indexes can require a follow-up pass once all generated titles
+// and parent relationships are visible to the scanner.
 func ConvergeWithin(root, ignoreRoot string, c config.Config) (model.ReconcileResult, int, error) {
 	changed := 0
 	messages := []string{}

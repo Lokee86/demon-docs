@@ -138,11 +138,13 @@ Reverse selection additionally resolves and validates reverse roots and output f
 The selectors are:
 
 ```text
--d, --docs, -i, --indexes
+-d, --docs
     documentation indexes, frontmatter, and document-body format
-    --frontmatter
+-i, --indexes
+    documentation indexes only
+--frontmatter
     frontmatter only
-    --format
+--format
     document-body format only
 -l, --links
     link tracking and, when enabled in configuration, link reconciliation
@@ -163,7 +165,7 @@ link reconciliation = gated by [links].enabled
 reverse indexes = selected only when reverse roots or codemap-heading overrides are present
 ```
 
-The compatibility aliases `-i` and `--indexes` select the same three documentation-policy systems as `-d` and `--docs`; they no longer mean indexes alone.
+`-i` is the short alias for `--indexes`; both select documentation indexes only. `-d` and `--docs` select indexes, frontmatter, and document-body format together.
 
 Feature selection is command-scoped. It does not mutate repository configuration.
 

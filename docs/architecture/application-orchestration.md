@@ -45,7 +45,7 @@ The application boundary owns:
 - foreground watch startup;
 - explicit codemap fix, check, inspect, export, benchmark, and precision command integration;
 - repository-demon public and hidden commands; and
-- compatibility aliases such as `--indexes` and the `demon` executable.
+- command aliases such as `-i` / `--indexes` and the `demon` executable.
 
 ## Does not own
 

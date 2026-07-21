@@ -138,7 +138,7 @@ During `check`, a link-enabled pass projects the current link graph back onto ma
 
 This projection is diagnostic only. It does not add links or decide which document should own the missing relationship. See [Document Health Checks](../guides/document-health-checks.md).
 
-Documentation indexes, Markdown links, and code-folder reverse indexes are selected independently with `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse`. `-i` / `--indexes` remains a compatibility alias for `--docs`. When any selector is supplied, only selected systems run.
+Documentation policy, documentation indexes, Markdown links, and code-folder reverse indexes are selected independently with `-d` / `--docs`, `-i` / `--indexes`, `-l` / `--links`, and `-r` / `--reverse`. `--docs` selects indexes, frontmatter, and document-body format; `--indexes` selects indexes only. When any selector is supplied, only selected systems run.
 
 ## Safety Boundaries
 

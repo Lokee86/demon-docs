@@ -107,7 +107,7 @@ Mutation scope: the same selected authored surfaces as `fix`, plus watcher runti
     --format   document-body format only
 -l, --links    repository-local Markdown link inventory and reconciliation
 -r, --reverse  code-folder reverse indexes
--i, --indexes  compatibility alias for --docs
+-i, --indexes  reconcile documentation indexes only
 ```
 
 When any selector is supplied, only selected systems run. Without selectors, documentation indexes, configured frontmatter, document-body format, and links run; reverse indexes also run when reverse roots are configured or supplied.

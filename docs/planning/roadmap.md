@@ -38,7 +38,7 @@ This roadmap describes the current product state and the next implementation tra
 - Parent navigation links keep folder indexes and configured indexed documents connected to their owning index.
 - `check`, `fix`, and foreground `watch` expose the same deterministic reconciliation core.
 - The repository demon provides single-owner detached watcher lifecycle while shell or agent feeders remain active, without becoming a correctness dependency.
-- `-d` / `--docs`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `-i` / `--indexes` remains a compatibility alias for `--docs`.
+- `-d` / `--docs`, `-i` / `--indexes`, `-l` / `--links`, and `-r` / `--reverse` select reconciliation subsystems independently; `--docs` includes indexes, frontmatter, and document-body format, while `--indexes` selects indexes only.
 - Existing index descriptions and link syntax are preserved where entries remain stable or moves are unambiguous.
 
 ### Document health checks

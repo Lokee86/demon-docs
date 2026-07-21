@@ -430,6 +430,31 @@ func (i *inventory) ensureTarget(path, preferredID string) (*FileRecord, string,
 	return resolved, actual, nil
 }
 
+func (i *inventory) historicalCandidates(path, kind string) []string {
+	key := pathKey(filepath.Clean(path))
+	seen := map[string]bool{}
+	var result []string
+	for _, record := range i.manifest.Files {
+		if !record.Present || record.Kind != kind {
+			continue
+		}
+		for _, historical := range record.PathHistory {
+			candidate := recordAbsolute(i.root, FileRecord{Path: historical, Scope: record.Scope})
+			if pathKey(candidate) != key {
+				continue
+			}
+			current := recordAbsolute(i.root, record)
+			currentKey := pathKey(current)
+			if !seen[currentKey] {
+				seen[currentKey] = true
+				result = append(result, current)
+			}
+		}
+	}
+	sort.Slice(result, func(a, b int) bool { return pathKey(result[a]) < pathKey(result[b]) })
+	return result
+}
+
 func (i *inventory) candidates(base, kind string) []string {
 	seen := map[string]bool{}
 	var result []string
