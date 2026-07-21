@@ -20,6 +20,14 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
+## Version 0.3.4 performance update
+
+Version 0.3.4 parallelizes cold or invalidated frontmatter and document-format validation through a bounded 16-worker pool. Frontmatter source reads and parsing now run concurrently. Document-format source reads, frontmatter parsing, Markdown parsing, and per-document schema enforcement also run concurrently.
+
+Repository-wide coordination remains deterministic and serial where required: duplicate document-ID handling, immutable-state decisions, shared-schema and schema-history decisions, diagnostic ordering, rewrite planning, cache publication, and private-state publication.
+
+No configuration or private-state migration is required. Existing validation-cache entries remain compatible. On the retained 1,000-document Windows fixture, warmed-host cold-pass means improved from 157.5 ms to 56.1 ms for frontmatter and from 314.4 ms to 171.6 ms for document format.
+
 ## Version 0.3.3 hotfix
 
 Version 0.3.3 disables automatic private-object compaction. Version 0.3.2 could repack `.ddocs` from the daemon while a separate CLI process was reading the same object store, leaving references pointed at missing packfiles or objects. Loose objects are retained until private-state readers and writers share a cross-process lock.
@@ -43,7 +51,7 @@ Version 0.3.2 changes several execution and private-state details without requir
 - When one live file and stale absent private records share a `document_id`, reconciliation collapses the stale aliases into the live identity, remaps links, merges path history, and uses that historical path evidence before generic filename guessing.
 - Existing pending watcher suppressions are retained and merged with suppressions from a new generated rewrite batch.
 
-Cold frontmatter and format validation remains serial, and changed Markdown sources are still reparsed as complete documents. Those are documented current performance limits rather than upgrade failures.
+In version 0.3.2, cold frontmatter and format validation remained serial, and changed Markdown sources were still reparsed as complete documents. Version 0.3.4 parallelizes cold validation; changed Markdown link sources are still reparsed as complete documents.
 
 ## Prerequisites
 
