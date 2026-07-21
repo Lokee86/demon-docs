@@ -137,6 +137,11 @@ The generic `agent` feeder protocol is implemented inside Demon Docs. Thin MCP, 
 
 The following work is independent of the larger code-graph track:
 
+### Remaining validation and link-scan performance opportunities
+
+- **Bounded parallel cold validation:** frontmatter and document-format validation currently enumerate and process applicable Markdown documents serially on a cache miss. Introduce a bounded document-worker pool for file reads, parsing, and per-document evaluation, then merge results deterministically before duplicate-document-ID checks, immutable-state decisions, diagnostics, repair planning, and publication. Benchmark conservative Windows worker limits rather than using unbounded goroutines.
+- **Incremental changed-source link parsing:** unchanged source fingerprints already reuse stored link records, offsets, lines, and columns, but any source-content change currently reparses the complete Markdown document. Persist line or bounded-chunk hashes and enough synchronization metadata to diff changed regions, shift stored byte and line locations for unchanged regions, and reparse only affected regions plus context. Fall back to a full parse when edits may change non-local Markdown state, including frontmatter boundaries, fenced-code delimiters, reference definitions, HTML constructs, or parser-version changes.
+
 - stress the single-owner lease path and retain race-focused coverage;
 - complete actionable watcher and reconciliation diagnostics;
 - expand heading-fragment validation when a deterministic Markdown anchor model is selected;
