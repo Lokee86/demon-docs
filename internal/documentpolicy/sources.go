@@ -47,7 +47,7 @@ type documentEvaluation struct {
 	result         enforcementResult
 }
 
-func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cache *validationcache.Store, policyHash string, schemaHasher *validationcache.SchemaHasher) ([]documentSource, error) {
+func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cache *validationcache.Store, policyHash string, schemaHasher *validationcache.SchemaHasher, selected map[string]bool) ([]documentSource, error) {
 	sources := make([]documentSource, len(files))
 	errors := validationworkers.Run(len(files), func(index int) error {
 		path := files[index]
@@ -55,13 +55,25 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 		if err != nil {
 			return err
 		}
+		relativePath := filepath.ToSlash(relative)
+		if selected != nil && !selected[validationcache.NormalizePath(path)] {
+			entry, ok := cache.LookupPath(relativePath)
+			if !ok || !entry.FormatClean || entry.FormatPolicyHash != policyHash || entry.SchemaName == "" {
+				return validationcache.ErrScopedReuseUnavailable
+			}
+			sources[index] = documentSource{
+				path: path, relative: relativePath, contentHash: entry.ContentSHA256,
+				candidate: entry, cacheHit: true,
+			}
+			return nil
+		}
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read document format source %s: %w", path, err)
 		}
 		source := documentSource{
 			path:        path,
-			relative:    filepath.ToSlash(relative),
+			relative:    relativePath,
 			data:        data,
 			text:        string(data),
 			contentHash: validationcache.ContentHash(data),
@@ -105,6 +117,20 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 		}
 	}
 	return sources, nil
+}
+
+func scopedPathSet(repoRoot string, paths []string) map[string]bool {
+	if paths == nil {
+		return nil
+	}
+	selected := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(repoRoot, path)
+		}
+		selected[validationcache.NormalizePath(path)] = true
+	}
+	return selected
 }
 
 func runDocumentEvaluations(evaluations []documentEvaluation, repair bool) {

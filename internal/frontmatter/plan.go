@@ -26,6 +26,8 @@ type Plan struct {
 	cacheHits   int
 }
 
+var ErrScopedReuseUnavailable = validationcache.ErrScopedReuseUnavailable
+
 func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time) (Plan, error) {
 	if !cfg.Frontmatter.Enabled {
 		return BuildWithValidationCache(repoRoot, docsRoot, cfg, repair, now, nil)
@@ -44,10 +46,41 @@ func Build(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.T
 	return plan, nil
 }
 
+// BuildScoped validates changed Markdown paths while reusing clean cache
+// identities for every other active document.
+func BuildScoped(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time, paths []string) (Plan, error) {
+	if !cfg.Frontmatter.Enabled {
+		return BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, now, nil, paths)
+	}
+	cache, err := validationcache.Open(repoRoot)
+	if err != nil {
+		return Plan{}, fmt.Errorf("open validation cache: %w", err)
+	}
+	plan, err := BuildScopedWithValidationCache(repoRoot, docsRoot, cfg, repair, now, cache, paths)
+	if err != nil {
+		return plan, err
+	}
+	if err := cache.Save(); err != nil {
+		return plan, fmt.Errorf("save validation cache: %w", err)
+	}
+	return plan, nil
+}
+
 // BuildWithValidationCache builds one frontmatter plan against a caller-owned
 // command cache. The caller publishes the cache after all parallel planners
 // complete, keeping private-state writes outside the planning phase.
 func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time, cache *validationcache.Store) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, now, cache, nil)
+}
+
+// BuildScopedWithValidationCache is the caller-owned-cache form of
+// BuildScoped. The full builder above intentionally retains its existing
+// read-and-validate behavior.
+func BuildScopedWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time, cache *validationcache.Store, paths []string) (Plan, error) {
+	return buildWithValidationCache(repoRoot, docsRoot, cfg, repair, now, cache, paths)
+}
+
+func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repair bool, now time.Time, cache *validationcache.Store, scopedPaths []string) (Plan, error) {
 	plan := Plan{immutable: map[string]map[string]any{}}
 	if !cfg.Frontmatter.Enabled {
 		return plan, nil
@@ -65,7 +98,8 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 	immutable := loadImmutableIndex(repoRoot)
 	cache.Retain(relativeValidationPaths(repoRoot, files))
 	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
-	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache, schemaHasher)
+	selected := scopedPathSet(repoRoot, scopedPaths)
+	sources, duplicateExisting, err := loadSources(repoRoot, files, cfg.Frontmatter.AllowedFormats, cfg, immutable, cache, schemaHasher, selected)
 	if err != nil {
 		return plan, err
 	}

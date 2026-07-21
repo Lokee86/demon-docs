@@ -1,6 +1,8 @@
 package frontmatter
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,6 +93,110 @@ func TestUnchangedCleanDocumentUsesValidationCacheAndPolicyChangesInvalidate(t *
 	}
 	if third.cacheHits != 0 || len(third.Diagnostics) != 0 {
 		t.Fatalf("frontmatter policy change did not invalidate cache: hits=%d diagnostics=%v", third.cacheHits, third.Diagnostics)
+	}
+}
+
+func TestScopedBuildReusesUntouchedDocumentsWithoutReadingThem(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ddrepo.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	text := "---\nauthor: Human\ncreated: '2026-07-20'\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: guide\nsummary: Existing\n---\n# Guide\n"
+	changed := filepath.Join(docs, "changed.md")
+	untouched := filepath.Join(docs, "untouched.md")
+	if err := os.WriteFile(changed, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	untouchedText := strings.Replace(text, "11111111-2222-4333-8444-555555555555", "22222222-3333-4444-8555-666666666666", 1)
+	if err := os.WriteFile(untouched, []byte(untouchedText), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Default()
+	cfg.Root = "docs"
+	cfg.Frontmatter = schema()
+	if _, err := Build(root, docs, cfg, false, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(untouched, []byte("not valid frontmatter\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(changed, []byte("not valid frontmatter\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := BuildScoped(root, docs, cfg, false, time.Now(), []string{changed})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.cacheHits != 1 || !plan.Failed() {
+		t.Fatalf("scoped result did not reuse untouched document: hits=%d diagnostics=%v", plan.cacheHits, plan.Diagnostics)
+	}
+}
+
+func TestScopedBuildRequestsFallbackWhenUntouchedCacheIsIncomplete(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ddrepo.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	text := "---\nauthor: Human\ncreated: '2026-07-20'\ndocument_id: 11111111-2222-4333-8444-555555555555\ndocument_type: guide\nsummary: Existing\n---\n# Guide\n"
+	changed := filepath.Join(docs, "changed.md")
+	untouched := filepath.Join(docs, "untouched.md")
+	if err := os.WriteFile(changed, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Default()
+	cfg.Root = "docs"
+	cfg.Frontmatter = schema()
+	if _, err := Build(root, docs, cfg, false, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(untouched, []byte(text), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := BuildScoped(root, docs, cfg, false, time.Now(), []string{changed})
+	if !errors.Is(err, ErrScopedReuseUnavailable) {
+		t.Fatalf("error=%v want scoped reuse sentinel", err)
+	}
+}
+
+func TestScopedBuildRequestsFallbackWhenDuplicateTouchesUntouchedDocument(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ddrepo.Init(root); err != nil {
+		t.Fatal(err)
+	}
+	base := "---\nauthor: Human\ncreated: '2026-07-20'\ndocument_id: %s\ndocument_type: guide\nsummary: Existing\n---\n# Guide\n"
+	changed := filepath.Join(docs, "a.md")
+	untouched := filepath.Join(docs, "b.md")
+	untouchedID := "22222222-3333-4444-8555-666666666666"
+	if err := os.WriteFile(changed, []byte(fmt.Sprintf(base, "11111111-2222-4333-8444-555555555555")), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(untouched, []byte(fmt.Sprintf(base, untouchedID)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Default()
+	cfg.Root = "docs"
+	cfg.Frontmatter = schema()
+	if _, err := Build(root, docs, cfg, false, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(changed, []byte(fmt.Sprintf(base, untouchedID)), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := BuildScoped(root, docs, cfg, true, time.Now(), []string{changed})
+	if !errors.Is(err, ErrScopedReuseUnavailable) {
+		t.Fatalf("error=%v want scoped reuse sentinel", err)
 	}
 }
 

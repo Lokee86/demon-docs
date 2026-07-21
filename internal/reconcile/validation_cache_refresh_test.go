@@ -22,14 +22,18 @@ func TestConvergeRefreshesValidationCacheAfterIndexRewrite(t *testing.T) {
 	write(t, filepath.Join(docsRoot, "page.md"), "# Page\n")
 
 	entry := validationcache.Entry{
-		Path:                  "docs/INDEX.md",
-		ContentSHA256:         validationcache.ContentHash(oldData),
-		EngineVersion:         validationcache.EngineVersion,
-		FrontmatterPolicyHash: validationcache.Hash("frontmatter"),
-		EffectiveSchemaHash:   validationcache.Hash("schema"),
-		ImmutableSnapshotHash: validationcache.Hash(nil),
-		FrontmatterClean:      true,
-		FormatClean:           true,
+		Path:                      "docs/INDEX.md",
+		ContentSHA256:             validationcache.ContentHash(oldData),
+		EngineVersion:             validationcache.EngineVersion,
+		FrontmatterIdentitySHA256: validationcache.Hash("frontmatter-source"),
+		FrontmatterPolicyHash:     validationcache.Hash("frontmatter-policy"),
+		FrontmatterSchemaHash:     validationcache.Hash("frontmatter-schema"),
+		ImmutableSnapshotHash:     validationcache.Hash(nil),
+		FormatIdentitySHA256:      validationcache.Hash("format-source"),
+		FormatPolicyHash:          validationcache.Hash("format-policy"),
+		FormatSchemaHash:          validationcache.Hash("format-schema"),
+		FrontmatterClean:          true,
+		FormatClean:               true,
 	}
 	store, err := validationcache.Open(repositoryRoot)
 	if err != nil {
@@ -55,17 +59,17 @@ func TestConvergeRefreshesValidationCacheAfterIndexRewrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated, ok := reopened.Lookup(
-		entry.Path,
-		validationcache.ContentHash(newData),
-		entry.FrontmatterPolicyHash,
-		entry.EffectiveSchemaHash,
-		entry.ImmutableSnapshotHash,
-	)
-	if !ok {
-		t.Fatal("index rewrite did not refresh the cached content identity")
+	updated, ok := reopened.LookupPath(entry.Path)
+	if !ok || updated.ContentSHA256 != validationcache.ContentHash(newData) {
+		t.Fatal("index rewrite did not refresh the cached source state")
 	}
 	if !updated.FrontmatterClean || updated.FormatClean {
 		t.Fatalf("index rewrite retained wrong validation surfaces: frontmatter=%t format=%t", updated.FrontmatterClean, updated.FormatClean)
+	}
+	if _, ok := reopened.LookupFrontmatter(entry.Path, entry.FrontmatterIdentitySHA256, entry.FrontmatterPolicyHash, entry.FrontmatterSchemaHash, entry.ImmutableSnapshotHash); !ok {
+		t.Fatal("index rewrite did not retain the unaffected frontmatter result")
+	}
+	if _, ok := reopened.LookupFormat(entry.Path, entry.FormatIdentitySHA256, entry.FormatPolicyHash, entry.FormatSchemaHash); ok {
+		t.Fatal("index rewrite retained the invalidated format result")
 	}
 }

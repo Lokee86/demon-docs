@@ -48,6 +48,8 @@ Known generated rewrites refresh the raw content hash from the exact final publi
 
 The refresh is guarded by the expected old content hash, so a stale cache record is never carried across an unrelated edit. If every clean result is invalidated, the record is removed; otherwise the unaffected subsystem identity remains reusable under the final raw content hash.
 
+Scoped watcher validation uses a normalized-path lookup that does not require reading or hashing untouched files. Frontmatter scoped reuse requires a current `FrontmatterClean` entry with the active frontmatter policy and reuses its cached document identity for global duplicate-ID detection. Document-format scoped reuse requires a current `FormatClean` entry with the active format policy and reuses its cached schema name and document ID. If any active untouched document lacks the required clean state, or a duplicate ID spans a changed and untouched document, the watcher reruns that subsystem with the full builder.
+
 The selected schema metadata remains in the record so either subsystem can verify current shared and document-specific schema sources before reuse. Shared or document-specific schema changes invalidate only the matching subsystem identity. The structural fingerprint has its own version marker, so older whole-document format identities miss safely and rebuild without another durable-record schema change. Validation cache schema version 2 continues to discard older combined-identity entries safely.
 
 ## Clean-only reuse

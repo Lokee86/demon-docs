@@ -38,15 +38,18 @@ func TestRefreshPublishedRetainsUnaffectedValidationResult(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated, ok := reopened.Lookup(entry.Path, ContentHash(newData), entry.FrontmatterPolicyHash, entry.EffectiveSchemaHash, entry.ImmutableSnapshotHash)
-	if !ok {
-		t.Fatal("published content hash did not replace the old cache identity")
+	updated, ok := reopened.LookupPath(entry.Path)
+	if !ok || updated.ContentSHA256 != ContentHash(newData) {
+		t.Fatal("published content hash did not replace the old cache source state")
 	}
 	if !updated.FrontmatterClean || updated.FormatClean {
 		t.Fatalf("unexpected retained surfaces: frontmatter=%t format=%t", updated.FrontmatterClean, updated.FormatClean)
 	}
-	if _, ok := reopened.Lookup(entry.Path, ContentHash(oldData), entry.FrontmatterPolicyHash, entry.EffectiveSchemaHash, entry.ImmutableSnapshotHash); ok {
-		t.Fatal("old content hash remained reachable after refresh")
+	if _, ok := reopened.LookupFrontmatter(entry.Path, entry.FrontmatterIdentitySHA256, entry.FrontmatterPolicyHash, entry.FrontmatterSchemaHash, entry.ImmutableSnapshotHash); !ok {
+		t.Fatal("unaffected frontmatter result was not retained")
+	}
+	if _, ok := reopened.LookupFormat(entry.Path, entry.FormatIdentitySHA256, entry.FormatPolicyHash, entry.FormatSchemaHash); ok {
+		t.Fatal("invalidated format result remained reusable")
 	}
 }
 
@@ -73,9 +76,15 @@ func TestRefreshPublishedPreservesAllValidationResultsForLinkRewrite(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated, ok := reopened.Lookup(entry.Path, ContentHash(newData), entry.FrontmatterPolicyHash, entry.EffectiveSchemaHash, entry.ImmutableSnapshotHash)
-	if !ok || !updated.FrontmatterClean || !updated.FormatClean {
+	updated, ok := reopened.LookupPath(entry.Path)
+	if !ok || updated.ContentSHA256 != ContentHash(newData) || !updated.FrontmatterClean || !updated.FormatClean {
 		t.Fatalf("link rewrite did not preserve clean validation results: %#v ok=%t", updated, ok)
+	}
+	if _, ok := reopened.LookupFrontmatter(entry.Path, entry.FrontmatterIdentitySHA256, entry.FrontmatterPolicyHash, entry.FrontmatterSchemaHash, entry.ImmutableSnapshotHash); !ok {
+		t.Fatal("link rewrite lost the frontmatter cache result")
+	}
+	if _, ok := reopened.LookupFormat(entry.Path, entry.FormatIdentitySHA256, entry.FormatPolicyHash, entry.FormatSchemaHash); !ok {
+		t.Fatal("link rewrite lost the format cache result")
 	}
 }
 
@@ -119,17 +128,21 @@ func TestRefreshPublishedDeletesEntryWhenAllResultsAreInvalidated(t *testing.T) 
 
 func refreshTestEntry(data []byte) Entry {
 	return Entry{
-		Path:                  "docs/guide.md",
-		ContentSHA256:         ContentHash(data),
-		EngineVersion:         EngineVersion,
-		FrontmatterPolicyHash: Hash("frontmatter"),
-		EffectiveSchemaHash:   Hash("schema"),
-		ImmutableSnapshotHash: Hash(nil),
-		DocumentID:            "guide",
-		DocumentType:          "general",
-		SchemaName:            "general",
-		FrontmatterClean:      true,
-		FormatClean:           true,
+		Path:                      "docs/guide.md",
+		ContentSHA256:             ContentHash(data),
+		EngineVersion:             EngineVersion,
+		FrontmatterIdentitySHA256: Hash("frontmatter-source"),
+		FrontmatterPolicyHash:     Hash("frontmatter-policy"),
+		FrontmatterSchemaHash:     Hash("frontmatter-schema"),
+		ImmutableSnapshotHash:     Hash(nil),
+		FormatIdentitySHA256:      Hash("format-source"),
+		FormatPolicyHash:          Hash("format-policy"),
+		FormatSchemaHash:          Hash("format-schema"),
+		DocumentID:                "guide",
+		DocumentType:              "general",
+		SchemaName:                "general",
+		FrontmatterClean:          true,
+		FormatClean:               true,
 	}
 }
 

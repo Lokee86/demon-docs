@@ -82,6 +82,82 @@ func TestSchedulerDebouncesAndRunsFollowup(t *testing.T) {
 	}
 }
 
+func TestScopedSchedulerCoalescesPathsInDeterministicOrder(t *testing.T) {
+	var got []string
+	scheduler := NewScopedScheduler(func(paths []string, full bool) error {
+		if full {
+			t.Fatal("path-only batch unexpectedly requested a full pass")
+		}
+		got = append([]string{}, paths...)
+		return nil
+	}, 0)
+	scheduler.MarkChangedPath(filepath.Join("docs", "z.md"))
+	scheduler.MarkChangedPath(filepath.Join("docs", "a.md"))
+	scheduler.MarkChangedPath(filepath.Join("docs", "z.md"))
+	if ran, err := scheduler.RunIfPending(); !ran || err != nil {
+		t.Fatalf("scoped run failed: ran=%v err=%v", ran, err)
+	}
+	want := []string{filepath.Join("docs", "a.md"), filepath.Join("docs", "z.md")}
+	if strings.Join(got, "\x00") != strings.Join(want, "\x00") {
+		t.Fatalf("paths=%v want=%v", got, want)
+	}
+}
+
+func TestScopedSchedulerRunsWithoutValidationPaths(t *testing.T) {
+	var gotPaths []string
+	var gotFull bool
+	scheduler := NewScopedScheduler(func(paths []string, full bool) error {
+		gotPaths, gotFull = paths, full
+		return nil
+	}, 0)
+	scheduler.MarkScopedPass()
+	if ran, err := scheduler.RunIfPending(); !ran || err != nil {
+		t.Fatalf("empty scoped run failed: ran=%v err=%v", ran, err)
+	}
+	if gotFull || len(gotPaths) != 0 {
+		t.Fatalf("full=%v paths=%v", gotFull, gotPaths)
+	}
+}
+
+func TestScopedSchedulerFullPassOverridesPaths(t *testing.T) {
+	var gotPaths []string
+	var gotFull bool
+	scheduler := NewScopedScheduler(func(paths []string, full bool) error {
+		gotPaths, gotFull = paths, full
+		return nil
+	}, 0)
+	scheduler.MarkChangedPath(filepath.Join("docs", "page.md"))
+	scheduler.MarkFullPass()
+	if ran, err := scheduler.RunIfPending(); !ran || err != nil {
+		t.Fatalf("scoped full run failed: ran=%v err=%v", ran, err)
+	}
+	if !gotFull || len(gotPaths) != 0 {
+		t.Fatalf("full=%v paths=%v", gotFull, gotPaths)
+	}
+}
+
+func TestScopedSchedulerRetainsChangesArrivingDuringRun(t *testing.T) {
+	var scheduler *Scheduler
+	runs := 0
+	scheduler = NewScopedScheduler(func(paths []string, full bool) error {
+		runs++
+		if runs == 1 {
+			scheduler.MarkChangedPath(filepath.Join("docs", "during.md"))
+		}
+		return nil
+	}, 0)
+	scheduler.MarkChangedPath(filepath.Join("docs", "before.md"))
+	if ran, err := scheduler.RunIfPending(); !ran || err != nil {
+		t.Fatalf("first run failed: ran=%v err=%v", ran, err)
+	}
+	if ran, err := scheduler.RunIfPending(); !ran || err != nil {
+		t.Fatalf("follow-up run failed: ran=%v err=%v", ran, err)
+	}
+	if runs != 2 {
+		t.Fatalf("runs=%d want=2", runs)
+	}
+}
+
 func TestRootSelectedWithRunLockSerializesReconciliation(t *testing.T) {
 	root := t.TempDir()
 	if err := os.WriteFile(filepath.Join(root, "page.md"), []byte("# Page\n"), 0o644); err != nil {
