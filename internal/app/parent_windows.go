@@ -2,20 +2,30 @@
 
 package app
 
-import (
-	"fmt"
-	"os/exec"
-	"strconv"
-	"strings"
-)
+import "golang.org/x/sys/windows"
 
 func parentAlive(pid int) bool {
 	if pid <= 0 {
 		return true
 	}
-	out, err := exec.Command("tasklist", "/FI", "PID eq "+strconv.Itoa(pid), "/NH").Output()
+
+	handle, err := windows.OpenProcess(windows.SYNCHRONIZE, false, uint32(pid))
+	if err != nil {
+		return err != windows.ERROR_INVALID_PARAMETER
+	}
+	defer windows.CloseHandle(handle)
+
+	status, err := windows.WaitForSingleObject(handle, 0)
 	if err != nil {
 		return true
 	}
-	return strings.Contains(string(out), fmt.Sprintf(" %d ", pid)) || strings.Contains(string(out), fmt.Sprintf("%d ", pid))
+
+	switch status {
+	case uint32(windows.WAIT_TIMEOUT):
+		return true
+	case windows.WAIT_OBJECT_0:
+		return false
+	default:
+		return true
+	}
 }
