@@ -49,6 +49,7 @@ jobs:
           }
           .\ddocs.exe --help | Out-Null
           .\demon.exe --help | Out-Null
+          go run ./tools/smoke --ddocs .\ddocs.exe --demon .\demon.exe
 
   release:
     name: Build and publish release
@@ -107,6 +108,9 @@ jobs:
           ./package/demon-docs_linux_amd64/ddocs --version | grep -Fx "ddocs ${VERSION}"
           ./package/demon-docs_linux_amd64/ddocs --help >/dev/null
           ./package/demon-docs_linux_amd64/demon --help >/dev/null
+          go run ./tools/smoke \
+            --ddocs ./package/demon-docs_linux_amd64/ddocs \
+            --demon ./package/demon-docs_linux_amd64/demon
           go version -m package/demon-docs_windows_amd64/ddocs.exe
           go version -m package/demon-docs_windows_amd64/demon.exe
 

@@ -377,6 +377,16 @@ Run the complete local release gate:
 make release-check
 ```
 
+Run the checked-in black-box smoke harness:
+
+```bash
+go run ./tools/smoke
+```
+
+It builds fresh binaries, creates an isolated repository and user configuration, and exercises documentation-policy convergence, link repair, explicit moves, reverse indexes, and detached-daemon maintenance. Release binaries can be tested directly with `--ddocs PATH --demon PATH`.
+
+This is a correctness smoke harness, not a load or stress test. It uses a deliberately small fixture to verify that the real CLI, storage, reconciliation, and daemon paths work together. It does not measure high-volume throughput, watcher event storms, concurrent command contention, resource ceilings, or long-running daemon stability.
+
 Run the Go suite directly:
 
 ```bash

@@ -55,6 +55,51 @@ A direct full-suite run is:
 go test ./... -count=1
 ```
 
+## Checked-In Smoke Harness
+
+`make smoke` runs the cross-platform black-box harness in `tools/smoke/`. The harness builds fresh `ddocs` and `demon` binaries by default, isolates user configuration and runtime state, creates a disposable initialized repository, and verifies:
+
+- top-level help, version, and configuration-path commands for both executables;
+- index, frontmatter, and document-format convergence plus byte-stable repeated repair;
+- permanent exclusion of `.obsidian/` editor state;
+- observed filesystem-rename link repair;
+- explicit `ddocs mv` link rewriting;
+- configured code-folder reverse indexes;
+- detached-daemon link repair after an ordinary rename;
+- daemon index insertion and stale-entry removal after ordinary create/delete operations;
+- confirmation that daemon maintenance does not apply frontmatter or document-format policy; and
+- daemon reverse-index refresh after a codemap source change.
+
+Run it directly with:
+
+```bash
+go run ./tools/smoke
+```
+
+Use already-built or extracted release binaries without rebuilding them:
+
+```bash
+go run ./tools/smoke --ddocs /path/to/ddocs --demon /path/to/demon
+```
+
+`--keep` preserves the disposable workspace after success. Failed runs always preserve it and print its path. `--skip-daemon` is available for restricted diagnostic environments, but CI and release gates run the full daemon scenario.
+
+### Scope: correctness, not stress
+
+The smoke harness intentionally uses a small repository and a small number of filesystem operations. Its purpose is to catch integration failures that package tests may miss, such as broken binary wiring, configuration isolation, command composition, persistence, detached-process behavior, or disagreement between reconciliation subsystems.
+
+It is not a performance, soak, or stress harness. It does not currently test:
+
+- thousands of documents or links;
+- large rename or move batches;
+- rapid watcher-event bursts;
+- concurrent mutating CLI operations;
+- repeated daemon crashes, restarts, or lease contention;
+- sustained memory, handle, CPU, or storage growth; or
+- latency and throughput thresholds under load.
+
+Those cases belong in dedicated benchmarks and stress fixtures with explicit workload sizes, resource measurements, and pass/fail thresholds. The checked-in smoke harness should remain fast, deterministic, and suitable for every CI and release run.
+
 ## CLI Help Coverage
 
 Help tests cover the complete public command tree, not only top-level command names. Every public command and nested subcommand must:
@@ -239,9 +284,9 @@ Structural review should also confirm that normal documents contain one parent i
 `.github/workflows/ci.yml` runs:
 
 - the complete Go suite, including `./tests`, on Linux and Windows;
-- `go vet ./...`;
-- both executable builds; and
-- basic CLI smoke tests for `ddocs` and `demon`.
+- the checked-in black-box smoke harness on Linux and Windows;
+- `go vet ./...`; and
+- both executable builds.
 
 ## Release Requirements
 
@@ -288,6 +333,7 @@ Corpus preparation and deterministic harness validation can proceed without paid
 - `internal/review/*_test.go` — review history, policy replay, and undo coverage.
 - `internal/app/help_test.go` and `help_nested_test.go` — top-level and scoped nested CLI help contracts.
 - `cmd/demon/main_test.go` — standalone demon alias argument normalization.
+- `tools/smoke/` — cross-platform black-box source-build and prebuilt-binary smoke harness.
 - `internal/app/move_test.go` — stateless move CLI coverage.
 - `internal/app/orphans_test.go` and `orphans_integration_test.go` — document-health rules and command behavior.
 - `internal/app/review_cli_test.go` — suggestion and applied-change CLI coverage.

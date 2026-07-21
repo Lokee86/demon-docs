@@ -15,13 +15,8 @@ regression:
 vet:
 	go vet ./...
 
-smoke: build
-	./bin/ddocs --help >/dev/null
-	./bin/ddocs --version
-	./bin/ddocs config paths >/dev/null
-	./bin/demon --help >/dev/null
-	./bin/demon --version
-	./bin/demon config paths >/dev/null
+smoke:
+	go run ./tools/smoke
 
 release-check: test vet build smoke
 

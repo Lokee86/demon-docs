@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   go-tests:
-    name: Go tests (${{ matrix.os }})
+    name: Go tests and smoke harness (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -22,6 +22,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - run: go test ./... -count=1
+      - run: go run ./tools/smoke
 
   quality-and-build:
     name: Vet, build, and CLI smoke tests
