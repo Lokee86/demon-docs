@@ -148,6 +148,23 @@ func TestWaitReadyRetriesTransientOwnerReadError(t *testing.T) {
 	}
 }
 
+func TestWaitReadyStopsWhenOwnerAndHeartbeatAreGone(t *testing.T) {
+	r := testRuntime(t)
+	owner, won, err := r.Claim(1)
+	if err != nil || !won {
+		t.Fatalf("claim: owner=%+v won=%t err=%v", owner, won, err)
+	}
+	if err := os.Remove(r.Paths.Owner); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(r.Paths.Heartbeat); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.WaitReady(context.Background(), owner, time.Second); err == nil {
+		t.Fatal("wait did not report a stopped demon")
+	}
+}
+
 func TestTokenSafeReleaseAndStaleRecovery(t *testing.T) {
 	r := testRuntime(t)
 	first, won, err := r.Claim(1)

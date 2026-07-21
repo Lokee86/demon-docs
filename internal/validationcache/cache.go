@@ -198,7 +198,7 @@ func (s *Store) Save() error {
 	}
 	sort.Strings(deleted)
 	sort.Strings(paths)
-	if err := s.repository.Transaction(func(tx *ddrepo.Transaction) error {
+	if err := s.repository.TransactionRetry(4, func(tx *ddrepo.Transaction) error {
 		for _, path := range deleted {
 			if err := tx.Delete(recordName(path)); err != nil {
 				return err

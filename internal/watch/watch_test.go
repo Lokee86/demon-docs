@@ -129,11 +129,23 @@ func TestWatchConvergesWithoutSelfWriteLoop(t *testing.T) {
 	c.Watch.DebounceSeconds = 0.05
 	c.ParentLink.IndexedFiles = true
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	done := make(chan error, 1)
-	go func() { done <- Root(ctx, root, c, nil, false, nil) }()
+	ready := make(chan struct{})
+	features := Features{Indexes: true, Frontmatter: c.Frontmatter.Enabled, Format: c.Format.Enabled}
+	go func() {
+		done <- RootSelectedWithRunLock(ctx, root, root, c, features, nil, false, nil, nil, func() error {
+			close(ready)
+			return nil
+		})
+	}()
+	select {
+	case <-ready:
+	case <-time.After(3 * time.Second):
+		cancel()
+		t.Fatal("watcher did not become ready")
+	}
 	index := filepath.Join(root, "INDEX.md")
-	waitFor(t, 3*time.Second, func() bool { _, err := os.Stat(index); return err == nil })
-	time.Sleep(150 * time.Millisecond)
 	page := filepath.Join(root, "page.md")
 	if err := os.WriteFile(page, []byte("# Page\n"), 0o644); err != nil {
 		t.Fatal(err)

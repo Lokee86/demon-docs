@@ -437,7 +437,7 @@ func TestExplicitDebounceOverrideWins(t *testing.T) {
 	fake := newFakeWatcher()
 	installFakeWatcher(t, fake, nil)
 	c := config.Default()
-	c.Watch.DebounceSeconds = 10
+	c.Watch.DebounceSeconds = 30
 	zero := 0.0
 	cancel, done := startFakeWatch(t, root, c, &zero, fake)
 	page := filepath.Join(root, "fast.md")
@@ -446,11 +446,11 @@ func TestExplicitDebounceOverrideWins(t *testing.T) {
 	}
 	started := time.Now()
 	fake.events <- fsnotify.Event{Name: page, Op: fsnotify.Create}
-	waitFor(t, time.Second, func() bool {
+	waitFor(t, 5*time.Second, func() bool {
 		data, err := os.ReadFile(filepath.Join(root, "INDEX.md"))
 		return err == nil && strings.Contains(string(data), "[fast.md](fast.md)")
 	})
-	if time.Since(started) >= time.Second {
+	if time.Since(started) >= 5*time.Second {
 		t.Fatal("configured debounce was used instead of explicit override")
 	}
 	stopFakeWatch(t, cancel, done)

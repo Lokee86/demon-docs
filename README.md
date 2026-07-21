@@ -6,6 +6,13 @@ It maintains folder indexes, validates and repairs local links, reports orphan d
 
 Configured repositories can also enforce frontmatter fields and document-body structure, create documents from TOML document schemas, and resolve explicit format conflicts without rewriting authored prose.
 
+## Hackathon judge quick path
+
+- Review the [hackathon scope, prior-work boundary, and AI engineering process](HACKATHON.md).
+- Install the [latest prebuilt release](https://github.com/Lokee86/demon-docs/releases/latest), or build from source below.
+- Run the [adoption walkthrough](tutorial/adoption-demo/README.md) against its disposable fixture.
+- Review the [current limitations](#current-limitations) and verify the repository with `go test ./... -count=1` and `go run ./cmd/ddocs check`.
+
 ## Core behavior
 
 Demon Docs can:

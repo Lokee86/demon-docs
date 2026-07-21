@@ -54,9 +54,11 @@ AI wrote the code and much of the architecture, but within a managed engineering
 
 Before the hackathon, I had a small Python project called **Doc Ledger** that generated documentation indexes and included an early daemon concept. It solved a real problem in my own repository but remained a narrow, backburnered utility.
 
-After the hackathon began, the project was entirely rebuilt in Go and renamed Demon Docs. Link identity and repair, repository-scoped state, link-aware moves, review and undo history, reverse indexes, schemas, the upgraded daemon, the codemap generation experiment, and the present test and documentation system were all added. Essentially all functionality except for the original index maintenance and watcher daemon that could do that maintenance.
+After the hackathon began, the project was entirely rebuilt in Go and renamed Demon Docs. Before that rebuild, the project contained only basic Markdown index maintenance and an early watcher daemon that could refresh those indexes. Link identity and repair, repository-scoped state, link-aware moves, review and undo history, reverse indexes, schemas, the upgraded daemon, the codemap generation experiment, and the present test and documentation system were all added during the event.
 
 The repository history preserves the original Python prototype and the full Go rebuild, making the pre-hackathon work easy to distinguish from the work completed during the submission period.
+
+Primary Codex feedback ID: `019f7928-4500-70e0-9bf9-6b20ad53c6a7`.
 
 ## Codemap generation
 

@@ -233,12 +233,14 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			return fmt.Errorf("watch document schemas: %w", err)
 		}
 	}
+	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
+	// Close the startup handoff gap with one pass after watch registration.
+	scheduler.MarkChanged()
 	if ready != nil {
 		if err := ready(); err != nil {
 			return fmt.Errorf("mark watcher ready: %w", err)
 		}
 	}
-	scheduler := NewScheduler(run, time.Duration(seconds*float64(time.Second)))
 	pendingRenames := map[string]time.Time{}
 	immediateRenameRepairs := 0
 	bulkRenameObserved := false

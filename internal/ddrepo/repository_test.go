@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/storage"
 )
 
 func TestRepositoryTransactionPersistsAndReopens(t *testing.T) {
@@ -80,6 +81,57 @@ func TestRepositoryRejectsStaleTransaction(t *testing.T) {
 	}
 	if err := second.Commit(); !errors.Is(err, ErrConflict) {
 		t.Fatalf("stale commit error = %v, want ErrConflict", err)
+	}
+}
+
+func TestReferenceConflictNormalization(t *testing.T) {
+	for _, err := range []error{storage.ErrReferenceHasChanged, errors.New(storage.ErrReferenceHasChanged.Error())} {
+		if !isReferenceConflict(err) {
+			t.Fatalf("conflict was not recognized: %v", err)
+		}
+	}
+	if isReferenceConflict(errors.New("different error")) {
+		t.Fatal("unrelated error was recognized as a reference conflict")
+	}
+}
+
+func TestRepositoryTransactionRetryReplaysConflict(t *testing.T) {
+	path := filepath.Join(t.TempDir(), ".ddocs")
+	repository, err := Init(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	other, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attempts := 0
+	err = repository.TransactionRetry(2, func(tx *Transaction) error {
+		attempts++
+		if err := tx.Write("file/retried", []byte("value")); err != nil {
+			return err
+		}
+		if attempts == 1 {
+			return other.Transaction(func(otherTx *Transaction) error {
+				return otherTx.Write("file/concurrent", []byte("other"))
+			})
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attempts != 2 {
+		t.Fatalf("attempts = %d, want 2", attempts)
+	}
+	tx, err := repository.Begin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"file/concurrent", "file/retried"} {
+		if _, err := tx.Read(name); err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
 	}
 }
 

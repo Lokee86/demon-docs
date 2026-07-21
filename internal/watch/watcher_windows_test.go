@@ -36,7 +36,33 @@ func TestWindowsRecursiveWatcherAllowsNestedTreeMove(t *testing.T) {
 	if err := watcher.Add(root); err != nil {
 		t.Fatal(err)
 	}
+	marker := filepath.Join(root, "watch-ready.tmp")
+	if err := os.WriteFile(marker, []byte("ready\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	readyDeadline := time.After(3 * time.Second)
+	for {
+		select {
+		case event, ok := <-watcher.Events():
+			if !ok {
+				t.Fatal("watcher events closed before registration was observed")
+			}
+			if filepath.Clean(event.Name) == filepath.Clean(marker) {
+				goto watcherReady
+			}
+		case err := <-watcher.Errors():
+			if err != nil {
+				t.Fatalf("watcher error before move: %v", err)
+			}
+		case <-readyDeadline:
+			t.Fatal("watcher did not observe registration marker")
+		}
+	}
 
+watcherReady:
+	if err := os.Remove(marker); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.Rename(oldTree, newTree); err != nil {
 		t.Fatalf("move nested watched tree: %v", err)
 	}

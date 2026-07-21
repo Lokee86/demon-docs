@@ -324,7 +324,7 @@ func (r *Runtime) WaitReady(ctx context.Context, owner Owner, timeout time.Durat
 			return nil
 		}
 		current, err := r.ReadOwner()
-		if os.IsNotExist(err) {
+		if os.IsNotExist(err) && !r.ownerHeartbeatFresh() {
 			return fmt.Errorf("demon stopped before its watcher became ready")
 		}
 		if err != nil {
@@ -348,6 +348,11 @@ func (r *Runtime) WaitReady(ctx context.Context, owner Owner, timeout time.Durat
 		case <-ticker.C:
 		}
 	}
+}
+
+func (r *Runtime) ownerHeartbeatFresh() bool {
+	info, err := os.Stat(r.Paths.Heartbeat)
+	return err == nil && time.Since(info.ModTime()) <= r.Timing.OwnerLease
 }
 
 func (r *Runtime) Heartbeat(owner Owner) error {

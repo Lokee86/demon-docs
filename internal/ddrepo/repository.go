@@ -94,6 +94,21 @@ func (r *Repository) Transaction(fn func(*Transaction) error) error {
 	return tx.Commit()
 }
 
+// TransactionRetry replays an idempotent transaction after optimistic write conflicts.
+func (r *Repository) TransactionRetry(attempts int, fn func(*Transaction) error) error {
+	if attempts < 1 {
+		attempts = 1
+	}
+	var err error
+	for attempt := 0; attempt < attempts; attempt++ {
+		err = r.Transaction(fn)
+		if !errors.Is(err, ErrConflict) {
+			return err
+		}
+	}
+	return err
+}
+
 func (r *Repository) CurrentRoot() (plumbing.Hash, error) {
 	if r == nil {
 		return plumbing.ZeroHash, fmt.Errorf("%w: repository is nil", ErrMissingState)

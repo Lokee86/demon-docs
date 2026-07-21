@@ -10,6 +10,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/storage"
 )
 
 type Transaction struct {
@@ -189,6 +190,9 @@ func (tx *Transaction) Commit() error {
 			return nil
 		}
 		if err := tx.repo.store.CheckAndSetReference(plumbing.NewHashReference(stateReference, rootHash), current); err != nil {
+			if isReferenceConflict(err) {
+				return ErrConflict
+			}
 			return err
 		}
 		tx.repo.compactAfterWrite()
@@ -219,6 +223,11 @@ func (tx *Transaction) checkOpen() error {
 		return ErrClosed
 	}
 	return nil
+}
+
+func isReferenceConflict(err error) bool {
+	return errors.Is(err, storage.ErrReferenceHasChanged) ||
+		err != nil && err.Error() == storage.ErrReferenceHasChanged.Error()
 }
 
 func sameReference(left, right *plumbing.Reference) bool {

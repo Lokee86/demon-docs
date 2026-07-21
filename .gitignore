@@ -9,6 +9,8 @@ dist/
 
 # Local runtime/cache files
 .cache/
+/.tmp*
+/demo_video.mp4
 /.ddocs/
 **/.ddocs/
 /.worktrees/

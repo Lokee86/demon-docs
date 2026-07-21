@@ -24,6 +24,10 @@ Use a clean branch or worktree for the first upgrade pass. Do not upgrade while 
 
 Version 0.3.3 disables automatic private-object compaction. Version 0.3.2 could repack `.ddocs` from the daemon while a separate CLI process was reading the same object store, leaving references pointed at missing packfiles or objects. Loose objects are retained until private-state readers and writers share a cross-process lock.
 
+The watcher also schedules one stabilization pass after filesystem watch registration. This closes the startup handoff gap in which a file could change after initial reconciliation but before the operating-system event reader was fully active. Startup readiness checks also use the fresh owner heartbeat to tolerate atomic owner-file replacement without falsely reporting that the daemon stopped.
+
+Validation-cache publication now retries bounded optimistic repository conflicts. A foreground check or fix no longer fails merely because the daemon advanced private state during the same cache write.
+
 Repositories that report `packfile not found`, `object not found`, or an unreadable state-root hash should stop the daemon and preserve the damaged `.ddocs` directory before rebuilding its private Git metadata. Keep `config.toml` and authored schemas.
 
 ## Version 0.3.2 behavior changes
