@@ -20,6 +20,14 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
+## Version 0.3.5 incremental validation update
+
+Version 0.3.5 separates frontmatter and document-format cache identities, refreshes unaffected validation results after generated rewrites, and adds path-scoped frontmatter and format validation to the watcher. Unrelated prose, link, code-block, and section-body edits no longer invalidate clean policy results, while schema, policy, identity, and structural-heading changes still force validation.
+
+The validation cache advances to schema version 2. Older combined-identity entries are discarded safely and rebuilt; no authored-document or configuration migration is required.
+
+Bare `ddocs fix` now runs indexes, links, and configured reverse indexes while deliberately skipping frontmatter and document-format mutation. Use `ddocs fix -a` or `ddocs fix --all` to run every configured reconciliation system. Bare `check` and `watch` retain full configured validation behavior.
+
 ## Version 0.3.4 performance update
 
 Version 0.3.4 parallelizes cold or invalidated frontmatter and document-format validation through a bounded 16-worker pool. Frontmatter source reads and parsing now run concurrently. Document-format source reads, frontmatter parsing, Markdown parsing, and per-document schema enforcement also run concurrently.
@@ -159,10 +167,16 @@ ddocs fix --reverse
 
 Use `ddocs fix --docs` when all three documentation-policy systems should migrate together.
 
-Or run the configured default set:
+Run the safe general default set with:
 
 ```bash
 ddocs fix
+```
+
+That excludes frontmatter and document-format mutation. Run every configured reconciliation system with:
+
+```bash
+ddocs fix --all
 ```
 
 Important migrations include:
@@ -180,11 +194,11 @@ Review the Git diff and command output. Private-state publication must not be mi
 ## Verify idempotence
 
 ```bash
-ddocs fix
+ddocs fix --all
 ddocs check
 ```
 
-The second fix should report zero changed files. A clean check confirms the selected subsystems are reconciled under the target version.
+The second full fix should report zero changed files. A clean check confirms the selected subsystems are reconciled under the target version.
 
 Run the repository's normal test or release gate when upgrading Demon Docs inside its own checkout or when generated fixtures depend on exact output.
 

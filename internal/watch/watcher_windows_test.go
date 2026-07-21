@@ -42,7 +42,10 @@ func TestWindowsRecursiveWatcherAllowsNestedTreeMove(t *testing.T) {
 	if err := os.WriteFile(marker, []byte("ready\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	readyDeadline := time.After(eventTimeout)
+	readyDeadline := time.NewTimer(eventTimeout)
+	defer readyDeadline.Stop()
+	readyRetry := time.NewTicker(50 * time.Millisecond)
+	defer readyRetry.Stop()
 	for {
 		select {
 		case event, ok := <-watcher.Events():
@@ -56,7 +59,14 @@ func TestWindowsRecursiveWatcherAllowsNestedTreeMove(t *testing.T) {
 			if err != nil {
 				t.Fatalf("watcher error before move: %v", err)
 			}
-		case <-readyDeadline:
+		case <-readyRetry.C:
+			// Add starts the blocking Windows read loop on a goroutine. Rewriting
+			// the marker makes the registration handshake robust when that goroutine
+			// is delayed by other packages running in parallel.
+			if err := os.WriteFile(marker, []byte(time.Now().Format(time.RFC3339Nano)), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		case <-readyDeadline.C:
 			t.Fatal("watcher did not observe registration marker")
 		}
 	}

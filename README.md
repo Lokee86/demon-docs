@@ -157,6 +157,7 @@ ddocs demon        manage repository-local watcher lifecycle
 Subsystem selectors:
 
 ```text
+--all          every configured reconciliation system
 --docs         documentation indexes, configured frontmatter, and document-body format
 --indexes      documentation indexes only
 --frontmatter  configured frontmatter enforcement only
@@ -165,7 +166,7 @@ Subsystem selectors:
 --reverse      code-folder reverse indexes
 ```
 
-Use `ddocs <command> --help` or `ddocs <command> <subcommand> --help` for exact scoped flags and safety behavior. `demon --help` opens the repository-demon command family. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
+Use `ddocs <command> --help` or `ddocs <command> <subcommand> --help` for exact scoped flags and safety behavior. Bare `ddocs fix` runs indexes, links, and configured reverse indexes; use `ddocs fix --all` when frontmatter and document-format mutation should also run. Bare `check` and `watch` retain full configured validation. `demon --help` opens the repository-demon command family. See the [CLI Reference](docs/reference/cli.md) for command ownership and mutation scope.
 
 ## Incremental and private-state behavior
 
