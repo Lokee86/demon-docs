@@ -34,7 +34,6 @@ type documentEvaluation struct {
 	data         []byte
 	text         string
 	contentHash  string
-	candidate    validationcache.Entry
 	schemaName   string
 	documentID   string
 	documentType string
@@ -65,10 +64,10 @@ func loadDocumentSources(repoRoot string, files []string, cfg config.Config, cac
 			text:        string(data),
 			contentHash: validationcache.ContentHash(data),
 		}
-		source.candidate, _ = cache.Candidate(source.relative, source.contentHash, policyHash)
-		if source.candidate.FormatClean && source.candidate.SchemaName != "" {
+		source.candidate, _ = cache.CandidateFormat(source.relative, source.contentHash, policyHash)
+		if source.candidate.SchemaName != "" {
 			schemaHash := schemaHasher.Effective(source.candidate.SchemaName, source.candidate.DocumentID)
-			if _, valid := cache.Lookup(source.relative, source.contentHash, policyHash, schemaHash, source.candidate.ImmutableSnapshotHash); valid {
+			if _, valid := cache.LookupFormat(source.relative, source.contentHash, policyHash, schemaHash); valid {
 				source.cacheHit = true
 				sources[index] = source
 				return nil

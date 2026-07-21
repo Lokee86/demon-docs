@@ -274,7 +274,7 @@ Impact:
 - cold validation is substantially faster but does not scale linearly with CPU count;
 - repositories dominated by shared-schema loading, private-state access, or publication may see smaller gains than parse-heavy corpora;
 - broad policy or schema changes still invalidate many cache entries at once;
-- link, index, or other body-only rewrites still change the raw whole-document hash and force fresh frontmatter and format scans even when their relevant inputs did not change; and
+- link, index, or other body-only rewrites no longer invalidate frontmatter cache entries, but they still change document format's current whole-document identity and force a fresh format scan; and
 - the worker limit is fixed at 16 rather than dynamically tuned per filesystem or machine.
 
 Workaround:
@@ -289,7 +289,7 @@ Owning docs:
 
 Removal condition:
 
-Cache identity is narrowed to validation-relevant document surfaces, or affected cache records are safely refreshed after final generated rewrites, so body-only link changes do not cause unrelated cold validation. Any further parallel coordination changes preserve deterministic duplicate-ID behavior, schema-history decisions, diagnostic ordering, and publication safety under retained benchmarks.
+Document format identity is narrowed to schema-selection metadata and heading structure, and affected cache records are safely refreshed after final generated rewrites, so body-only link changes do not cause format cold validation. Any further parallel coordination changes preserve deterministic duplicate-ID behavior, schema-history decisions, diagnostic ordering, and publication safety under retained benchmarks.
 
 ## Changed Markdown sources are reparsed as whole documents
 

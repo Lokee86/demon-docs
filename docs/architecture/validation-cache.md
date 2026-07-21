@@ -16,18 +16,30 @@ Frontmatter and document-body format validation use a durable incremental cache 
 
 ## Record identity
 
-Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the normalized repository-relative path. A record is reusable only when all of these values match:
+Each record is stored through `ddrepo` under `.ddocs/` and is addressed by the normalized repository-relative path. The record contains independent reusable identities for the two validation subsystems.
+
+Frontmatter reuse requires:
 
 - normalized path;
-- raw document content SHA-256;
 - validation engine version;
+- raw leading-frontmatter identity;
 - effective frontmatter policy hash;
 - effective selected shared/document schema hash; and
 - the immutable-value snapshot used by frontmatter validation.
 
-The selected schema identity is retained in the record so an unchanged document can verify the current shared and document-specific schema sources without reparsing its Markdown frontmatter. Shared and document-specific schema source changes therefore invalidate the record; changing the engine version also invalidates all records.
+Document-format reuse requires:
 
-Because the cache currently keys reuse to the raw whole-document SHA-256, a generated link rewrite, index rewrite, or other body-only edit invalidates both frontmatter and document-format cache entries even when their relevant metadata and heading structure are unchanged. The following validation pass therefore performs a cold parse for that document. A future optimization may split cache identity by owned input surface or refresh the affected validation records from the final published bytes after generated rewrites.
+- normalized path;
+- validation engine version;
+- format-source identity;
+- format-selection policy hash; and
+- effective selected shared/document schema hash.
+
+The raw whole-document SHA-256 remains recorded as source-state metadata, but it is no longer the shared identity for both validators. Frontmatter identity hashes the exact leading YAML or TOML block, including its source line endings. Ordinary body prose, link, and heading edits therefore do not invalidate a clean frontmatter result. The identity also distinguishes no block, unterminated blocks, and a newly introduced second leading block so cached clean results cannot hide parser diagnostics.
+
+Document format now owns a separate identity field and separate policy/schema hashes. In this slice its source identity remains the raw whole-document SHA-256; the next optimization can replace that field with a heading-structure fingerprint without changing frontmatter cache ownership or the durable record shape.
+
+The selected schema metadata remains in the record so either subsystem can verify current shared and document-specific schema sources before reuse. Shared or document-specific schema changes invalidate only the matching subsystem identity. Validation cache schema version 2 discards older combined-identity entries safely and rebuilds them on the next validation pass.
 
 ## Clean-only reuse
 

@@ -102,7 +102,7 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 	}
 	cache.Retain(activePaths)
-	policyHash := validationcache.FrontmatterPolicyHash(cfg)
+	policyHash := validationcache.FormatPolicyHash(cfg)
 	schemaHasher := validationcache.NewSchemaHasher(repoRoot, cfg.Format)
 	sharedSchemas := map[string]Schema{}
 	sharedErrors := map[string]error{}
@@ -255,7 +255,6 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			data:         source.data,
 			text:         source.text,
 			contentHash:  source.contentHash,
-			candidate:    source.candidate,
 			schemaName:   schemaName,
 			documentID:   documentID,
 			documentType: documentType,
@@ -287,16 +286,16 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 		if len(result.Diagnostics) == 0 && !result.Changed {
 			cache.Merge(validationcache.Entry{
-				Path:                  evaluation.relative,
-				ContentSHA256:         evaluation.contentHash,
-				EngineVersion:         validationcache.EngineVersion,
-				FrontmatterPolicyHash: policyHash,
-				EffectiveSchemaHash:   schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
-				ImmutableSnapshotHash: evaluation.candidate.ImmutableSnapshotHash,
-				DocumentID:            strings.TrimSpace(evaluation.documentID),
-				DocumentType:          strings.TrimSpace(evaluation.documentType),
-				SchemaName:            evaluation.schemaName,
-				FormatClean:           true,
+				Path:                 evaluation.relative,
+				ContentSHA256:        evaluation.contentHash,
+				EngineVersion:        validationcache.EngineVersion,
+				FormatIdentitySHA256: evaluation.contentHash,
+				FormatPolicyHash:     policyHash,
+				FormatSchemaHash:     schemaHasher.Effective(evaluation.schemaName, evaluation.documentID),
+				DocumentID:           strings.TrimSpace(evaluation.documentID),
+				DocumentType:         strings.TrimSpace(evaluation.documentType),
+				SchemaName:           evaluation.schemaName,
+				FormatClean:          true,
 			})
 		}
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/ddrepo"
+	"github.com/Lokee86/demon-docs/internal/validationcache"
 )
 
 func TestUnchangedCleanDocumentUsesValidationCacheAndPolicyChangesInvalidate(t *testing.T) {
@@ -42,6 +43,36 @@ func TestUnchangedCleanDocumentUsesValidationCacheAndPolicyChangesInvalidate(t *
 	}
 	if second.cacheHits != 1 || len(second.Diagnostics) != 0 {
 		t.Fatalf("unchanged clean document was not cached: hits=%d diagnostics=%v", second.cacheHits, second.Diagnostics)
+	}
+	bodyChanged := strings.Replace(text, "# Guide\n", "# Guide\n\nBody prose changed.\n", 1)
+	if err := os.WriteFile(path, []byte(bodyChanged), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	bodyOnly, err := Build(root, docs, cfg, false, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bodyOnly.cacheHits != 1 || len(bodyOnly.Diagnostics) != 0 {
+		t.Fatalf("body-only edit invalidated frontmatter cache: hits=%d diagnostics=%v", bodyOnly.cacheHits, bodyOnly.Diagnostics)
+	}
+	cache, err := validationcache.Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	candidate, ok := cache.CandidateFrontmatter("docs/guide.md", IdentityHash([]byte(bodyChanged)), validationcache.FrontmatterPolicyHash(cfg))
+	if !ok {
+		t.Fatal("body-only edit did not retain frontmatter candidate")
+	}
+	if candidate.ContentSHA256 != validationcache.ContentHash([]byte(bodyChanged)) {
+		t.Fatal("body-only cache hit did not refresh raw content metadata")
+	}
+	cfg.Format.InvalidationSimilarity = 0.25
+	formatOnlyPolicy, err := Build(root, docs, cfg, false, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if formatOnlyPolicy.cacheHits != 1 || len(formatOnlyPolicy.Diagnostics) != 0 {
+		t.Fatalf("format-only policy invalidated frontmatter cache: hits=%d diagnostics=%v", formatOnlyPolicy.cacheHits, formatOnlyPolicy.Diagnostics)
 	}
 	if err := os.WriteFile(path, []byte(strings.ReplaceAll(text, "\n", "\r\n")), 0o644); err != nil {
 		t.Fatal(err)

@@ -49,6 +49,14 @@ func TestUnchangedCleanDocumentFormatUsesCacheAndSchemaChangesInvalidate(t *test
 	if second.cacheHits != 1 || len(second.Diagnostics) != 0 {
 		t.Fatalf("unchanged clean format was not cached: hits=%d diagnostics=%v", second.cacheHits, second.Diagnostics)
 	}
+	cfg.Frontmatter.UnknownFields = "warn"
+	frontmatterPolicyOnly, err := Build(root, docs, cfg, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if frontmatterPolicyOnly.cacheHits != 1 || len(frontmatterPolicyOnly.Diagnostics) != 0 {
+		t.Fatalf("unrelated frontmatter policy invalidated format cache: hits=%d diagnostics=%v", frontmatterPolicyOnly.cacheHits, frontmatterPolicyOnly.Diagnostics)
+	}
 	if err := os.WriteFile(schemaPath, []byte("version = 1\nname = 'general'\ndescription = 'changed'\nunknown_sections = 'allow'\nduplicate_sections = 'allow'\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

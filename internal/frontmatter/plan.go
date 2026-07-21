@@ -85,6 +85,7 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 					plan.immutable[relative] = cloneValues(source.cacheEntry.ImmutableValues)
 					cacheEntry := source.cacheEntry
 					cacheEntry.ImmutableSnapshotHash = validationcache.Hash(cacheEntry.ImmutableValues)
+					cacheEntry.FormatClean = false
 					cache.Merge(cacheEntry)
 				}
 			}
@@ -157,17 +158,18 @@ func BuildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 				immutableSnapshot = outcome.Immutable
 			}
 			cache.Merge(validationcache.Entry{
-				Path:                  relative,
-				ContentSHA256:         source.contentHash,
-				EngineVersion:         validationcache.EngineVersion,
-				FrontmatterPolicyHash: validationcache.FrontmatterPolicyHash(cfg),
-				EffectiveSchemaHash:   selectedSchemaHash(schemaHasher, relative, parsed.Values, cfg),
-				ImmutableSnapshotHash: validationcache.Hash(immutableSnapshot),
-				DocumentID:            documentID(outcome.Values),
-				DocumentType:          stringValue(outcome.Values["document_type"]),
-				SchemaName:            selectedSchemaName(relative, parsed.Values, cfg),
-				ImmutableValues:       cloneValues(outcome.Immutable),
-				FrontmatterClean:      true,
+				Path:                      relative,
+				ContentSHA256:             source.contentHash,
+				EngineVersion:             validationcache.EngineVersion,
+				FrontmatterIdentitySHA256: source.frontmatterIdentity,
+				FrontmatterPolicyHash:     validationcache.FrontmatterPolicyHash(cfg),
+				FrontmatterSchemaHash:     selectedSchemaHash(schemaHasher, relative, parsed.Values, cfg),
+				ImmutableSnapshotHash:     validationcache.Hash(immutableSnapshot),
+				DocumentID:                documentID(outcome.Values),
+				DocumentType:              stringValue(outcome.Values["document_type"]),
+				SchemaName:                selectedSchemaName(relative, parsed.Values, cfg),
+				ImmutableValues:           cloneValues(outcome.Immutable),
+				FrontmatterClean:          true,
 			})
 		}
 	}

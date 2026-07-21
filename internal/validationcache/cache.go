@@ -20,25 +20,30 @@ import (
 const (
 	EngineVersion = "validation-engine-v1"
 	prefix        = "validation-cache/"
-	schemaVersion = 1
+	schemaVersion = 2
 )
 
 // Entry is the durable identity and clean-result state for one document.
-// The two clean flags are merged by frontmatter and document-policy builders.
+// Frontmatter and format keep independent identity and policy fields so one
+// subsystem can be reused when the other subsystem's source surface changes.
 type Entry struct {
-	SchemaVersion         int            `json:"schema_version"`
-	Path                  string         `json:"path"`
-	ContentSHA256         string         `json:"content_sha256"`
-	EngineVersion         string         `json:"engine_version"`
-	FrontmatterPolicyHash string         `json:"frontmatter_policy_hash"`
-	EffectiveSchemaHash   string         `json:"effective_schema_hash"`
-	ImmutableSnapshotHash string         `json:"immutable_snapshot_hash"`
-	DocumentID            string         `json:"document_id,omitempty"`
-	DocumentType          string         `json:"document_type,omitempty"`
-	SchemaName            string         `json:"schema_name,omitempty"`
-	ImmutableValues       map[string]any `json:"immutable_values,omitempty"`
-	FrontmatterClean      bool           `json:"frontmatter_clean"`
-	FormatClean           bool           `json:"format_clean"`
+	SchemaVersion             int            `json:"schema_version"`
+	Path                      string         `json:"path"`
+	ContentSHA256             string         `json:"content_sha256"`
+	EngineVersion             string         `json:"engine_version"`
+	FrontmatterIdentitySHA256 string         `json:"frontmatter_identity_sha256,omitempty"`
+	FrontmatterPolicyHash     string         `json:"frontmatter_policy_hash,omitempty"`
+	FrontmatterSchemaHash     string         `json:"frontmatter_schema_hash,omitempty"`
+	ImmutableSnapshotHash     string         `json:"immutable_snapshot_hash,omitempty"`
+	FormatIdentitySHA256      string         `json:"format_identity_sha256,omitempty"`
+	FormatPolicyHash          string         `json:"format_policy_hash,omitempty"`
+	FormatSchemaHash          string         `json:"format_schema_hash,omitempty"`
+	DocumentID                string         `json:"document_id,omitempty"`
+	DocumentType              string         `json:"document_type,omitempty"`
+	SchemaName                string         `json:"schema_name,omitempty"`
+	ImmutableValues           map[string]any `json:"immutable_values,omitempty"`
+	FrontmatterClean          bool           `json:"frontmatter_clean"`
+	FormatClean               bool           `json:"format_clean"`
 }
 
 type Store struct {
@@ -116,7 +121,17 @@ func Open(repoRoot string) (*Store, error) {
 	return store, nil
 }
 
-func (s *Store) Lookup(path, contentHash, frontmatterPolicyHash, schemaHash, immutableHash string) (Entry, bool) {
+func (s *Store) LookupFrontmatter(path, identityHash, policyHash, schemaHash, immutableHash string) (Entry, bool) {
+	entry, ok := s.CandidateFrontmatter(path, identityHash, policyHash)
+	if !ok || entry.FrontmatterSchemaHash != schemaHash || entry.ImmutableSnapshotHash != immutableHash {
+		return Entry{}, false
+	}
+	return entry, true
+}
+
+// CandidateFrontmatter returns a frontmatter identity and policy match before
+// the caller re-reads the selected schema and immutable-state snapshot.
+func (s *Store) CandidateFrontmatter(path, identityHash, policyHash string) (Entry, bool) {
 	if s == nil {
 		return Entry{}, false
 	}
@@ -125,18 +140,24 @@ func (s *Store) Lookup(path, contentHash, frontmatterPolicyHash, schemaHash, imm
 	defer s.mu.RUnlock()
 	entry, ok := s.entries[normalized]
 	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != normalized ||
-		entry.ContentSHA256 != contentHash || entry.EngineVersion != EngineVersion ||
-		entry.FrontmatterPolicyHash != frontmatterPolicyHash || entry.EffectiveSchemaHash != schemaHash ||
-		entry.ImmutableSnapshotHash != immutableHash {
+		entry.EngineVersion != EngineVersion || !entry.FrontmatterClean ||
+		entry.FrontmatterIdentitySHA256 != identityHash || entry.FrontmatterPolicyHash != policyHash {
 		return Entry{}, false
 	}
 	return cloneEntry(entry), true
 }
 
-// Candidate returns a path/content/version/policy match before the caller has
-// re-read the selected schema. It is used to recover the selection metadata
-// needed to compute the current effective schema hash without parsing Markdown.
-func (s *Store) Candidate(path, contentHash, frontmatterPolicyHash string) (Entry, bool) {
+func (s *Store) LookupFormat(path, identityHash, policyHash, schemaHash string) (Entry, bool) {
+	entry, ok := s.CandidateFormat(path, identityHash, policyHash)
+	if !ok || entry.FormatSchemaHash != schemaHash {
+		return Entry{}, false
+	}
+	return entry, true
+}
+
+// CandidateFormat returns a format identity and policy match before the caller
+// re-reads the selected shared and document-specific schema sources.
+func (s *Store) CandidateFormat(path, identityHash, policyHash string) (Entry, bool) {
 	if s == nil {
 		return Entry{}, false
 	}
@@ -145,8 +166,8 @@ func (s *Store) Candidate(path, contentHash, frontmatterPolicyHash string) (Entr
 	defer s.mu.RUnlock()
 	entry, ok := s.entries[normalized]
 	if !ok || entry.SchemaVersion != schemaVersion || entry.Path != normalized ||
-		entry.ContentSHA256 != contentHash || entry.EngineVersion != EngineVersion ||
-		entry.FrontmatterPolicyHash != frontmatterPolicyHash {
+		entry.EngineVersion != EngineVersion || !entry.FormatClean ||
+		entry.FormatIdentitySHA256 != identityHash || entry.FormatPolicyHash != policyHash {
 		return Entry{}, false
 	}
 	return cloneEntry(entry), true
@@ -158,32 +179,50 @@ func (s *Store) Merge(entry Entry) {
 	}
 	entry.SchemaVersion = schemaVersion
 	entry.Path = NormalizePath(entry.Path)
+	entry.EngineVersion = EngineVersion
 	entry = cloneEntry(entry)
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
 	previous, exists := s.entries[entry.Path]
-	if exists && sameIdentity(previous, entry) {
-		entry.FrontmatterClean = entry.FrontmatterClean || previous.FrontmatterClean
-		entry.FormatClean = entry.FormatClean || previous.FormatClean
-		if entry.DocumentID == "" {
-			entry.DocumentID = previous.DocumentID
-		}
-		if entry.DocumentType == "" {
-			entry.DocumentType = previous.DocumentType
-		}
-		if entry.SchemaName == "" {
-			entry.SchemaName = previous.SchemaName
-		}
-		if entry.ImmutableValues == nil {
-			entry.ImmutableValues = cloneValues(previous.ImmutableValues)
-		}
+	merged := Entry{
+		SchemaVersion: schemaVersion,
+		Path:          entry.Path,
+		EngineVersion: EngineVersion,
 	}
-	s.entries[entry.Path] = entry
-	if exists && reflect.DeepEqual(previous, entry) {
+	if exists && previous.SchemaVersion == schemaVersion && previous.EngineVersion == EngineVersion {
+		merged = cloneEntry(previous)
+	}
+	if entry.ContentSHA256 != "" {
+		merged.ContentSHA256 = entry.ContentSHA256
+	}
+	if entry.FrontmatterClean {
+		merged.FrontmatterIdentitySHA256 = entry.FrontmatterIdentitySHA256
+		merged.FrontmatterPolicyHash = entry.FrontmatterPolicyHash
+		merged.FrontmatterSchemaHash = entry.FrontmatterSchemaHash
+		merged.ImmutableSnapshotHash = entry.ImmutableSnapshotHash
+		merged.DocumentID = entry.DocumentID
+		merged.DocumentType = entry.DocumentType
+		merged.SchemaName = entry.SchemaName
+		merged.ImmutableValues = cloneValues(entry.ImmutableValues)
+		merged.FrontmatterClean = true
+	}
+	if entry.FormatClean {
+		merged.FormatIdentitySHA256 = entry.FormatIdentitySHA256
+		merged.FormatPolicyHash = entry.FormatPolicyHash
+		merged.FormatSchemaHash = entry.FormatSchemaHash
+		merged.DocumentID = entry.DocumentID
+		merged.DocumentType = entry.DocumentType
+		merged.SchemaName = entry.SchemaName
+		merged.FormatClean = true
+	}
+
+	s.entries[entry.Path] = merged
+	if exists && reflect.DeepEqual(previous, merged) {
 		delete(s.dirty, entry.Path)
 		return
 	}
-	s.dirty[entry.Path] = entry
+	s.dirty[entry.Path] = merged
 }
 
 // Retain drops cache records for documents that are no longer in the active
@@ -260,14 +299,36 @@ func Hash(value any) string {
 	return hex.EncodeToString(digest[:])
 }
 
-// FrontmatterPolicyHash covers frontmatter rules and the format-selection and
-// index defaults that can change the effective frontmatter schema.
+// FrontmatterPolicyHash covers frontmatter rules and only the format-selection
+// inputs that can change the effective frontmatter schema. Format evaluation,
+// schema locations, and invalidation thresholds belong to separate identities.
 func FrontmatterPolicyHash(cfg config.Config) string {
 	return Hash(struct {
 		Frontmatter config.Frontmatter
 		IndexFile   string
-		Format      config.Format
-	}{cfg.Frontmatter, cfg.IndexFile, cfg.Format})
+		Selection   struct {
+			Enabled       bool
+			DefaultSchema string
+			PathRules     []config.FormatPathRule
+		}
+	}{
+		Frontmatter: cfg.Frontmatter,
+		IndexFile:   cfg.IndexFile,
+		Selection: struct {
+			Enabled       bool
+			DefaultSchema string
+			PathRules     []config.FormatPathRule
+		}{cfg.Format.Enabled, cfg.Format.DefaultSchema, cfg.Format.PathRules},
+	})
+}
+
+// FormatPolicyHash covers only configuration used while parsing frontmatter
+// for schema selection and evaluating document-format rules.
+func FormatPolicyHash(cfg config.Config) string {
+	return Hash(struct {
+		AllowedFormats []string
+		Format         config.Format
+	}{cfg.Frontmatter.AllowedFormats, cfg.Format})
 }
 
 func ContentHash(data []byte) string {
@@ -307,12 +368,6 @@ func effectiveSchemaHash(repoRoot string, format config.Format, schemaName, docu
 		Shared     string
 		Local      string
 	}{strings.TrimSpace(schemaName), strings.TrimSpace(documentID), shared, local})
-}
-
-func sameIdentity(left, right Entry) bool {
-	return left.Path == NormalizePath(right.Path) && left.ContentSHA256 == right.ContentSHA256 &&
-		left.EngineVersion == right.EngineVersion && left.FrontmatterPolicyHash == right.FrontmatterPolicyHash &&
-		left.EffectiveSchemaHash == right.EffectiveSchemaHash && left.ImmutableSnapshotHash == right.ImmutableSnapshotHash
 }
 
 func cloneEntry(entry Entry) Entry {
