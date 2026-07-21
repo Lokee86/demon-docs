@@ -3,6 +3,7 @@ package validationcache
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/Lokee86/demon-docs/internal/config"
@@ -168,7 +169,11 @@ func TestEntryRoundTripsAndSchemaSourceChangesInvalidate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := reopened.Lookup("docs/guide.md", ContentHash([]byte("content")), Hash("frontmatter"), firstSchemaHash, Hash(nil)); !ok {
+	lookupPath := "docs/Guide.md"
+	if runtime.GOOS == "windows" {
+		lookupPath = "docs/guide.md"
+	}
+	if _, ok := reopened.Lookup(lookupPath, ContentHash([]byte("content")), Hash("frontmatter"), firstSchemaHash, Hash(nil)); !ok {
 		t.Fatal("stored validation entry did not round-trip through ddrepo")
 	}
 	if err := os.WriteFile(schemaPath, []byte("name = 'general'\ndescription = 'changed'\n"), 0o644); err != nil {
