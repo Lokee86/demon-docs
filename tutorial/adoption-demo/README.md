@@ -146,18 +146,23 @@ The documentation check should now pass.
 
 ## 9. Establish and review link health
 
+The first link pass records the repository baseline. Run the command again so deterministic repairs can be applied against that baseline:
+
 ```bash
 ddocs fix --links
-ddocs suggestions
+ddocs fix --links
+ddocs suggestions docs/home.md
 ddocs check --links
 ```
+
+Scoping `suggestions` to `docs/home.md` keeps unrelated suggestion types out of the walkthrough output.
 
 The remaining relationship issues should be:
 
 - `docs/home.md` contains an ambiguous `[[overview|project overview]]` wiki link because two files are named `overview.md`;
 - `docs/notes/launch-retrospective.md` is useful but has no incoming authored link.
 
-Inspect the ambiguous suggestion using the identifier printed by `ddocs suggestions`:
+Inspect the ambiguous suggestion using the identifier printed by the scoped `ddocs suggestions` command:
 
 ```bash
 ddocs suggestions show <suggestion-id>
@@ -264,7 +269,7 @@ Demon Docs also supports bounded hash-guarded undo, but performing an undo is un
 Enable the repository daemon only after the explicit repair and reorganization demonstrations are complete:
 
 ```bash
-ddocs demon run
+ddocs demon run --true
 ddocs demon --status
 ```
 
