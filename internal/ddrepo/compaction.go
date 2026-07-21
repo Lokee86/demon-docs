@@ -20,7 +20,11 @@ type Options struct {
 }
 
 func DefaultCompactionThresholds() CompactionThresholds {
-	return CompactionThresholds{LooseFileCount: 256, LooseBytes: 8 << 20}
+	// Automatic compaction is disabled until private-repository readers and
+	// writers are coordinated across processes. The repository demon and CLI
+	// run in separate processes, so an in-process mutex cannot prevent one
+	// process from removing a packfile while another process is reading it.
+	return CompactionThresholds{}
 }
 
 var repositoryWriteMu sync.Mutex
@@ -53,6 +57,9 @@ func WithRepositoryWriteLock(path string, fn func() error) error {
 func CompactIfNeeded(repository *git.Repository, path string, thresholds CompactionThresholds) (bool, error) {
 	if repository == nil {
 		return false, errors.New("ddrepo: compaction repository is nil")
+	}
+	if thresholds.LooseFileCount <= 0 && thresholds.LooseBytes <= 0 {
+		return false, nil
 	}
 	storagePath, err := ddocsPath(path)
 	if err != nil {

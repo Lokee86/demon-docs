@@ -161,7 +161,7 @@ Unchanged clean frontmatter and document-format results can be reused from durab
 
 Link inventory traverses the repository deterministically, reuses unchanged size/mtime metadata, and reads changed or new files through a bounded 16-worker pool. When an index, frontmatter, format, or reverse-index fix changes Markdown after the initial link pass, Demon Docs refreshes only those changed link sources. A clean non-link fix does not run a repository-wide link scan or initialize absent link state. Explicit `--links` still runs the complete reconciliation, review, rollback, and suppression path.
 
-Successful private state and review writes trigger best-effort compaction only after loose-object thresholds are exceeded. Maintenance preserves everything reachable from all private references, including review history and undo snapshots; a compaction failure does not reverse the completed logical write.
+Automatic private-object compaction is currently disabled. The repository demon and CLI run as separate processes, and go-git pack replacement is not safe until private-state readers and writers share a cross-process lock. Normal commands therefore retain loose objects rather than risking a missing pack or referenced object.
 
 Cold frontmatter and document-format validation is still processed serially, and a changed Markdown source is currently reparsed as a whole. These remaining performance boundaries are tracked in [Current Product Limitations](docs/limits/current-limitations.md) and the [Roadmap](docs/planning/roadmap.md).
 

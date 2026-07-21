@@ -134,11 +134,11 @@ An unchanged blocked repair is not applied. Materially changed evidence makes th
 - Private review events do not modify the user's normal Git branch history.
 - Expired undo eligibility does not erase audit records.
 
-After a successful review-reference advancement, the shared private-object
-repository maintenance path may compact the bare Git object store. It walks
-all private references before repacking, so review commits and their before /
-after undo blobs remain reachable. Compaction failure is best effort and does
-not change the successful append result.
+Automatic private-object compaction is disabled for normal review writes. The
+daemon and CLI can read the same bare object store from separate processes,
+and pack replacement is unsafe until those readers and writers share a
+cross-process lock. Explicit storage tests still verify that controlled
+single-process compaction retains review commits and undo blobs.
 
 ## Code map
 

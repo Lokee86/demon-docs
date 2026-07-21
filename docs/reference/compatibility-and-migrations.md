@@ -20,6 +20,8 @@ Demon Docs accepts a bounded set of previous names and formats so repositories c
 
 Automatic migration is permitted only when the old format can be translated deterministically. Unsupported private-state schemas fail explicitly rather than being guessed.
 
+Version 0.3.3 disables automatic private-object compaction because the daemon and CLI can access `.ddocs` from separate processes. This is a storage-safety change and does not alter authored documents or private-state schemas.
+
 Version 0.3.2 changed feature selection: `-i` / `--indexes` means indexes only, while `-d` / `--docs` means indexes plus frontmatter and document-body format. Scripts that previously used `--indexes` as an alias for the full documentation-policy group must switch to `--docs` explicitly.
 
 ## Configuration filenames
@@ -118,7 +120,7 @@ Preserve the failing `.ddocs/` directory and command output before reset. Reinit
 
 Review-ledger events are append-only Git objects under the private review reference. Current batched and legacy per-event commits can coexist. Undo eligibility settings may change without deleting audit history.
 
-Private object compaction is format-preserving maintenance rather than a schema migration. It runs only after a successful state or review reference update crosses the configured internal thresholds and retains all objects reachable from every private reference.
+Automatic private-object compaction is disabled for normal constructors. This is a safety change rather than a schema migration: existing loose and packed objects remain readable, but new state and review writes do not initiate pack replacement until cross-process repository locking exists.
 
 ## Linked-worktree bootstrap compatibility
 

@@ -9,6 +9,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
+func TestDefaultCompactionIsDisabled(t *testing.T) {
+	thresholds := DefaultCompactionThresholds()
+	if thresholds.LooseFileCount != 0 || thresholds.LooseBytes != 0 {
+		t.Fatalf("default compaction must remain disabled without a cross-process repository lock: %+v", thresholds)
+	}
+}
+
 func TestCompactionWaitsUntilCountIsAboveThreshold(t *testing.T) {
 	path := filepath.Join(t.TempDir(), ".ddocs")
 	repository, err := InitWithOptions(path, Options{Compaction: CompactionThresholds{LooseFileCount: 4}})

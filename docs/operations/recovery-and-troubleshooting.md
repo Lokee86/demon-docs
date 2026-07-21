@@ -136,7 +136,7 @@ Likely differences include:
 
 Validation-cache records are optimization state. A content, policy, schema, immutable-state, duplicate-identity, or validation-engine change invalidates reuse automatically. Deleting only the cache records after all Demon Docs processes stop is safe, but normally unnecessary; the next pass simply reparses the affected documents.
 
-Private state and review publication may trigger automatic compaction after more than 256 loose objects or more than 8 MiB of loose object data. Compaction runs only after the logical reference write succeeds and preserves all objects reachable from private references, including review history and undo snapshots. A maintenance failure is non-fatal to the completed write and is retried after a later successful publication.
+Automatic private-object compaction is disabled. Builds that enabled it could corrupt `.ddocs` when the daemon repacked while another CLI process read the same object store. Errors such as `packfile not found`, `object not found`, or a state/reference hash whose object cannot be loaded require stopping the daemon and preserving the damaged `.ddocs` directory before rebuilding private state. Do not delete `config.toml` or authored schemas when only the private Git metadata is damaged.
 
 An error from the project's normal `.git` maintenance is separate from Demon Docs' private `.ddocs` maintenance. Diagnose the path named in the message before deleting or repairing either repository.
 

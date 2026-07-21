@@ -29,7 +29,7 @@ import (
 )
 
 // Version is the source-build fallback and is overridden for tagged release binaries.
-var Version = "0.3.2"
+var Version = "0.3.3"
 
 type stringsFlag struct{ values []string }
 

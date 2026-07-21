@@ -20,6 +20,12 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
+## Version 0.3.3 hotfix
+
+Version 0.3.3 disables automatic private-object compaction. Version 0.3.2 could repack `.ddocs` from the daemon while a separate CLI process was reading the same object store, leaving references pointed at missing packfiles or objects. Loose objects are retained until private-state readers and writers share a cross-process lock.
+
+Repositories that report `packfile not found`, `object not found`, or an unreadable state-root hash should stop the daemon and preserve the damaged `.ddocs` directory before rebuilding its private Git metadata. Keep `config.toml` and authored schemas.
+
 ## Version 0.3.2 behavior changes
 
 Version 0.3.2 changes several execution and private-state details without requiring an authored-document migration:
@@ -30,7 +36,6 @@ Version 0.3.2 changes several execution and private-state details without requir
 - Clean frontmatter and document-format results can be reused from durable validation-cache records. Content, policy, schema, immutable-state, duplicate-identity, or validation-engine changes invalidate reuse.
 - Link inventory reads changed and new files through a bounded 16-worker pool while retaining serial deterministic traversal and ordered result merging.
 - Review events created by one reconciliation run are stored in one `batch.json` review commit. Existing per-event `event.json` commits remain readable; no destructive review-history conversion is required.
-- Private `.ddocs` state and review writes automatically trigger best-effort object compaction after the loose-object count exceeds 256 or loose bytes exceed 8 MiB. Maintenance occurs after logical publication, preserves all referenced review and undo history, and cannot turn a completed write into a failed write.
 - When one live file and stale absent private records share a `document_id`, reconciliation collapses the stale aliases into the live identity, remaps links, merges path history, and uses that historical path evidence before generic filename guessing.
 - Existing pending watcher suppressions are retained and merged with suppressions from a new generated rewrite batch.
 
@@ -188,7 +193,7 @@ External adapters should reacquire new feeder tokens. Do not reuse pre-upgrade t
 - Current private state and legacy review commits are readable.
 - Legacy link JSON is removed only after successful current-state publication.
 - Validation-cache records are reused only when all identity inputs still match.
-- Private-object compaction, when triggered, preserves state, review history, and undo snapshots.
+- Normal state and review writes do not trigger private-object compaction.
 - A second fix is idempotent.
 - `ddocs check` succeeds.
 - Watcher automation is re-enabled only after static verification.
