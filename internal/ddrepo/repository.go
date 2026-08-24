@@ -3,10 +3,12 @@ package ddrepo
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"github.com/Lokee86/demon-docs/internal/repostatefs"
 	git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage"
@@ -43,6 +45,13 @@ func InitWithOptions(path string, options Options) (*Repository, error) {
 	storagePath, err := ddocsPath(path)
 	if err != nil {
 		return nil, err
+	}
+	base := path
+	if filepath.Base(filepath.Clean(base)) == ".ddocs" {
+		base = filepath.Dir(filepath.Clean(base))
+	}
+	if err := repostatefs.Prepare(findRepositoryRoot(base), storagePath); err != nil {
+		return nil, fmt.Errorf("prepare ddocs state: %w", err)
 	}
 	gitRepository, err := git.PlainInit(storagePath, true)
 	if err != nil {
@@ -137,6 +146,20 @@ func (r *Repository) currentReference() (*plumbing.Reference, error) {
 		return nil, ErrMissingState
 	}
 	return ref, nil
+}
+
+func findRepositoryRoot(start string) string {
+	root := filepath.Clean(start)
+	for {
+		if _, err := os.Stat(filepath.Join(root, ".git")); err == nil {
+			return root
+		}
+		parent := filepath.Dir(root)
+		if parent == root {
+			return ""
+		}
+		root = parent
+	}
 }
 
 func ddocsPath(path string) (string, error) {
