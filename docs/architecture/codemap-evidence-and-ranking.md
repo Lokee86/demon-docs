@@ -27,7 +27,7 @@ Corpus facts + visible authored targets
 -> suggestion tier
 ```
 
-Evidence explains why a target may be relevant. Ranking decides which candidates are surfaced first. Neither establishes universal semantic truth. The explicit production codemap command automatically adds selected non-declined candidates from both tiers; mutation ownership remains in `internal/codemaprun` and `internal/codemap`, not in the ranker.
+Evidence explains why a target may be relevant. Ranking decides which candidates are surfaced first. Neither establishes universal semantic truth. The explicit production codemap command automatically adds only selected non-declined `hard_link` candidates; `context` remains an inspect/review surface. Mutation ownership remains in `internal/codemaprun` and `internal/codemap`, not in the ranker.
 
 ## Code root
 
@@ -75,13 +75,16 @@ It does not own:
 document path and visible text
 repository files
 visible existing targets
+authored target provenance and resolved coverage
 dependency edges
 bounded commit facts
 related documents and their visible targets
 symbol declarations
 ```
 
-All paths are normalized before candidate creation. The current document and every visible existing target are excluded from the candidate set.
+All paths are normalized before candidate creation. The current document and every visible existing target are excluded from the candidate set. Authored directories additionally cover their descendants, and resolved pattern matches remain covered without becoming independent outward expansion seeds.
+
+Outward structural, dependency, and target-history expansion is seeded only by explicitly authored resolved files. Directory, pattern, and symbol entries retain their authored abstraction instead of being flattened into equivalent file seeds. A basename-only pattern also constrains inferred evidence for non-matching siblings in its literal parent directory; direct path, basename, or symbol evidence from the current document may still surface an explicit exception.
 
 ## Current evidence kinds
 
@@ -101,7 +104,7 @@ The document mentions a declared symbol that resolves to one repository path. Am
 
 ### Sibling of existing target
 
-The candidate shares a structural directory relationship with an existing authored target.
+The candidate shares a structural directory relationship with an explicitly authored file target. Resolved members of authored directories, patterns, or symbols do not become sibling seeds merely because resolution found a backing path.
 
 ### Test counterpart
 
@@ -109,7 +112,7 @@ The candidate is the source/test or implementation/spec counterpart recognized b
 
 ### Dependency neighbor
 
-A dependency edge connects the candidate and an existing target in either direction. The relation and edge source contribute to the evidence atom.
+A dependency edge connects the candidate and an explicitly authored file expansion seed in either direction. The relation and edge source contribute to the evidence atom.
 
 ### Git co-change with document
 
@@ -117,11 +120,11 @@ The candidate appears in a bounded commit with the document.
 
 ### Git co-change with existing target
 
-The candidate appears in a bounded commit with a visible authored target.
+The candidate appears in a bounded commit with an explicitly authored file expansion seed.
 
 ### Related-document target
 
-A locally linked related document already authors the candidate target.
+A locally linked related document already authors the candidate as a direct resolved file target. Broader directory, pattern, and symbol abstractions are not flattened into inherited file-level evidence.
 
 ## Evidence aggregation
 
@@ -218,9 +221,9 @@ At most five ordered suggestions receive `hard_link`. Eligibility requires one o
 - an exact path mentioned at least twice and independently corroborated by declared-symbol or dependency evidence;
 - a test counterpart independently supported by dependency, related-document, or sibling evidence, with non-test implementation counterparts additionally requiring score 20 or greater;
 - dependency-neighbor evidence with total score at least 18; or
-- related-document evidence reinforced by direct Git co-change with the current document.
+- for non-test targets, related-document evidence reinforced by direct Git co-change with the current document.
 
-The tier distinguishes stronger relationships from the broader context set. Both tiers are eligible for automatic addition by explicit codemap execution after decline-policy filtering. The tier does not make a candidate universally true and does not imply that an existing link should be removed.
+The tier distinguishes stronger relationships from the broader context set. Only `hard_link` is eligible for automatic addition by explicit codemap execution after decline-policy filtering. `context` remains visible for inspection, review, and downstream analysis. The tier does not make a candidate universally true and does not imply that an existing link should be removed.
 
 An empty legacy tier in schema-1 reports is interpreted as `context` by current consumers.
 
@@ -228,7 +231,7 @@ An empty legacy tier in schema-1 reports is interpreted as `context` by current 
 
 `SuggestCurrent` and production execution treat all current codemap links supplied by the corpus as visible. They ask for only additional candidates and return the same ranked suggestion model used by explicit codemap execution, review commands, precision-source commands, and controlled evaluation.
 
-Production execution strips the codemap section from document text before collecting mention evidence, filters the result through shared decline policy, and passes every remaining tier to unified section reconciliation. Current recommendations are not holdout answers, and measured validity still requires repository-specific review or labeled evaluation.
+Production execution strips the codemap section from document text before collecting mention evidence and filters the result through shared decline policy. Only remaining `hard_link` targets are passed to unified section reconciliation; `context` recommendations remain visible without mutating the codemap. Current recommendations are not holdout answers, and measured validity still requires repository-specific review or labeled evaluation.
 
 ## State and data ownership
 
@@ -242,15 +245,17 @@ Production execution strips the codemap section from document text before collec
 ## Invariants and safety boundaries
 
 - The current document is never its own candidate.
-- Visible authored targets are excluded.
+- Visible authored targets are excluded, including descendants covered by authored directories and concrete matches covered by authored patterns.
+- Only explicit resolved file targets seed outward structural, dependency, and target-history expansion.
+- Basename-only authored patterns constrain inferred non-matching siblings in their literal parent directory unless direct current-document evidence overrides the boundary.
 - Existing links are never emitted as removal or irrelevance suggestions.
 - Ambiguous basenames and symbols do not produce unique evidence.
 - Weak history or sibling evidence alone is not admitted.
 - Broad evidence fan-out is discounted.
 - Ordering is deterministic for identical inputs.
 - Per-document output is bounded.
-- Tier is confidence and policy metadata, not a mandatory per-run approval gate.
-- Explicit production generation adds both tiers after persisted decline filtering.
+- Tier is confidence and mutation-policy metadata.
+- Explicit production generation adds only non-declined `hard_link` recommendations; `context` remains non-mutating.
 - A planned write still passes through managed-section reconciliation and source-hash guards.
 
 ## Failure behavior

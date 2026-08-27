@@ -211,7 +211,8 @@ When stale, it prints `ddocs codemaps check failed` followed by changed document
 ```text
 section: missing | existing | schema-created
 changed: true | false
-add TARGET score=SCORE tier=TIER
+add TARGET score=SCORE tier=hard_link
+context TARGET score=SCORE tier=context
 declined TARGET score=SCORE tier=TIER
 evidence lines
 remove TARGET
@@ -221,7 +222,7 @@ Configured heading matching is case-insensitive and ignores heading-like lines i
 
 Existing configured sections are processed regardless of document schema. For a missing section, the application selects the effective schema from `document_type` metadata, configured path rules, and any document-specific exception. A required codemap section is created at its schema-defined position; schemas without one report `missing` and leave the document unchanged.
 
-The complete section body is adopted between codemap-specific markers derived from `[markers].prefix`. Existing and newly generated links are not split into provenance groups. Fenced path lists remain fenced; bullet maps retain their first recognized bullet prefix. All selected non-declined `hard_link` and `context` recommendations are eligible for addition.
+The complete section body is adopted between codemap-specific markers derived from `[markers].prefix`. Existing and newly generated links are not split into provenance groups. Fenced path lists remain fenced; bullet maps retain their first recognized bullet prefix. Only selected non-declined `hard_link` recommendations are eligible for addition; `context` recommendations are inspect/review output only.
 
 Confidence-based removal is disabled by default and controlled by `[codemap].remove_undiscovered_links` and `[codemap].remove_low_score_links`. Declines suppress proposed additions only; they do not remove existing links.
 

@@ -151,7 +151,7 @@ The fixture produces an additional folder candidate:
 docs/architecture/runtime.md
   section: existing
   changed: true
-  add internal/runtime/ score=5.262 tier=context
+  context internal/runtime/ score=5.262 tier=context
     evidence: sibling_of_existing_target:internal/runtime/service.go:
     evidence: unique_basename_mention:runtime
 ```

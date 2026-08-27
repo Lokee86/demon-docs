@@ -2,6 +2,7 @@ package codemaprun
 
 import (
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
 	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/filetxn"
 )
@@ -15,6 +16,7 @@ type Options struct {
 	RemoveUndiscoveredLinks bool
 	RemoveLowScoreLinks     bool
 	Schema                  codemap.SectionSchema
+	CodeIntelligence        codemapcorpus.CodeIntelligenceProvider
 }
 
 type Recommendation struct {

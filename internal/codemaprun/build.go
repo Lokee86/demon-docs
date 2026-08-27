@@ -23,7 +23,7 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 	if err != nil {
 		return Plan{}, err
 	}
-	corpus, err := codemapcorpus.Build(options.RepositoryRoot, dataset, codemapcorpus.Options{})
+	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{CodeIntelligence: options.CodeIntelligence})
 	if err != nil {
 		return Plan{}, fmt.Errorf("build codemap corpus: %w", err)
 	}
@@ -97,6 +97,9 @@ func buildDocument(
 		result.Recommendations = append(result.Recommendations, Recommendation{Suggestion: item, Declined: declined})
 		if declined {
 			result.Suppressed = append(result.Suppressed, item.Target)
+			continue
+		}
+		if item.Tier != codemaprecommend.SuggestionTierHardLink {
 			continue
 		}
 		addTargets = append(addTargets, item.Target)

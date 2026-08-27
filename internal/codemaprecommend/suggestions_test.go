@@ -30,6 +30,19 @@ func TestSuggestionsFromEvidenceAssignsProductionTiers(t *testing.T) {
 	}
 }
 
+func TestSuggestionsFromEvidenceDoesNotPromoteRelatedTestByHistoryAlone(t *testing.T) {
+	items := SuggestionsFromEvidence("docs/runtime.md", []evidence.Candidate{{
+		Path: "internal/app/help_test.go",
+		Evidence: []evidence.Evidence{
+			{Kind: evidence.KindRelatedDocumentTarget, Detail: "docs/development/behavioral-contract-matrix.md", Count: 1},
+			{Kind: evidence.KindGitDocumentCoChange, Detail: "", Count: 1},
+		},
+	}})
+	if len(items) != 1 || items[0].Tier != SuggestionTierContext {
+		t.Fatalf("related test was promoted without direct support: %#v", items)
+	}
+}
+
 func TestSuggestionsFromEvidenceFiltersIncidentalLockfile(t *testing.T) {
 	items := SuggestionsFromEvidence("docs/runtime.md", []evidence.Candidate{{
 		Path:     "package-lock.json",

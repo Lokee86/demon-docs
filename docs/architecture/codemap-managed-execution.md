@@ -197,7 +197,7 @@ For each invocation it:
 6. reads each source through `textio`, retaining source encoding and line-ending behavior;
 7. resolves the document path relative to the repository root;
 8. computes recommendations with all current targets visible;
-9. applies decline policy to each proposed addition;
+9. applies decline policy to each recommendation and selects only non-declined `hard_link` targets for addition;
 10. evaluates configured pruning policies for current resolved entries;
 11. reconciles the complete codemap section;
 12. compares exact encoded before and after bytes; and
@@ -324,7 +324,8 @@ For each selected document it reports:
 ```text
 section status: missing, existing, or schema-created
 whether exact bytes would change
-proposed additions
+hard-link additions
+context-only recommendations
 persisted-decline decisions
 score and tier
 evidence lines
@@ -424,7 +425,7 @@ The codemap command does not create a separate provenance ledger for links. The 
 - Existing and newly added links are not separated by provenance.
 - Existing valid links are retained by default.
 - Confidence-based pruning is explicit and disabled by default.
-- Declines suppress additions only.
+- Declines suppress recommendations; only non-declined `hard_link` recommendations are eligible for addition.
 - An existing section bypasses file-type schema requirements.
 - A missing section is never invented without schema placement.
 - The codemap layer never creates a new document.

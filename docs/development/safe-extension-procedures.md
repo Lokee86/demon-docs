@@ -37,7 +37,8 @@ Use the focused procedures for implementation details:
 | New codemap evidence kind | `internal/evidence` | ranking admission/weight decision, benchmark and precision evaluation |
 | Codemap missing-section placement rule | `internal/documentpolicy` provider and `internal/codemap` seam | schema authority, deterministic placement, skip/refusal behavior, codemap and document-policy tests |
 | Ranking weight, admission, cap, or tier change | `internal/codemapbench` | pinned evaluation, methodology record, evidence/ranking architecture |
-| New language dependency adapter | `internal/codemapcorpus` | explicit supported syntax, false-positive fixtures, corpus architecture |
+| New local fallback dependency adapter | `internal/codemapcorpus` | explicit supported syntax, false-positive fixtures, provider/corpus architecture |
+| New code-intelligence provider | `internal/codemapcorpus.CodeIntelligenceProvider` | repository-local fact validation, cancellation/error behavior, deterministic parity across production and benchmark paths |
 | New report field or meaning | owning report package | schema compatibility decision, canonical serialization tests, reference |
 | New configuration key | `internal/config` | defaults, decode, starter config when appropriate, reference and tests |
 | New frontmatter field, value source, or conditional rule | `internal/config` and `internal/frontmatter` | frontmatter reference, validation/repair tests, immutable-state decision, behavioral contract |

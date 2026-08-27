@@ -140,7 +140,8 @@ The deterministic evidence pipeline and explicit production writer are implement
 
 Impact:
 
-- explicit codemap execution automatically adds selected non-declined candidates from both tiers;
+- explicit codemap execution automatically adds only selected non-declined `hard_link` candidates; `context` remains non-mutating;
+- the code-intelligence provider seam exists, but current CLI execution still uses the built-in shallow local provider; no Arcana provider is wired yet;
 - a repository may receive plausible but unnecessary `context` links;
 - new repository populations need independent labels;
 - self-authored Demon Docs codemaps are not an independent benchmark; and
@@ -170,7 +171,7 @@ Impact:
 - an active `agent` feeder only keeps Demon Docs watcher automation alive;
 - host adapters receive no context payload from the demon;
 - Demon Docs has no context request or delivery command contract; and
-- codemap suggestions remain permanent documentation-link candidates, not temporary task context.
+- codemap `hard_link` suggestions remain permanent documentation-link candidates; `context` suggestions are non-mutating analysis/review output, not temporary task-context delivery.
 
 Operational guidance:
 

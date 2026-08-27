@@ -276,7 +276,7 @@ remove_low_score_links = false
 
 Existing links are retained by default even when the algorithm does not rediscover them or ranks them below the hard-link tier. `remove_undiscovered_links` permits removal when a hidden-link evaluation cannot recover an existing resolved target. `remove_low_score_links` permits removal when that evaluation recovers only a context-tier relationship. Both are intentionally `false` by default.
 
-New missing links from both `hard_link` and `context` tiers are added automatically by explicit codemap execution. The codemap operation consults the shared review-decision store before writing each addition, so an unchanged declined recommendation remains suppressed and materially changed evidence may be reconsidered under the existing fingerprint policy. Tier remains visible in inspection and removal policy; it is not a per-run approval gate.
+New missing links from the `hard_link` tier are added automatically by explicit codemap execution. `context` recommendations remain visible in inspection, review, and removal-policy evaluation but are not written as permanent links. The codemap operation consults the shared review-decision store before writing each hard-link addition, so an unchanged declined recommendation remains suppressed and materially changed evidence may be reconsidered under the existing fingerprint policy.
 
 The research-oriented `codemap export` command additionally supports `--target-base repository|document`, repeated `--target-root PATH`, and `--output PATH`. `[reverse_index].roots` remains separate configuration for reverse indexes. Codemap execution is never invoked by ordinary reconciliation, foreground watch, or the repository daemon.
 

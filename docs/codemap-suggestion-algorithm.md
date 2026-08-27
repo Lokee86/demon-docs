@@ -27,7 +27,7 @@ controlled hidden-link benchmarks
 precision-source and sampling workflows
 ```
 
-Production codemap execution automatically adds every selected non-declined recommendation, including both `hard_link` and `context` tiers. The tier remains confidence and policy metadata; it is not a separate approval gate.
+Production codemap execution automatically adds only selected non-declined `hard_link` recommendations. `context` remains visible for inspection, review, benchmarking, and downstream analysis without being written into the permanent codemap.
 
 Existing links are excluded from missing-link candidates and retained by default. Optional removal of undiscovered or context-tier existing links belongs to the separate codemap execution policy, not to the ranker itself.
 
@@ -56,7 +56,7 @@ It must:
 - feed production execution and evaluation from one ranking implementation; and
 - produce stable output for identical normalized inputs.
 
-Production execution may automatically add the returned candidates after shared decline-policy filtering. Existing-link pruning is separately configured and disabled by default.
+Production execution may automatically add returned `hard_link` candidates after shared decline-policy filtering. `context` candidates remain non-mutating. Existing-link pruning is separately configured and disabled by default.
 
 ## Pipeline
 
@@ -74,9 +74,11 @@ The corpus layer supplies normalized inputs:
 - bounded Git co-change facts; and
 - related documents with their current targets.
 
-Existing codemap targets seed structural evidence where appropriate and are excluded from the missing-link output.
+Existing codemap targets retain their authored abstraction. Exact files may seed outward structural evidence; directories cover their descendants; resolved patterns cover their matches without turning those matches into independent file seeds; and symbol targets retain symbol-level provenance. Already-covered paths are excluded from missing-link output.
 
 For production execution, the codemap section itself is stripped from document text before mention evidence is collected. A target therefore cannot become evidence for itself merely because it is already listed in the map.
+
+Before evidence collection, provenance separates authored coverage from expansion. Only explicit resolved files seed sibling, dependency-neighbor, test-counterpart, and target-history expansion. Authored directories and resolved patterns remain coverage boundaries rather than file-seed factories. For basename-only globs, inferred non-matching siblings in the literal parent directory are suppressed unless the current document directly names the path, basename, or declared symbol.
 
 ### 2. Collect deterministic evidence
 
@@ -155,7 +157,7 @@ A candidate qualifies for `hard_link` through one of these paths:
 2. **Declared symbol:** a declared symbol from the target is named by the document.
 3. **Test counterpart:** counterpart evidence is independently supported by dependency, related-document, or sibling evidence. Test targets may qualify directly; non-test implementation targets additionally require score 20 or greater.
 4. **Dependency neighbor:** dependency evidence qualifies at score 18 or greater.
-5. **Related document plus direct history:** related-document evidence is corroborated by direct Git co-change between the target and current document.
+5. **Related document plus direct history:** for non-test targets, related-document evidence is corroborated by direct Git co-change between the target and current document. Test targets need direct counterpart or semantic support instead.
 
 Single exact-path mentions and repeated paths without independent semantic corroboration remain `context`.
 
@@ -178,7 +180,7 @@ It does not mean:
 
 A weaker, indirect, optional, or already-explicit relationship that survived admission and negative-evidence filtering.
 
-In production execution it is also eligible for automatic addition after decline-policy filtering. The distinction remains visible in `inspect`, review policy, benchmark reports, and optional existing-link pruning. When `remove_low_score_links` is enabled, a hidden existing target recovered only as `context` is eligible for removal.
+In production execution it is not eligible for automatic addition. It remains visible in `inspect`, review policy, benchmark reports, and optional existing-link pruning. When `remove_low_score_links` is enabled, a hidden existing target recovered only as `context` is eligible for removal.
 
 Context candidates are not failed hard links. They are the broader retained relationship set.
 
@@ -189,8 +191,8 @@ The explicit codemap execution path:
 1. computes current recommendations with all existing targets visible;
 2. converts each recommendation to the shared review suggestion model;
 3. suppresses unchanged declined candidates;
-4. passes all remaining `hard_link` and `context` targets to unified section reconciliation;
-5. deduplicates them against the existing codemap; and
+4. passes only remaining `hard_link` targets to unified section reconciliation while retaining `context` recommendations in the plan;
+5. deduplicates selected hard links against the existing codemap; and
 6. publishes only exact changed files through the shared transaction layer.
 
 The ranker does not write files directly. `internal/codemaprun` and `internal/codemap` own generation planning and managed-section mutation.
@@ -240,6 +242,8 @@ The algorithm and production workflow preserve these boundaries:
 - a concurrent source edit is protected by content-addressed preflight.
 
 ## Current measured baseline
+
+The retained measurements below predate the August 27 mutation-policy and authored-provenance repairs. They remain useful historical tuning evidence, but they are not a current post-repair precision claim. Re-running the frozen corpora is a later tuning/validation step after the remaining algorithm upgrades.
 
 ### Space Rocks authored-links precision
 
@@ -313,7 +317,7 @@ Current limits remain:
 - only three unmatched hard-tier suggestions were available outside Space Rocks;
 - ordinary cross-repository holdout recovery remains 11/18;
 - thresholds are empirical defaults rather than universal constants;
-- both tiers are currently auto-added by production execution after decline filtering; and
+- only `hard_link` is auto-added by production execution after decline filtering; `context` remains non-mutating; and
 - production missing-section creation is constrained by selected effective document schemas and remains separate from ranking quality.
 
 Continued tuning against the same fixed errors would risk overfitting. New data should precede another algorithm pass.

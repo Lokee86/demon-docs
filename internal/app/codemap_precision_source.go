@@ -62,7 +62,7 @@ func runCodemapPrecisionSource(ctx context.Context, args []string, out, errOut i
 		return fail(errOut, err)
 	}
 	datasetValue = filterCodemapDataset(datasetValue, excludes.values)
-	corpus, err := codemapcorpus.Build(repositoryRoot, datasetValue, codemapcorpus.Options{})
+	corpus, err := codemapcorpus.BuildContext(ctx, repositoryRoot, datasetValue, codemapcorpus.Options{})
 	if err != nil {
 		return fail(errOut, fmt.Errorf("build precision corpus: %w", err))
 	}

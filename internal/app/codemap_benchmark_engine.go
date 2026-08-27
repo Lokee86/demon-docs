@@ -20,7 +20,7 @@ func (benchmarkEngine) Run(ctx context.Context, options codemapBenchmarkOptions)
 	if err != nil {
 		return codemapBenchmarkResult{}, err
 	}
-	corpus, err := codemapcorpus.Build(options.RepositoryRoot, dataset, codemapcorpus.Options{})
+	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{})
 	if err != nil {
 		return codemapBenchmarkResult{}, fmt.Errorf("build benchmark corpus: %w", err)
 	}

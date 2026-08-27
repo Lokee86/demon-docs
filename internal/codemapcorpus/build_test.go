@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/evidence"
 )
 
 func TestBuildProvidesBenchmarkCorpusInputs(t *testing.T) {
@@ -74,8 +75,8 @@ func fixtureDataset() codemap.Dataset {
 	return codemap.Dataset{
 		Documents: []codemap.DocumentRecord{{Path: "docs/a.md"}, {Path: "docs/b.md"}},
 		Entries: []codemap.DatasetEntry{
-			{Entry: codemap.Entry{DocumentPath: "docs/a.md"}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "server/a/a.go"}},
-			{Entry: codemap.Entry{DocumentPath: "docs/b.md"}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "server/b/b.go"}},
+			{Entry: codemap.Entry{DocumentPath: "docs/a.md", Target: "server/a/a.go", Kind: codemap.TargetFile}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "server/a/a.go"}},
+			{Entry: codemap.Entry{DocumentPath: "docs/b.md", Target: "server/b/b.go", Kind: codemap.TargetFile}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "server/b/b.go"}},
 		},
 	}
 }
@@ -99,6 +100,48 @@ func fixtureFiles() map[string]string {
 		"api/b.rb":              "B = true\n",
 		"tools/pkg/a.py":        "from .b import Thing\n",
 		"tools/pkg/b.py":        "class Thing: pass\n",
+	}
+}
+
+func TestVisibleAuthoredTargetsPreservesNonHoldoutPatternCoverage(t *testing.T) {
+	values := []evidence.AuthoredTarget{
+		{Target: "internal/app/run.go", Kind: evidence.AuthoredTargetFile, ResolvedTargets: []string{"internal/app/run.go"}},
+		{Target: "internal/app/codemap_*.go", Kind: evidence.AuthoredTargetPattern, ResolvedTargets: []string{"internal/app/codemap_execute.go"}},
+	}
+	got := visibleAuthoredTargets(values, nil)
+	if len(got) != 2 || len(got[0].ResolvedTargets) != 0 || !reflect.DeepEqual(got[1].ResolvedTargets, []string{"internal/app/codemap_execute.go"}) {
+		t.Fatalf("visible authored targets = %#v", got)
+	}
+}
+
+func TestAuthoredTargetsPreserveAbstractionLevel(t *testing.T) {
+	dataset := codemap.Dataset{Entries: []codemap.DatasetEntry{
+		{Entry: codemap.Entry{DocumentPath: "docs/map.md", Target: "internal/app/run.go", Kind: codemap.TargetFile}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "internal/app/run.go"}},
+		{Entry: codemap.Entry{DocumentPath: "docs/map.md", Target: "internal/codemap/", Kind: codemap.TargetDirectory}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionResolved, ResolvedPath: "internal/codemap"}},
+		{Entry: codemap.Entry{DocumentPath: "docs/map.md", Target: "internal/app/codemap_*.go", Kind: codemap.TargetGlob}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionPatternResolved, Matches: []codemap.TargetMatch{{Path: "internal/app/codemap_execute.go"}, {Path: "internal/app/codemap_precision.go"}}}},
+		{Entry: codemap.Entry{DocumentPath: "docs/map.md", Target: "internal/app/run.go#Runner", Kind: codemap.TargetSymbol}, Resolution: codemap.TargetRecord{Status: codemap.ResolutionSymbolUnverified, ResolvedPath: "internal/app/run.go"}},
+	}}
+
+	got := authoredTargets(dataset)["docs/map.md"]
+	if len(got) != 4 {
+		t.Fatalf("authored targets = %#v", got)
+	}
+	if got[0].Kind != evidence.AuthoredTargetFile || !reflect.DeepEqual(got[0].ResolvedTargets, []string{"internal/app/run.go"}) {
+		t.Fatalf("file provenance = %#v", got[0])
+	}
+	if got[1].Kind != evidence.AuthoredTargetDirectory || !reflect.DeepEqual(got[1].ResolvedTargets, []string{"internal/codemap"}) {
+		t.Fatalf("directory provenance = %#v", got[1])
+	}
+	if got[2].Kind != evidence.AuthoredTargetPattern || !reflect.DeepEqual(got[2].ResolvedTargets, []string{"internal/app/codemap_execute.go", "internal/app/codemap_precision.go"}) {
+		t.Fatalf("pattern provenance = %#v", got[2])
+	}
+	if got[3].Kind != evidence.AuthoredTargetSymbol || !reflect.DeepEqual(got[3].ResolvedTargets, []string{"internal/app/run.go"}) {
+		t.Fatalf("symbol provenance = %#v", got[3])
+	}
+
+	direct := directFileTargets(map[string][]evidence.AuthoredTarget{"docs/map.md": got})["docs/map.md"]
+	if !reflect.DeepEqual(direct, []string{"internal/app/run.go"}) {
+		t.Fatalf("direct expansion targets = %v", direct)
 	}
 }
 

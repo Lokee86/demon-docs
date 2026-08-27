@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/ddrepo"
 	"github.com/Lokee86/demon-docs/internal/review"
 )
 
-func TestBuildAdoptsExistingSectionAndAddsRecommendation(t *testing.T) {
+func TestBuildKeepsContextRecommendationOutOfManagedSection(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
 	writeFile(t, filepath.Join(docs, "runtime.md"), "# Runtime\n\nThe implementation is in `src/runtime.go`.\n\n## Code Map\n")
@@ -32,14 +33,20 @@ func TestBuildAdoptsExistingSectionAndAddsRecommendation(t *testing.T) {
 		t.Fatalf("unexpected plan: %#v", plan)
 	}
 	document := plan.Documents[0]
-	if len(document.Added) != 1 || document.Added[0] != "src/runtime.go" {
-		t.Fatalf("unexpected additions: %#v", document)
+	if len(document.Recommendations) != 1 || document.Recommendations[0].Tier != codemaprecommend.SuggestionTierContext {
+		t.Fatalf("unexpected recommendations: %#v", document.Recommendations)
+	}
+	if len(document.Added) != 0 {
+		t.Fatalf("context recommendation was selected for addition: %#v", document)
 	}
 	text := string(document.After)
-	for _, want := range []string{"<!-- ddocs:codemap:start -->", "- `src/runtime.go`", "<!-- ddocs:codemap:end -->"} {
+	for _, want := range []string{"<!-- ddocs:codemap:start -->", "<!-- ddocs:codemap:end -->"} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("missing %q:\n%s", want, text)
 		}
+	}
+	if strings.Contains(text, "- `src/runtime.go`") {
+		t.Fatalf("context recommendation was rendered into the codemap:\n%s", text)
 	}
 	if err := Apply(plan); err != nil {
 		t.Fatal(err)
@@ -47,6 +54,64 @@ func TestBuildAdoptsExistingSectionAndAddsRecommendation(t *testing.T) {
 	written, err := os.ReadFile(filepath.Join(docs, "runtime.md"))
 	if err != nil || string(written) != text {
 		t.Fatalf("written=%q err=%v", written, err)
+	}
+}
+
+func TestBuildAddsHardLinkRecommendation(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeFile(t, filepath.Join(docs, "runtime.md"), "# Runtime\n\nRequestRuntime owns request execution.\n\n## Code Map\n")
+	writeFile(t, filepath.Join(root, "src", "runtime.go"), "package runtime\n\ntype RequestRuntime struct{}\n")
+
+	plan, err := Build(context.Background(), Options{
+		RepositoryRoot: root,
+		DocsRoot:       docs,
+		TargetFiles:    []string{filepath.Join(docs, "runtime.md")},
+		Headings:       []string{"Code Map"},
+		MarkerPrefix:   "ddocs",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	document := plan.Documents[0]
+	if len(document.Recommendations) != 1 || document.Recommendations[0].Tier != codemaprecommend.SuggestionTierHardLink {
+		t.Fatalf("unexpected recommendations: %#v", document.Recommendations)
+	}
+	if len(document.Added) != 1 || document.Added[0] != "src/runtime.go" {
+		t.Fatalf("hard-link recommendation was not selected for addition: %#v", document)
+	}
+	if !strings.Contains(string(document.After), "- `src/runtime.go`") {
+		t.Fatalf("hard-link recommendation was not rendered:\n%s", document.After)
+	}
+}
+
+func TestBuildPreservesAuthoredDirectoryAndPatternBoundaries(t *testing.T) {
+	root := t.TempDir()
+	docs := filepath.Join(root, "docs")
+	writeFile(t, filepath.Join(docs, "pipeline.md"), "# Pipeline\n\nSee [App](app.md).\n\n## Code Map\n\n- `internal/codemap/`\n- `internal/app/codemap_*.go`\n")
+	writeFile(t, filepath.Join(docs, "app.md"), "# App\n\n## Code Map\n\n- `internal/app/app.go`\n")
+	writeFile(t, filepath.Join(root, "internal", "codemap", "managed.go"), "package codemap\n")
+	writeFile(t, filepath.Join(root, "internal", "app", "codemap_execute.go"), "package app\n")
+	writeFile(t, filepath.Join(root, "internal", "app", "app.go"), "package app\n")
+
+	plan, err := Build(context.Background(), Options{
+		RepositoryRoot: root,
+		DocsRoot:       docs,
+		TargetFiles:    []string{filepath.Join(docs, "pipeline.md")},
+		Headings:       []string{"Code Map"},
+		MarkerPrefix:   "ddocs",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	document := plan.Documents[0]
+	if len(document.Added) != 0 {
+		t.Fatalf("authored abstraction boundaries leaked additions: %#v", document.Added)
+	}
+	for _, recommendation := range document.Recommendations {
+		if recommendation.Target == "internal/codemap/managed.go" || recommendation.Target == "internal/app/app.go" {
+			t.Fatalf("authored boundary leaked recommendation: %#v", recommendation)
+		}
 	}
 }
 

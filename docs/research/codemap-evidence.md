@@ -121,7 +121,7 @@ The production ranker retains a bounded relationship set:
 - `hard_link` is the stronger-confidence tier, capped at five candidates per document;
 - `context` is the broader weaker or indirect set that still passed admission and negative-evidence filtering.
 
-Both tiers are eligible for automatic addition by explicit codemap execution after persisted decline filtering.
+Only `hard_link` is eligible for automatic addition by explicit codemap execution after persisted decline filtering. `context` remains a non-mutating analysis/review tier.
 
 The tier remains useful for:
 
@@ -134,6 +134,8 @@ The tier remains useful for:
 A context candidate is not a failed hard link. It may be plausible and useful while still unnecessary as a permanent relationship.
 
 ## Current measured baseline
+
+The retained measurements below were produced before the August 27 mutation-policy and authored-provenance repairs. Treat them as historical baseline evidence until the frozen corpora are rerun against the revised algorithm.
 
 ### Space Rocks labeled sample
 

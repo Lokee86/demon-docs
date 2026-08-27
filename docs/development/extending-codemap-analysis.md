@@ -41,7 +41,7 @@ Define:
 - whether one instance is strong enough for admission; and
 - whether broad fan-out should discount it.
 
-Implement the fact collection in the owning corpus adapter when it requires repository analysis. Keep `internal/evidence` focused on candidate construction from normalized inputs.
+Implement repository analysis behind the code-intelligence provider boundary when it supplies dependency or symbol facts. Keep `internal/evidence` focused on candidate construction from normalized inputs, and keep provider-specific graph/query mechanics out of evidence and ranking.
 
 Add focused positive, negative, ambiguity, exclusion, order-independence, and fingerprint tests.
 
@@ -74,9 +74,15 @@ A change to any of these is a product-quality change:
 
 Do not tune only against Demon Docs' own authored codemaps. They are useful for deterministic and portability checks but are not independent quality evidence.
 
-## Adding a dependency adapter
+## Adding or replacing code intelligence
 
-Dependency adapters belong in `internal/codemapcorpus` and emit local `DependencyEdge` facts.
+`internal/codemapcorpus.CodeIntelligenceProvider` is the supported boundary for dependency and declared-symbol facts. A provider must return repository-local facts only; corpus construction validates paths against the current repository inventory, normalizes and deduplicates facts, and owns deterministic ordering.
+
+External providers must not consume review decisions or return recommendation scores. Snapshot selection, transport, availability, and stale-state policy belong to the concrete provider implementation. Production and benchmark paths should use the same provider semantics so evaluation does not silently measure a different algorithm.
+
+## Adding a local fallback dependency adapter
+
+Built-in dependency adapters belong behind the default local provider in `internal/codemapcorpus` and emit local `DependencyEdge` facts.
 
 Define:
 
@@ -98,9 +104,9 @@ The adapter must:
 
 Add fixtures for valid local imports, unsupported/external imports, ambiguous resolution, extension fallbacks, and deterministic ordering. Update [Codemap Corpus and Adapters](../architecture/codemap-corpus-adapters.md).
 
-## Adding symbol extraction
+## Adding local fallback symbol extraction
 
-Symbol extraction is a corpus seam distinct from dependency extraction.
+Built-in symbol extraction is part of the default local provider and remains distinct from dependency extraction.
 
 A new language extractor must define which declaration kinds are stable enough to expose, how qualified names are formed, and how ambiguous duplicate declarations are handled. Generic or common local names should not become unique symbol evidence merely because parsing found them.
 
@@ -182,7 +188,7 @@ go vet ./...
 ## Code map
 
 - `internal/codemap/` — extraction, datasets, map stripping, and selected insertion.
-- `internal/codemapcorpus/` — repository facts, dependency adapters, symbols, history, and related documents.
+- `internal/codemapcorpus/` — repository facts, code-intelligence provider seam, local fallback adapters, history, and related documents.
 - `internal/evidence/` — deterministic evidence candidates and fingerprints.
 - `internal/codemapbench/` — admission, weights, ranking, tiers, holdouts, and reports.
 - `internal/codemapprecision/` — samples, labels, validation, and evaluation.

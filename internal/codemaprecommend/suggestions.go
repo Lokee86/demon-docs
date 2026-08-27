@@ -195,9 +195,11 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
 		return true
 	}
-	// A target inherited through a related document becomes link-worthy when it
-	// also changed directly with the current document.
-	return item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
+	// A non-test target inherited through a related document becomes link-worthy
+	// when it also changed directly with the current document. Test files need
+	// direct counterpart or semantic support; broad related-document inheritance
+	// plus history is not enough to make them permanent links.
+	return !item.targetIsTest && item.hasRelatedDocumentTarget && item.hasGitDocumentCoChange
 }
 
 // IsTestTarget reports whether a target follows a common test/spec naming convention.

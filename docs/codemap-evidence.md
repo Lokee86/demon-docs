@@ -18,7 +18,7 @@ This document defines the deterministic evidence boundary that identifies reposi
 
 The evidence layer receives normalized repository facts and emits candidate targets with canonical evidence records and fingerprints. It is independent of one Markdown codemap layout and does not write documents.
 
-Production codemap execution consumes the ranked evidence through `internal/codemaprecommend` and `internal/codemaprun`. All selected non-declined tiers are eligible for insertion by the explicit foreground codemap command. Existing-link retention or pruning remains a separate execution policy.
+Production codemap execution consumes the ranked evidence through `internal/codemaprecommend` and `internal/codemaprun`. Only selected non-declined `hard_link` recommendations are eligible for insertion by the explicit foreground codemap command; `context` remains non-mutating analysis and review output. Existing-link retention or pruning remains a separate execution policy.
 
 ## Inputs
 
@@ -26,7 +26,7 @@ The collector accepts normalized facts supplied by the codemap parser, repositor
 
 - document path and visible text;
 - repository file paths;
-- existing codemap targets, used as seeds and exclusions;
+- existing codemap targets with authored file/directory/pattern/symbol provenance, used separately for coverage exclusion and bounded expansion;
 - observed dependency edges;
 - declared symbols;
 - bounded Git commit path sets; and
@@ -69,9 +69,9 @@ Ranked candidates are separated without discarding the broader relationship set:
 - `hard_link` identifies a bounded stronger-confidence relationship. At most five candidates per document receive this tier.
 - `context` identifies a weaker, indirect, optional, or already-explicit relationship that still survived admission and negative-evidence filtering.
 
-Current `hard_link` qualification includes declared-symbol evidence; repeated exact paths independently corroborated by dependency or symbol evidence; supported source/test counterparts; dependency-neighbor evidence at score 18 or greater; and related-document evidence reinforced by direct document co-change.
+Current `hard_link` qualification includes declared-symbol evidence; repeated exact paths independently corroborated by dependency or symbol evidence; supported source/test counterparts; dependency-neighbor evidence at score 18 or greater; and, for non-test targets, related-document evidence reinforced by direct document co-change.
 
-A tier does not declare an existing link irrelevant. Both tiers are eligible for automatic addition by explicit codemap execution after shared decline-policy filtering. The tier remains visible in inspection, review state, benchmarks, and optional low-score pruning.
+A tier does not declare an existing link irrelevant. Only `hard_link` is eligible for automatic addition by explicit codemap execution after shared decline-policy filtering. `context` remains visible in inspection, review state, benchmarks, and optional low-score pruning without mutating the permanent codemap.
 
 When `remove_low_score_links` is enabled, an existing hidden target recovered only as `context` may be selected for removal. That removal decision belongs to the execution layer, not the evidence collector.
 
@@ -102,7 +102,7 @@ The evidence layer does not persist the decision. `internal/review` owns policy 
 
 ## Safety contract
 
-- Existing codemap targets are never returned as missing-link candidates.
+- Existing authored coverage is never returned as a missing-link candidate; directory descendants and resolved pattern matches remain covered without becoming independent expansion seeds.
 - Evidence does not establish universal semantic truth or documentation completeness.
 - The collector has no existing-link removal or irrelevance signal.
 - Production source mutation occurs only through explicit codemap execution.

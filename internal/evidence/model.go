@@ -41,11 +41,31 @@ type SymbolDeclaration struct {
 	Symbol string
 }
 
+type AuthoredTargetKind string
+
+const (
+	AuthoredTargetUnknown   AuthoredTargetKind = "unknown"
+	AuthoredTargetFile      AuthoredTargetKind = "file"
+	AuthoredTargetDirectory AuthoredTargetKind = "directory"
+	AuthoredTargetPattern   AuthoredTargetKind = "pattern"
+	AuthoredTargetSymbol    AuthoredTargetKind = "symbol"
+)
+
+// AuthoredTarget preserves the abstraction level chosen in the source codemap.
+// ResolvedTargets records concrete repository coverage without implying that
+// every covered path is an independent seed for outward evidence expansion.
+type AuthoredTarget struct {
+	Target          string
+	Kind            AuthoredTargetKind
+	ResolvedTargets []string
+}
+
 type Input struct {
 	DocumentPath       string
 	DocumentText       string
 	RepositoryFiles    []string
 	ExistingTargets    []string
+	AuthoredTargets    []AuthoredTarget
 	DependencyEdges    []DependencyEdge
 	Commits            []Commit
 	RelatedDocuments   []RelatedDocument

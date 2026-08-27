@@ -101,7 +101,7 @@ See [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md).
 
 ### 2. Corpus
 
-`internal/codemapcorpus` combines current repository files, visible authored targets, supported local dependencies, symbols, related documents, and bounded Git history into normalized facts.
+`internal/codemapcorpus` combines current repository files, authored target provenance and concrete coverage, code-intelligence provider facts, related documents, and bounded Git history into normalized facts. File, directory, pattern, and symbol targets retain their authored abstraction; only explicit resolved files become outward evidence-expansion seeds. Dependency and declared-symbol facts cross a narrow `CodeIntelligenceProvider` seam; the existing shallow language adapters are the default fallback provider.
 
 See [Codemap Corpus and Adapters](codemap-corpus-adapters.md).
 
@@ -129,7 +129,7 @@ See [Codemap Precision Governance](../research/codemap-precision-governance.md).
 
 ### 7. Unified reconciliation
 
-The codemap section is adopted under codemap-specific managed markers. Existing syntax is preserved where possible: fenced Space Rocks-style path lists remain fenced, and bullet maps retain their bullet prefix. Qualified missing links from both tiers are added automatically after shared decline filtering. Existing links are retained unless an explicit removal policy applies. Writes use the shared content-addressed transactional file layer. The detailed scope, adoption, rendering, pruning, transaction, and failure lifecycle is owned by [Codemap Managed Execution](codemap-managed-execution.md).
+The codemap section is adopted under codemap-specific managed markers. Existing syntax is preserved where possible: fenced Space Rocks-style path lists remain fenced, and bullet maps retain their bullet prefix. Qualified non-declined `hard_link` recommendations are added automatically; `context` recommendations remain visible to inspection and review without being written. Existing links are retained unless an explicit removal policy applies. Writes use the shared content-addressed transactional file layer. The detailed scope, adoption, rendering, pruning, transaction, and failure lifecycle is owned by [Codemap Managed Execution](codemap-managed-execution.md).
 
 ## Command surfaces
 
@@ -178,11 +178,12 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 
 - Paths and output ordering are deterministic.
 - Ambiguous extraction or resolution is not guessed into truth.
-- Existing targets are excluded from missing-link candidates.
+- Existing authored coverage is excluded from missing-link candidates, including descendants covered by directory targets and concrete matches covered by patterns.
+- Pattern matches and directory descendants do not become independent outward evidence seeds.
 - Holdout answers are absent from generator inputs.
 - Evidence remains inspectable in reports.
 - Output per document is bounded.
-- `hard_link` and `context` remain deterministic generation tiers.
+- `hard_link` and `context` remain deterministic recommendation tiers; only `hard_link` is an automatic generation tier.
 - Existing links are retained unless configured removal policy applies.
 - Declined unchanged additions remain suppressed through evidence fingerprints.
 - Research metrics are tied to their corpus, revision, method, seed, and labels.

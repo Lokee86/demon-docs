@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/codemaprun"
 )
 
@@ -26,7 +27,10 @@ func writeCodemapInspection(out io.Writer, plan codemaprun.Plan) {
 		}
 		fmt.Fprintf(out, "%s\n  section: %s\n  changed: %t\n", document.Path, status, document.Changed)
 		for _, item := range document.Recommendations {
-			decision := "add"
+			decision := "context"
+			if item.Tier == codemaprecommend.SuggestionTierHardLink {
+				decision = "add"
+			}
 			if item.Declined {
 				decision = "declined"
 			}

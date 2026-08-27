@@ -2,6 +2,7 @@ package evidence
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -55,6 +56,123 @@ func TestCollectProducesDeterministicEvidence(t *testing.T) {
 			t.Fatalf("candidate %q has no fingerprint", candidate.Path)
 		}
 	}
+}
+
+func TestCollectPatternCoverageDoesNotExpandOutward(t *testing.T) {
+	input := Input{
+		DocumentPath: "docs/runtime.md",
+		RepositoryFiles: []string{
+			"internal/app/codemap_execute.go",
+			"internal/app/codemap_precision.go",
+			"internal/app/help_test.go",
+			"cmd/ddocs/main.go",
+		},
+		ExistingTargets: []string{
+			"internal/app/codemap_execute.go",
+			"internal/app/codemap_precision.go",
+		},
+		AuthoredTargets: []AuthoredTarget{{
+			Target: "internal/app/codemap_*.go",
+			Kind:   AuthoredTargetPattern,
+			ResolvedTargets: []string{
+				"internal/app/codemap_execute.go",
+				"internal/app/codemap_precision.go",
+			},
+		}},
+		DependencyEdges: []DependencyEdge{
+			{Source: "cmd/ddocs/main.go", Target: "internal/app/codemap_execute.go", Relation: "imports"},
+		},
+		Commits: []Commit{{
+			ID:    "a",
+			Paths: []string{"internal/app/codemap_execute.go", "internal/app/help_test.go"},
+		}},
+	}
+
+	candidates := Collect(input)
+	for _, candidate := range candidates {
+		if candidate.Path == "internal/app/help_test.go" || candidate.Path == "cmd/ddocs/main.go" {
+			t.Fatalf("pattern coverage expanded outward to %q: %#v", candidate.Path, candidate.Evidence)
+		}
+	}
+}
+
+func TestCollectDirectoryTargetCoversDescendants(t *testing.T) {
+	input := Input{
+		DocumentPath: "docs/runtime.md",
+		DocumentText: "The codemap runtime is described here.",
+		RepositoryFiles: []string{
+			"internal/codemap/",
+			"internal/codemap/managed.go",
+			"internal/codemap/managed_render.go",
+		},
+		ExistingTargets: []string{"internal/codemap"},
+		AuthoredTargets: []AuthoredTarget{{
+			Target:          "internal/codemap/",
+			Kind:            AuthoredTargetDirectory,
+			ResolvedTargets: []string{"internal/codemap"},
+		}},
+		RelatedDocuments: []RelatedDocument{{
+			Path:    "docs/managed.md",
+			Targets: []string{"internal/codemap/managed.go"},
+		}},
+	}
+
+	for _, candidate := range Collect(input) {
+		if strings.HasPrefix(candidate.Path, "internal/codemap/") {
+			t.Fatalf("directory-covered descendant was suggested: %#v", candidate)
+		}
+	}
+}
+
+func TestCollectPatternBoundaryBlocksInferredSiblingButAllowsDirectMention(t *testing.T) {
+	base := Input{
+		DocumentPath: "docs/runtime.md",
+		RepositoryFiles: []string{
+			"internal/app/codemap_execute.go",
+			"internal/app/app.go",
+		},
+		ExistingTargets: []string{"internal/app/codemap_execute.go"},
+		AuthoredTargets: []AuthoredTarget{{
+			Target:          "internal/app/codemap_*.go",
+			Kind:            AuthoredTargetPattern,
+			ResolvedTargets: []string{"internal/app/codemap_execute.go"},
+		}},
+		RelatedDocuments: []RelatedDocument{{Path: "docs/app.md", Targets: []string{"internal/app/app.go"}}},
+		Commits:          []Commit{{ID: "a", Paths: []string{"docs/runtime.md", "internal/app/app.go"}}},
+	}
+	for _, candidate := range Collect(base) {
+		if candidate.Path == "internal/app/app.go" {
+			t.Fatalf("pattern boundary admitted inferred sibling: %#v", candidate)
+		}
+	}
+
+	base.DocumentText = "The explicit exception is `internal/app/app.go`."
+	candidate := findCandidate(t, Collect(base), "internal/app/app.go")
+	assertKind(t, candidate, KindExactPathMention)
+}
+
+func TestCollectExplicitFileStillExpandsOutward(t *testing.T) {
+	input := Input{
+		DocumentPath: "docs/runtime.md",
+		RepositoryFiles: []string{
+			"internal/app/codemap_execute.go",
+			"internal/app/help_test.go",
+			"cmd/ddocs/main.go",
+		},
+		ExistingTargets: []string{"internal/app/codemap_execute.go"},
+		AuthoredTargets: []AuthoredTarget{{
+			Target:          "internal/app/codemap_execute.go",
+			Kind:            AuthoredTargetFile,
+			ResolvedTargets: []string{"internal/app/codemap_execute.go"},
+		}},
+		DependencyEdges: []DependencyEdge{
+			{Source: "cmd/ddocs/main.go", Target: "internal/app/codemap_execute.go", Relation: "imports"},
+		},
+	}
+
+	candidates := Collect(input)
+	assertKind(t, findCandidate(t, candidates, "internal/app/help_test.go"), KindSiblingTarget)
+	assertKind(t, findCandidate(t, candidates, "cmd/ddocs/main.go"), KindDependencyNeighbor)
 }
 
 func TestCollectPreservesDirectoryCandidates(t *testing.T) {

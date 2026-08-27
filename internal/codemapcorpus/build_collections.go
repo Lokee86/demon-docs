@@ -1,6 +1,8 @@
 package codemapcorpus
 
 import (
+	"context"
+
 	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/evidence"
 )
@@ -18,9 +20,8 @@ type documentCollectionResult struct {
 }
 
 type sourceCollectionResult struct {
-	dependencies []evidence.DependencyEdge
-	symbols      []evidence.SymbolDeclaration
-	err          error
+	facts CodeIntelligenceFacts
+	err   error
 }
 
 type commitCollectionResult struct {
@@ -29,6 +30,7 @@ type commitCollectionResult struct {
 }
 
 func collectCorpusCollections(
+	ctx context.Context,
 	root string,
 	files []string,
 	dataset codemap.Dataset,
@@ -43,8 +45,12 @@ func collectCorpusCollections(
 		documents <- documentCollectionResult{documents: items, err: err}
 	}()
 	go func() {
-		dependencies, symbols, err := collectSourceFacts(root, files)
-		sources <- sourceCollectionResult{dependencies: dependencies, symbols: symbols, err: err}
+		request := CodeIntelligenceRequest{RepositoryRoot: root, RepositoryFiles: cloneStrings(files)}
+		facts, err := options.CodeIntelligence.Collect(ctx, request)
+		if err == nil {
+			facts, err = normalizeCodeIntelligence(request, facts)
+		}
+		sources <- sourceCollectionResult{facts: facts, err: err}
 	}()
 	go func() {
 		items, err := collectCommits(root, files, options)
@@ -61,8 +67,8 @@ func collectCorpusCollections(
 	}
 	return corpusCollections{
 		documents:    documentResult.documents,
-		dependencies: sourceResult.dependencies,
-		symbols:      sourceResult.symbols,
+		dependencies: sourceResult.facts.DependencyEdges,
+		symbols:      sourceResult.facts.SymbolDeclarations,
 		commits:      commitResult.commits,
 	}, nil
 }

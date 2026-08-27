@@ -247,6 +247,32 @@ Space Rocks remained unchanged at:
 - 621 hard and 3,872 context candidates in the full source pool; and
 - 10/10 canonical hidden-link recovery.
 
+### Phase 11: Production policy and authored-provenance repair
+
+August 27 dogfooding against Demon Docs exposed that the retained research tiers had been connected to a broader mutation policy than their labels justified. `context` recommendations were being written as permanent links, and resolved glob members were flattened into ordinary existing-file seeds. An authored pattern such as `internal/app/codemap_*.go` could therefore fan out through siblings, dependencies, related documents, and Git history.
+
+The production repair separated these concerns:
+
+- only non-declined `hard_link` recommendations are eligible for automatic insertion;
+- `context` remains inspectable but non-mutating;
+- file, directory, pattern, and symbol provenance survives corpus projection;
+- authored directories cover their descendants instead of causing per-file re-suggestions;
+- resolved patterns cover their matches without turning each match into an independent expansion seed;
+- only explicitly authored resolved files seed sibling, dependency, test-counterpart, and target-history expansion; and
+- basename-only patterns constrain inferred non-matching siblings in their literal parent directory unless the current document supplies direct path, basename, or symbol evidence.
+
+The immediate Demon Docs self-test on `docs/architecture/codemap-pipeline.md` moved from 30 would-be additions before the repair, to five hard-link additions after the mutation-policy split, to zero permanent additions after provenance and scope-boundary preservation. Context candidates remain visible for later ranking work.
+
+The older precision and recovery numbers above are retained as historical baselines. They have not yet been regenerated against the repaired production algorithm and must not be presented as post-repair measurements.
+
+### Phase 12: Code-intelligence provider boundary
+
+The next step separated repository semantics from Demon Docs' local language parsers without changing ranking policy. `internal/codemapcorpus` now exposes a narrow `CodeIntelligenceProvider` contract that returns repository-local dependency and declared-symbol facts. The existing shallow parsers are wrapped as the default local provider rather than being hard-wired into corpus construction.
+
+The corpus retains ownership of trust and determinism at the boundary: provider paths are validated against the current repository-file inventory, malformed or out-of-scope paths fail construction, facts are normalized/deduplicated/sorted before publication, and provider failures are not silently mixed with fallback results. `BuildContext` propagates caller cancellation through production, benchmark, and precision paths; the older `Build` entry point remains as a background-context compatibility wrapper.
+
+No Arcana or Lexicon transport was added in this phase. The purpose of the seam is to make that integration replace the semantic fact source later without moving evidence scoring, review policy, codemap coverage, or mutation authority out of Demon Docs.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories

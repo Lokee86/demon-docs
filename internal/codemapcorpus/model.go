@@ -17,18 +17,20 @@ const (
 type Options struct {
 	MaxCommits        int
 	MaxPathsPerCommit int
+	CodeIntelligence  CodeIntelligenceProvider
 }
 
 type Corpus struct {
-	RepositoryRoot     string
-	RepositoryFiles    []string
-	RepositoryPaths    []string
-	Documents          map[string]string
-	TargetsByDocument  map[string][]string
-	DependencyEdges    []evidence.DependencyEdge
-	Commits            []evidence.Commit
-	RelatedDocuments   map[string][]evidence.RelatedDocument
-	SymbolDeclarations []evidence.SymbolDeclaration
+	RepositoryRoot            string
+	RepositoryFiles           []string
+	RepositoryPaths           []string
+	Documents                 map[string]string
+	TargetsByDocument         map[string][]string
+	AuthoredTargetsByDocument map[string][]evidence.AuthoredTarget
+	DependencyEdges           []evidence.DependencyEdge
+	Commits                   []evidence.Commit
+	RelatedDocuments          map[string][]evidence.RelatedDocument
+	SymbolDeclarations        []evidence.SymbolDeclaration
 }
 
 func (c Corpus) KnownTargets(documentPath string) []string {
@@ -50,6 +52,7 @@ func (c Corpus) Input(documentPath string, existingTargets []string) (evidence.I
 		DocumentText:       text,
 		RepositoryFiles:    repositoryPaths,
 		ExistingTargets:    cloneStrings(existingTargets),
+		AuthoredTargets:    visibleAuthoredTargets(c.AuthoredTargetsByDocument[documentPath], existingTargets),
 		DependencyEdges:    c.DependencyEdges,
 		Commits:            c.Commits,
 		RelatedDocuments:   cloneRelated(c.RelatedDocuments[documentPath]),
@@ -63,6 +66,9 @@ func normalizeOptions(options Options) Options {
 	}
 	if options.MaxPathsPerCommit <= 0 {
 		options.MaxPathsPerCommit = DefaultMaxPathsPerCommit
+	}
+	if options.CodeIntelligence == nil {
+		options.CodeIntelligence = localCodeIntelligenceProvider{}
 	}
 	return options
 }
@@ -91,6 +97,37 @@ func sortedSet(values map[string]struct{}) []string {
 
 func cloneStrings(values []string) []string {
 	return append([]string(nil), values...)
+}
+
+func visibleAuthoredTargets(values []evidence.AuthoredTarget, visibleTargets []string) []evidence.AuthoredTarget {
+	visible := map[string]struct{}{}
+	for _, value := range visibleTargets {
+		if normalized := normalizePath(value); normalized != "" {
+			visible[normalized] = struct{}{}
+		}
+	}
+	result := make([]evidence.AuthoredTarget, 0, len(values))
+	for _, value := range values {
+		item := evidence.AuthoredTarget{Target: value.Target, Kind: value.Kind}
+		for _, resolved := range value.ResolvedTargets {
+			normalized := normalizePath(resolved)
+			if normalized == "" {
+				continue
+			}
+			// Pattern and symbol entries are not exact-link holdout answers, so
+			// their authored coverage remains visible while exact file/directory
+			// targets honor the caller-provided visible target set.
+			if value.Kind == evidence.AuthoredTargetPattern || value.Kind == evidence.AuthoredTargetSymbol {
+				item.ResolvedTargets = append(item.ResolvedTargets, normalized)
+				continue
+			}
+			if _, ok := visible[normalized]; ok {
+				item.ResolvedTargets = append(item.ResolvedTargets, normalized)
+			}
+		}
+		result = append(result, item)
+	}
+	return result
 }
 
 func cloneRelated(values []evidence.RelatedDocument) []evidence.RelatedDocument {

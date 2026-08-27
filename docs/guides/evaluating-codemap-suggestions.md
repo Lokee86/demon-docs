@@ -29,7 +29,7 @@ persisted decisions
 = suggestions show, decline, reconsider, and compatibility selection
 ```
 
-Research commands measure and inspect the evidence pipeline. They do not edit managed codemap sections. Explicit production generation automatically adds selected non-declined recommendations from both tiers. Repository suggestion commands provide the shared persisted decision surface; an unchanged decline suppresses the corresponding future addition.
+Research commands measure and inspect the evidence pipeline. They do not edit managed codemap sections. Explicit production generation automatically adds only selected non-declined `hard_link` recommendations; `context` remains non-mutating analysis/review output. Repository suggestion commands provide the shared persisted decision surface; an unchanged decline suppresses the corresponding future addition.
 
 Missing-link generation remains one-directional and does not classify an existing link as irrelevant. Production execution separately supports opt-in confidence pruning, disabled by default and outside the precision labels described in this guide.
 
@@ -183,7 +183,7 @@ ddocs suggestions decline SUGGESTION CANDIDATE --reason "..."
 ddocs suggestions reconsider SUGGESTION
 ```
 
-Declines persist while the relationship and evidence fingerprint remain unchanged. Production `codemap fix` replays that policy and automatically adds remaining selected candidates. A materially changed evidence fingerprint may surface a new current decision.
+Declines persist while the relationship and evidence fingerprint remain unchanged. Production `codemap fix` replays that policy and automatically adds remaining selected `hard_link` candidates; `context` recommendations stay visible without being written. A materially changed evidence fingerprint may surface a new current decision.
 
 The compatibility `suggestions select` path can still apply one candidate as a normal recorded repair, but it is not required before production codemap generation. Research reports themselves never mutate the codemap or bypass persisted declines.
 

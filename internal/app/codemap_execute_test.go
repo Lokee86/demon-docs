@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
+	"github.com/Lokee86/demon-docs/internal/codemaprun"
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/repository"
 )
@@ -37,11 +39,26 @@ func TestCodemapExecutionHelpAndRequiredRoots(t *testing.T) {
 	}
 }
 
+func TestCodemapInspectionDistinguishesContextFromAdditions(t *testing.T) {
+	plan := codemaprun.Plan{Documents: []codemaprun.DocumentPlan{{
+		Path: "docs/runtime.md",
+		Recommendations: []codemaprun.Recommendation{
+			{Suggestion: codemaprecommend.Suggestion{Link: codemaprecommend.Link{Document: "docs/runtime.md", Target: "src/context.go"}, Tier: codemaprecommend.SuggestionTierContext}},
+			{Suggestion: codemaprecommend.Suggestion{Link: codemaprecommend.Link{Document: "docs/runtime.md", Target: "src/hard.go"}, Tier: codemaprecommend.SuggestionTierHardLink}},
+		},
+	}}}
+	var output bytes.Buffer
+	writeCodemapInspection(&output, plan)
+	if !strings.Contains(output.String(), "context src/context.go") || !strings.Contains(output.String(), "add src/hard.go") {
+		t.Fatalf("inspection did not distinguish policy outcomes:\n%s", output.String())
+	}
+}
+
 func TestCodemapFixDryRunCheckAndApplySingleFile(t *testing.T) {
 	root := t.TempDir()
 	docs := filepath.Join(root, "docs")
-	writeTestFile(t, filepath.Join(docs, "runtime.md"), "# Runtime\n\nThe implementation is in `src/runtime.go`.\n\n## Code Map\n")
-	writeTestFile(t, filepath.Join(root, "src", "runtime.go"), "package runtime\n")
+	writeTestFile(t, filepath.Join(docs, "runtime.md"), "# Runtime\n\nRequestRuntime owns request execution.\n\n## Code Map\n")
+	writeTestFile(t, filepath.Join(root, "src", "runtime.go"), "package runtime\n\ntype RequestRuntime struct{}\n")
 	if _, err := repository.Initialize(root, config.RepositoryStarterText("docs")); err != nil {
 		t.Fatal(err)
 	}
