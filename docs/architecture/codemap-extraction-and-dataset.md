@@ -185,7 +185,7 @@ Resolved semantic records retain Arcana's durable external node identity, node k
 
 An Arcana executable is discovered next to the running Demon Docs binary or on `PATH`; `DDOCS_ARCANA_COMMAND` is available as a development/host override. Missing or structurally stale Arcana state degrades to the explicit fallback states above. Once a current Arcana protocol session has been opened, query/protocol failures abort the operation rather than silently mixing partial semantic truth with fallback results.
 
-Relationship expansion from Arcana is deliberately not part of this phase; it belongs to the next relationship-evidence stage.
+Relationship expansion is not part of dataset construction. Step 5 consumes the same verified Arcana session through the separate corpus `RelationshipProvider`, so target resolution remains an authored-target concern while graph-neighborhood evidence remains per-document and benchmark-safe.
 
 ## Dataset construction
 

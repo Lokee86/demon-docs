@@ -21,21 +21,29 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 	format := codemap.DefaultFormat()
 	format.SectionHeadings = append([]string(nil), options.Headings...)
 	resolver := options.TargetResolver
-	if resolver == nil {
+	relationshipProvider := options.RelationshipProvider
+	if resolver == nil || relationshipProvider == nil {
 		arcanaResolver, _, openErr := codemaparcana.OpenCurrent(ctx, options.RepositoryRoot)
 		if openErr != nil {
-			return Plan{}, fmt.Errorf("open Arcana target resolver: %w", openErr)
+			return Plan{}, fmt.Errorf("open Arcana codemap provider: %w", openErr)
 		}
 		if arcanaResolver != nil {
 			defer arcanaResolver.Close()
-			resolver = arcanaResolver
+			if resolver == nil {
+				resolver = arcanaResolver
+			}
+			if relationshipProvider == nil {
+				relationshipProvider = arcanaResolver
+			}
 		}
 	}
 	dataset, err := codemap.BuildDatasetContext(ctx, options.RepositoryRoot, options.DocsRoot, format, resolver)
 	if err != nil {
 		return Plan{}, err
 	}
-	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{CodeIntelligence: options.CodeIntelligence})
+	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{
+		CodeIntelligence: options.CodeIntelligence, RelationshipProvider: relationshipProvider,
+	})
 	if err != nil {
 		return Plan{}, fmt.Errorf("build codemap corpus: %w", err)
 	}
@@ -144,7 +152,7 @@ func recommend(ctx context.Context, corpus codemapcorpus.Corpus, format codemap.
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	input, err := corpus.Input(documentPath, existingTargets)
+	input, err := corpus.InputContext(ctx, documentPath, existingTargets)
 	if err != nil {
 		return nil, err
 	}

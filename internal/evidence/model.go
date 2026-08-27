@@ -15,12 +15,19 @@ const (
 	KindSiblingTarget         Kind = "sibling_of_existing_target"
 	KindTestCounterpart       Kind = "test_counterpart"
 	KindDependencyNeighbor    Kind = "dependency_neighbor"
+	KindSemanticRelationship  Kind = "semantic_relationship"
 	KindGitDocumentCoChange   Kind = "git_cochange_with_document"
 	KindGitTargetCoChange     Kind = "git_cochange_with_existing_target"
 	KindRelatedDocumentTarget Kind = "related_document_target"
 )
 
 type DependencyEdge struct {
+	Source   string
+	Target   string
+	Relation string
+}
+
+type RelationshipEdge struct {
 	Source   string
 	Target   string
 	Relation string
@@ -61,15 +68,16 @@ type AuthoredTarget struct {
 }
 
 type Input struct {
-	DocumentPath       string
-	DocumentText       string
-	RepositoryFiles    []string
-	ExistingTargets    []string
-	AuthoredTargets    []AuthoredTarget
-	DependencyEdges    []DependencyEdge
-	Commits            []Commit
-	RelatedDocuments   []RelatedDocument
-	SymbolDeclarations []SymbolDeclaration
+	DocumentPath          string
+	DocumentText          string
+	RepositoryFiles       []string
+	ExistingTargets       []string
+	AuthoredTargets       []AuthoredTarget
+	DependencyEdges       []DependencyEdge
+	SemanticRelationships []RelationshipEdge
+	Commits               []Commit
+	RelatedDocuments      []RelatedDocument
+	SymbolDeclarations    []SymbolDeclaration
 }
 
 type Evidence struct {

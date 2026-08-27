@@ -44,7 +44,7 @@ internal/codemapbench/current.go
 This boundary owns:
 
 - excluding the current document and visible authored targets;
-- collecting implemented mention, structural, dependency, history, related-document, and symbol evidence;
+- collecting implemented mention, structural, dependency, semantic-relationship, history, related-document, and symbol evidence;
 - canonical evidence ordering and candidate fingerprints;
 - candidate admission rules;
 - evidence base weights;
@@ -77,6 +77,7 @@ repository files
 visible existing targets
 authored target provenance and resolved coverage
 dependency edges
+bounded semantic relationship edges
 bounded commit facts
 related documents and their visible targets
 symbol declarations
@@ -84,7 +85,7 @@ symbol declarations
 
 All paths are normalized before candidate creation. The current document and every visible existing target are excluded from the candidate set. Authored directories additionally cover their descendants, and resolved pattern matches remain covered without becoming independent outward expansion seeds.
 
-Outward structural, dependency, and target-history expansion is seeded only by explicitly authored resolved files. Directory, pattern, and symbol entries retain their authored abstraction instead of being flattened into equivalent file seeds. A basename-only pattern also constrains inferred evidence for non-matching siblings in its literal parent directory; direct path, basename, or symbol evidence from the current document may still surface an explicit exception.
+Outward structural, shallow-dependency, and target-history expansion is seeded only by explicitly authored resolved files. Arcana semantic relationships use a separate per-document seed set: visible exact files plus symbols that Step 4 resolved to an exact Arcana node. Directory and pattern entries never seed either expansion path. A basename-only pattern also constrains inferred evidence for non-matching siblings in its literal parent directory; direct path, basename, or symbol evidence from the current document may still surface an explicit exception.
 
 ## Current evidence kinds
 
@@ -113,6 +114,12 @@ The candidate is the source/test or implementation/spec counterpart recognized b
 ### Dependency neighbor
 
 A dependency edge connects the candidate and an explicitly authored file expansion seed in either direction. The relation and edge source contribute to the evidence atom.
+
+### Semantic relationship
+
+A current Arcana relationship connects the candidate and one currently visible exact authored file or verified symbol seed. The relation is drawn from the bounded allowlist owned by the corpus relationship-provider seam. This evidence remains distinct from shallow dependency evidence so Arcana call/inheritance/test structure cannot silently inherit dependency promotion policy.
+
+A semantic relationship is currently context-only evidence: it may be admitted as a single evidence kind and ranked for inspection, but it does not satisfy any `hard_link` eligibility path. Its score is also excluded from the numeric thresholds used by dependency and non-test counterpart hard-link promotion, so Arcana evidence cannot indirectly push an otherwise-context candidate across a mutation threshold. Step 6 owns role-aware interpretation and any future stronger promotion rules.
 
 ### Git co-change with document
 
@@ -156,6 +163,7 @@ unique basename mention
 declared symbol mention
 test counterpart
 dependency neighbor
+semantic relationship
 related-document target
 ```
 
@@ -173,6 +181,7 @@ exact path mention                  6
 test counterpart                    6
 unique basename mention             4
 dependency neighbor                 4
+semantic relationship               3
 related-document target             4
 sibling target                      2
 Git target co-change              1.5
@@ -193,7 +202,7 @@ Each evidence atom is divided by the logarithm of its candidate fan-out. A broad
 
 Fan-out is measured by an atom composed from evidence kind, source, and selected detail.
 
-Dependency and declared-symbol evidence retain detail because different dependencies or symbols are meaningfully distinct. Other kinds use the normalized source/kind identity needed by current scoring.
+Dependency, semantic-relationship, and declared-symbol evidence retain detail because different relations or symbols are meaningfully distinct. Other kinds use the normalized source/kind identity needed by current scoring.
 
 Changing atom identity changes ranking behavior and requires benchmark review.
 
@@ -246,11 +255,12 @@ Production execution strips the codemap section from document text before collec
 
 - The current document is never its own candidate.
 - Visible authored targets are excluded, including descendants covered by authored directories and concrete matches covered by authored patterns.
-- Only explicit resolved file targets seed outward structural, dependency, and target-history expansion.
+- Only explicit resolved file targets seed outward structural, shallow-dependency, and target-history expansion; Arcana relationships additionally permit exact verified symbol seeds without flattening them into file-neighborhood seeds.
 - Basename-only authored patterns constrain inferred non-matching siblings in their literal parent directory unless direct current-document evidence overrides the boundary.
 - Existing links are never emitted as removal or irrelevance suggestions.
 - Ambiguous basenames and symbols do not produce unique evidence.
 - Weak history or sibling evidence alone is not admitted.
+- Semantic relationships may surface context candidates but cannot independently promote a candidate to `hard_link`.
 - Broad evidence fan-out is discounted.
 - Ordering is deterministic for identical inputs.
 - Per-document output is bounded.
@@ -267,7 +277,7 @@ A ranking change can pass unit tests while reducing real precision. Such changes
 ## Code map
 
 - `internal/evidence/model.go` — evidence kinds, normalized inputs, candidates, and fingerprints.
-- `collect.go` — candidate aggregation and exclusions.
+- `collect.go` and `target_selection.go` — candidate aggregation, exclusions, and distinct file-versus-semantic expansion seed selection.
 - `mentions.go`, `structure.go`, `symbols.go`, and `history.go` — current signal collectors.
 - `internal/codemaprecommend/suggestions.go` — weights, admission, fan-out discount, bounds, and tiers.
 - `internal/codemaprecommend/suggestion_negative_evidence.go` — narrow incidental-target filtering.

@@ -175,6 +175,45 @@ func TestCollectExplicitFileStillExpandsOutward(t *testing.T) {
 	assertKind(t, findCandidate(t, candidates, "cmd/ddocs/main.go"), KindDependencyNeighbor)
 }
 
+func TestCollectVerifiedSymbolCanSeedSemanticRelationshipOnly(t *testing.T) {
+	input := Input{
+		DocumentPath:    "docs/runtime.md",
+		RepositoryFiles: []string{"src/runtime.go", "src/worker.go", "src/sibling.go"},
+		ExistingTargets: []string{"src/runtime.go"},
+		AuthoredTargets: []AuthoredTarget{{
+			Target: "src/runtime.go#Run", Kind: AuthoredTargetSymbol, ResolvedTargets: []string{"src/runtime.go"},
+		}},
+		DependencyEdges:       []DependencyEdge{{Source: "src/runtime.go", Target: "src/sibling.go", Relation: "imports"}},
+		SemanticRelationships: []RelationshipEdge{{Source: "src/runtime.go", Target: "src/worker.go", Relation: "calls"}},
+	}
+	candidates := Collect(input)
+	assertKind(t, findCandidate(t, candidates, "src/worker.go"), KindSemanticRelationship)
+	for _, candidate := range candidates {
+		if candidate.Path == "src/sibling.go" {
+			t.Fatalf("symbol backing file leaked into ordinary dependency expansion: %#v", candidate)
+		}
+	}
+}
+
+func TestCollectAddsSemanticRelationshipWithoutTreatingItAsDependency(t *testing.T) {
+	input := Input{
+		DocumentPath:    "docs/runtime.md",
+		RepositoryFiles: []string{"src/runtime.go", "src/worker.go"},
+		ExistingTargets: []string{"src/runtime.go"},
+		AuthoredTargets: []AuthoredTarget{{
+			Target: "src/runtime.go", Kind: AuthoredTargetFile, ResolvedTargets: []string{"src/runtime.go"},
+		}},
+		SemanticRelationships: []RelationshipEdge{{Source: "src/runtime.go", Target: "src/worker.go", Relation: "calls"}},
+	}
+	candidate := findCandidate(t, Collect(input), "src/worker.go")
+	assertKind(t, candidate, KindSemanticRelationship)
+	for _, item := range candidate.Evidence {
+		if item.Kind == KindDependencyNeighbor {
+			t.Fatalf("semantic relationship was flattened into dependency evidence: %#v", candidate.Evidence)
+		}
+	}
+}
+
 func TestCollectPreservesDirectoryCandidates(t *testing.T) {
 	input := Input{
 		DocumentPath:    "docs/runtime.md",

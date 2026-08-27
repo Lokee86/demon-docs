@@ -43,6 +43,29 @@ func TestSuggestionsFromEvidenceDoesNotPromoteRelatedTestByHistoryAlone(t *testi
 	}
 }
 
+func TestSemanticRelationshipIsContextOnlyBeforeRoleClassification(t *testing.T) {
+	items := SuggestionsFromEvidence("docs/runtime.md", []evidence.Candidate{{
+		Path:     "src/worker.go",
+		Evidence: []evidence.Evidence{{Kind: evidence.KindSemanticRelationship, Source: "src/runtime.go", Detail: "outbound:calls", Count: 1}},
+	}})
+	if len(items) != 1 || items[0].Tier != SuggestionTierContext {
+		t.Fatalf("semantic relationship should remain context-only: %#v", items)
+	}
+}
+
+func TestSemanticRelationshipCannotPushDependencyAcrossHardLinkThreshold(t *testing.T) {
+	items := SuggestionsFromEvidence("docs/runtime.md", []evidence.Candidate{{
+		Path: "src/worker.go",
+		Evidence: []evidence.Evidence{
+			{Kind: evidence.KindDependencyNeighbor, Source: "src/runtime.go", Detail: "outbound:imports", Count: 7},
+			{Kind: evidence.KindSemanticRelationship, Source: "src/runtime.go", Detail: "outbound:calls", Count: 1},
+		},
+	}})
+	if len(items) != 1 || items[0].Score <= HardLinkDependencyMinimumScore || items[0].Tier != SuggestionTierContext {
+		t.Fatalf("semantic score affected mutation threshold: %#v", items)
+	}
+}
+
 func TestSuggestionsFromEvidenceFiltersIncidentalLockfile(t *testing.T) {
 	items := SuggestionsFromEvidence("docs/runtime.md", []evidence.Candidate{{
 		Path:     "package-lock.json",

@@ -31,6 +31,7 @@ func BuildContext(ctx context.Context, repositoryRoot string, dataset codemap.Da
 	paths := repositoryPaths(files)
 	targets := resolvedTargets(dataset)
 	authoredTargets := authoredTargets(dataset)
+	semanticSeeds := relationshipSeeds(dataset)
 	collections, err := collectCorpusCollections(ctx, root, files, dataset, options)
 	if err != nil {
 		return Corpus{}, err
@@ -46,6 +47,8 @@ func BuildContext(ctx context.Context, repositoryRoot string, dataset codemap.Da
 		Commits:                   collections.commits,
 		RelatedDocuments:          collectRelatedDocuments(collections.documents, directFileTargets(authoredTargets)),
 		SymbolDeclarations:        collections.symbols,
+		relationshipProvider:      options.RelationshipProvider,
+		relationshipSeeds:         semanticSeeds,
 	}, nil
 }
 

@@ -1,7 +1,7 @@
 package codemapcorpus
 
 import (
-	"fmt"
+	"context"
 	"path"
 	"sort"
 	"strings"
@@ -15,9 +15,10 @@ const (
 )
 
 type Options struct {
-	MaxCommits        int
-	MaxPathsPerCommit int
-	CodeIntelligence  CodeIntelligenceProvider
+	MaxCommits           int
+	MaxPathsPerCommit    int
+	CodeIntelligence     CodeIntelligenceProvider
+	RelationshipProvider RelationshipProvider
 }
 
 type Corpus struct {
@@ -31,6 +32,8 @@ type Corpus struct {
 	Commits                   []evidence.Commit
 	RelatedDocuments          map[string][]evidence.RelatedDocument
 	SymbolDeclarations        []evidence.SymbolDeclaration
+	relationshipProvider      RelationshipProvider
+	relationshipSeeds         map[string][]RelationshipSeed
 }
 
 func (c Corpus) KnownTargets(documentPath string) []string {
@@ -38,26 +41,7 @@ func (c Corpus) KnownTargets(documentPath string) []string {
 }
 
 func (c Corpus) Input(documentPath string, existingTargets []string) (evidence.Input, error) {
-	documentPath = normalizePath(documentPath)
-	text, ok := c.Documents[documentPath]
-	if !ok {
-		return evidence.Input{}, fmt.Errorf("document %s is not in the corpus", documentPath)
-	}
-	repositoryPaths := c.RepositoryPaths
-	if len(repositoryPaths) == 0 {
-		repositoryPaths = c.RepositoryFiles
-	}
-	return evidence.Input{
-		DocumentPath:       documentPath,
-		DocumentText:       text,
-		RepositoryFiles:    repositoryPaths,
-		ExistingTargets:    cloneStrings(existingTargets),
-		AuthoredTargets:    visibleAuthoredTargets(c.AuthoredTargetsByDocument[documentPath], existingTargets),
-		DependencyEdges:    c.DependencyEdges,
-		Commits:            c.Commits,
-		RelatedDocuments:   cloneRelated(c.RelatedDocuments[documentPath]),
-		SymbolDeclarations: cloneSymbols(c.SymbolDeclarations),
-	}, nil
+	return c.InputContext(context.Background(), documentPath, existingTargets)
 }
 
 func normalizeOptions(options Options) Options {

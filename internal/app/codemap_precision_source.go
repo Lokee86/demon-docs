@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/codemaparcana"
 	"github.com/Lokee86/demon-docs/internal/codemapbench"
 	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
 )
@@ -62,7 +63,16 @@ func runCodemapPrecisionSource(ctx context.Context, args []string, out, errOut i
 		return fail(errOut, err)
 	}
 	datasetValue = filterCodemapDataset(datasetValue, excludes.values)
-	corpus, err := codemapcorpus.BuildContext(ctx, repositoryRoot, datasetValue, codemapcorpus.Options{})
+	relationshipResolver, _, err := codemaparcana.OpenCurrent(ctx, repositoryRoot)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	var relationshipProvider codemapcorpus.RelationshipProvider
+	if relationshipResolver != nil {
+		defer relationshipResolver.Close()
+		relationshipProvider = relationshipResolver
+	}
+	corpus, err := codemapcorpus.BuildContext(ctx, repositoryRoot, datasetValue, codemapcorpus.Options{RelationshipProvider: relationshipProvider})
 	if err != nil {
 		return fail(errOut, fmt.Errorf("build precision corpus: %w", err))
 	}

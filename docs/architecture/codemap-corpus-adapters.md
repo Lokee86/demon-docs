@@ -29,9 +29,13 @@ repository + codemap dataset
 -> bounded co-change history
 -> corpus-owned normalization and validation
 -> normalized Corpus
+-> per-document InputContext
+   -> currently visible exact file/symbol seeds
+   -> optional RelationshipProvider
+   -> bounded semantic relationship facts
 ```
 
-The provider reports facts only. It does not rank candidates, decide documentation coverage, or mutate authored maps. The default provider wraps Demon Docs' existing shallow language adapters so the feature remains usable without an external intelligence source.
+The providers report facts only. They do not rank candidates, decide documentation coverage, or mutate authored maps. The repository-wide `CodeIntelligenceProvider` defaults to Demon Docs' shallow language adapters. The per-document `RelationshipProvider` is optional and is currently backed by Arcana when a current verified snapshot is available.
 
 ## Code root
 
@@ -50,6 +54,7 @@ This boundary owns:
 - authored target provenance grouped by document, preserving file, directory, pattern, symbol, and unknown kinds;
 - concrete authored coverage used to suppress already-covered missing-link candidates;
 - the code-intelligence provider contract for repository-local dependency and declared-symbol facts;
+- the per-document relationship-provider contract for bounded graph facts from currently visible exact targets;
 - deterministic validation, normalization, deduplication, and ordering of provider facts;
 - shallow local dependency and symbol extraction as the default fallback provider;
 - related-document relationships derived from local Markdown links;
@@ -133,6 +138,32 @@ The provider does **not** receive document text, existing codemap targets, evide
 `codemapcorpus.Options.CodeIntelligence` selects the provider. A nil provider uses the built-in local fallback. `codemaprun.Options.CodeIntelligence` forwards the same seam into production planning. Production, benchmark, and precision entry points use `BuildContext`; current CLI paths still leave the provider nil, so external provider selection is not wired until the concrete integration step.
 
 Provider failures fail corpus construction rather than silently mixing incomplete semantic facts with fallback facts. Explicit stale/unavailable degradation policy belongs to the concrete external provider integration and is not implemented by this seam alone.
+
+## Relationship-provider seam
+
+`RelationshipProvider` is deliberately separate from repository-wide code-intelligence collection. It is invoked only by `Corpus.InputContext` after the caller has supplied the exact authored targets that remain visible for one document. The request contains the repository root, current repository-file inventory, and normalized exact file/symbol seeds for that document.
+
+This placement is a benchmark-safety boundary. A held-out codemap target is removed from the visible target set before relationship collection, so that hidden answer cannot influence which Arcana neighborhood is queried. Directory and pattern targets never become relationship seeds. A symbol target becomes a seed only when Step 4 resolved it to an exact semantic node.
+
+The current Arcana provider queries only a one-hop allowlist:
+
+```text
+calls
+imports
+depends-on
+implements
+extends
+overrides
+uses-trait
+includes
+tests
+```
+
+File seeds expand only relation-capable nodes whose source path is exactly the authored file. Verified symbol seeds resolve back to their exact Arcana identity and expand only that symbol. Each seed is bounded to at most 128 relation-capable nodes, and each node/direction is bounded to 128 neighbors. If Arcana reports truncation at either boundary, that seed contributes no semantic relationship evidence rather than publishing an arbitrary partial neighborhood.
+
+Both the seed path and returned neighbor path must still match the Lexicon content identity verified by the Step 4 Arcana resolver. Relationships are projected to repository file pairs, normalized against the current repository-file inventory, deduplicated, and sorted before evidence collection.
+
+Arcana relationship facts are a distinct `semantic_relationship` evidence kind. In this phase they may produce an inspectable `context` recommendation, but they do not satisfy any `hard_link` promotion rule by themselves. Role-aware classification and stronger promotion policy belong to the next algorithm phase.
 
 ## Local fallback dependency adapters
 
@@ -248,6 +279,7 @@ The corpus is an in-memory, rebuildable projection. It does not persist a second
 - document text and authored targets come from the selected dataset;
 - dependency and symbol facts come through the selected `CodeIntelligenceProvider`;
 - the default provider derives those facts from the built-in shallow source adapters;
+- bounded per-document semantic relationship facts come through the optional `RelationshipProvider` and are not persisted in the corpus;
 - related facts come from current local Markdown links; and
 - history facts come from bounded current Git history.
 
@@ -264,7 +296,8 @@ The corpus is an in-memory, rebuildable projection. It does not persist a second
 - Source workers read immutable repository bytes and publish only indexed detached results.
 - Worker completion order cannot affect returned ordering or first-error selection.
 - Collections are deduplicated and sorted serially after collection.
-- Hidden holdout targets must be removed from related-document inputs before generation.
+- Hidden holdout targets must be removed from related-document inputs and relationship-provider seeds before generation.
+- Arcana relationship neighborhoods are one-hop, allowlisted, source-current, and bounded; truncated seed neighborhoods are discarded rather than partially trusted.
 - Directory and pattern coverage suppresses already-covered descendants or matches without making them independent expansion seeds.
 - Basename-only authored patterns constrain inferred sibling evidence outside the pattern unless the current document supplies direct mention or symbol evidence.
 
@@ -277,7 +310,8 @@ Unsupported language syntax normally results in no fact rather than a fatal erro
 ## Code map
 
 - `internal/codemapcorpus/build.go` and `model.go` — corpus assembly, provider selection, and model.
-- `code_intelligence.go` — provider contract, default local provider, and corpus-owned provider-output validation.
+- `code_intelligence.go` — repository-wide provider contract, default local provider, and corpus-owned provider-output validation.
+- `relationship_intelligence.go` and `input.go` — visible-seed relationship contract, benchmark-safe per-document collection, and relationship normalization.
 - `build_collections.go` — concurrent document, code-intelligence, and history collection with deterministic error priority.
 - `source_facts.go` and `workers.go` — default-provider bounded source reads, fallback adapter dispatch, indexed results, and serial normalized merge.
 - `files.go`, `paths.go`, and `gitcli.go` — repository discovery and normalized paths.
@@ -294,6 +328,7 @@ Focused tests cover:
 
 - complete corpus input assembly and missing-document refusal;
 - injected provider usage, context propagation, deterministic provider normalization, invalid-path rejection, and provider error propagation;
+- visible relationship-seed projection, hidden-holdout isolation, verified-symbol seed identity, and normalized relationship output;
 - bounded local-fallback source concurrency, deterministic indexed errors, and one read per supported source;
 - retained large-corpus construction performance;
 - repository paths and tracked parent directories;

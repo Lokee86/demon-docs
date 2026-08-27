@@ -16,7 +16,7 @@ This document defines the current deterministic codemap missing-link algorithm, 
 
 ## Overview
 
-The algorithm identifies repository targets that are absent from a document's current codemap but supported by deterministic document, repository, dependency, symbol, related-document, and Git evidence.
+The algorithm identifies repository targets that are absent from a document's current codemap but supported by deterministic document, repository, dependency, Arcana relationship, symbol, related-document, and Git evidence.
 
 The same production ranking package is used by:
 
@@ -71,6 +71,7 @@ The corpus layer supplies normalized inputs:
 - current codemap targets;
 - dependency edges;
 - declared symbols;
+- bounded per-document semantic relationships from current Arcana state when available;
 - bounded Git co-change facts; and
 - related documents with their current targets.
 
@@ -78,7 +79,7 @@ Existing codemap targets retain their authored abstraction. Exact files may seed
 
 For production execution, the codemap section itself is stripped from document text before mention evidence is collected. A target therefore cannot become evidence for itself merely because it is already listed in the map.
 
-Before evidence collection, provenance separates authored coverage from expansion. Only explicit resolved files seed sibling, dependency-neighbor, test-counterpart, and target-history expansion. Authored directories and resolved patterns remain coverage boundaries rather than file-seed factories. For basename-only globs, inferred non-matching siblings in the literal parent directory are suppressed unless the current document directly names the path, basename, or declared symbol.
+Before evidence collection, provenance separates authored coverage from expansion. Only explicit resolved files seed sibling, shallow dependency-neighbor, test-counterpart, and target-history expansion. Arcana relationship collection uses a separate per-document seed set containing currently visible exact files plus symbol targets that Step 4 resolved to one exact Arcana node. Authored directories and resolved patterns remain coverage boundaries rather than seed factories. For basename-only globs, inferred non-matching siblings in the literal parent directory are suppressed unless the current document directly names the path, basename, or declared symbol.
 
 ### 2. Collect deterministic evidence
 
@@ -91,6 +92,7 @@ The evidence collector creates one candidate per repository target and attaches 
 | `test_counterpart` | Source and test naming/layout identify a counterpart. | 6 |
 | `unique_basename_mention` | A uniquely resolvable file or directory basename appears in the document. | 4 |
 | `dependency_neighbor` | The target is a direct observed dependency neighbor of a current target. | 4 |
+| `semantic_relationship` | A one-hop allowlisted Arcana relationship connects the target to a currently visible exact file or verified symbol seed. | 3 |
 | `related_document_target` | A related document already contains the target. | 4 |
 | `sibling_target` | The target is a direct sibling of a current target. | 2 |
 | `git_target_cochange` | The target changed with a current target. | 1.5 |
@@ -103,7 +105,7 @@ Each evidence record retains its kind, source, detail, count, and deterministic 
 A candidate enters ranking when it has either:
 
 - at least two different evidence kinds; or
-- one independently admissible kind: exact path, unique basename, declared symbol, test counterpart, dependency neighbor, or related-document target.
+- one independently admissible kind: exact path, unique basename, declared symbol, test counterpart, dependency neighbor, semantic relationship, or related-document target.
 
 Weak structural or Git-only evidence cannot enter the output by itself.
 
@@ -159,7 +161,7 @@ A candidate qualifies for `hard_link` through one of these paths:
 4. **Dependency neighbor:** dependency evidence qualifies at score 18 or greater.
 5. **Related document plus direct history:** for non-test targets, related-document evidence is corroborated by direct Git co-change between the target and current document. Test targets need direct counterpart or semantic support instead.
 
-Single exact-path mentions and repeated paths without independent semantic corroboration remain `context`.
+Single exact-path mentions and repeated paths without independent semantic corroboration remain `context`. A semantic relationship may independently surface and rank a `context` candidate, but it does not satisfy any `hard_link` qualification path and its score is excluded from numeric hard-link thresholds. Role-aware interpretation of Arcana relationships belongs to the next algorithm phase.
 
 ## Output semantics
 
@@ -235,6 +237,9 @@ The algorithm and production workflow preserve these boundaries:
 - pruning requires explicit configuration;
 - benchmark labels are not universal truth;
 - broad weak evidence is bounded and discounted;
+- Arcana relationship queries are one-hop and allowlisted, use only currently visible exact file or verified-symbol seeds, and discard truncated seed neighborhoods rather than trusting partial results;
+- hidden benchmark targets are removed before Arcana relationship seeds are chosen;
+- semantic-relationship evidence is context-only until role-aware classification is implemented;
 - output per document is bounded;
 - identical normalized inputs produce stable ordering, evidence, scores, tiers, and fingerprints;
 - section mutation occurs only through explicit foreground codemap commands;
@@ -317,7 +322,8 @@ Current limits remain:
 - only three unmatched hard-tier suggestions were available outside Space Rocks;
 - ordinary cross-repository holdout recovery remains 11/18;
 - thresholds are empirical defaults rather than universal constants;
-- only `hard_link` is auto-added by production execution after decline filtering; `context` remains non-mutating; and
+- only `hard_link` is auto-added by production execution after decline filtering; `context` remains non-mutating;
+- Arcana semantic relationships currently remain context-only pending role-aware classification; and
 - production missing-section creation is constrained by selected effective document schemas and remains separate from ranking quality.
 
 Continued tuning against the same fixed errors would risk overfitting. New data should precede another algorithm pass.

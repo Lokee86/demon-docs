@@ -67,9 +67,12 @@ func startProtocolClient(ctx context.Context, command, snapshotDirectory string)
 		return nil, fmt.Errorf("query Arcana capabilities: %w", err)
 	}
 	if capabilities.Protocol != protocolID || capabilities.Version != 1 ||
-		!containsString(capabilities.Operations, "resolve_file") || !containsString(capabilities.Operations, "resolve_symbol") {
+		!containsString(capabilities.Operations, "resolve_file") ||
+		!containsString(capabilities.Operations, "resolve_symbol") ||
+		!containsString(capabilities.Operations, "list_nodes") ||
+		!containsString(capabilities.Operations, "neighbors") {
 		_ = client.Close()
-		return nil, fmt.Errorf("Arcana protocol does not provide required file/symbol resolution")
+		return nil, fmt.Errorf("Arcana protocol does not provide required codemap operations")
 	}
 	return client, nil
 }

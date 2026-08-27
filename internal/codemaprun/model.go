@@ -18,6 +18,7 @@ type Options struct {
 	Schema                  codemap.SectionSchema
 	CodeIntelligence        codemapcorpus.CodeIntelligenceProvider
 	TargetResolver          codemap.TargetResolver
+	RelationshipProvider    codemapcorpus.RelationshipProvider
 }
 
 type Recommendation struct {

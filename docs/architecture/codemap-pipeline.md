@@ -23,6 +23,7 @@ Existing or schema-required codemap section
 -> extraction and versioned dataset
 -> pinned Arcana file/symbol resolution when current
 -> normalized repository corpus
+-> visible-target-bounded Arcana relationship evidence when current
 -> evidence candidates and fingerprints
 -> production admission, score, order, and tier
 -> shared decline-policy filtering
@@ -103,7 +104,9 @@ See [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md).
 
 ### 2. Corpus
 
-`internal/codemapcorpus` combines current repository files, authored target provenance and concrete coverage, code-intelligence provider facts, related documents, and bounded Git history into normalized facts. File, directory, pattern, and symbol targets retain their authored abstraction; only explicit resolved files become outward evidence-expansion seeds. Dependency and declared-symbol facts cross a narrow `CodeIntelligenceProvider` seam; the existing shallow language adapters are the default fallback provider.
+`internal/codemapcorpus` combines current repository files, authored target provenance and concrete coverage, code-intelligence provider facts, related documents, and bounded Git history into normalized facts. File, directory, pattern, and symbol targets retain their authored abstraction; only explicit resolved files become outward shallow-structure/dependency/history seeds. Dependency and declared-symbol facts cross a narrow repository-wide `CodeIntelligenceProvider` seam; the existing shallow language adapters are the default fallback provider.
+
+At per-document input time, an independent `RelationshipProvider` receives only currently visible exact file targets plus verified symbol targets. When Arcana is current, this adds one-hop allowlisted semantic relationships without exposing hidden benchmark holdouts or handing graph traversal ownership to the ranker. These relationships remain a distinct context-only evidence kind until role-aware classification is implemented.
 
 See [Codemap Corpus and Adapters](codemap-corpus-adapters.md).
 
@@ -181,6 +184,7 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 - Paths and output ordering are deterministic.
 - Ambiguous extraction or resolution is not guessed into truth.
 - Arcana semantic resolution is trusted only when Arcana/Lexicon snapshot alignment and the required source freshness checks succeed.
+- Arcana relationship evidence is one-hop, allowlisted, per-document, and seeded only from currently visible exact files or verified symbols; truncated seed neighborhoods are discarded.
 - Missing or stale Arcana state degrades explicitly; an opened current protocol session failing mid-query is an error.
 - Existing authored coverage is excluded from missing-link candidates, including descendants covered by directory targets and concrete matches covered by patterns.
 - Pattern matches and directory descendants do not become independent outward evidence seeds.

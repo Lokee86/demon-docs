@@ -21,7 +21,16 @@ func (benchmarkEngine) Run(ctx context.Context, options codemapBenchmarkOptions)
 	if err != nil {
 		return codemapBenchmarkResult{}, err
 	}
-	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{})
+	relationshipResolver, _, err := codemaparcana.OpenCurrent(ctx, options.RepositoryRoot)
+	if err != nil {
+		return codemapBenchmarkResult{}, err
+	}
+	var relationshipProvider codemapcorpus.RelationshipProvider
+	if relationshipResolver != nil {
+		defer relationshipResolver.Close()
+		relationshipProvider = relationshipResolver
+	}
+	corpus, err := codemapcorpus.BuildContext(ctx, options.RepositoryRoot, dataset, codemapcorpus.Options{RelationshipProvider: relationshipProvider})
 	if err != nil {
 		return codemapBenchmarkResult{}, fmt.Errorf("build benchmark corpus: %w", err)
 	}
@@ -67,7 +76,7 @@ func (c benchmarkCorpus) DocumentInput(ctx context.Context, request codemapbench
 	if err := ctx.Err(); err != nil {
 		return evidence.Input{}, err
 	}
-	input, err := c.corpus.Input(request.Document, request.VisibleTargets)
+	input, err := c.corpus.InputContext(ctx, request.Document, request.VisibleTargets)
 	if err != nil {
 		return evidence.Input{}, err
 	}

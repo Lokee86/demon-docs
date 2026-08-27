@@ -34,10 +34,12 @@ func Collect(input Input) []Candidate {
 		items:             map[string]map[string]*Evidence{},
 	}
 	expansionTargets := evidenceExpansionTargets(input)
+	semanticTargets := semanticRelationshipTargets(input)
 	c.collectMentions(input.DocumentText)
 	c.collectDeclaredSymbols(input.DocumentText, input.SymbolDeclarations)
 	c.collectStructure(expansionTargets)
 	c.collectDependencies(expansionTargets, input.DependencyEdges)
+	c.collectSemanticRelationships(semanticTargets, input.SemanticRelationships)
 	c.collectHistory(document, expansionTargets, input.Commits)
 	c.collectRelatedDocuments(input.RelatedDocuments)
 	return c.result()
@@ -91,30 +93,6 @@ func authoredPatternBoundaries(targets []AuthoredTarget) map[string]map[string]s
 		}
 	}
 	return result
-}
-
-func evidenceExpansionTargets(input Input) []string {
-	if len(input.AuthoredTargets) == 0 {
-		return append([]string(nil), input.ExistingTargets...)
-	}
-	visible := normalizedSet(input.ExistingTargets)
-	result := map[string]struct{}{}
-	for _, authored := range input.AuthoredTargets {
-		if authored.Kind != AuthoredTargetFile {
-			continue
-		}
-		for _, target := range authored.ResolvedTargets {
-			target = normalizePath(target)
-			if target == "" {
-				continue
-			}
-			if _, ok := visible[target]; !ok {
-				continue
-			}
-			result[target] = struct{}{}
-		}
-	}
-	return sortedKeys(result)
 }
 
 func (c *collector) add(candidate string, kind Kind, source, detail string, count int) {

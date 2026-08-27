@@ -32,6 +32,7 @@ type nodeList struct {
 }
 
 type protocolNode struct {
+	NodeID        uint32        `json:"node_id"`
 	Identity      string        `json:"identity"`
 	Kind          string        `json:"kind"`
 	Path          string        `json:"path"`

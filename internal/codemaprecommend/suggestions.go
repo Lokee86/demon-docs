@@ -31,6 +31,7 @@ type evidenceAtom struct {
 
 type rankedSuggestion struct {
 	suggestion               Suggestion
+	hardLinkScore            float64
 	repeatedMentionCount     int
 	hasExactPathMention      bool
 	hasDeclaredSymbolMention bool
@@ -76,9 +77,11 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 			if breadth < 1 {
 				breadth = 1
 			}
-			itemResult.suggestion.Score += evidenceWeight(item.Kind) *
-				occurrenceFactor /
-				math.Log2(float64(breadth+1))
+			contribution := evidenceWeight(item.Kind) * occurrenceFactor / math.Log2(float64(breadth+1))
+			itemResult.suggestion.Score += contribution
+			if item.Kind != evidence.KindSemanticRelationship {
+				itemResult.hardLinkScore += contribution
+			}
 
 			detail := fmt.Sprintf("%s:%s", item.Kind, item.Detail)
 			if item.Source != "" {
@@ -190,9 +193,9 @@ func (item rankedSuggestion) isHardLinkCandidate() bool {
 	// Filename-based test counterparts need independent semantic support so a
 	// similarly named test in another service cannot qualify by structure alone.
 	if item.hasTestCounterpart && (item.hasDependencyNeighbor || item.hasRelatedDocumentTarget || item.hasSiblingTarget) {
-		return item.targetIsTest || item.suggestion.Score >= HardLinkImplementationCounterpartMinimumScore
+		return item.targetIsTest || item.hardLinkScore >= HardLinkImplementationCounterpartMinimumScore
 	}
-	if item.hasDependencyNeighbor && item.suggestion.Score >= HardLinkDependencyMinimumScore {
+	if item.hasDependencyNeighbor && item.hardLinkScore >= HardLinkDependencyMinimumScore {
 		return true
 	}
 	// A non-test target inherited through a related document becomes link-worthy
@@ -230,7 +233,7 @@ func suggestionEvidenceAtom(item evidence.Evidence) evidenceAtom {
 		source = string(item.Kind)
 	}
 	detail := ""
-	if item.Kind == evidence.KindDependencyNeighbor || item.Kind == evidence.KindDeclaredSymbolMention {
+	if item.Kind == evidence.KindDependencyNeighbor || item.Kind == evidence.KindSemanticRelationship || item.Kind == evidence.KindDeclaredSymbolMention {
 		detail = item.Detail
 	}
 	return evidenceAtom{kind: item.Kind, source: source, detail: detail}
@@ -251,6 +254,7 @@ func admitSuggestionCandidate(candidate evidence.Candidate) bool {
 			evidence.KindDeclaredSymbolMention,
 			evidence.KindTestCounterpart,
 			evidence.KindDependencyNeighbor,
+			evidence.KindSemanticRelationship,
 			evidence.KindRelatedDocumentTarget:
 			return true
 		}
@@ -270,6 +274,8 @@ func evidenceWeight(kind evidence.Kind) float64 {
 		return 6
 	case evidence.KindDependencyNeighbor:
 		return 4
+	case evidence.KindSemanticRelationship:
+		return 3
 	case evidence.KindRelatedDocumentTarget:
 		return 4
 	case evidence.KindSiblingTarget:

@@ -34,6 +34,20 @@ func (c *collector) collectDependencies(existingTargets []string, edges []Depend
 	}
 }
 
+func (c *collector) collectSemanticRelationships(existingTargets []string, edges []RelationshipEdge) {
+	seeds := normalizedSet(existingTargets)
+	for _, edge := range edges {
+		source := normalizePath(edge.Source)
+		target := normalizePath(edge.Target)
+		if _, ok := seeds[source]; ok {
+			c.add(target, KindSemanticRelationship, source, "outbound:"+edge.Relation, 1)
+		}
+		if _, ok := seeds[target]; ok {
+			c.add(source, KindSemanticRelationship, target, "inbound:"+edge.Relation, 1)
+		}
+	}
+}
+
 func (c *collector) collectRelatedDocuments(documents []RelatedDocument) {
 	for _, document := range documents {
 		source := normalizePath(document.Path)

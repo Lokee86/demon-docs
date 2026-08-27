@@ -283,6 +283,16 @@ Path-qualified and standalone symbols can now produce real `resolved`, `missing`
 
 Arcana relationship expansion remains intentionally deferred to the following evidence phase.
 
+### Phase 14: Bounded Arcana relationship evidence
+
+Arcana graph relationships are now consumed through a separate per-document `RelationshipProvider` rather than being injected into the repository-wide code-intelligence corpus. This preserves the Step 3 provider boundary and prevents a hidden benchmark answer from influencing which graph neighborhood is fetched.
+
+Only currently visible exact file targets and Step 4-verified symbol targets seed Arcana expansion. Directory and pattern targets do not. The provider projects one-hop `calls`, `imports`, `depends-on`, `implements`, `extends`, `overrides`, `uses-trait`, `includes`, and `tests` relationships back to current repository file pairs. Source-content freshness is rechecked for both seed and neighbor paths.
+
+Expansion is deliberately bounded: at most 128 relation-capable nodes per seed and 128 neighbors per node/direction. A truncated seed neighborhood is discarded rather than partially trusted. Returned relationships become a distinct `semantic_relationship` evidence kind with weight 3. They can surface and rank context recommendations, but they do not qualify a `hard_link` and their score is excluded from numeric hard-link thresholds; role-aware interpretation remains the next phase.
+
+Live dogfooding used a freshly prepared matching Lexicon/Arcana snapshot for Demon Docs. `codemap-pipeline.md` still produced zero additions/removals. On `codemap-extraction-and-dataset.md`, Arcana emitted real call/implements relationship evidence and changed context scores/order, while the automatic hard-link set remained exactly the same five files as the fallback run. This is a mutation-isolation check, not a precision claim.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories
