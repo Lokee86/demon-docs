@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-2e95-787b-ae80-fc5555714de5
 document_type: general
 policy_exempt: false
-summary: This document describes how normalized repository facts become deterministic potentially-missing-link candidates, scores, ordered suggestions, and hardlink or context tiers.
+summary: This document describes how normalized repository facts become deterministic potentially-missing-link candidates, roles, scores, ordered suggestions, and hardlink or context tiers.
 ---
 # Codemap Evidence and Ranking
 
@@ -12,7 +12,7 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document describes how normalized repository facts become deterministic potentially-missing-link candidates, scores, ordered suggestions, and `hard_link` or `context` tiers.
+This document describes how normalized repository facts become deterministic potentially-missing-link candidates, semantic roles, scores, ordered suggestions, and `hard_link` or `context` tiers.
 
 ## Overview
 
@@ -22,6 +22,7 @@ Evidence and ranking are separate ownership seams:
 Corpus facts + visible authored targets
 -> evidence candidates and fingerprints
 -> candidate admission
+-> deterministic role classification
 -> weighted scoring and fan-out discount
 -> bounded deterministic ordering
 -> suggestion tier
@@ -47,6 +48,7 @@ This boundary owns:
 - collecting implemented mention, structural, dependency, semantic-relationship, history, related-document, and symbol evidence;
 - canonical evidence ordering and candidate fingerprints;
 - candidate admission rules;
+- deterministic candidate-role classification;
 - evidence base weights;
 - repeated-occurrence handling;
 - evidence-atom fan-out discounting;
@@ -119,7 +121,7 @@ A dependency edge connects the candidate and an explicitly authored file expansi
 
 A current Arcana relationship connects the candidate and one currently visible exact authored file or verified symbol seed. The relation is drawn from the bounded allowlist owned by the corpus relationship-provider seam. This evidence remains distinct from shallow dependency evidence so Arcana call/inheritance/test structure cannot silently inherit dependency promotion policy.
 
-A semantic relationship is currently context-only evidence: it may be admitted as a single evidence kind and ranked for inspection, but it does not satisfy any `hard_link` eligibility path. Its score is also excluded from the numeric thresholds used by dependency and non-test counterpart hard-link promotion, so Arcana evidence cannot indirectly push an otherwise-context candidate across a mutation threshold. Step 6 owns role-aware interpretation and any future stronger promotion rules.
+A semantic relationship is currently context-only evidence for tier policy: it may be admitted as a single evidence kind and ranked for inspection, but it does not satisfy any `hard_link` eligibility path. Its score is also excluded from the numeric thresholds used by dependency and non-test counterpart hard-link promotion, so Arcana evidence cannot indirectly push an otherwise-context candidate across a mutation threshold. Its direction and relation type now contribute to deterministic candidate-role classification; stronger role-aware promotion remains deferred.
 
 ### Git co-change with document
 
@@ -170,6 +172,34 @@ related-document target
 Sibling or history evidence alone is not sufficient.
 
 Admission is a surfacing policy, not a claim that the candidate is valid.
+
+## Candidate role classification
+
+Every admitted candidate receives exactly one deterministic role before scoring is published:
+
+```text
+primary_implementation
+supporting_implementation
+verification_test
+interface_boundary
+context_only
+```
+
+Role answers **what kind of relationship the candidate appears to have to the document**. Tier answers **whether current mutation policy considers the candidate strong enough for permanent insertion**. The two are deliberately independent in this phase.
+
+Current precedence is:
+
+1. `verification_test` for recognized test/spec paths or candidates connected to a visible seed by an incoming Arcana `tests` relationship;
+2. `interface_boundary` when a visible seed points outward through `implements`, `extends`, `overrides`, `uses-trait`, or `includes`, making the candidate the contract/base/trait side of that relationship;
+3. `primary_implementation` for direct current-document evidence: declared-symbol mention, exact path mention, or unique basename mention;
+4. `supporting_implementation` for non-direct structural or semantic support such as dependency neighbors, semantic relationships, test counterparts, sibling targets, or related-document targets; and
+5. `context_only` when the retained evidence does not establish one of the stronger roles, such as history-only corroboration.
+
+The opposite side of `implements`/`extends`/`overrides` remains supporting implementation rather than interface/boundary. An outgoing Arcana `tests` edge means the candidate is the thing under test, not verification; an incoming `tests` edge means the candidate performs verification.
+
+This classification is intentionally conservative and evidence-derived. It does not use an LLM, repository naming guesses for interfaces, or unbounded graph traversal. Step 7 may use roles for coverage-aware selection, but Step 6 does **not** alter score, ordering, hard-link thresholds, or automatic mutation eligibility.
+
+Roles are emitted in inspect output and benchmark/precision reports. Legacy reports may omit role; current consumers treat an empty legacy role as `context_only` for role-level evaluation.
 
 ## Score policy
 
@@ -245,7 +275,7 @@ Production execution strips the codemap section from document text before collec
 ## State and data ownership
 
 - `internal/evidence` owns candidate evidence and fingerprints.
-- `internal/codemaprecommend` owns production admission, score, ordering, limits, negative-evidence filtering, and tier.
+- `internal/codemaprecommend` owns production admission, role classification, score, ordering, limits, negative-evidence filtering, and tier.
 - `internal/codemaprun` owns production recommendation planning, decline replay, and optional pruning evaluation.
 - `internal/codemapbench` owns holdouts and reports while importing the production ranker.
 - Ranked recommendations are rebuildable analysis output.
@@ -264,6 +294,7 @@ Production execution strips the codemap section from document text before collec
 - Broad evidence fan-out is discounted.
 - Ordering is deterministic for identical inputs.
 - Per-document output is bounded.
+- Role is deterministic relationship metadata and does not currently affect score or mutation policy.
 - Tier is confidence and mutation-policy metadata.
 - Explicit production generation adds only non-declined `hard_link` recommendations; `context` remains non-mutating.
 - A planned write still passes through managed-section reconciliation and source-hash guards.
@@ -279,6 +310,7 @@ A ranking change can pass unit tests while reducing real precision. Such changes
 - `internal/evidence/model.go` — evidence kinds, normalized inputs, candidates, and fingerprints.
 - `collect.go` and `target_selection.go` — candidate aggregation, exclusions, and distinct file-versus-semantic expansion seed selection.
 - `mentions.go`, `structure.go`, `symbols.go`, and `history.go` — current signal collectors.
+- `internal/codemaprecommend/roles.go` — deterministic candidate-role classification.
 - `internal/codemaprecommend/suggestions.go` — weights, admission, fan-out discount, bounds, and tiers.
 - `internal/codemaprecommend/suggestion_negative_evidence.go` — narrow incidental-target filtering.
 - `internal/codemaprun/build.go` — production recommendation, decline, and pruning planning.

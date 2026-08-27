@@ -60,7 +60,10 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 			continue
 		}
 		itemResult := rankedSuggestion{
-			suggestion:   Suggestion{Link: Link{Document: document, Target: candidate.Path}},
+			suggestion: Suggestion{
+				Link: Link{Document: document, Target: candidate.Path},
+				Role: classifySuggestionRole(candidate.Path, candidate.Evidence),
+			},
 			targetIsTest: IsTestTarget(candidate.Path),
 		}
 		for _, item := range candidate.Evidence {

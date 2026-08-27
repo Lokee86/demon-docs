@@ -25,6 +25,7 @@ Existing or schema-required codemap section
 -> normalized repository corpus
 -> visible-target-bounded Arcana relationship evidence when current
 -> evidence candidates and fingerprints
+-> deterministic candidate role
 -> production admission, score, order, and tier
 -> shared decline-policy filtering
 -> unified managed-section reconciliation
@@ -106,13 +107,13 @@ See [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md).
 
 `internal/codemapcorpus` combines current repository files, authored target provenance and concrete coverage, code-intelligence provider facts, related documents, and bounded Git history into normalized facts. File, directory, pattern, and symbol targets retain their authored abstraction; only explicit resolved files become outward shallow-structure/dependency/history seeds. Dependency and declared-symbol facts cross a narrow repository-wide `CodeIntelligenceProvider` seam; the existing shallow language adapters are the default fallback provider.
 
-At per-document input time, an independent `RelationshipProvider` receives only currently visible exact file targets plus verified symbol targets. When Arcana is current, this adds one-hop allowlisted semantic relationships without exposing hidden benchmark holdouts or handing graph traversal ownership to the ranker. These relationships remain a distinct context-only evidence kind until role-aware classification is implemented.
+At per-document input time, an independent `RelationshipProvider` receives only currently visible exact file targets plus verified symbol targets. When Arcana is current, this adds one-hop allowlisted semantic relationships without exposing hidden benchmark holdouts or handing graph traversal ownership to the ranker. These relationships remain a distinct context-only evidence kind for mutation policy, but Step 6 now uses their direction and relation type as deterministic role-classification input.
 
 See [Codemap Corpus and Adapters](codemap-corpus-adapters.md).
 
 ### 3. Evidence and ranking
 
-`internal/evidence` constructs candidates and evidence fingerprints after excluding the document and existing visible targets. `internal/codemaprecommend` owns production admission, scoring, bounding, ordering, negative-evidence filtering, and tiering. `internal/codemapbench` consumes that package rather than owning a second algorithm.
+`internal/evidence` constructs candidates and evidence fingerprints after excluding the document and existing visible targets. `internal/codemaprecommend` owns production admission, deterministic candidate-role classification, scoring, bounding, ordering, negative-evidence filtering, and tiering. Roles distinguish primary implementation, supporting implementation, verification/test, interface/boundary, and context-only relationships without yet affecting score or tier. `internal/codemapbench` consumes that package rather than owning a second algorithm.
 
 See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
@@ -189,7 +190,8 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 - Existing authored coverage is excluded from missing-link candidates, including descendants covered by directory targets and concrete matches covered by patterns.
 - Pattern matches and directory descendants do not become independent outward evidence seeds.
 - Holdout answers are absent from generator inputs.
-- Evidence remains inspectable in reports.
+- Evidence and deterministic candidate roles remain inspectable in reports.
+- Candidate role does not currently alter score, ordering, hard-link thresholds, or mutation eligibility.
 - Output per document is bounded.
 - `hard_link` and `context` remain deterministic recommendation tiers; only `hard_link` is an automatic generation tier.
 - Existing links are retained unless configured removal policy applies.
@@ -209,7 +211,7 @@ A benchmark threshold failure represents a completed measurement below a request
 - `internal/codemaparcana/` — current-snapshot discovery, Arcana JSONL transport, freshness checks, and file/symbol resolution.
 - `internal/codemapcorpus/` — repository facts and polyglot adapters.
 - `internal/evidence/` — candidate evidence and fingerprints.
-- `internal/codemaprecommend/` — production ranking, filtering, ordering, and tiers.
+- `internal/codemaprecommend/` — production role classification, ranking, filtering, ordering, and tiers.
 - `internal/codemaprun/` — foreground planning, decline filtering, removal policy, and transactional rewrites.
 - `internal/codemapbench/` — holdouts, classification, and reports using the production ranker.
 - `internal/codemapprecision/` — samples, labels, validation, and evaluation.

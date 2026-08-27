@@ -34,7 +34,7 @@ func writeCodemapInspection(out io.Writer, plan codemaprun.Plan) {
 			if item.Declined {
 				decision = "declined"
 			}
-			fmt.Fprintf(out, "  %s %s score=%.3f tier=%s\n", decision, item.Target, item.Score, item.Tier)
+			fmt.Fprintf(out, "  %s %s score=%.3f tier=%s role=%s\n", decision, item.Target, item.Score, item.Tier, item.Role)
 			for _, evidence := range item.Evidence {
 				fmt.Fprintf(out, "    evidence: %s\n", evidence)
 			}

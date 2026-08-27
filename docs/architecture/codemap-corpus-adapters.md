@@ -163,7 +163,7 @@ File seeds expand only relation-capable nodes whose source path is exactly the a
 
 Both the seed path and returned neighbor path must still match the Lexicon content identity verified by the Step 4 Arcana resolver. Relationships are projected to repository file pairs, normalized against the current repository-file inventory, deduplicated, and sorted before evidence collection.
 
-Arcana relationship facts are a distinct `semantic_relationship` evidence kind. In this phase they may produce an inspectable `context` recommendation, but they do not satisfy any `hard_link` promotion rule by themselves. Role-aware classification and stronger promotion policy belong to the next algorithm phase.
+Arcana relationship facts are a distinct `semantic_relationship` evidence kind. They may produce an inspectable `context` recommendation but do not satisfy any `hard_link` promotion rule by themselves. Step 6 now uses their direction and relation type as deterministic candidate-role input; stronger role-aware ranking or promotion remains deferred.
 
 ## Local fallback dependency adapters
 

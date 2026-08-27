@@ -42,7 +42,7 @@ Among current unmatched suggestions, what proportion are:
 - plausible but unnecessary relationships; or
 - incorrect suggestions?
 
-How does quality vary by rank, evidence kind, score bucket, tier, document, subsystem, and repository?
+How does quality vary by rank, evidence kind, score bucket, tier, candidate role, document, subsystem, and repository?
 
 ## Source report
 
@@ -50,7 +50,7 @@ Precision sampling begins from a current suggestion report produced without hold
 
 Candidates are ranked within each document by score and target. Recovered trusted links are excluded from the precision candidate pool.
 
-The source report is part of the audit record. Evaluation later verifies that sampled score, evidence, tier, and rank still match it.
+The source report is part of the audit record. Evaluation later verifies that sampled score, evidence, and rank still match it. Tier and candidate role are validated as known metadata values and current subgroup metrics use the values from the supplied source report.
 
 ## Deterministic sampling
 
@@ -131,9 +131,9 @@ Before computing metrics, evaluation verifies:
 - complete valid labels;
 - non-empty rationales and audit references;
 - no trailing or malformed JSON;
-- known tier values;
+- known tier and candidate-role values;
 - candidate presence in the source report; and
-- exact score, evidence, tier, and rank consistency.
+- exact score, evidence, and rank consistency.
 
 This prevents evaluating stale labels against a different report while presenting the result as one run.
 
@@ -150,7 +150,8 @@ Current evaluation includes:
 - score-bucket metrics;
 - rank-bucket metrics;
 - tier metrics;
-- sampling coverage;
+- candidate-role metrics;
+- sampling coverage, including role coverage;
 - hard-link sample valid recall; and
 - hard-link suggestions per document.
 
@@ -158,14 +159,14 @@ No single number is sufficient. A change that improves global precision while co
 
 ## Governance for ranking changes
 
-Before merging a weight, admission, cap, fan-out, or tier change:
+Before merging a weight, admission, role-classification, cap, fan-out, or tier change:
 
 1. identify the observed false-positive or false-negative pattern;
 2. add focused synthetic tests;
 3. regenerate source reports from the same pinned revisions;
 4. evaluate existing labels against unchanged audited candidate identities where possible;
 5. identify candidates added, removed, or reordered;
-6. inspect strict precision, non-junk acceptance, top-k, tier, and subgroup changes;
+6. inspect strict precision, non-junk acceptance, top-k, tier, role, and subgroup changes;
 7. run controlled holdouts separately for known-link recall;
 8. test at least one independent repository when claiming portability; and
 9. retain a written interpretation and known tradeoffs.
@@ -218,7 +219,7 @@ Pinned artifacts currently live primarily under `research/codemap-precision/` an
 go test ./internal/codemapprecision ./internal/codemapbench ./internal/app -count=1
 ```
 
-Tests cover candidate decoration, deterministic stratification, complete-label validation, schema and trailing-data refusal, source-report consistency, top-k metrics, tier metrics, and subgroup breakdowns.
+Tests cover candidate decoration, deterministic stratification, complete-label validation, schema and trailing-data refusal, source-report consistency, top-k metrics, tier and role metrics, and subgroup breakdowns.
 
 ## Related docs
 
@@ -231,4 +232,4 @@ Tests cover candidate decoration, deterministic stratification, complete-label v
 
 ## Notes
 
-Labels govern evaluation, not product behavior. A valid label still requires explicit user selection before Demon Docs writes an authored codemap link.
+Labels govern evaluation, not product behavior. Production mutation follows the separate codemap policy: only non-declined `hard_link` recommendations are eligible for automatic insertion, while `context` remains non-mutating.

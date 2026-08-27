@@ -83,6 +83,7 @@ func TestEvaluateCalculatesOverallAcceptanceAndPerDocumentAtK(t *testing.T) {
 	for _, item := range benchmark.Suggestions {
 		suggestion := item.Suggestion
 		suggestion.Tier = codemapbench.SuggestionTierContext
+		suggestion.Role = codemapbench.SuggestionRolePrimaryImplementation
 		if item.Document+"/"+item.Target == "docs/a.md/a.go" || item.Document+"/"+item.Target == "docs/a.md/b.go" || item.Document+"/"+item.Target == "docs/b.md/a.go" {
 			suggestion.Tier = codemapbench.SuggestionTierHardLink
 		}
@@ -106,6 +107,9 @@ func TestEvaluateCalculatesOverallAcceptanceAndPerDocumentAtK(t *testing.T) {
 	}
 	if evaluation.HardLinkSampleValidRecall != 1.0/3.0 || evaluation.HardLinkSuggestionsPerDocument != 1.5 {
 		t.Fatalf("unexpected hard-link coverage: %#v", evaluation)
+	}
+	if got := evaluation.ByRole[string(codemapbench.SuggestionRolePrimaryImplementation)]; got.Total != 6 || got.Valid != 3 || got.Accepted != 4 {
+		t.Fatalf("unexpected role metrics: %#v", got)
 	}
 }
 
@@ -144,6 +148,9 @@ func TestLoadersRejectWrongSchemaTrailingJSONAndUnknownTier(t *testing.T) {
 	if _, err := LoadSuggestionReport(strings.NewReader(`{"schema_version":1,"unmatched_suggestions":[{"document":"docs/a.md","target":"src/a.go","tier":"unknown"}]}`)); err == nil || !strings.Contains(err.Error(), "invalid tier") {
 		t.Fatalf("expected invalid tier error, got %v", err)
 	}
+	if _, err := LoadSuggestionReport(strings.NewReader(`{"schema_version":1,"unmatched_suggestions":[{"document":"docs/a.md","target":"src/a.go","role":"unknown"}]}`)); err == nil || !strings.Contains(err.Error(), "invalid role") {
+		t.Fatalf("expected invalid role error, got %v", err)
+	}
 }
 
 func TestCandidatesFromReportUseDeterministicDocumentRankingAndDecoration(t *testing.T) {
@@ -159,6 +166,13 @@ func TestCandidatesFromReportUseDeterministicDocumentRankingAndDecoration(t *tes
 	}
 	if candidates[0].Rank != 1 || candidates[0].PrimaryEvidenceKind != "test_counterpart" || candidates[1].ScoreBucket != "2-<8" {
 		t.Fatalf("candidate decoration = %#v", candidates)
+	}
+	report.UnmatchedSuggestions = []codemapbench.Suggestion{{
+		Link: codemapbench.Link{Document: "docs/a.md", Target: "semantic.go"}, Score: 1,
+		Evidence: []string{"semantic_relationship:src/runtime.go:outbound:calls"},
+	}}
+	if got := CandidatesFromReport(report)[0].PrimaryEvidenceKind; got != "semantic_relationship" {
+		t.Fatalf("semantic relationship primary kind = %q", got)
 	}
 }
 

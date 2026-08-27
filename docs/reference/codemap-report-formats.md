@@ -117,6 +117,7 @@ target
 score
 evidence
 tier
+role
 ```
 
 Current tier values are:
@@ -127,6 +128,18 @@ context
 ```
 
 An empty tier is accepted as a legacy schema-1 value and normalized to `context` by current evaluation consumers.
+
+Current role values are:
+
+```text
+primary_implementation
+supporting_implementation
+verification_test
+interface_boundary
+context_only
+```
+
+Role is deterministic relationship metadata, not mutation authority. An empty role is accepted as a legacy schema-1 value and normalized to `context_only` for role-level evaluation.
 
 Invalid suggestions include their original index, suggestion payload, and reason.
 
@@ -242,6 +255,7 @@ by_evidence_kind
 by_score_bucket
 by_rank_bucket
 by_tier
+by_role
 sampling_coverage
 ```
 
@@ -255,7 +269,7 @@ Text evaluation is intended for human summaries and review. JSON remains the aut
 
 ## Canonical ordering
 
-Canonical benchmark output sorts links and classifications by normalized document/target identity and uses stable suggestion ordering. Tier may participate in canonical tie-breaking where the current writer requires it.
+Canonical benchmark output sorts links and classifications by normalized document/target identity and uses stable suggestion ordering. Tier and role may participate in canonical tie-breaking where the current writer requires it.
 
 Precision samples preserve deterministic candidate ranking and deterministic stratified selection for identical source report and seed.
 
@@ -263,7 +277,7 @@ Consumers must not rely on Go map iteration or incidental file input order.
 
 ## Compatibility
 
-Schema 1 currently permits additive optional suggestion metadata such as tier because empty tier has a defined legacy interpretation.
+Schema 1 currently permits additive optional suggestion metadata such as tier and role because their empty values have defined legacy interpretations.
 
 A schema bump is required when:
 

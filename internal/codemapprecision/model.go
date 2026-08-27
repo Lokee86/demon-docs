@@ -98,5 +98,6 @@ type Evaluation struct {
 	ByScoreBucket                  map[string]PrecisionMetrics `json:"by_score_bucket"`
 	ByRankBucket                   map[string]PrecisionMetrics `json:"by_rank_bucket"`
 	ByTier                         map[string]PrecisionMetrics `json:"by_tier"`
+	ByRole                         map[string]PrecisionMetrics `json:"by_role"`
 	SamplingCoverage               map[string]map[string]int   `json:"sampling_coverage"`
 }

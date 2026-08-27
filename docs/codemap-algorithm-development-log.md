@@ -289,9 +289,25 @@ Arcana graph relationships are now consumed through a separate per-document `Rel
 
 Only currently visible exact file targets and Step 4-verified symbol targets seed Arcana expansion. Directory and pattern targets do not. The provider projects one-hop `calls`, `imports`, `depends-on`, `implements`, `extends`, `overrides`, `uses-trait`, `includes`, and `tests` relationships back to current repository file pairs. Source-content freshness is rechecked for both seed and neighbor paths.
 
-Expansion is deliberately bounded: at most 128 relation-capable nodes per seed and 128 neighbors per node/direction. A truncated seed neighborhood is discarded rather than partially trusted. Returned relationships become a distinct `semantic_relationship` evidence kind with weight 3. They can surface and rank context recommendations, but they do not qualify a `hard_link` and their score is excluded from numeric hard-link thresholds; role-aware interpretation remains the next phase.
+Expansion is deliberately bounded: at most 128 relation-capable nodes per seed and 128 neighbors per node/direction. A truncated seed neighborhood is discarded rather than partially trusted. Returned relationships become a distinct `semantic_relationship` evidence kind with weight 3. They can surface and rank context recommendations, but they do not qualify a `hard_link` and their score is excluded from numeric hard-link thresholds.
 
 Live dogfooding used a freshly prepared matching Lexicon/Arcana snapshot for Demon Docs. `codemap-pipeline.md` still produced zero additions/removals. On `codemap-extraction-and-dataset.md`, Arcana emitted real call/implements relationship evidence and changed context scores/order, while the automatic hard-link set remained exactly the same five files as the fallback run. This is a mutation-isolation check, not a precision claim.
+
+### Phase 15: Deterministic candidate roles
+
+The next phase separated **relationship type** from **confidence tier**. Every admitted suggestion now carries one of five deterministic roles:
+
+- `primary_implementation`;
+- `supporting_implementation`;
+- `verification_test`;
+- `interface_boundary`; or
+- `context_only`.
+
+Classification is evidence-derived and deliberately non-probabilistic. Recognized test/spec paths and incoming Arcana `tests` edges become verification. Outgoing `implements`, `extends`, `overrides`, `uses-trait`, and `includes` edges identify the candidate as the contract/base/trait side and therefore `interface_boundary`. Direct symbol/path/basename evidence identifies primary implementation. Dependency, semantic, counterpart, sibling, and related-document evidence identifies supporting implementation when no stronger role applies. Remaining retained candidates are context-only.
+
+The role field is orthogonal to `hard_link`/`context`. This phase does not change weights, ranking order, hard-link thresholds, caps, or automatic mutation eligibility. The purpose is to provide the semantic buckets required for the following coverage-aware selection rewrite without combining that rewrite with classification mechanics.
+
+Roles are emitted by inspect and benchmark report surfaces. Precision evaluation now includes `by_role` metrics and role sampling coverage, while legacy schema-1 suggestions with no role are interpreted as `context_only` for role-level evaluation. The precision helper was also corrected to recognize `semantic_relationship` at its implemented weight when selecting a primary evidence kind.
 
 ## Rejected or Revised Experiments
 

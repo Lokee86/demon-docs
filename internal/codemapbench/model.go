@@ -12,10 +12,17 @@ const DefaultSeed = "demon-docs-codemap-benchmark-v1"
 // Link is one authored relationship from a document to a code target.
 type Link = codemaprecommend.Link
 type SuggestionTier = codemaprecommend.SuggestionTier
+type SuggestionRole = codemaprecommend.SuggestionRole
 
 const (
 	SuggestionTierHardLink = codemaprecommend.SuggestionTierHardLink
 	SuggestionTierContext  = codemaprecommend.SuggestionTierContext
+
+	SuggestionRolePrimaryImplementation    = codemaprecommend.SuggestionRolePrimaryImplementation
+	SuggestionRoleSupportingImplementation = codemaprecommend.SuggestionRoleSupportingImplementation
+	SuggestionRoleVerification             = codemaprecommend.SuggestionRoleVerification
+	SuggestionRoleInterfaceBoundary        = codemaprecommend.SuggestionRoleInterfaceBoundary
+	SuggestionRoleContext                  = codemaprecommend.SuggestionRoleContext
 )
 
 type Suggestion = codemaprecommend.Suggestion

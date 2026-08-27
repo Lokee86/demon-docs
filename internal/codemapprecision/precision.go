@@ -72,13 +72,13 @@ func LoadSuggestionReport(reader io.Reader) (codemapbench.Report, error) {
 	if envelope.SchemaVersion != codemapbench.ReportSchemaVersion {
 		return codemapbench.Report{}, fmt.Errorf("unsupported suggestion report schema %d", envelope.SchemaVersion)
 	}
-	if err := validateSuggestionReportTiers(envelope.Report); err != nil {
+	if err := validateSuggestionReportMetadata(envelope.Report); err != nil {
 		return codemapbench.Report{}, err
 	}
 	return envelope.Report, nil
 }
 
-func validateSuggestionReportTiers(report codemapbench.Report) error {
+func validateSuggestionReportMetadata(report codemapbench.Report) error {
 	groups := [][]codemapbench.Suggestion{
 		report.RecoveredSuggestions,
 		report.UnmatchedSuggestions,
@@ -90,11 +90,17 @@ func validateSuggestionReportTiers(report codemapbench.Report) error {
 			if !suggestion.Tier.Valid() {
 				return fmt.Errorf("suggestion %s -> %s has invalid tier %q", suggestion.Document, suggestion.Target, suggestion.Tier)
 			}
+			if !suggestion.Role.Valid() {
+				return fmt.Errorf("suggestion %s -> %s has invalid role %q", suggestion.Document, suggestion.Target, suggestion.Role)
+			}
 		}
 	}
 	for _, invalid := range report.InvalidSuggestions {
 		if !invalid.Suggestion.Tier.Valid() {
 			return fmt.Errorf("invalid suggestion %d has invalid tier %q", invalid.Index, invalid.Suggestion.Tier)
+		}
+		if !invalid.Suggestion.Role.Valid() {
+			return fmt.Errorf("invalid suggestion %d has invalid role %q", invalid.Index, invalid.Suggestion.Role)
 		}
 	}
 	return nil
@@ -447,7 +453,7 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 	if err := ValidateLabeledBenchmark(benchmark); err != nil {
 		return Evaluation{}, err
 	}
-	if err := validateSuggestionReportTiers(report); err != nil {
+	if err := validateSuggestionReportMetadata(report); err != nil {
 		return Evaluation{}, err
 	}
 	source := map[string]codemapbench.Suggestion{}
@@ -475,7 +481,8 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 		SchemaVersion: SchemaVersion, BenchmarkSize: len(benchmark.Suggestions),
 		PerDocument: map[string]DocumentMetrics{}, ByEvidenceKind: map[string]PrecisionMetrics{},
 		ByScoreBucket: map[string]PrecisionMetrics{}, ByRankBucket: map[string]PrecisionMetrics{},
-		ByTier: map[string]PrecisionMetrics{}, SamplingCoverage: map[string]map[string]int{},
+		ByTier: map[string]PrecisionMetrics{}, ByRole: map[string]PrecisionMetrics{},
+		SamplingCoverage: map[string]map[string]int{},
 	}
 	evaluation.LabelCounts.Total = len(benchmark.Suggestions)
 	for _, item := range benchmark.Suggestions {
@@ -506,6 +513,11 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 			tier = codemapbench.SuggestionTierContext
 		}
 		addMetrics(evaluation.ByTier, string(tier))
+		role := source[item.Document+"\x00"+item.Target].Role
+		if role == "" {
+			role = codemapbench.SuggestionRoleContext
+		}
+		addMetrics(evaluation.ByRole, string(role))
 		for _, key := range []string{"area", "subsystem"} {
 			value := item.Area
 			if key == "subsystem" {
@@ -519,6 +531,7 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 		evaluation.SamplingCoverage["score_bucket"] = incrementCoverage(evaluation.SamplingCoverage["score_bucket"], item.ScoreBucket)
 		evaluation.SamplingCoverage["rank_bucket"] = incrementCoverage(evaluation.SamplingCoverage["rank_bucket"], item.RankBucket)
 		evaluation.SamplingCoverage["evidence_kind"] = incrementCoverage(evaluation.SamplingCoverage["evidence_kind"], item.PrimaryEvidenceKind)
+		evaluation.SamplingCoverage["role"] = incrementCoverage(evaluation.SamplingCoverage["role"], string(role))
 		evaluation.SamplingCoverage["document"] = incrementCoverage(evaluation.SamplingCoverage["document"], item.Document)
 		for _, k := range []int{1, 3, 5} {
 			if item.Rank <= k {
@@ -559,6 +572,9 @@ func Evaluate(benchmark Benchmark, report codemapbench.Report) (Evaluation, erro
 	}
 	for key, metrics := range evaluation.ByTier {
 		evaluation.ByTier[key] = finalize(metrics)
+	}
+	for key, metrics := range evaluation.ByRole {
+		evaluation.ByRole[key] = finalize(metrics)
 	}
 	if hardLinks, ok := evaluation.ByTier[string(codemapbench.SuggestionTierHardLink)]; ok {
 		if evaluation.LabelCounts.Valid > 0 {
@@ -687,7 +703,7 @@ func primaryEvidenceKind(kinds []string) string {
 		weight := map[string]float64{
 			"declared_symbol_mention": 7, "exact_path_mention": 6, "test_counterpart": 6,
 			"unique_basename_mention": 4, "dependency_neighbor": 4, "related_document_target": 4,
-			"sibling_of_existing_target": 2, "git_cochange_with_existing_target": 1.5,
+			"semantic_relationship": 3, "sibling_of_existing_target": 2, "git_cochange_with_existing_target": 1.5,
 			"git_cochange_with_document": 1,
 		}[kind]
 		if weight > bestWeight || weight == bestWeight && kind < best {

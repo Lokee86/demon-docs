@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7549-855a-80c60bf09e9c
 document_type: general
 policy_exempt: false
-summary: This document defines the current deterministic codemap missing-link algorithm, production generation semantics, confidence tiers, measured baseline, and safety boundaries.
+summary: This document defines the current deterministic codemap missing-link algorithm, candidate roles, production generation semantics, confidence tiers, measured baseline, and safety boundaries.
 ---
 # Codemap Missing-Link Algorithm
 
@@ -60,7 +60,7 @@ Production execution may automatically add returned `hard_link` candidates after
 
 ## Pipeline
 
-The algorithm runs in seven stages.
+The algorithm runs in eight stages.
 
 ### 1. Normalize repository facts
 
@@ -125,7 +125,23 @@ Explicit path evidence or independent structural or semantic support preserves n
 
 These rules are intentionally narrow. Broader class penalties were rejected when they removed reviewed useful links without improving measured quality.
 
-### 5. Rank candidates
+### 5. Classify candidate role
+
+Each admitted candidate receives exactly one deterministic relationship role:
+
+```text
+primary_implementation
+supporting_implementation
+verification_test
+interface_boundary
+context_only
+```
+
+Classification uses the target path plus structured evidence already collected for the candidate. Recognized tests/specs and incoming Arcana `tests` relationships classify as verification. Outgoing `implements`, `extends`, `overrides`, `uses-trait`, or `includes` relationships classify the candidate as the interface/boundary side. Direct symbol/path/basename mentions classify as primary implementation. Dependency, semantic, counterpart, sibling, and related-document evidence classify as supporting implementation when no stronger role applies. Remaining candidates are context-only.
+
+Role and tier are independent. Role describes the candidate's apparent function relative to the document; tier describes current mutation confidence. This phase does not change score, ordering, hard-link thresholds, or automatic insertion eligibility.
+
+### 6. Rank candidates
 
 Each evidence contribution is weighted, repetition-adjusted, and fan-out-discounted.
 
@@ -141,7 +157,7 @@ Evidence shared across many targets receives a logarithmic fan-out discount. One
 
 Candidates are sorted by descending score, then repository-relative target path for deterministic ties.
 
-### 6. Bound the output
+### 7. Bound the output
 
 The default retained list is the top 30 candidates per document.
 
@@ -149,7 +165,7 @@ Up to two repeated exact-path candidates may be reserved outside the top 30. Thi
 
 The final union remains deterministically ordered by score and target.
 
-### 7. Assign confidence tiers
+### 8. Assign confidence tiers
 
 Every retained candidate defaults to `context`. At most five candidates per document may become `hard_link`.
 
@@ -161,7 +177,7 @@ A candidate qualifies for `hard_link` through one of these paths:
 4. **Dependency neighbor:** dependency evidence qualifies at score 18 or greater.
 5. **Related document plus direct history:** for non-test targets, related-document evidence is corroborated by direct Git co-change between the target and current document. Test targets need direct counterpart or semantic support instead.
 
-Single exact-path mentions and repeated paths without independent semantic corroboration remain `context`. A semantic relationship may independently surface and rank a `context` candidate, but it does not satisfy any `hard_link` qualification path and its score is excluded from numeric hard-link thresholds. Role-aware interpretation of Arcana relationships belongs to the next algorithm phase.
+Single exact-path mentions and repeated paths without independent semantic corroboration remain `context`. A semantic relationship may independently surface and rank a `context` candidate, but it does not satisfy any `hard_link` qualification path and its score is excluded from numeric hard-link thresholds. Its direction and relation type may now affect candidate role without affecting tier.
 
 ## Output semantics
 
@@ -239,9 +255,9 @@ The algorithm and production workflow preserve these boundaries:
 - broad weak evidence is bounded and discounted;
 - Arcana relationship queries are one-hop and allowlisted, use only currently visible exact file or verified-symbol seeds, and discard truncated seed neighborhoods rather than trusting partial results;
 - hidden benchmark targets are removed before Arcana relationship seeds are chosen;
-- semantic-relationship evidence is context-only until role-aware classification is implemented;
+- semantic-relationship evidence remains non-promoting for tier policy even though its direction/type now contributes to deterministic candidate role;
 - output per document is bounded;
-- identical normalized inputs produce stable ordering, evidence, scores, tiers, and fingerprints;
+- identical normalized inputs produce stable ordering, evidence, roles, scores, tiers, and fingerprints;
 - section mutation occurs only through explicit foreground codemap commands;
 - normal `fix`, `check`, `watch`, and repository-demon paths do not invoke generation; and
 - a concurrent source edit is protected by content-addressed preflight.
@@ -323,7 +339,7 @@ Current limits remain:
 - ordinary cross-repository holdout recovery remains 11/18;
 - thresholds are empirical defaults rather than universal constants;
 - only `hard_link` is auto-added by production execution after decline filtering; `context` remains non-mutating;
-- Arcana semantic relationships currently remain context-only pending role-aware classification; and
+- candidate roles are currently descriptive metadata only; coverage-aware selection by role remains deferred to the next algorithm phase; and
 - production missing-section creation is constrained by selected effective document schemas and remains separate from ranking quality.
 
 Continued tuning against the same fixed errors would risk overfitting. New data should precede another algorithm pass.
@@ -332,6 +348,7 @@ Continued tuning against the same fixed errors would risk overfitting. New data 
 
 - `internal/evidence/` — deterministic evidence collection and fingerprints.
 - `internal/codemapcorpus/` — repository inventory, dependency, symbol, related-document, and Git fact adapters.
+- `internal/codemaprecommend/roles.go` — deterministic candidate-role classification.
 - `internal/codemaprecommend/suggestions.go` — admission, scoring, bounded selection, and tier assignment.
 - `internal/codemaprecommend/suggestion_negative_evidence.go` — narrow incidental-target rejection.
 - `internal/codemaprun/` — production recommendation planning, decline filtering, pruning evaluation, and rewrite plans.

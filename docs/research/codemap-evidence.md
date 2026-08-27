@@ -18,7 +18,7 @@ This document records retained codemap evidence findings, measured baselines, co
 
 Demon Docs has implemented a deterministic missing-link analysis pipeline and an explicit foreground managed-section writer. This page owns research evidence and interpretation, not the exact production command or implementation contract.
 
-The missing-link ranker returns targets absent from the current codemap. Production execution automatically adds selected non-declined candidates from both confidence tiers. Existing links remain by default; optional confidence-based pruning belongs to a separate execution policy and is disabled by default.
+The missing-link ranker returns targets absent from the current codemap. Production execution automatically adds only selected non-declined `hard_link` candidates; `context` remains non-mutating analysis/review output. Existing links remain by default; optional confidence-based pruning belongs to a separate execution policy and is disabled by default.
 
 Current implementation owners are:
 
@@ -107,6 +107,7 @@ The deterministic evidence population includes:
 - direct siblings of current targets;
 - source/test counterparts;
 - direct observed dependency neighbours;
+- bounded one-hop semantic relationships from current Arcana state when available;
 - document/code and current-target/code Git co-change counts; and
 - current targets shared by related documents.
 
@@ -132,6 +133,20 @@ The tier remains useful for:
 - optional `remove_low_score_links` evaluation for existing targets.
 
 A context candidate is not a failed hard link. It may be plausible and useful while still unnecessary as a permanent relationship.
+
+## Candidate roles
+
+Current recommendations also carry one deterministic relationship role:
+
+```text
+primary_implementation
+supporting_implementation
+verification_test
+interface_boundary
+context_only
+```
+
+Role and confidence tier answer different questions. Role describes the candidate's apparent function relative to the document; tier describes whether current mutation policy considers the candidate strong enough for automatic insertion. Step 6 deliberately keeps roles descriptive: they do not yet alter score, ordering, hard-link thresholds, or output caps. Precision evaluation exposes `by_role` metrics so role quality can be measured before the next coverage-aware selection pass relies on it.
 
 ## Current measured baseline
 
@@ -218,7 +233,7 @@ Production behavior is:
 1. generate a current recommendation and fingerprint;
 2. replay persisted decline policy;
 3. suppress unchanged declined relationships;
-4. automatically pass remaining recommendations to managed-section reconciliation;
+4. automatically pass only remaining `hard_link` recommendations to managed-section reconciliation;
 5. allow materially changed evidence to produce a new current fingerprint; and
 6. expose decline and reconsideration through `ddocs suggestions`.
 
@@ -249,7 +264,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - Few unmatched hard-tier recommendations were available outside Space Rocks.
 - Ordinary cross-repository holdout recovery remains 11/18.
 - Thresholds are empirical defaults rather than universal constants.
-- Production currently auto-adds both selected tiers after decline filtering.
+- Candidate roles are currently descriptive metadata; coverage-aware selection by role is not yet implemented.
 - Production execution now creates missing codemap sections only through selected effective document schemas; schema placement is separate from ranking quality.
 - Continued tuning on the same frozen errors risks overfitting.
 
@@ -266,9 +281,9 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 ## Code map
 
 - `internal/codemap/` — extraction, target normalization, datasets, authored-section stripping, and managed reconciliation.
-- `internal/codemapcorpus/` — repository paths, dependencies, symbols, related documents, and Git history adapters.
+- `internal/codemapcorpus/` — repository paths, dependency/symbol providers, bounded per-document relationship facts, related documents, and Git history adapters.
 - `internal/evidence/` — deterministic evidence collection and fingerprints.
-- `internal/codemaprecommend/` — production admission, ranking, negative evidence, bounds, and tiers.
+- `internal/codemaprecommend/` — production admission, deterministic candidate roles, ranking, negative evidence, bounds, and tiers.
 - `internal/codemaprun/` — production decline filtering, pruning evaluation, and rewrite planning.
 - `internal/codemapbench/` — holdout orchestration and reports using the production ranker.
 - `internal/codemapprecision/` — curated-label sampling and metric aggregation.

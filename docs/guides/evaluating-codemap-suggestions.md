@@ -106,7 +106,7 @@ ddocs codemaps precision source \
   --output research/current-suggestions.json
 ```
 
-This command keeps all authored codemap links visible and generates current missing-link candidates. It does not simulate hidden links.
+This command keeps all authored codemap links visible and generates current missing-link candidates. Each current candidate carries a deterministic relationship role (`primary_implementation`, `supporting_implementation`, `verification_test`, `interface_boundary`, or `context_only`) in addition to score, evidence, and tier. It does not simulate hidden links.
 
 Optional inputs:
 
@@ -164,13 +164,13 @@ Report at least:
 - suggestion-report hash or retained path;
 - sample count and seed;
 - exclusions;
-- ranking or tier population;
+- ranking, tier, and candidate-role population;
 - precision and recall definitions;
 - missing or stale sampled candidates;
 - labeling limitations; and
 - whether thresholds changed.
 
-A result from one repository or curated sample does not establish universal product quality. Compare like-for-like reports and add new independently labeled corpora before broadening claims.
+A result from one repository or curated sample does not establish universal product quality. Current evaluation includes `by_role` metrics so role quality can be checked independently before roles are allowed to influence ranking. Compare like-for-like reports and add new independently labeled corpora before broadening claims.
 
 ## Use repository decision policy
 

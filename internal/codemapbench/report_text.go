@@ -63,6 +63,9 @@ func writeSuggestionSection(output *strings.Builder, title string, suggestions [
 		if suggestion.Tier != "" {
 			fmt.Fprintf(output, ", tier %s", suggestion.Tier)
 		}
+		if suggestion.Role != "" {
+			fmt.Fprintf(output, ", role %s", suggestion.Role)
+		}
 		fmt.Fprintln(output, ")")
 		for _, evidence := range suggestion.Evidence {
 			fmt.Fprintf(output, "  evidence: %s\n", evidence)
