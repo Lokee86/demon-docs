@@ -141,7 +141,7 @@ The deterministic evidence pipeline and explicit production writer are implement
 Impact:
 
 - explicit codemap execution automatically adds only selected non-declined `hard_link` candidates; `context` remains non-mutating;
-- the code-intelligence provider seam exists, but current CLI execution still uses the built-in shallow local provider; no Arcana provider is wired yet;
+- Arcana-backed file/symbol target resolution is wired when a current matching Arcana/Lexicon snapshot and query executable are available, but relationship evidence still comes from the current code-intelligence provider path and defaults to the built-in shallow local provider;
 - a repository may receive plausible but unnecessary `context` links;
 - new repository populations need independent labels;
 - self-authored Demon Docs codemaps are not an independent benchmark; and

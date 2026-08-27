@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/codemaparcana"
 	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
 	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/evidence"
@@ -19,7 +20,18 @@ import (
 func Build(ctx context.Context, options Options) (Plan, error) {
 	format := codemap.DefaultFormat()
 	format.SectionHeadings = append([]string(nil), options.Headings...)
-	dataset, err := codemap.BuildDataset(options.RepositoryRoot, options.DocsRoot, format)
+	resolver := options.TargetResolver
+	if resolver == nil {
+		arcanaResolver, _, openErr := codemaparcana.OpenCurrent(ctx, options.RepositoryRoot)
+		if openErr != nil {
+			return Plan{}, fmt.Errorf("open Arcana target resolver: %w", openErr)
+		}
+		if arcanaResolver != nil {
+			defer arcanaResolver.Close()
+			resolver = arcanaResolver
+		}
+	}
+	dataset, err := codemap.BuildDatasetContext(ctx, options.RepositoryRoot, options.DocsRoot, format, resolver)
 	if err != nil {
 		return Plan{}, err
 	}

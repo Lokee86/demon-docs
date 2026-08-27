@@ -273,6 +273,16 @@ The corpus retains ownership of trust and determinism at the boundary: provider 
 
 No Arcana or Lexicon transport was added in this phase. The purpose of the seam is to make that integration replace the semantic fact source later without moving evidence scoring, review policy, codemap coverage, or mutation authority out of Demon Docs.
 
+### Phase 13: Pinned Arcana file and symbol resolution
+
+The next phase wired authored target resolution to Arcana without yet consuming Arcana relationship edges. Demon Docs now speaks the `arcana.query.v1` JSONL protocol through `resolve_file` and `resolve_symbol`, retaining Arcana's durable external node identity and source span when a target resolves uniquely.
+
+Trust is deliberately narrower than snapshot existence. `.arcana/CURRENT` must equal `.lexicon/CURRENT`; the Arcana snapshot must name that Lexicon snapshot; and the content-addressed Lexicon manifest must verify against its published ID. Path-qualified queries additionally require the current source SHA-256 to equal the Lexicon manifest content ID. Standalone/global symbol resolution requires a clean repository at the Git head recorded when Lexicon state was prepared. Stale or unavailable semantic state therefore degrades to the pre-existing `symbol_unverified` or `unsupported` outcomes instead of being treated as current truth.
+
+Path-qualified and standalone symbols can now produce real `resolved`, `missing`, or `ambiguous` dataset states. Plain file targets remain filesystem-authoritative but can carry Arcana semantic identity when the snapshot can safely attest them. Once a current Arcana protocol session is open, transport or query failure is fatal rather than silently mixing partial semantic results with fallback behavior.
+
+Arcana relationship expansion remains intentionally deferred to the following evidence phase.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories

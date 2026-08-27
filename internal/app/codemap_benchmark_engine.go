@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/codemaparcana"
 	"github.com/Lokee86/demon-docs/internal/codemapbench"
 	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
 	"github.com/Lokee86/demon-docs/internal/evidence"
@@ -16,7 +17,7 @@ import (
 type benchmarkEngine struct{}
 
 func (benchmarkEngine) Run(ctx context.Context, options codemapBenchmarkOptions) (codemapBenchmarkResult, error) {
-	dataset, format, err := loadBenchmarkDataset(options)
+	dataset, format, err := loadBenchmarkDataset(ctx, options)
 	if err != nil {
 		return codemapBenchmarkResult{}, err
 	}
@@ -74,10 +75,19 @@ func (c benchmarkCorpus) DocumentInput(ctx context.Context, request codemapbench
 	return input, nil
 }
 
-func loadBenchmarkDataset(options codemapBenchmarkOptions) (codemap.Dataset, codemap.Format, error) {
+func loadBenchmarkDataset(ctx context.Context, options codemapBenchmarkOptions) (codemap.Dataset, codemap.Format, error) {
 	if options.DatasetPath == "" {
 		format := codemap.DefaultFormat()
-		dataset, err := codemap.BuildDataset(options.RepositoryRoot, options.RepositoryRoot, format)
+		resolver, _, err := codemaparcana.OpenCurrent(ctx, options.RepositoryRoot)
+		if err != nil {
+			return codemap.Dataset{}, codemap.Format{}, err
+		}
+		var targetResolver codemap.TargetResolver
+		if resolver != nil {
+			defer resolver.Close()
+			targetResolver = resolver
+		}
+		dataset, err := codemap.BuildDatasetContext(ctx, options.RepositoryRoot, options.RepositoryRoot, format, targetResolver)
 		return dataset, format, err
 	}
 	file, err := os.Open(options.DatasetPath)

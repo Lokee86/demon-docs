@@ -21,6 +21,7 @@ The codemap system is a deterministic generation and research pipeline:
 ```text
 Existing or schema-required codemap section
 -> extraction and versioned dataset
+-> pinned Arcana file/symbol resolution when current
 -> normalized repository corpus
 -> evidence candidates and fingerprints
 -> production admission, score, order, and tier
@@ -51,6 +52,7 @@ By default it never removes an existing valid semantic link merely because the a
 
 ```text
 internal/codemap/
+internal/codemaparcana/
 internal/codemapcorpus/
 internal/evidence/
 internal/codemaprecommend/
@@ -95,7 +97,7 @@ Codemap execution is deliberately absent from ordinary `fix`, `check`, `watch`, 
 
 ### 1. Extraction
 
-`internal/codemap` finds configured map sections, records authored targets and source metadata, and builds a deterministic dataset with explicit resolution outcomes.
+`internal/codemap` finds configured map sections, records authored targets and source metadata, and builds a deterministic dataset with explicit resolution outcomes. Current production/export/benchmark paths also attempt to attach `internal/codemaparcana` as a `TargetResolver`: exact files and symbol targets may then be resolved against one Arcana snapshot pinned to matching Lexicon state. Unavailable or stale Arcana state degrades to explicit unverified/unsupported outcomes rather than guessed semantic truth.
 
 See [Codemap Extraction and Dataset](codemap-extraction-and-dataset.md).
 
@@ -178,6 +180,8 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 
 - Paths and output ordering are deterministic.
 - Ambiguous extraction or resolution is not guessed into truth.
+- Arcana semantic resolution is trusted only when Arcana/Lexicon snapshot alignment and the required source freshness checks succeed.
+- Missing or stale Arcana state degrades explicitly; an opened current protocol session failing mid-query is an error.
 - Existing authored coverage is excluded from missing-link candidates, including descendants covered by directory targets and concrete matches covered by patterns.
 - Pattern matches and directory descendants do not become independent outward evidence seeds.
 - Holdout answers are absent from generator inputs.
@@ -197,7 +201,8 @@ A benchmark threshold failure represents a completed measurement below a request
 
 ## Code map
 
-- `internal/codemap/` — extraction, datasets, managed-section adoption, schema placement seam, and syntax-preserving rendering.
+- `internal/codemap/` — extraction, datasets, semantic target-resolution contract, managed-section adoption, schema placement seam, and syntax-preserving rendering.
+- `internal/codemaparcana/` — current-snapshot discovery, Arcana JSONL transport, freshness checks, and file/symbol resolution.
 - `internal/codemapcorpus/` — repository facts and polyglot adapters.
 - `internal/evidence/` — candidate evidence and fingerprints.
 - `internal/codemaprecommend/` — production ranking, filtering, ordering, and tiers.

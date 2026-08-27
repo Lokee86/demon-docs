@@ -54,7 +54,7 @@ func runCodemapPrecisionSource(ctx context.Context, args []string, out, errOut i
 	if err != nil {
 		return fail(errOut, err)
 	}
-	datasetValue, format, err := loadBenchmarkDataset(codemapBenchmarkOptions{
+	datasetValue, format, err := loadBenchmarkDataset(ctx, codemapBenchmarkOptions{
 		RepositoryRoot: repositoryRoot,
 		DatasetPath:    datasetPath,
 	})

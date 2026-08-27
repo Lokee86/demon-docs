@@ -23,6 +23,7 @@ configured Markdown section
 -> authored entry extraction
 -> lexical target classification
 -> repository/document-relative resolution
+-> optional Arcana file/symbol verification against one pinned snapshot
 -> explicit resolution state
 -> stable dataset document and entry records
 ```
@@ -38,6 +39,9 @@ internal/codemap/dataset.go
 internal/codemap/dataset_build.go
 internal/codemap/dataset_workers.go
 internal/codemap/target_content_cache.go
+internal/codemap/semantic_resolver.go
+internal/codemap/semantic_target_resolution.go
+internal/codemaparcana/
 internal/codemap/strip.go
 internal/codemap/insert.go
 internal/app/app.go
@@ -54,7 +58,8 @@ This boundary owns:
 - normalizing repository-style path separators and directory suffixes;
 - classifying targets as file, directory, glob, symbol, or unknown;
 - resolving targets against the selected base and optional target roots;
-- retaining unresolved, ambiguous, pattern, kind-mismatch, outside-repository, and unsupported outcomes explicitly;
+- resolving file-backed and standalone symbol targets through a deterministic `TargetResolver` when one is safely available;
+- retaining unresolved, ambiguous, pattern, kind-mismatch, outside-repository, unverified-symbol, and unsupported outcomes explicitly;
 - hashing source documents and resolved files;
 - stable dataset ordering and schema-1 JSON export;
 - stripping authored map sections from benchmark document text; and
@@ -139,21 +144,52 @@ Resolution records keep important outcomes distinct, including:
 
 ```text
 resolved exact target
+resolved Arcana symbol
 resolved pattern
-missing exact target
+missing exact or semantic target
 missing pattern
-ambiguous target roots
+ambiguous target roots or semantic target
 kind mismatch
 outside repository
-symbol not verified
+symbol not verified because semantic resolution is unavailable/stale
 unsupported target
 ```
 
 Demon Docs does not choose among ambiguous roots or coerce a directory into a file target. Pattern families are not later treated as one exact benchmark answer.
 
+## Arcana file and symbol resolution
+
+`BuildDatasetContext` accepts a narrow `TargetResolver`. The current production, export, benchmark, and precision paths attempt to open the current Arcana snapshot through `internal/codemaparcana`; `BuildDataset` remains the compatibility path with no semantic resolver.
+
+The Arcana integration uses the versioned `arcana.query.v1` JSONL process protocol and only the `resolve_file` and `resolve_symbol` operations in this phase. Demon Docs never reads Arcana's packed graph storage directly.
+
+Before a resolver is trusted, `.arcana/CURRENT` must equal `.lexicon/CURRENT`, the Arcana snapshot must be bound to that same Lexicon snapshot, and the content-addressed Lexicon snapshot manifest must verify against its published ID. Path-qualified symbol/file queries are used only when the current file SHA-256 still matches the Lexicon manifest content ID. Standalone/global symbols are more conservative: they require the Lexicon preparation Git head to equal the current clean repository head. If those checks cannot establish freshness, semantic resolution is not attempted.
+
+Resolution policy is explicit:
+
+```text
+path#symbol / path::symbol
+  Arcana current + one exact node -> resolved
+  Arcana current + zero nodes     -> missing
+  Arcana current + many nodes     -> ambiguous
+  Arcana unavailable/stale        -> symbol_unverified
+
+symbol:Name / standalone symbol
+  Arcana current + one exact node -> resolved backing path
+  Arcana current + zero nodes     -> missing
+  Arcana current + many nodes     -> ambiguous
+  Arcana unavailable/stale        -> unsupported
+```
+
+Resolved semantic records retain Arcana's durable external node identity, node kind, repository path, qualified name, and exact source span when present. Plain file existence remains filesystem truth; Arcana file resolution adds semantic identity but does not turn an existing unsupported-language file into a missing file.
+
+An Arcana executable is discovered next to the running Demon Docs binary or on `PATH`; `DDOCS_ARCANA_COMMAND` is available as a development/host override. Missing or structurally stale Arcana state degrades to the explicit fallback states above. Once a current Arcana protocol session has been opened, query/protocol failures abort the operation rather than silently mixing partial semantic truth with fallback results.
+
+Relationship expansion from Arcana is deliberately not part of this phase; it belongs to the next relationship-evidence stage.
+
 ## Dataset construction
 
-`BuildDataset` first walks Markdown documents below the selected docs root under the repository ignore policy. Traversal, ignore evaluation, and document discovery remain serial and deterministic. Discovered document jobs are then sorted by repository-relative path.
+`BuildDatasetContext` first walks Markdown documents below the selected docs root under the repository ignore policy. `BuildDataset` is the background-context, no-semantic-resolver compatibility wrapper. Traversal, ignore evaluation, and document discovery remain serial and deterministic. Discovered document jobs are then sorted by repository-relative path.
 
 A bounded 16-worker pool independently reads, hashes, extracts, and resolves each document. Workers store complete detached results in their assigned job slots. The main goroutine merges documents, entries, diagnostics, and errors in deterministic document-path order before the final canonical sort.
 
@@ -166,7 +202,7 @@ It skips:
 - directories as document inputs; and
 - symlinked files.
 
-Each document record includes path, byte size, SHA-256, section count, entry count, and diagnostic count. Each extracted entry includes its normalized target plus a `TargetRecord` containing resolution state, resolved path or pattern matches, existence, file size, and file hash when applicable.
+Each document record includes path, byte size, SHA-256, section count, entry count, and diagnostic count. Each extracted entry includes its normalized target plus a `TargetRecord` containing resolution state, resolved path or pattern matches, existence, file size, and file hash when applicable. When Arcana safely resolves a file or symbol, the record also carries optional semantic node identity/span metadata; ambiguous semantic candidates remain explicit.
 
 Documents and entries are emitted in deterministic path and source order. Worker completion order cannot affect exported ordering or which error is returned first.
 
@@ -243,6 +279,8 @@ Selected insertion fails when no configured section exists, the target is alread
 - `internal/codemap/dataset_build.go` — deterministic discovery, bounded per-document preparation, ordered merge, and dataset assembly.
 - `internal/codemap/dataset_workers.go` — fixed 16-worker execution boundary with indexed errors.
 - `internal/codemap/target_content_cache.go` — concurrent single-read target hashing shared by one dataset build.
+- `internal/codemap/semantic_resolver.go` and `semantic_target_resolution.go` — generic semantic target contract and mapping into dataset resolution states.
+- `internal/codemaparcana/` — pinned Arcana/Lexicon state validation, JSONL query transport, and Arcana target resolver.
 - `internal/codemap/strip.go` — holdout text sanitization.
 - `internal/codemap/insert.go` — explicit selected-target insertion.
 - `internal/app/app.go` — `codemap export` scope and output orchestration.
@@ -254,6 +292,8 @@ Focused coverage includes:
 - `extractor_test.go` — supported syntax, configured headings, boundaries, prose rejection, and symbol forms;
 - `inventory_fixture_test.go` — extraction against retained authored fixtures;
 - `dataset_test.go` — repository/document bases, target roots, ambiguity, templates, hashes, and stable JSON;
+- `semantic_target_resolution_test.go` — resolved/missing/ambiguous/unsupported symbol outcomes and optional file identity;
+- `internal/codemaparcana/*_test.go` — snapshot alignment, file-content freshness, global-resolution gating, qualified ambiguity, and JSONL framing;
 - `dataset_workers_test.go` — bounded concurrency and deterministic indexed errors;
 - `target_content_cache_test.go` — concurrent repeated-target reads collapse to one content read;
 - `dataset_benchmark_test.go` — retained large deterministic dataset-build benchmark;

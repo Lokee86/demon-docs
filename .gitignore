@@ -13,6 +13,9 @@ dist/
 /demo_video.mp4
 /.ddocs/
 **/.ddocs/
+/.lexicon/
+/.arcana/
+/.grimoire/
 /.worktrees/
 /.codex/
 # Existing committed hackathon evidence remains tracked; ignore new local captures.

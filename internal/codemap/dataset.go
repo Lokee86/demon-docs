@@ -1,6 +1,7 @@
 package codemap
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -44,13 +45,15 @@ type TargetMatch struct {
 }
 
 type TargetRecord struct {
-	Status       ResolutionStatus `json:"status"`
-	ResolvedPath string           `json:"resolved_path,omitempty"`
-	Exists       bool             `json:"exists"`
-	Size         int64            `json:"size,omitempty"`
-	SHA256       string           `json:"sha256,omitempty"`
-	Matches      []TargetMatch    `json:"matches,omitempty"`
-	Candidates   []string         `json:"candidates,omitempty"`
+	Status             ResolutionStatus `json:"status"`
+	ResolvedPath       string           `json:"resolved_path,omitempty"`
+	Exists             bool             `json:"exists"`
+	Size               int64            `json:"size,omitempty"`
+	SHA256             string           `json:"sha256,omitempty"`
+	Matches            []TargetMatch    `json:"matches,omitempty"`
+	Candidates         []string         `json:"candidates,omitempty"`
+	SemanticNode       *SemanticNode    `json:"semantic_node,omitempty"`
+	SemanticCandidates []SemanticNode   `json:"semantic_candidates,omitempty"`
 }
 
 type DatasetEntry struct {
@@ -89,10 +92,17 @@ func resolveTarget(repositoryRoot, documentPath string, entry Entry, format Form
 }
 
 func resolveTargetWithCache(repositoryRoot, documentPath string, entry Entry, format Format, contentCache *targetContentCache) (TargetRecord, error) {
-	if entry.Kind == TargetSymbol && !strings.Contains(entry.Target, "#") && !strings.Contains(entry.Target, "::") {
-		return TargetRecord{Status: ResolutionUnsupported}, nil
+	return resolveTargetWithResolver(context.Background(), repositoryRoot, documentPath, entry, format, contentCache, nil)
+}
+
+func resolveTargetWithResolver(ctx context.Context, repositoryRoot, documentPath string, entry Entry, format Format, contentCache *targetContentCache, resolver TargetResolver) (TargetRecord, error) {
+	if err := ctx.Err(); err != nil {
+		return TargetRecord{}, err
 	}
 	baseTarget, hasSymbol := targetFilePart(entry.Target)
+	if entry.Kind == TargetSymbol && (baseTarget == "" || !hasSymbol) {
+		return resolveStandaloneSymbol(ctx, repositoryRoot, entry, resolver, contentCache)
+	}
 	if baseTarget == "" || isTemplateTarget(baseTarget) {
 		return TargetRecord{Status: ResolutionUnsupported}, nil
 	}
@@ -170,14 +180,16 @@ func resolveTargetWithCache(repositoryRoot, documentPath string, entry Entry, fo
 		}
 	}
 	if hasSymbol {
-		record.Status = ResolutionSymbolUnverified
-		return record, nil
+		return resolvePathSymbol(ctx, record, entry.Target, resolver)
 	}
 	if entry.Kind == TargetDirectory && !info.IsDir() || entry.Kind == TargetFile && info.IsDir() {
 		record.Status = ResolutionKindMismatch
 		return record, nil
 	}
 	record.Status = ResolutionResolved
+	if entry.Kind == TargetFile || entry.Kind == TargetUnknown {
+		return attachFileSemantic(ctx, record, resolver)
+	}
 	return record, nil
 }
 

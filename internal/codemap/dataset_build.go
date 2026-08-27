@@ -1,6 +1,7 @@
 package codemap
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,6 +26,13 @@ type datasetDocumentResult struct {
 // maps, and resolves their targets against repositoryRoot. Output ordering and
 // hashes depend only on repository content and the supplied format.
 func BuildDataset(repositoryRoot, docsRoot string, format Format) (Dataset, error) {
+	return BuildDatasetContext(context.Background(), repositoryRoot, docsRoot, format, nil)
+}
+
+func BuildDatasetContext(ctx context.Context, repositoryRoot, docsRoot string, format Format, resolver TargetResolver) (Dataset, error) {
+	if err := ctx.Err(); err != nil {
+		return Dataset{}, err
+	}
 	repositoryRoot, err := filepath.Abs(repositoryRoot)
 	if err != nil {
 		return Dataset{}, err
@@ -51,7 +59,10 @@ func BuildDataset(repositoryRoot, docsRoot string, format Format) (Dataset, erro
 	results := make([]datasetDocumentResult, len(jobs))
 	contentCache := newTargetContentCache(os.ReadFile)
 	errors := runDatasetWorkers(len(jobs), func(index int) error {
-		result, err := prepareDatasetDocument(repositoryRoot, jobs[index], format, contentCache)
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		result, err := prepareDatasetDocument(ctx, repositoryRoot, jobs[index], format, contentCache, resolver)
 		results[index] = result
 		return err
 	})
@@ -106,7 +117,7 @@ func discoverDatasetDocuments(repositoryRoot, docsRoot string, policy ignorepoli
 	return jobs, nil
 }
 
-func prepareDatasetDocument(repositoryRoot string, job datasetDocumentJob, format Format, contentCache *targetContentCache) (datasetDocumentResult, error) {
+func prepareDatasetDocument(ctx context.Context, repositoryRoot string, job datasetDocumentJob, format Format, contentCache *targetContentCache, resolver TargetResolver) (datasetDocumentResult, error) {
 	source, err := os.ReadFile(job.filePath)
 	if err != nil {
 		return datasetDocumentResult{}, err
@@ -125,7 +136,10 @@ func prepareDatasetDocument(repositoryRoot string, job datasetDocumentJob, forma
 		entries:     make([]DatasetEntry, 0, len(extracted.Entries)),
 	}
 	for _, entry := range extracted.Entries {
-		resolution, err := resolveTargetWithCache(repositoryRoot, job.documentPath, entry, format, contentCache)
+		if err := ctx.Err(); err != nil {
+			return datasetDocumentResult{}, err
+		}
+		resolution, err := resolveTargetWithResolver(ctx, repositoryRoot, job.documentPath, entry, format, contentCache, resolver)
 		if err != nil {
 			return datasetDocumentResult{}, err
 		}

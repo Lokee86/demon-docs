@@ -17,6 +17,7 @@ type Options struct {
 	RemoveLowScoreLinks     bool
 	Schema                  codemap.SectionSchema
 	CodeIntelligence        codemapcorpus.CodeIntelligenceProvider
+	TargetResolver          codemap.TargetResolver
 }
 
 type Recommendation struct {

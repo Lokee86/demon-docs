@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/codemaparcana"
 	"github.com/Lokee86/demon-docs/internal/config"
 	"github.com/Lokee86/demon-docs/internal/demon"
 	"github.com/Lokee86/demon-docs/internal/documentpolicy"
@@ -955,7 +956,16 @@ func runCodemap(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 	format.TargetBase = codemap.TargetBase(targetBase)
 	format.TargetRoots = targetRoots.values
-	dataset, err := codemap.BuildDataset(scope.RepositoryRoot, scope.DocsRoot, format)
+	resolver, _, err := codemaparcana.OpenCurrent(ctx, scope.RepositoryRoot)
+	if err != nil {
+		return fail(errOut, err)
+	}
+	var targetResolver codemap.TargetResolver
+	if resolver != nil {
+		defer resolver.Close()
+		targetResolver = resolver
+	}
+	dataset, err := codemap.BuildDatasetContext(ctx, scope.RepositoryRoot, scope.DocsRoot, format, targetResolver)
 	if err != nil {
 		return fail(errOut, err)
 	}
