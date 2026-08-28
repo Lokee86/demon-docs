@@ -44,6 +44,7 @@ func classifyDocument(roots []*markdownSection, current, previous Schema, hasPre
 					matched = true
 				case 2:
 					classification.diagnostics = append(classification.diagnostics, Diagnostic{
+						Code:    diagnosticAmbiguousSection,
 						Section: child.Heading,
 						Message: fmt.Sprintf("section heading is ambiguous between schema sections %q and %q", candidates[0].ID, candidates[1].ID),
 						Options: []string{"repair manually"},
@@ -51,6 +52,7 @@ func classifyDocument(roots []*markdownSection, current, previous Schema, hasPre
 				default:
 					if len(candidates) > 2 {
 						classification.diagnostics = append(classification.diagnostics, Diagnostic{
+							Code:    diagnosticAmbiguousSection,
 							Section: child.Heading,
 							Message: "section heading is ambiguous across multiple schema sections",
 							Options: []string{"repair manually"},
@@ -97,6 +99,7 @@ func manualConflictDiagnostics(roots []*markdownSection, classification document
 			if !matched {
 				if strings.EqualFold(schema.UnknownSections, "manual") || schema.UnknownSections == "" {
 					diagnostics = append(diagnostics, Diagnostic{
+						Code:    diagnosticUnknownSection,
 						Section: child.Heading,
 						Message: "unknown human-authored section requires a document-specific schema or explicit deletion",
 						Options: []string{"ignore", "delete", "repair manually"},
@@ -113,6 +116,7 @@ func manualConflictDiagnostics(roots []*markdownSection, classification document
 		nodes := classification.byID[definition.ID]
 		if len(nodes) > 1 && !definition.AllowDuplicates && (strings.EqualFold(schema.DuplicateSections, "manual") || schema.DuplicateSections == "") {
 			diagnostics = append(diagnostics, Diagnostic{
+				Code:    diagnosticDuplicateSection,
 				Section: definition.Heading,
 				Message: fmt.Sprintf("duplicate section has %d occurrences", len(nodes)),
 				Options: []string{"merge", "delete an occurrence", "ignore", "repair manually"},
@@ -144,6 +148,7 @@ func relocateKnownSections(document *markdownDocument, classification documentCl
 				parents := classification.byID[definition.Parent]
 				if len(parents) != 1 {
 					diagnostics = append(diagnostics, Diagnostic{
+						Code:    diagnosticSectionParent,
 						Section: node.Heading,
 						Message: fmt.Sprintf("section belongs under %q but that parent is missing or duplicated", definition.Parent),
 						Options: []string{"repair manually"},
@@ -163,6 +168,7 @@ func relocateKnownSections(document *markdownDocument, classification documentCl
 	resolved := resolveDiagnostics && !blocked
 	for _, planned := range moves {
 		diagnostics = append(diagnostics, Diagnostic{
+			Code:     diagnosticSectionParent,
 			Section:  planned.node.Heading,
 			Message:  fmt.Sprintf("section moved to schema parent %s", planned.parentName),
 			Resolved: resolved,

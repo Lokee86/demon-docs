@@ -4,7 +4,7 @@ created: "2026-08-28"
 document_id: 019fb711-9205-7fe0-bdd5-9ef5244bcb3e
 document_type: general
 policy_exempt: false
-summary: Versioned JSON diagnostic contract for link, index, and frontmatter verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
+summary: Versioned JSON diagnostic contract for link, index, frontmatter, and document-format verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
 ---
 # Machine-Readable Diagnostics
 
@@ -16,16 +16,17 @@ This document defines the first stable machine-readable diagnostic contract expo
 
 ## Current scope
 
-Schema version 1 currently covers links, documentation indexes, and frontmatter:
+Schema version 1 currently covers links, documentation indexes, frontmatter, and document-body format:
 
 ```bash
 ddocs check --links --output-format json
 ddocs check --indexes --output-format json
 ddocs check --frontmatter --output-format json
-ddocs check --links --indexes --frontmatter --output-format json
+ddocs check --format --output-format json
+ddocs check --links --indexes --frontmatter --format --output-format json
 ```
 
-Text remains the default output. JSON accepts any selected combination of the migrated link, index, and frontmatter subsystems. Document-body format or reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
+Text remains the default output. JSON accepts any selected combination of the migrated link, index, frontmatter, and document-format subsystems. Reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
 
 `fix` and `watch` do not yet expose this JSON diagnostic contract.
 
@@ -72,6 +73,8 @@ Optional structured evidence is emitted when available:
 {
   "path": "docs/guide.md",
   "field": "document_id",
+  "section": "Purpose",
+  "options": ["ignore", "delete", "repair manually"],
   "line": 42,
   "column": 17,
   "target": "../missing.md",
@@ -80,7 +83,7 @@ Optional structured evidence is emitted when available:
 }
 ```
 
-Paths are repository-relative slash-separated paths for repository-owned findings. `field` identifies a frontmatter field when applicable; `section` identifies a managed index section when applicable. Line and column values are one-based. Candidate arrays retain deterministic sorted order.
+Paths are repository-relative slash-separated paths for repository-owned findings. `field` identifies a frontmatter field when applicable. `section` identifies a managed index section or document heading when applicable. `options` contains explicit authored-resolution choices when a subsystem exposes them. Line and column values are one-based. Candidate arrays retain deterministic sorted order.
 
 Consumers should branch on `code`, not parse `message`. `message` is still part of the schema-1 contract and remains stable within that schema version, but it is display text rather than a secondary identifier.
 
@@ -136,9 +139,35 @@ Index diagnostics are emitted directly by `internal/reconcile`. The optional sch
 
 Frontmatter diagnostics originate in `internal/frontmatter` and are projected into schema 1 without parsing message text. The optional `field` property identifies the affected frontmatter field. Warning-mode unknown fields do not by themselves fail the completed check; consumers must use envelope `status` and `exit_code` rather than infer command failure from diagnostic count.
 
+## Document-format diagnostic codes
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `format.schema_load_error` | error | A selected shared document schema cannot be loaded or validated. |
+| `format.frontmatter_parse_error` | error | Metadata required for format selection cannot be parsed. |
+| `format.schema_selection_error` | error | Document metadata or path policy cannot select a valid schema. |
+| `format.document_schema_load_error` | error | A document-specific schema cannot be loaded or parsed. |
+| `format.document_schema_identity_mismatch` | error | A document-specific schema names a different document ID. |
+| `format.document_schema_shared_mismatch` | error | A document-specific schema extends a different shared schema than metadata selects. |
+| `format.schema_snapshot_load_error` | error | A retained accepted shared-schema snapshot cannot be loaded. |
+| `format.schema_snapshot_missing` | error | A referenced accepted shared-schema snapshot is unavailable. |
+| `format.document_schema_invalidated` | error | A document-specific schema is no longer safe after a sufficiently large shared-schema change. |
+| `format.effective_schema_invalid` | error | Shared plus document-specific policy produces an invalid effective schema. |
+| `format.ambiguous_section` | error | An authored heading can match more than one schema section. |
+| `format.unknown_section` | error | A section is not represented by the effective schema and requires configured or authored resolution. |
+| `format.duplicate_section` | error or warning | A non-repeatable section occurs more than once. `warning` is used when the effective schema explicitly accepts the duplicates. |
+| `format.section_parent` | error | A known section is under the wrong schema parent or its required parent cannot be identified uniquely. |
+| `format.required_section_missing` | error | A required schema section is absent. |
+| `format.section_renamed` | error | A stable section ID now has a different canonical heading. |
+| `format.alias_canonicalization` | error | A recognized alias should be rewritten to its configured canonical heading. |
+| `format.heading_level` | error | A known section uses the wrong heading depth. |
+| `format.section_order` | error | Known sections are not in deterministic schema order. |
+
+Document-format diagnostics originate in `internal/documentpolicy`. The optional `section` field identifies the affected heading, and `options` preserves explicit manual-resolution choices for ambiguous or unknown authored sections. As with frontmatter, warning-only format diagnostics do not themselves fail a completed check.
+
 ## Ordering
 
-Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then frontmatter diagnostics, then link reconciliation diagnostics, then orphan-document diagnostics. Frontmatter diagnostics retain their deterministic path/field ordering; link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
+Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then frontmatter diagnostics, then document-format diagnostics, then link reconciliation diagnostics, then orphan-document diagnostics. Frontmatter and format diagnostics retain deterministic path/field or path/section ordering; link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
 
 Consumers must not infer priority from array position. Use `code`, `severity`, path, and position.
 
@@ -164,14 +193,15 @@ Contract coverage includes:
 - missing and out-of-date index reports;
 - failing frontmatter value reports with stable field evidence;
 - non-failing frontmatter warning reports;
+- document-format reports with stable section codes and authored-resolution options;
 - combined migrated-subsystem reports;
 - rejection when an unmigrated subsystem is selected; and
-- typed reconciliation tests for link identity evidence, stale index entries, and frontmatter policy findings.
+- typed reconciliation tests for link identity evidence, stale index entries, frontmatter policy findings, and document-format conditions.
 
 Run:
 
 ```bash
-go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/app -count=1
+go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/documentpolicy ./internal/app -count=1
 ```
 
 ## Related docs
@@ -183,4 +213,4 @@ go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/
 
 ## Notes
 
-Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Document-body format, reverse indexes, and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.
+Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Reverse indexes and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.

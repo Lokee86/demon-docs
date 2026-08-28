@@ -8,6 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
+	"github.com/Lokee86/demon-docs/internal/documentpolicy"
+	"github.com/Lokee86/demon-docs/internal/frontmatter"
+	"github.com/Lokee86/demon-docs/internal/links"
+	"github.com/Lokee86/demon-docs/internal/model"
 )
 
 type machineDiagnosticV1 struct {
@@ -22,6 +28,7 @@ type machineDiagnosticV1 struct {
 	Target      string   `json:"target"`
 	Replacement string   `json:"replacement"`
 	Candidates  []string `json:"candidates"`
+	Options     []string `json:"options"`
 	Section     string   `json:"section"`
 }
 
@@ -31,6 +38,30 @@ type machineReportV1 struct {
 	Status        string                `json:"status"`
 	ExitCode      int                   `json:"exit_code"`
 	Diagnostics   []machineDiagnosticV1 `json:"diagnostics"`
+}
+
+func TestMachineDiagnosticSubsystemOrdering(t *testing.T) {
+	var out bytes.Buffer
+	indexes := model.ReconcileResult{Diagnostics: []diagnostics.Diagnostic{{Code: "indexes.test", Severity: diagnostics.SeverityWarning, Subsystem: "indexes", Message: "index"}}}
+	frontmatterPlan := frontmatter.Plan{Diagnostics: []frontmatter.Diagnostic{{Code: "frontmatter.test", Message: "frontmatter"}}}
+	formatPlan := documentpolicy.Plan{Diagnostics: []documentpolicy.Diagnostic{{Code: "format.test", Message: "format"}}}
+	linkPlan := links.Plan{Diagnostics: []diagnostics.Diagnostic{{Code: "links.test", Severity: diagnostics.SeverityError, Subsystem: "links", Message: "link"}}}
+	if err := writeDiagnosticReport(&out, "check", 1, indexes, frontmatterPlan, formatPlan, linkPlan, []string{"docs/orphan.md"}); err != nil {
+		t.Fatal(err)
+	}
+	var report machineReportV1
+	if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"indexes.test", "frontmatter.test", "format.test", "links.test", "links.orphan_document"}
+	if len(report.Diagnostics) != len(want) {
+		t.Fatalf("diagnostics=%#v", report.Diagnostics)
+	}
+	for index, code := range want {
+		if report.Diagnostics[index].Code != code {
+			t.Fatalf("diagnostic order=%#v", report.Diagnostics)
+		}
+	}
 }
 
 func TestCheckLinksJSONDiagnosticContract(t *testing.T) {
@@ -296,6 +327,117 @@ func TestCheckFrontmatterJSONWarningDoesNotFail(t *testing.T) {
 	})
 }
 
+func TestCheckFormatJSONDiagnosticContract(t *testing.T) {
+	root := initializedDocumentPolicyRepo(t)
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"new", "general", "docs/page.md"}, &out, &errOut); code != 0 {
+			t.Fatalf("new code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+	})
+	path := filepath.Join(root, "docs", "page.md")
+	text := readTestFile(t, path)
+	text = strings.Replace(text, "## Purpose\n\nTODO\n\n", "", 1)
+	writeTestFile(t, path, text)
+
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"check", "--format", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if errOut.Len() != 0 {
+			t.Fatalf("machine diagnostics wrote stderr: %q", errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		if report.Status != "failed" || report.ExitCode != 1 {
+			t.Fatalf("unexpected format report: %#v", report)
+		}
+		found := false
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "format.required_section_missing" && diagnostic.Severity == "error" && diagnostic.Subsystem == "format" && diagnostic.Path == "docs/page.md" && diagnostic.Section == "Purpose" {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("required-section machine diagnostic missing: %#v", report.Diagnostics)
+		}
+	})
+}
+
+func TestCheckFormatJSONPreservesManualOptions(t *testing.T) {
+	root := initializedDocumentPolicyRepo(t)
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"new", "general", "docs/page.md"}, &out, &errOut); code != 0 {
+			t.Fatalf("new code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+	})
+	path := filepath.Join(root, "docs", "page.md")
+	text := readTestFile(t, path) + "\n## Appendix\n\nHuman text.\n"
+	writeTestFile(t, path, text)
+
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"check", "--format", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "format.unknown_section" && diagnostic.Section == "Appendix" {
+				if len(diagnostic.Options) == 0 || diagnostic.Options[0] != "ignore" {
+					t.Fatalf("manual resolution options missing: %#v", diagnostic)
+				}
+				return
+			}
+		}
+		t.Fatalf("unknown-section diagnostic missing: %#v", report.Diagnostics)
+	})
+}
+
+func TestCheckFormatJSONWarningDoesNotFail(t *testing.T) {
+	root := initializedDocumentPolicyRepo(t)
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"new", "general", "docs/page.md"}, &out, &errOut); code != 0 {
+			t.Fatalf("new code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+	})
+	schemaPath := filepath.Join(root, ".ddocs", "schemas", "general.toml")
+	schemaText := readTestFile(t, schemaPath)
+	schemaText = strings.Replace(schemaText, `duplicate_sections = "manual"`, `duplicate_sections = "keep"`, 1)
+	writeTestFile(t, schemaPath, schemaText)
+	path := filepath.Join(root, "docs", "page.md")
+	text := readTestFile(t, path)
+	text = strings.Replace(text, "## Purpose\n\nTODO\n\n", "## Purpose\n\nTODO\n\n## Purpose\n\nSecond purpose.\n\n", 1)
+	writeTestFile(t, path, text)
+
+	withWorkingDirectory(t, root, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"check", "--format", "--output-format", "json"}, &out, &errOut); code != 0 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		if report.Status != "passed" || report.ExitCode != 0 {
+			t.Fatalf("unexpected warning report: %#v", report)
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "format.duplicate_section" && diagnostic.Severity == "warning" && diagnostic.Section == "Purpose" {
+				return
+			}
+		}
+		t.Fatalf("duplicate warning missing: %#v", report.Diagnostics)
+	})
+}
+
 func TestJSONDiagnosticsRejectUnmigratedReconciliationSelection(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")
@@ -311,7 +453,7 @@ func TestJSONDiagnosticsRejectUnmigratedReconciliationSelection(t *testing.T) {
 		}
 		out.Reset()
 		errOut.Reset()
-		if code := Run(context.Background(), []string{"check", "--links", "--format", "--output-format", "json"}, &out, &errOut); code != 2 {
+		if code := Run(context.Background(), []string{"check", "--links", "--reverse", "--output-format", "json"}, &out, &errOut); code != 2 {
 			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 	})

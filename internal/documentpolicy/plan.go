@@ -16,6 +16,7 @@ import (
 )
 
 type Diagnostic struct {
+	Code     string
 	Path     string
 	Section  string
 	Message  string
@@ -170,7 +171,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		if source.cacheHit {
 			shared, loadErr := loadSharedOnce(source.candidate.SchemaName)
 			if loadErr != nil {
-				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: loadErr.Error()})
+				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticSchemaLoadError, Path: relative, Message: loadErr.Error()})
 				continue
 			}
 			plan.history[source.candidate.SchemaName] = shared
@@ -181,12 +182,12 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			continue
 		}
 		if source.parseErr != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.parseErr.Error()})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticFrontmatterParseError, Path: relative, Message: source.parseErr.Error()})
 			plan.blockAllHistory = true
 			continue
 		}
 		if source.schemaErr != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.schemaErr.Error()})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticSchemaSelectionError, Path: relative, Message: source.schemaErr.Error()})
 			plan.blockAllHistory = true
 			continue
 		}
@@ -196,7 +197,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 		shared, err := loadSharedOnce(schemaName)
 		if err != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticSchemaLoadError, Path: relative, Message: err.Error()})
 			continue
 		}
 		plan.history[schemaName] = shared
@@ -212,18 +213,18 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		if strings.TrimSpace(documentID) != "" {
 			local, localPath, localExists, err = LoadDocumentSchema(repoRoot, cfg.Format, documentID)
 			if err != nil {
-				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
+				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticDocumentSchemaLoadError, Path: relative, Message: err.Error()})
 				plan.blockedHistory[schemaName] = true
 				continue
 			}
 		}
 		if localExists && local.DocumentID != "" && local.DocumentID != documentID {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: fmt.Sprintf("document-specific schema identifies document %q instead of %q", local.DocumentID, documentID)})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticDocumentIdentityMismatch, Path: relative, Message: fmt.Sprintf("document-specific schema identifies document %q instead of %q", local.DocumentID, documentID)})
 			plan.blockedHistory[schemaName] = true
 			continue
 		}
 		if localExists && local.SharedSchema != "" && local.SharedSchema != schemaName {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: fmt.Sprintf("document-specific schema extends %q but metadata selects %q", local.SharedSchema, schemaName)})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticDocumentSharedMismatch, Path: relative, Message: fmt.Sprintf("document-specific schema extends %q but metadata selects %q", local.SharedSchema, schemaName)})
 			plan.blockedHistory[schemaName] = true
 			continue
 		}
@@ -238,7 +239,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			default:
 				accepted, hasAccepted, err = loadSchemaSnapshot(repoRoot, schemaName, local.SharedFingerprint)
 				if err != nil {
-					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: err.Error()})
+					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticSchemaSnapshotLoadError, Path: relative, Message: err.Error()})
 					plan.blockedHistory[schemaName] = true
 					continue
 				}
@@ -247,6 +248,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 				}
 				if !hasAccepted {
 					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
+						Code:    diagnosticSchemaSnapshotMissing,
 						Path:    relative,
 						Message: fmt.Sprintf("accepted shared-schema snapshot %s is missing; document-specific exceptions cannot be evaluated safely", local.SharedFingerprint),
 					})
@@ -261,7 +263,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 				similarity := Similarity(accepted, shared)
 				if similarity < cfg.Format.InvalidationSimilarity {
 					plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
-						Path: relative, Message: fmt.Sprintf("document-specific schema invalidated because shared schema similarity is %.2f below %.2f", similarity, cfg.Format.InvalidationSimilarity), Resolved: repair,
+						Code: diagnosticDocumentSchemaInvalid, Path: relative, Message: fmt.Sprintf("document-specific schema invalidated because shared schema similarity is %.2f below %.2f", similarity, cfg.Format.InvalidationSimilarity), Resolved: repair,
 					})
 					if repair {
 						backup, readErr := os.ReadFile(localPath)
@@ -278,7 +280,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		if localExists {
 			shared = EffectiveSchema(shared, local)
 			if err := ValidateSchema(shared); err != nil {
-				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: fmt.Sprintf("invalid effective document schema: %v", err)})
+				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticEffectiveSchemaInvalid, Path: relative, Message: fmt.Sprintf("invalid effective document schema: %v", err)})
 				plan.blockedHistory[schemaName] = true
 				continue
 			}

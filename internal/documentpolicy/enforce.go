@@ -70,7 +70,7 @@ func applyChildren(children []*markdownSection, parentID string, expectedLevel i
 				continue
 			}
 			resolved := repair
-			out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: "required section is missing; fix creates it with configured placeholder text", Resolved: resolved})
+			out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticRequiredSectionMissing, Section: definition.Heading, Message: "required section is missing; fix creates it with configured placeholder text", Resolved: resolved})
 			if repair {
 				placeholder := definition.Placeholder
 				if placeholder == "" {
@@ -84,7 +84,7 @@ func applyChildren(children []*markdownSection, parentID string, expectedLevel i
 		if len(nodes) > 1 && !definition.AllowDuplicates {
 			switch strings.ToLower(strings.TrimSpace(current.DuplicateSections)) {
 			case "merge":
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: fmt.Sprintf("merged %d duplicate sections", len(nodes)), Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticDuplicateSection, Section: definition.Heading, Message: fmt.Sprintf("merged %d duplicate sections", len(nodes)), Resolved: repair})
 				if repair {
 					merged := nodes[0]
 					for _, duplicate := range nodes[1:] {
@@ -94,38 +94,38 @@ func applyChildren(children []*markdownSection, parentID string, expectedLevel i
 					out.changed = true
 				}
 			case "delete-first":
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: "duplicate policy deletes all but the last occurrence", Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticDuplicateSection, Section: definition.Heading, Message: "duplicate policy deletes all but the last occurrence", Resolved: repair})
 				if repair {
 					nodes = nodes[len(nodes)-1:]
 					out.changed = true
 				}
 			case "delete-last":
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: "duplicate policy deletes all but the first occurrence", Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticDuplicateSection, Section: definition.Heading, Message: "duplicate policy deletes all but the first occurrence", Resolved: repair})
 				if repair {
 					nodes = nodes[:1]
 					out.changed = true
 				}
 			case "keep", "allow":
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: "duplicate section accepted by shared schema policy", Warning: true})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticDuplicateSection, Section: definition.Heading, Message: "duplicate section accepted by shared schema policy", Warning: true})
 			}
 		}
 		for _, node := range nodes {
 			match := matches.details[node]
 			if match.renamed {
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: node.Heading, Message: fmt.Sprintf("schema renamed section to %q", definition.Heading), Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticSectionRenamed, Section: node.Heading, Message: fmt.Sprintf("schema renamed section to %q", definition.Heading), Resolved: repair})
 				if repair {
 					replaceHeading(node, definition.Heading, newline)
 					out.changed = true
 				}
 			} else if match.alias && definition.CanonicalizeAliases {
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: node.Heading, Message: fmt.Sprintf("alias canonicalizes to %q", definition.Heading), Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticAliasCanonicalization, Section: node.Heading, Message: fmt.Sprintf("alias canonicalizes to %q", definition.Heading), Resolved: repair})
 				if repair {
 					replaceHeading(node, definition.Heading, newline)
 					out.changed = true
 				}
 			}
 			if node.Level != expectedLevel {
-				out.diagnostics = append(out.diagnostics, Diagnostic{Section: definition.Heading, Message: fmt.Sprintf("heading level is %d; schema requires %d", node.Level, expectedLevel), Resolved: repair})
+				out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticHeadingLevel, Section: definition.Heading, Message: fmt.Sprintf("heading level is %d; schema requires %d", node.Level, expectedLevel), Resolved: repair})
 				if repair {
 					setHeadingLevel(node, expectedLevel, newline)
 					out.changed = true
@@ -142,7 +142,7 @@ func applyChildren(children []*markdownSection, parentID string, expectedLevel i
 	switch strings.ToLower(strings.TrimSpace(current.UnknownSections)) {
 	case "delete":
 		for _, node := range unknown {
-			out.diagnostics = append(out.diagnostics, Diagnostic{Section: node.Heading, Message: "unknown section removed by configured policy", Resolved: repair})
+			out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticUnknownSection, Section: node.Heading, Message: "unknown section removed by configured policy", Resolved: repair})
 		}
 		if repair && len(unknown) > 0 {
 			out.changed = true
@@ -151,7 +151,7 @@ func applyChildren(children []*markdownSection, parentID string, expectedLevel i
 		ordered = append(ordered, unknown...)
 	}
 	if !sameNodeOrder(children, ordered) {
-		out.diagnostics = append(out.diagnostics, Diagnostic{Message: parentOrderMessage(parentID), Resolved: repair})
+		out.diagnostics = append(out.diagnostics, Diagnostic{Code: diagnosticSectionOrder, Message: parentOrderMessage(parentID), Resolved: repair})
 		if repair {
 			out.changed = true
 		}
