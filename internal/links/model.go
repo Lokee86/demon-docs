@@ -1,6 +1,7 @@
 package links
 
 import (
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/review"
 )
@@ -57,6 +58,7 @@ type Plan struct {
 	Rewrites            []GeneratedRewrite
 	Suppressions        []Suppression
 	Messages            []string
+	Diagnostics         []diagnostics.Diagnostic
 	Files               FilesManifest
 	Links               LinksManifest
 	RepositoryRoot      string

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/review"
 	"github.com/Lokee86/demon-docs/internal/textio"
@@ -114,6 +115,9 @@ func ApplySelectedSuggestion(plan *Plan, suggestion review.Suggestion, candidate
 	if plan.Unresolved > 0 {
 		plan.Unresolved--
 	}
-	plan.Messages = append(plan.Messages, fmt.Sprintf("Selected link repair in %s:%d: %s -> %s", record.SourcePath, record.Line, transformation.OldDestination, newPath))
+	human := fmt.Sprintf("Selected link repair in %s:%d: %s -> %s", record.SourcePath, record.Line, transformation.OldDestination, newPath)
+	diagnostic := linkDiagnostic(diagnosticRepairSelected, diagnostics.SeverityInfo, "Link repair selected by review", record.SourcePath, record.Line, record.Column, transformation.OldDestination)
+	diagnostic.Replacement = newPath
+	addDiagnostic(plan, human, diagnostic)
 	return nil
 }

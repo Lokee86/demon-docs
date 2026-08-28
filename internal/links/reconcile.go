@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/review"
 )
@@ -106,7 +107,8 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 		Links:               LinksManifest{SchemaVersion: schemaVersion},
 	}
 	if !initialized {
-		plan.Messages = append(plan.Messages, "Link state is not initialized; this pass records a baseline and does not repair links.")
+		human := "Link state is not initialized; this pass records a baseline and does not repair links."
+		addDiagnostic(&plan, human, linkDiagnostic(diagnosticStateUninitialized, diagnostics.SeverityError, "Link state is not initialized", "", 0, 0, ""))
 	}
 
 	policy, err := review.LoadPolicy(root)
@@ -154,6 +156,7 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 			}
 			plan.Links.Links = append(plan.Links.Links, rewrite.records...)
 			plan.Messages = append(plan.Messages, rewrite.messages...)
+			plan.Diagnostics = append(plan.Diagnostics, rewrite.structured...)
 			plan.Unresolved += rewrite.unresolved
 			continue
 		}
@@ -249,18 +252,30 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 					if state, decision := reviewRepairPolicy(policy, source.record.ID, source.record.Path, record, found.RawPath, newPath, targetRecord.ID); state != review.MatchNone {
 						record.Status = "blocked"
 						label := "Blocked"
+						code := diagnosticRepairBlocked
+						message := "Automatic link repair is blocked by review policy"
 						if state == review.MatchStale {
 							record.Status = "stale_block"
 							label = "Stale blocked"
+							code = diagnosticRepairBlockStale
+							message = "Link repair block is stale"
 						}
 						record.Candidates = []string{storePath(inventory.root, actualPath)}
 						plan.Unresolved++
-						plan.Messages = append(plan.Messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason)))
+						human := fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason))
+						diagnostic := linkDiagnostic(code, diagnostics.SeverityError, message, source.record.Path, found.Line, found.Column, found.RawPath)
+						diagnostic.Replacement = newPath
+						diagnostic.Candidates = append([]string(nil), record.Candidates...)
+						addDiagnostic(plan, human, diagnostic)
 					} else {
-						replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+						oldPath := found.RawPath
+						replacements = append(replacements, replacement{record.ID, found.Start, found.End, oldPath, newPath})
 						record.RawPath = newPath
 						record.Target = newPath + found.Suffix
-						plan.Messages = append(plan.Messages, fmt.Sprintf("Updated link case in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+						human := fmt.Sprintf("Updated link case in %s:%d: %s -> %s", source.record.Path, found.Line, oldPath, newPath)
+						diagnostic := linkDiagnostic(diagnosticCaseRepair, diagnostics.SeverityWarning, "Link path casing does not match the target", source.record.Path, found.Line, found.Column, oldPath)
+						diagnostic.Replacement = newPath
+						addDiagnostic(plan, human, diagnostic)
 					}
 				}
 			}
@@ -286,7 +301,8 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 		case 0:
 			record.Status = "broken"
 			plan.Unresolved++
-			plan.Messages = append(plan.Messages, fmt.Sprintf("Broken link in %s:%d:%d: %s", source.record.Path, found.Line, found.Column, originalTarget))
+			human := fmt.Sprintf("Broken link in %s:%d:%d: %s", source.record.Path, found.Line, found.Column, originalTarget)
+			addDiagnostic(plan, human, linkDiagnostic(diagnosticBroken, diagnostics.SeverityError, "Local link target does not exist", source.record.Path, found.Line, found.Column, originalTarget))
 		case 1:
 			candidate := candidates[0]
 			targetRecord, actualPath, err = inventory.ensureTarget(candidate, preferredID)
@@ -304,24 +320,38 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 					if state, decision := reviewRepairPolicy(policy, source.record.ID, source.record.Path, record, found.RawPath, newPath, targetRecord.ID); state != review.MatchNone {
 						record.Status = "blocked"
 						label := "Blocked"
+						code := diagnosticRepairBlocked
+						message := "Automatic link repair is blocked by review policy"
 						if state == review.MatchStale {
 							record.Status = "stale_block"
 							label = "Stale blocked"
+							code = diagnosticRepairBlockStale
+							message = "Link repair block is stale"
 						}
 						plan.Unresolved++
-						plan.Messages = append(plan.Messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason)))
+						human := fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, source.record.Path, found.Line, found.RawPath, newPath, reviewReason(decision.Reason))
+						diagnostic := linkDiagnostic(code, diagnostics.SeverityError, message, source.record.Path, found.Line, found.Column, found.RawPath)
+						diagnostic.Replacement = newPath
+						addDiagnostic(plan, human, diagnostic)
 					} else {
-						replacements = append(replacements, replacement{record.ID, found.Start, found.End, found.RawPath, newPath})
+						oldPath := found.RawPath
+						replacements = append(replacements, replacement{record.ID, found.Start, found.End, oldPath, newPath})
 						record.RawPath = newPath
 						record.Target = newPath + found.Suffix
-						plan.Messages = append(plan.Messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, found.RawPath, newPath))
+						human := fmt.Sprintf("Repair link in %s:%d: %s -> %s", source.record.Path, found.Line, oldPath, newPath)
+						diagnostic := linkDiagnostic(diagnosticRepair, diagnostics.SeverityWarning, "Link target moved", source.record.Path, found.Line, found.Column, oldPath)
+						diagnostic.Replacement = newPath
+						addDiagnostic(plan, human, diagnostic)
 					}
 				}
 			}
 		default:
 			record.Status = "ambiguous"
 			plan.Unresolved++
-			plan.Messages = append(plan.Messages, fmt.Sprintf("Ambiguous link in %s:%d:%d: %s; candidates: %s", source.record.Path, found.Line, found.Column, originalTarget, strings.Join(record.Candidates, ", ")))
+			human := fmt.Sprintf("Ambiguous link in %s:%d:%d: %s; candidates: %s", source.record.Path, found.Line, found.Column, originalTarget, strings.Join(record.Candidates, ", "))
+			diagnostic := linkDiagnostic(diagnosticAmbiguous, diagnostics.SeverityError, "Local link target is ambiguous", source.record.Path, found.Line, found.Column, originalTarget)
+			diagnostic.Candidates = append([]string(nil), record.Candidates...)
+			addDiagnostic(plan, human, diagnostic)
 		}
 		plan.Links.Links = append(plan.Links.Links, record)
 	}
@@ -348,7 +378,8 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 		}
 		ordinal++
 		plan.Unresolved++
-		plan.Messages = append(plan.Messages, fmt.Sprintf("Undefined reference label in %s:%d:%d: %s", source.record.Path, missing.Line, missing.Column, missing.Label))
+		human := fmt.Sprintf("Undefined reference label in %s:%d:%d: %s", source.record.Path, missing.Line, missing.Column, missing.Label)
+		addDiagnostic(plan, human, linkDiagnostic(diagnosticUndefinedReference, diagnostics.SeverityError, "Reference label has no definition", source.record.Path, missing.Line, missing.Column, missing.Label))
 		plan.Links.Links = append(plan.Links.Links, record)
 	}
 	if initialized && repair && len(replacements) > 0 {

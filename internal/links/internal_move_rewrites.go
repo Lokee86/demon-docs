@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/review"
 	"github.com/Lokee86/demon-docs/internal/textio"
@@ -14,6 +15,7 @@ type internalRewritePlan struct {
 	update     model.FileUpdate
 	records    []LinkRecord
 	messages   []string
+	structured []diagnostics.Diagnostic
 	unresolved int
 }
 
@@ -100,6 +102,7 @@ func buildInternalMoveRewrite(root string, job internalRewriteJob, movedTargets 
 	records := append([]LinkRecord(nil), job.previousRecords...)
 	var replacements []replacement
 	var messages []string
+	var structured []diagnostics.Diagnostic
 	unresolved := 0
 	metadataChanged := false
 	for index := range records {
@@ -130,7 +133,18 @@ func buildInternalMoveRewrite(root string, job internalRewriteJob, movedTargets 
 				records[index].Status = "stale_block"
 				label = "Stale blocked"
 			}
-			messages = append(messages, fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, job.currentSource.Path, records[index].Line, records[index].RawPath, newPath, reviewReason(decision.Reason)))
+			human := fmt.Sprintf("%s link repair in %s:%d: %s -> %s%s", label, job.currentSource.Path, records[index].Line, records[index].RawPath, newPath, reviewReason(decision.Reason))
+			messages = append(messages, human)
+			code := diagnosticRepairBlocked
+			message := "Automatic link repair is blocked by review policy"
+			if state == review.MatchStale {
+				code = diagnosticRepairBlockStale
+				message = "Link repair block is stale"
+			}
+			diagnostic := linkDiagnostic(code, diagnostics.SeverityError, message, job.currentSource.Path, records[index].Line, records[index].Column, records[index].RawPath)
+			diagnostic.Replacement = newPath
+			diagnostic.Candidates = []string{target.Path}
+			structured = append(structured, diagnostic)
 			unresolved++
 			continue
 		}
@@ -146,11 +160,15 @@ func buildInternalMoveRewrite(root string, job internalRewriteJob, movedTargets 
 		records[index].Target = newPath + records[index].Suffix
 		records[index].ResolvedPath = target.Path
 		records[index].Status = "moved"
-		messages = append(messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", job.currentSource.Path, records[index].Line, replacements[len(replacements)-1].oldValue, newPath))
+		oldPath := replacements[len(replacements)-1].oldValue
+		messages = append(messages, fmt.Sprintf("Repair link in %s:%d: %s -> %s", job.currentSource.Path, records[index].Line, oldPath, newPath))
+		diagnostic := linkDiagnostic(diagnosticRepair, diagnostics.SeverityWarning, "Link target moved", job.currentSource.Path, records[index].Line, records[index].Column, oldPath)
+		diagnostic.Replacement = newPath
+		structured = append(structured, diagnostic)
 	}
 	if len(replacements) == 0 {
 		if metadataChanged || unresolved > 0 {
-			return internalRewritePlan{records: records, messages: messages, unresolved: unresolved}, true, nil
+			return internalRewritePlan{records: records, messages: messages, structured: structured, unresolved: unresolved}, true, nil
 		}
 		return internalRewritePlan{}, false, nil
 	}
@@ -173,6 +191,7 @@ func buildInternalMoveRewrite(root string, job internalRewriteJob, movedTargets 
 		update:     model.FileUpdate{Path: sourcePath, OldText: &old, NewText: updated},
 		records:    records,
 		messages:   messages,
+		structured: structured,
 		unresolved: unresolved,
 	}, true, nil
 }

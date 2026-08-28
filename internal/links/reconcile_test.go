@@ -19,6 +19,9 @@ func TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget(t *testing.T) {
 	if !first.NeedsInitialization || len(first.Updates) != 0 {
 		t.Fatalf("first scan should only establish state: %#v", first)
 	}
+	if len(first.Diagnostics) != 1 || first.Diagnostics[0].Code != "links.state_uninitialized" || first.Diagnostics[0].Severity != "error" {
+		t.Fatalf("missing structured initialization diagnostic: %#v", first.Diagnostics)
+	}
 	if err := Save(first); err != nil {
 		t.Fatal(err)
 	}
@@ -38,6 +41,9 @@ func TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget(t *testing.T) {
 	}
 	if !strings.Contains(second.Updates[0].NewText, "media/picture.png#preview") {
 		t.Fatalf("link was not repaired: %q", second.Updates[0].NewText)
+	}
+	if len(second.Diagnostics) != 1 || second.Diagnostics[0].Code != "links.repair" || second.Diagnostics[0].Target != "assets/picture.png" || second.Diagnostics[0].Replacement != "media/picture.png" {
+		t.Fatalf("missing structured move diagnostic: %#v", second.Diagnostics)
 	}
 }
 
@@ -191,6 +197,13 @@ func TestAmbiguousGuessIsLeftForTheUser(t *testing.T) {
 	}
 	if len(second.Links.Links) != 1 || second.Links.Links[0].Status != "ambiguous" || len(second.Links.Links[0].Candidates) != 2 {
 		t.Fatalf("ambiguous candidates were not recorded: %#v", second.Links.Links)
+	}
+	if len(second.Diagnostics) != 1 {
+		t.Fatalf("ambiguous structured diagnostics=%#v", second.Diagnostics)
+	}
+	diagnostic := second.Diagnostics[0]
+	if diagnostic.Code != "links.ambiguous" || diagnostic.Severity != "error" || diagnostic.Path != "README.md" || diagnostic.Line != 1 || diagnostic.Column != 10 || diagnostic.Target != "old/manual.pdf" || len(diagnostic.Candidates) != 2 {
+		t.Fatalf("unexpected ambiguous structured diagnostic: %#v", diagnostic)
 	}
 }
 

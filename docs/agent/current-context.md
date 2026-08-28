@@ -30,7 +30,7 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 - Broader Demon Docs diagnostics remain incomplete.
 - Link and index watcher reconciliation still has broader-than-ideal scope.
-- Markdown heading-fragment validation and stable machine-readable diagnostics remain unimplemented.
+- Markdown heading-fragment validation remains unimplemented. Stable schema-1 machine-readable diagnostics are implemented for link-only checks; other reconciliation subsystems still need migration onto the shared envelope.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 

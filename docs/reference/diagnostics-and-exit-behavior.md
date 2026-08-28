@@ -165,7 +165,7 @@ whether a write occurred
 whether user selection is required
 ```
 
-Machine-readable output is not implied unless a command explicitly documents such a format.
+Machine-readable output is not implied unless a command explicitly documents such a format. The first stable contract is `ddocs check --links --output-format json`; its schema, codes, severity values, and compatibility policy are defined in [Machine-Readable Diagnostics](machine-readable-diagnostics.md).
 
 ## Failure safety
 

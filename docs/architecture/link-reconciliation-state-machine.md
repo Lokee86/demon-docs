@@ -450,4 +450,4 @@ go test ./internal/links -count=1
 
 ## Notes
 
-Status values are internal reconciliation state, not a stable machine-readable public API. User-facing behavior is defined by CLI diagnostics and review commands.
+Status values are internal reconciliation state and are not themselves the stable machine-readable public API. Link reconciliation now also emits typed diagnostics that feed the schema-1 `check --links --output-format json` contract; consumers should use those documented diagnostic codes rather than internal `LinkRecord.Status` values. Human-readable CLI diagnostics and review commands remain separate interfaces.

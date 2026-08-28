@@ -152,6 +152,7 @@ func RepairObservedRename(repositoryRoot, oldPath, newPath string) (bool, int, e
 			}
 			plan.Links.Links = append(plan.Links.Links, rewrite.records...)
 			plan.Messages = append(plan.Messages, rewrite.messages...)
+			plan.Diagnostics = append(plan.Diagnostics, rewrite.structured...)
 			plan.Unresolved += rewrite.unresolved
 			continue
 		}

@@ -48,14 +48,17 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ### 1. Stable machine-readable diagnostics
 
-Add a versioned native JSON format without destabilizing human-readable output.
+The schema-1 native JSON envelope and stable link diagnostic vocabulary are implemented for `ddocs check --links --output-format json` without changing human-readable output.
 
-- stable diagnostic code, severity, subsystem, and message;
-- repository-relative path and source position where available;
-- documented exit semantics; and
-- explicit schema versioning for CI adapters.
+Remaining work is to migrate the other reconciliation subsystems onto the same envelope:
 
-Consider SARIF only after the smaller native contract is stable.
+- indexes;
+- frontmatter;
+- document-body format;
+- reverse indexes; and
+- runtime/configuration failures where a completed machine report is appropriate.
+
+Keep stable code, severity, subsystem, repository-relative path, source position, and documented exit semantics as each subsystem migrates. Consider SARIF only after the native contract covers the core check surface.
 
 ### 2. Link and reverse-index correctness
 

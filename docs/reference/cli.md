@@ -84,6 +84,8 @@ Computes reconciliation without writing selected authored surfaces or frontmatte
 
 Mutation scope: no authored-file writes. Internal read/cache behavior remains implementation-owned.
 
+`ddocs check --links --output-format json` emits the versioned schema-1 machine-readable link diagnostic report. JSON currently requires links to be the only selected reconciliation subsystem; mixed-subsystem requests fail with usage exit code `2` rather than returning an incomplete report. See [Machine-Readable Diagnostics](machine-readable-diagnostics.md).
+
 ### `ddocs fix`
 
 Computes and applies safe deterministic updates for selected systems, then persists the state needed for later reconciliation. With no selector, it runs configured documentation indexes and links, plus reverse indexes when roots are configured; it deliberately skips frontmatter and document-body format. Use `-a` or `--all` to run every configured reconciliation system.
@@ -318,6 +320,9 @@ ddocs mv docs/old.md docs/new.md
 
 # Verify links and orphan-document health.
 ddocs check --links
+
+# Emit the stable schema-1 link diagnostic report.
+ddocs check --links --output-format json
 
 # Review unresolved suggestions and recorded changes.
 ddocs suggestions

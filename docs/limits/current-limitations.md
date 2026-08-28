@@ -189,28 +189,29 @@ Boundary:
 
 This is not a missing Demon Docs feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
 
-## Machine-readable health output is not a stable public contract
+## Machine-readable diagnostics currently cover links only
 
-Current `check`, orphan, and reconciliation diagnostics are human-readable text. JSON or SARIF output is not currently documented as a stable command contract.
+`ddocs check --links --output-format json` now exposes the stable schema-1 native diagnostic contract, including link reconciliation and orphan-document findings. Other `check` subsystems still use their existing human-readable diagnostic surfaces.
 
 Impact:
 
-- integrations should primarily use process success/failure and preserve full text output;
-- parsing individual message wording may be brittle; and
-- CI annotations require adapter logic.
+- link-only CI and agent integrations can consume stable diagnostic codes and structured source evidence;
+- mixed-subsystem JSON output is intentionally rejected rather than silently omitting non-link findings; and
+- indexes, frontmatter, document-body format, reverse indexes, and pre-report runtime/configuration failures still require text handling.
 
 Workaround:
 
-Treat zero versus non-zero as the stable automation boundary and archive stdout/stderr for diagnosis.
+Use the JSON contract for link-only verification. Use normal text output and exit status for broader checks until each remaining subsystem migrates onto the same envelope.
 
 Owning docs:
 
+- [Machine-Readable Diagnostics](../reference/machine-readable-diagnostics.md)
 - [Diagnostics and Exit Behavior](../reference/diagnostics-and-exit-behavior.md)
 - [CI and Automation](../guides/ci-and-automation.md)
 
 Removal condition:
 
-A versioned machine-readable schema, command flag, tests, and compatibility policy are implemented.
+All core `check` subsystems emit the shared versioned native diagnostic contract, and mixed-subsystem JSON reports are complete rather than rejected.
 
 ## Symlink entries are not owned traversal trees
 
