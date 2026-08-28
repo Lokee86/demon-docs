@@ -150,9 +150,10 @@ source identity and current fingerprint are unchanged
 parser version is current
 every prior record has rewrite metadata
 every prior record status is valid
+every prior local target has persisted target identity
 ```
 
-Only `SourcePath` is refreshed. All prior outgoing records are copied into the new plan.
+Only `SourcePath` is refreshed. All prior outgoing records are copied into the new plan. A valid legacy or degraded record without `TargetFileID` is parsed once rather than reused blindly, allowing the current inventory to re-establish target identity and verify that the authored path still names the same file.
 
 Any non-`valid` status forces the source through parsing on the next pass. This intentionally lets transient repair states converge to the normal current state after a successful write.
 
@@ -191,9 +192,13 @@ An exact target produces `valid`, unless path casing differs from the filesystem
 
 When an exact target is absent, the prior occurrence's target file ID is preferred. If that identity is present at a different path, including after unambiguous `document_id` alias collapse, it becomes the sole move candidate.
 
+### Inventory identity recovery
+
+Inventory construction independently preserves file identity across moves. After exact-path matching, a unique `document_id` match is preferred, then a unique whole-file fingerprint match. A fingerprint match does not depend on the link record retaining `TargetFileID`. When identity is recovered at a new path, the old path is appended to that file's path history.
+
 ### Historical path evidence
 
-If the current rendered target matches one unique historical path retained on a present file identity, that file becomes the preferred candidate before generic basename or fingerprint search. This allows an interrupted move or older duplicate-state publication to converge without weakening ambiguity refusal.
+If the current rendered target matches one unique historical path retained on a present file identity, that file becomes the preferred candidate before generic basename/path ranking. This means an unchanged moved file can be resolved from its persisted old-path fingerprint even when the link itself has lost target identity. Duplicate fingerprint matches remain ambiguous and do not create identity.
 
 ### Candidate discovery
 

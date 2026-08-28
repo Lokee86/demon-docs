@@ -398,7 +398,11 @@ func recordsHaveRewriteMetadata(records []LinkRecord) bool {
 func recordsReferenceChangedTarget(records []LinkRecord, previousByID, currentByID map[string]*FileRecord) bool {
 	for _, record := range records {
 		if record.TargetFileID == "" {
-			continue
+			// A valid persisted link without target identity cannot prove that its
+			// resolved path still names the same file. Reconcile it once so the
+			// current inventory can recover identity through path history, document
+			// identity, or fingerprint evidence and repopulate TargetFileID.
+			return true
 		}
 		previous := previousByID[record.TargetFileID]
 		current := currentByID[record.TargetFileID]
