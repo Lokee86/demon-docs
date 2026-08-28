@@ -129,7 +129,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 			continue
 		}
 		if source.parseErr != nil {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: relative, Message: source.parseErr.Error()})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticParseError, Path: relative, Message: source.parseErr.Error()})
 			continue
 		}
 		if !parsed.HasBlock {
@@ -157,6 +157,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 				usedIDs[replacement] = struct{}{}
 				duplicateIDChanged = true
 				plan.Diagnostics = append(plan.Diagnostics, Diagnostic{
+					Code:     diagnosticDuplicateDocumentID,
 					Path:     relative,
 					Field:    "document_id",
 					Message:  fmt.Sprintf("duplicate document_id %s also used by %s; fix assigned %s", currentID, owner, replacement),
@@ -213,7 +214,7 @@ func buildWithValidationCache(repoRoot, docsRoot string, cfg config.Config, repa
 		}
 		sort.Strings(paths)
 		for _, path := range paths {
-			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Path: path, Field: "document_id", Message: fmt.Sprintf("duplicate document_id %s also used by %s", id, strings.Join(otherPaths(paths, path), ", "))})
+			plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: diagnosticDuplicateDocumentID, Path: path, Field: "document_id", Message: fmt.Sprintf("duplicate document_id %s also used by %s", id, strings.Join(otherPaths(paths, path), ", "))})
 			if values := plan.immutable[path]; values != nil {
 				delete(values, "document_id")
 				if len(values) == 0 {

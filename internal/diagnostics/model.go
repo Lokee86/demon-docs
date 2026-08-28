@@ -14,6 +14,7 @@ type Diagnostic struct {
 	Subsystem   string   `json:"subsystem"`
 	Message     string   `json:"message"`
 	Path        string   `json:"path,omitempty"`
+	Field       string   `json:"field,omitempty"`
 	Line        int      `json:"line,omitempty"`
 	Column      int      `json:"column,omitempty"`
 	Target      string   `json:"target,omitempty"`

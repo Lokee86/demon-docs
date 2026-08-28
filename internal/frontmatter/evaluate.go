@@ -25,9 +25,9 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 		switch unknownMode {
 		case "ignore":
 		case "warn":
-			out.add(path, key, "unknown frontmatter field", true, false)
+			out.add(diagnosticUnknownField, path, key, "unknown frontmatter field", true, false)
 		case "remove":
-			out.add(path, key, "unknown frontmatter field; fix removes it", false, repair)
+			out.add(diagnosticUnknownField, path, key, "unknown frontmatter field; fix removes it", false, repair)
 			if repair {
 				delete(values, key)
 				out.Changed = true
@@ -49,7 +49,7 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 		hasPrior = hasPrior && priorErr == nil
 
 		if definition.Immutable && present && hasPrior && !equalValue(current, prior) {
-			out.add(path, name, "immutable field differs from its recorded value", false, repair)
+			out.add(diagnosticImmutableMismatch, path, name, "immutable field differs from its recorded value", false, repair)
 			if repair {
 				values[name] = prior
 				current, present = prior, true
@@ -62,7 +62,7 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 			if repair && available {
 				replacement, ok, err := replacementValue(definition, schema, prior, hasPrior, now)
 				if err != nil {
-					out.add(path, name, err.Error(), false, false)
+					out.add(diagnosticRepairSourceError, path, name, err.Error(), false, false)
 				} else if ok {
 					values[name] = replacement
 					current, present = replacement, true
@@ -70,11 +70,11 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 				}
 			}
 			if present && !emptyValue(current) {
-				out.add(path, name, "frontmatter field was missing; fix added it", false, repair)
+				out.add(diagnosticMissingField, path, name, "frontmatter field was missing; fix added it", false, repair)
 			} else if available {
-				out.add(path, name, "frontmatter field is missing; fix can add it", false, false)
+				out.add(diagnosticMissingField, path, name, "frontmatter field is missing; fix can add it", false, false)
 			} else if definition.Required {
-				out.add(path, name, "required frontmatter field is missing or empty", false, false)
+				out.add(diagnosticRequiredFieldMissing, path, name, "required frontmatter field is missing or empty", false, false)
 			}
 		}
 
@@ -87,7 +87,7 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 			if definition.Immutable && repair {
 				replacement, ok, replacementErr := replacementValue(definition, schema, prior, hasPrior, now)
 				if replacementErr != nil {
-					out.add(path, name, replacementErr.Error(), false, false)
+					out.add(diagnosticRepairSourceError, path, name, replacementErr.Error(), false, false)
 				} else if ok {
 					values[name] = replacement
 					current = replacement
@@ -95,7 +95,7 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 					resolved = true
 				}
 			}
-			out.add(path, name, err.Error(), false, resolved)
+			out.add(diagnosticInvalidValue, path, name, err.Error(), false, resolved)
 			if !resolved {
 				continue
 			}
@@ -119,14 +119,14 @@ func Evaluate(path string, document Document, schema config.Frontmatter, repair 
 		if repair && hasConfiguredSource(definition, schema) {
 			replacement, ok, err := replacementValue(definition, schema, nil, false, now)
 			if err != nil {
-				out.add(path, rule.Require, err.Error(), false, false)
+				out.add(diagnosticRepairSourceError, path, rule.Require, err.Error(), false, false)
 			} else if ok {
 				values[rule.Require] = replacement
 				out.Changed = true
 				resolved = true
 			}
 		}
-		out.add(path, rule.Require, fmt.Sprintf("field is required when %s equals %v", rule.WhenField, rule.Equals), false, resolved)
+		out.add(diagnosticConditionalRequired, path, rule.Require, fmt.Sprintf("field is required when %s equals %v", rule.WhenField, rule.Equals), false, resolved)
 	}
 	return out
 }

@@ -37,3 +37,12 @@ func hasUnresolved(diagnostics []Diagnostic, field string) bool {
 	}
 	return false
 }
+
+func diagnosticCodeForField(diagnostics []Diagnostic, field string) string {
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Field == field {
+			return diagnostic.Code
+		}
+	}
+	return ""
+}

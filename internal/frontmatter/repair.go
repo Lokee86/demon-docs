@@ -45,8 +45,8 @@ func replacementValue(field config.FrontmatterField, schema config.Frontmatter, 
 	}
 }
 
-func (out *Outcome) add(path, field, message string, warning, resolved bool) {
-	out.Diagnostics = append(out.Diagnostics, Diagnostic{Path: path, Field: field, Message: message, Warning: warning, Resolved: resolved})
+func (out *Outcome) add(code, path, field, message string, warning, resolved bool) {
+	out.Diagnostics = append(out.Diagnostics, Diagnostic{Code: code, Path: path, Field: field, Message: message, Warning: warning, Resolved: resolved})
 }
 
 func cloneValues(values map[string]any) map[string]any {

@@ -1,6 +1,7 @@
 package frontmatter
 
 type Diagnostic struct {
+	Code     string
 	Path     string
 	Field    string
 	Message  string

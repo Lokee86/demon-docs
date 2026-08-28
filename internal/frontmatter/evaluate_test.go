@@ -25,6 +25,9 @@ func TestEvaluateRepairsMissingSourcedFieldsButLeavesUnsourcedRequiredField(t *t
 	if !hasUnresolved(outcome.Diagnostics, "summary") {
 		t.Fatalf("missing summary not diagnosed: %+v", outcome.Diagnostics)
 	}
+	if code := diagnosticCodeForField(outcome.Diagnostics, "summary"); code != "frontmatter.required_field_missing" {
+		t.Fatalf("summary diagnostic code=%q diagnostics=%+v", code, outcome.Diagnostics)
+	}
 }
 
 func TestEvaluateNeverOverwritesExistingValidMutableValues(t *testing.T) {
@@ -50,6 +53,11 @@ func TestEvaluateReportsInvalidMutableAndRepairsInvalidImmutable(t *testing.T) {
 	}
 	if !hasUnresolved(outcome.Diagnostics, "author") || hasUnresolved(outcome.Diagnostics, "created") {
 		t.Fatalf("unexpected diagnostics: %+v", outcome.Diagnostics)
+	}
+	for _, field := range []string{"author", "created"} {
+		if code := diagnosticCodeForField(outcome.Diagnostics, field); code != "frontmatter.invalid_value" {
+			t.Fatalf("%s diagnostic code=%q diagnostics=%+v", field, code, outcome.Diagnostics)
+		}
 	}
 }
 
@@ -77,7 +85,7 @@ func TestUnknownFieldModes(t *testing.T) {
 					t.Fatalf("remove failed: %+v", outcome)
 				}
 			case "warn":
-				if _, present := outcome.Values["unknown"]; !present || len(outcome.Diagnostics) != 1 || !outcome.Diagnostics[0].Warning {
+				if _, present := outcome.Values["unknown"]; !present || len(outcome.Diagnostics) != 1 || !outcome.Diagnostics[0].Warning || outcome.Diagnostics[0].Code != "frontmatter.unknown_field" {
 					t.Fatalf("warn failed: %+v", outcome)
 				}
 			case "ignore":
@@ -99,6 +107,9 @@ func TestConditionalRuleCanRemainUnresolvedOrUseConfiguredSource(t *testing.T) {
 	outcome := Evaluate("docs/guide.md", Document{Values: values}, cfg, true, nil, time.Now())
 	if !hasUnresolved(outcome.Diagnostics, "policy_exempt_reason") {
 		t.Fatalf("conditional requirement not diagnosed: %+v", outcome.Diagnostics)
+	}
+	if code := diagnosticCodeForField(outcome.Diagnostics, "policy_exempt_reason"); code != "frontmatter.conditional_required" {
+		t.Fatalf("conditional diagnostic code=%q diagnostics=%+v", code, outcome.Diagnostics)
 	}
 
 	field := cfg.Fields["policy_exempt_reason"]

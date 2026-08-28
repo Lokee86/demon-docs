@@ -4,7 +4,7 @@ created: "2026-08-28"
 document_id: 019fb711-9205-7fe0-bdd5-9ef5244bcb3e
 document_type: general
 policy_exempt: false
-summary: Versioned JSON diagnostic contract for link and index verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
+summary: Versioned JSON diagnostic contract for link, index, and frontmatter verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
 ---
 # Machine-Readable Diagnostics
 
@@ -16,15 +16,16 @@ This document defines the first stable machine-readable diagnostic contract expo
 
 ## Current scope
 
-Schema version 1 currently covers links and documentation indexes:
+Schema version 1 currently covers links, documentation indexes, and frontmatter:
 
 ```bash
 ddocs check --links --output-format json
 ddocs check --indexes --output-format json
-ddocs check --links --indexes --output-format json
+ddocs check --frontmatter --output-format json
+ddocs check --links --indexes --frontmatter --output-format json
 ```
 
-Text remains the default output. JSON accepts any selected combination of the migrated link and index subsystems. Frontmatter, document-body format, or reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
+Text remains the default output. JSON accepts any selected combination of the migrated link, index, and frontmatter subsystems. Document-body format or reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
 
 `fix` and `watch` do not yet expose this JSON diagnostic contract.
 
@@ -70,6 +71,7 @@ Optional structured evidence is emitted when available:
 ```json
 {
   "path": "docs/guide.md",
+  "field": "document_id",
   "line": 42,
   "column": 17,
   "target": "../missing.md",
@@ -78,7 +80,7 @@ Optional structured evidence is emitted when available:
 }
 ```
 
-Paths are repository-relative slash-separated paths when the underlying link state is repository-owned. Line and column values are one-based. Candidate arrays retain deterministic sorted order.
+Paths are repository-relative slash-separated paths for repository-owned findings. `field` identifies a frontmatter field when applicable; `section` identifies a managed index section when applicable. Line and column values are one-based. Candidate arrays retain deterministic sorted order.
 
 Consumers should branch on `code`, not parse `message`. `message` is still part of the schema-1 contract and remains stable within that schema version, but it is display text rather than a secondary identifier.
 
@@ -119,9 +121,24 @@ All reconciliation codes in the table except `links.orphan_document` are emitted
 
 Index diagnostics are emitted directly by `internal/reconcile`. The optional schema-1 `section` field identifies the managed index section for diagnostics such as stale entries.
 
+## Frontmatter diagnostic codes
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `frontmatter.parse_error` | error | The document's frontmatter block cannot be parsed under a supported format. |
+| `frontmatter.duplicate_document_id` | error | The same `document_id` is used by more than one managed document. |
+| `frontmatter.unknown_field` | warning or error | A field is not defined by the selected schema. Severity follows the configured unknown-field policy. |
+| `frontmatter.immutable_mismatch` | error | An immutable field differs from its recorded value. |
+| `frontmatter.missing_field` | error | A configured field is absent or empty and has a deterministic repair source. |
+| `frontmatter.required_field_missing` | error | A required field is absent or empty and no deterministic source can supply it. |
+| `frontmatter.invalid_value` | error | A present field does not satisfy its configured type or value contract. |
+| `frontmatter.conditional_required` | error | A conditional schema rule requires a field that is absent or empty. |
+
+Frontmatter diagnostics originate in `internal/frontmatter` and are projected into schema 1 without parsing message text. The optional `field` property identifies the affected frontmatter field. Warning-mode unknown fields do not by themselves fail the completed check; consumers must use envelope `status` and `exit_code` rather than infer command failure from diagnostic count.
+
 ## Ordering
 
-Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then link reconciliation diagnostics, then orphan-document diagnostics. Link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
+Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then frontmatter diagnostics, then link reconciliation diagnostics, then orphan-document diagnostics. Frontmatter diagnostics retain their deterministic path/field ordering; link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
 
 Consumers must not infer priority from array position. Use `code`, `severity`, path, and position.
 
@@ -145,14 +162,16 @@ Contract coverage includes:
 - clean JSON reports with an empty diagnostic array;
 - failing broken-link reports with stable code, severity, path, line, column, and target;
 - missing and out-of-date index reports;
-- combined link/index reports;
+- failing frontmatter value reports with stable field evidence;
+- non-failing frontmatter warning reports;
+- combined migrated-subsystem reports;
 - rejection when an unmigrated subsystem is selected; and
-- typed reconciliation tests for link identity evidence and stale index entries.
+- typed reconciliation tests for link identity evidence, stale index entries, and frontmatter policy findings.
 
 Run:
 
 ```bash
-go test ./internal/links ./internal/reconcile ./internal/app -count=1
+go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/app -count=1
 ```
 
 ## Related docs
@@ -164,4 +183,4 @@ go test ./internal/links ./internal/reconcile ./internal/app -count=1
 
 ## Notes
 
-Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Frontmatter, document-body format, reverse indexes, and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.
+Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Document-body format, reverse indexes, and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.

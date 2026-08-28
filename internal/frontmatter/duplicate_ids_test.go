@@ -35,6 +35,9 @@ func TestBuildStaysInsideDocsRootAndDetectsDuplicateIDs(t *testing.T) {
 	for _, diagnostic := range plan.Diagnostics {
 		if diagnostic.Field == "document_id" && strings.Contains(diagnostic.Message, "duplicate") {
 			duplicates++
+			if diagnostic.Code != "frontmatter.duplicate_document_id" {
+				t.Fatalf("duplicate diagnostic code=%q diagnostic=%+v", diagnostic.Code, diagnostic)
+			}
 		}
 		if diagnostic.Path == "outside.md" {
 			t.Fatalf("outside file was inspected: %+v", diagnostic)
