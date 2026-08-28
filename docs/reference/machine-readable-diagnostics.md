@@ -53,7 +53,21 @@ Stable envelope fields:
 - `exit_code` — `0` for a clean completed check and `1` for completed verification with findings.
 - `diagnostics` — ordered array of structured diagnostic objects; clean reports use an empty array rather than `null`.
 
-Usage errors still return `2` through the normal CLI error surface. Configuration, filesystem, or runtime failures that prevent a completed diagnostic pass are not represented by schema 1.
+Usage errors still return `2` through the normal CLI error surface. The completed audit also keeps invalid/unloadable configuration, missing repository or subsystem preconditions, planning/I/O failures, and private-state publication failures on stderr with exit code `2`. These conditions prevent a completed reconciliation pass and are not represented by schema 1.
+
+## Pre-report failure boundary
+
+Schema 1 is a reconciliation-result contract, not a generic CLI error protocol. The following classes remain outside the JSON report:
+
+| Failure class | Surface | Reason |
+|---|---|---|
+| invalid flags, arguments, or output selection | stderr, exit 2 | command usage failed before reconciliation selection completed |
+| configuration load or validation failure | stderr, exit 2 | the applicable reconciliation policy is not valid |
+| missing docs root, reverse-index roots, codemap headings, or equivalent scope precondition | stderr, exit 2 | the requested reconciliation cannot be planned |
+| planner, filesystem, resolver, or other I/O failure | stderr, exit 2 | no complete authoritative result exists |
+| private-state/cache publication failure | stderr, exit 2 | the command cannot claim a successfully completed check transaction |
+
+Consumers can therefore distinguish three states without parsing prose: exit `0` means a completed passing report, exit `1` means a completed failing report, and exit `2` means no schema-1 reconciliation report was completed. A future machine-readable command-error envelope, if needed, should be a separately defined contract rather than overloading reconciliation diagnostics.
 
 ## Diagnostic object
 
@@ -232,4 +246,4 @@ go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/
 
 ## Notes
 
-Schema 1 establishes one shared diagnostic envelope across every reconciliation subsystem. Usage errors and failures that prevent a check plan from completing remain outside this report contract unless a future version explicitly defines a machine-readable precondition/error envelope.
+Schema 1 establishes one shared diagnostic envelope across every reconciliation subsystem. The runtime/configuration audit intentionally leaves failures that prevent a check plan from completing outside this report contract. A future machine-readable command-error envelope should be added only as a separate, explicit contract.

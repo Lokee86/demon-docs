@@ -50,7 +50,9 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 The schema-1 native JSON envelope and stable link/index/frontmatter/document-format/reverse-index diagnostic vocabularies are implemented for `ddocs check --output-format json` without changing human-readable output. Every reconciliation subsystem may be selected individually or in combination.
 
-Remaining work is limited to auditing runtime/configuration failures and defining machine output only where a completed diagnostic report is semantically appropriate. Usage errors and failures that prevent planning should not be disguised as reconciliation results.
+The runtime/configuration audit is also complete. Remaining exit-2 paths are CLI misuse, invalid or unloadable configuration, missing scope/preconditions, planning/I/O failures, or private-state publication failures. These prevent a completed reconciliation result and therefore remain on the normal stderr error surface rather than being disguised as schema-1 diagnostics.
+
+No further machine-readable diagnostic migration is currently required. A separate machine-readable command-error envelope should be introduced only if consumers demonstrate a need for one.
 
 Keep stable code, severity, subsystem, repository-relative path, source position, and documented exit semantics as each subsystem migrates. Consider SARIF only after the native contract covers the core check surface.
 

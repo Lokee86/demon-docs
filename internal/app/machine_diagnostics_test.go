@@ -440,6 +440,23 @@ func TestCheckFormatJSONWarningDoesNotFail(t *testing.T) {
 	})
 }
 
+func TestJSONDiagnosticsPreserveInvalidConfigurationErrors(t *testing.T) {
+	repo := t.TempDir()
+	configText := strings.Replace(frontmatterTestConfig(false, "yaml"), `default_format = "yaml"`, `default_format = "json"`, 1)
+	writeTestFile(t, filepath.Join(repo, ".ddocs", "config.toml"), configText)
+	writeTestFile(t, filepath.Join(repo, "docs", "page.md"), "# Page\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"check", "--frontmatter", "--output-format", "json"}, &out, &errOut); code != 2 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if out.Len() != 0 || !strings.Contains(errOut.String(), "default_format") {
+			t.Fatalf("configuration failure should remain on stderr: out=%q err=%q", out.String(), errOut.String())
+		}
+	})
+}
+
 func TestJSONDiagnosticsPreservePreconditionErrors(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")
