@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 2742,
+      "sha256": "9a1b61538d37a9b19ca1ca4ff37cd4513b7231f691f9c153531d92eeaf3a5c01",
+      "entry_count": 3,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "packages/engine/src/index.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 39,
+          "column": 1,
+          "end_line": 39,
+          "end_column": 70
+        },
+        "raw_line": "| `packages/engine/src/index.ts` | Public API \u2014 all engine exports |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "packages/engine/src/index.ts",
+        "exists": true,
+        "size": 275,
+        "sha256": "ab6eb762dd3554fe1dc2f7f8042678fd5634cc383440725bb1c891f7c4608441"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "packages/api/src/index.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 46,
+          "column": 1,
+          "end_line": 46,
+          "end_column": 53
+        },
+        "raw_line": "| `packages/api/src/index.ts` | API package exports |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "packages/api/src/index.ts",
+        "exists": true,
+        "size": 1849,
+        "sha256": "9cc39d9e982493074d11accf479ad76667a9d14ebc8eb57dbc94bde9e07a9ea5"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "packages/api/src/adapters/next.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 47,
+          "column": 1,
+          "end_line": 47,
+          "end_column": 68
+        },
+        "raw_line": "| `packages/api/src/adapters/next.ts` | Next.js App Router adapter |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "packages/api/src/adapters/next.ts",
+        "exists": true,
+        "size": 4359,
+        "sha256": "ba7569ebe61391b607b9f4095e5a3e59cc7a7494f82d1e8a43d4a0fb315fa77e"
+      }
+    }
+  ],
+  "diagnostics": []
+}

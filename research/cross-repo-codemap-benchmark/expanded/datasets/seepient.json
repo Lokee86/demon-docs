@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 47994,
+      "sha256": "f69ecd784e9b14dafc46bee4843bc84ed3b77ee34dda61f503dcd3adfd85db7c",
+      "entry_count": 25,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/agent-loop.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 286,
+          "column": 1,
+          "end_line": 286,
+          "end_column": 86
+        },
+        "raw_line": "| Agent loop | `src/domain/agent-loop.ts` | Single execution engine for all adapters |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/agent-loop.ts",
+        "exists": true,
+        "size": 30036,
+        "sha256": "4db0a01cbb56b4ac50ac257a1136c76b4896ed9503a70a6e24054672f0546f2a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/foundations/types.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 287,
+          "column": 1,
+          "end_line": 287,
+          "end_column": 86
+        },
+        "raw_line": "| Core types | `src/foundations/types.ts` | Messages, tools, hooks, agents, sessions |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/foundations/types.ts",
+        "exists": true,
+        "size": 13144,
+        "sha256": "58697079e724e236f57cdf2cf7a12a0455202bd173ae237bc24968b2f88a4649"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/foundations/errors.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 288,
+          "column": 1,
+          "end_line": 288,
+          "end_column": 93
+        },
+        "raw_line": "| Error hierarchy | `src/foundations/errors.ts` | `SeepientError` with `code` + `retryable` |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/foundations/errors.ts",
+        "exists": true,
+        "size": 10093,
+        "sha256": "7c4ee7c342ba3b7ce0e8609b3842ddb71c896fb63002252219abecfa19139a81"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/foundations/settings-schema.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 290,
+          "column": 1,
+          "end_line": 290,
+          "end_column": 102
+        },
+        "raw_line": "| Settings schema | `src/foundations/settings-schema.ts` | 22 dot-key settings, validation, env vars |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/foundations/settings-schema.ts",
+        "exists": true,
+        "size": 12445,
+        "sha256": "c8a82b61dc92a461bd63172ce7f71ccb41af0be967ffb1252a87000501831e78"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/foundations/config.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 291,
+          "column": 1,
+          "end_line": 291,
+          "end_column": 115
+        },
+        "raw_line": "| Config + models | `src/foundations/config.ts` + `models-catalog.ts` | Merge layers + catalog metadata accessors |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/foundations/config.ts",
+        "exists": true,
+        "size": 7111,
+        "sha256": "c2018bab11fc3e8a4bc3d439cf45bbb038bf36f840f6eeef15bfaf8d33d4c75a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/foundations/models-catalog.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 291,
+          "column": 1,
+          "end_line": 291,
+          "end_column": 115
+        },
+        "raw_line": "| Config + models | `src/foundations/config.ts` + `models-catalog.ts` | Merge layers + catalog metadata accessors |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/foundations/models-catalog.ts",
+        "exists": true,
+        "size": 7950,
+        "sha256": "ad5f08ac1a743489271d73a0cbfafa2b02b5c81aee6238e2c280f1dfda432a4b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/tool-executor.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 293,
+          "column": 1,
+          "end_line": 293,
+          "end_column": 104
+        },
+        "raw_line": "| Tool executor | `src/domain/tool-executor.ts` | Registry, `tool()` factory, `resolveTools()`, groups |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/tool-executor.ts",
+        "exists": true,
+        "size": 11183,
+        "sha256": "829e5573f1b1a548d626271f08e9522626dd7fb8903de3304b26f1511c4209de"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/hooks.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 295,
+          "column": 1,
+          "end_line": 295,
+          "end_column": 81
+        },
+        "raw_line": "| Hooks | `src/domain/hooks.ts` | Safe executor \u2014 errors never crash the loop |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/hooks.ts",
+        "exists": true,
+        "size": 2311,
+        "sha256": "95fbb3f68222723c69ca67df708bbef81b168f09b6b68ad7233d1755ea7044a7"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/skills/skill-catalog.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 297,
+          "column": 1,
+          "end_line": 297,
+          "end_column": 126
+        },
+        "raw_line": "| Skill orchestration | `src/domain/skills/skill-invoker.ts` + `skill-catalog.ts` | Fill args, build prompt, switch provider |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/skills/skill-catalog.ts",
+        "exists": true,
+        "size": 662,
+        "sha256": "c05cd03c0d0a9872f730a516cd185b36bb9264638d0c2aac794d79f9c428f009"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/skills/skill-invoker.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 297,
+          "column": 1,
+          "end_line": 297,
+          "end_column": 126
+        },
+        "raw_line": "| Skill orchestration | `src/domain/skills/skill-invoker.ts` + `skill-catalog.ts` | Fill args, build prompt, switch provider |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/skills/skill-invoker.ts",
+        "exists": true,
+        "size": 6937,
+        "sha256": "43dd4bb134cb4a600fb69e9f32f55d3156a69d76b248f5ff32c50bdd462dec3a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/sessions/session-store.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 299,
+          "column": 1,
+          "end_line": 299,
+          "end_column": 95
+        },
+        "raw_line": "| Sessions | `src/domain/sessions/session-store.ts` | `PersistenceBackend` factory + registry |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/sessions/session-store.ts",
+        "exists": true,
+        "size": 10018,
+        "sha256": "5b3ac98ea6466ed84542247607463bb744fdcba6fac9b8e048cbb80ffd16d2c3"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/settings/settings-manager.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 300,
+          "column": 1,
+          "end_line": 300,
+          "end_column": 107
+        },
+        "raw_line": "| Settings manager | `src/domain/settings/settings-manager.ts` | get/set/reset/list, persistence, masking |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/settings/settings-manager.ts",
+        "exists": true,
+        "size": 15623,
+        "sha256": "921943fdead619c947d9d69c5dac2a5b9347ed7a08ff7532f2ec9182e87a6d09"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/transport/cli/provider-manager-api.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 302,
+          "column": 1,
+          "end_line": 302,
+          "end_column": 129
+        },
+        "raw_line": "| Provider controller | `src/transport/cli/provider-manager-api.ts` | Single semantic core for provider/account/slot management |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/transport/cli/provider-manager-api.ts",
+        "exists": true,
+        "size": 41687,
+        "sha256": "9bb5498475a7692d1eb0f7466cc31965207eaf424db34a63c2a670647392ee7c"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/tui/overlays/model-manager.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 303,
+          "column": 1,
+          "end_line": 303,
+          "end_column": 181
+        },
+        "raw_line": "| Model manager dock | `src/ui/tui/overlays/model-manager.tsx` + `model-manager/` | Multi-tab TUI dock: purpose board, accounts, catalog browse, search (state hook, tabs, dialogs) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/tui/overlays/model-manager.tsx",
+        "exists": true,
+        "size": 9511,
+        "sha256": "e44f84b38b8a752db88329c8b2338884b7cd63e0d021ab8762d5a5970b1b50e2"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/tui/components/model-picker.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 304,
+          "column": 1,
+          "end_line": 304,
+          "end_column": 127
+        },
+        "raw_line": "| Model picker | `src/ui/tui/components/model-picker.tsx` | Search & filter model selector with reachability & pricing badges |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/tui/components/model-picker.tsx",
+        "exists": true,
+        "size": 14722,
+        "sha256": "a761d2110027f381c094006b4c0d5bb0fde291db3f046caa7f8f2b3f05558a3b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/tui/components/add-account.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 305,
+          "column": 1,
+          "end_line": 305,
+          "end_column": 129
+        },
+        "raw_line": "| Add account flow | `src/ui/tui/components/add-account.tsx` | Multi-credential account configuration (paste, env, none, oauth) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/tui/components/add-account.tsx",
+        "exists": true,
+        "size": 14549,
+        "sha256": "b095b2afdff1a8ffad1a2a8f0c7ac5bd45d909a9d2cc32d32856cd59a8b8c278"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/tui/setup-wizard.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 306,
+          "column": 1,
+          "end_line": 306,
+          "end_column": 121
+        },
+        "raw_line": "| Setup wizard | `src/ui/tui/setup-wizard.tsx` | First-run onboarding wizard with preset bundles & slot recommendations |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/tui/setup-wizard.tsx",
+        "exists": true,
+        "size": 20607,
+        "sha256": "8ea82e68a54823120bd9a5466c8206a579be138af970f134fe9d90eccb16437e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/vendors/pi-ai/pi-auth-adapter.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 307,
+          "column": 1,
+          "end_line": 307,
+          "end_column": 114
+        },
+        "raw_line": "| OAuth adapter | `src/vendors/pi-ai/pi-auth-adapter.ts` | Pi AI OAuth flow bridge over Seepient CredentialStore |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/vendors/pi-ai/pi-auth-adapter.ts",
+        "exists": true,
+        "size": 9383,
+        "sha256": "7390624c8f0c28d8399c0c05429e6a4957a8bd4feaa960415b681b549fd95c70"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/prompts/system-prompts.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 314,
+          "column": 1,
+          "end_line": 314,
+          "end_column": 92
+        },
+        "raw_line": "| System prompts | `src/domain/prompts/system-prompts.ts` | Interactive vs non-interactive |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/prompts/system-prompts.ts",
+        "exists": true,
+        "size": 11031,
+        "sha256": "9e593007bc28c5d07126bb5619ffaac80a283c23dbc6d8b05ce6811ed4d95409"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/cli/index.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 315,
+          "column": 1,
+          "end_line": 315,
+          "end_column": 82
+        },
+        "raw_line": "| CLI UI entry | `src/ui/cli/index.ts` | Commander setup; dispatches TUI vs REPL |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/cli/index.ts",
+        "exists": true,
+        "size": 4537,
+        "sha256": "6907ab78cd82d6321d17f9be76fced824593ccc25899b5db053c6417f4dd815d"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/ui/repl/repl.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 317,
+          "column": 1,
+          "end_line": 317,
+          "end_column": 77
+        },
+        "raw_line": "| REPL | `src/ui/repl/repl.ts` | Readline fallback, non-interactive / piped |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/ui/repl/repl.ts",
+        "exists": true,
+        "size": 9907,
+        "sha256": "99c9b69a6f5364cf5fcb783805ea90597b70efb372694eb22a3e29c86991b9d4"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/transport/ws/connection-registry.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 320,
+          "column": 1,
+          "end_line": 320,
+          "end_column": 174
+        },
+        "raw_line": "| WebSocket | `src/transport/ws/` | Dispatcher (`ws-handlers.ts`), `connection-registry.ts`, message handlers (`chat`, `approvals`, `provider-mutations`, `session-control`) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/transport/ws/connection-registry.ts",
+        "exists": true,
+        "size": 2417,
+        "sha256": "12cc23e88cff764afe7a9e92d4f129c7fbb9b6ae757bf4f0954c185513bad8c3"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/transport/ws/ws-handlers.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 320,
+          "column": 1,
+          "end_line": 320,
+          "end_column": 174
+        },
+        "raw_line": "| WebSocket | `src/transport/ws/` | Dispatcher (`ws-handlers.ts`), `connection-registry.ts`, message handlers (`chat`, `approvals`, `provider-mutations`, `session-control`) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/transport/ws/ws-handlers.ts",
+        "exists": true,
+        "size": 5515,
+        "sha256": "656729bd426f1e3128fbacea426fe89ece909f9af164db14fe47a751ad7d55fa"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/capabilities/inference/aggregate-adapter.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 324,
+          "column": 1,
+          "end_line": 324,
+          "end_column": 184
+        },
+        "raw_line": "Unified provider architecture behind `ProviderRuntime` (`src/domain/providers/provider-runtime.ts`) and `AggregateInferenceAdapter` (`src/capabilities/inference/aggregate-adapter.ts`):"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/capabilities/inference/aggregate-adapter.ts",
+        "exists": true,
+        "size": 6659,
+        "sha256": "7e798bf23646e3ee1fa6e39ce0c4449303c5e213f00487bc349b0ba4cb6c02c7"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/domain/providers/provider-runtime.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 324,
+          "column": 1,
+          "end_line": 324,
+          "end_column": 184
+        },
+        "raw_line": "Unified provider architecture behind `ProviderRuntime` (`src/domain/providers/provider-runtime.ts`) and `AggregateInferenceAdapter` (`src/capabilities/inference/aggregate-adapter.ts`):"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/domain/providers/provider-runtime.ts",
+        "exists": true,
+        "size": 28546,
+        "sha256": "6a1ae24364e52679dc21cb5ce30d840e72532d1f3f5a007c55d901d96d260322"
+      }
+    }
+  ],
+  "diagnostics": []
+}

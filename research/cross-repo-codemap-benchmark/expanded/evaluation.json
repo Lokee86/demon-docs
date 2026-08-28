@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "evaluation": "step10-expanded-cross-repository-validation",
+  "implementation_baseline": "94d3b463962e149b3b44f6f8274b45ef839f3b03",
+  "date": "2026-08-28",
+  "methodology": {
+    "large_repository_policy": "ten deterministic holdout seeds on each primary-sized repository; same seeds compared with and without a current Arcana snapshot",
+    "small_repository_policy": "one deterministic fallback holdout split retained for diagnostic signal only",
+    "precision_warning": "holdout recovery is recall evidence only; unmatched suggestions are not labeled false positives and this evaluation does not claim cross-repository precision",
+    "tier_note": "all recovered links in this expanded evaluation remained context-tier; automatic mutation therefore stayed more conservative than discovery"
+  },
+  "primary_sized": {
+    "lemonade": {
+      "repository": {
+        "code_repository": "https://github.com/lemonade-sdk/lemonade.git",
+        "code_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+        "docs_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+        "resolved_pair_count": 22,
+        "resolved_document_count": 1,
+        "resolved_target_count": 22
+      },
+      "fallback": {
+        "seed_count": 10,
+        "holdout_per_seed": 4,
+        "hidden_link_trials": 40,
+        "recoveries_by_seed": [
+          0,
+          1,
+          2,
+          3,
+          0,
+          2,
+          3,
+          0,
+          0,
+          1
+        ],
+        "recovered_link_trials": 12,
+        "recall": 0.3,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 12,
+        "unique_suggestion_count_by_seed": [
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30,
+          30
+        ]
+      },
+      "arcana": {
+        "seed_count": 10,
+        "holdout_per_seed": 4,
+        "hidden_link_trials": 40,
+        "recoveries_by_seed": [
+          1,
+          2,
+          3,
+          2,
+          0,
+          2,
+          2,
+          1,
+          0,
+          1
+        ],
+        "recovered_link_trials": 14,
+        "recall": 0.35,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 14,
+        "unique_suggestion_count_by_seed": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "arcana_snapshot": "sha256:b4439daa8b253d2ce164e5f0a305dbf4b150edff3b610a547e6640d10750942f"
+    },
+    "seepient": {
+      "repository": {
+        "code_repository": "https://github.com/hashangit/seepient.git",
+        "code_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+        "docs_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+        "resolved_pair_count": 25,
+        "resolved_document_count": 1,
+        "resolved_target_count": 25
+      },
+      "fallback": {
+        "seed_count": 10,
+        "holdout_per_seed": 5,
+        "hidden_link_trials": 50,
+        "recoveries_by_seed": [
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          1,
+          2,
+          1,
+          2
+        ],
+        "recovered_link_trials": 11,
+        "recall": 0.22,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 11,
+        "unique_suggestion_count_by_seed": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "arcana": {
+        "seed_count": 10,
+        "holdout_per_seed": 5,
+        "hidden_link_trials": 50,
+        "recoveries_by_seed": [
+          2,
+          3,
+          2,
+          3,
+          3,
+          2,
+          2,
+          3,
+          2,
+          3
+        ],
+        "recovered_link_trials": 25,
+        "recall": 0.5,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 25,
+        "unique_suggestion_count_by_seed": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32
+        ]
+      },
+      "arcana_snapshot": "sha256:eb692c82eb0757bba8e9bf43433c565b6bb57ccd15579b44d68eeb835aa633a8"
+    }
+  },
+  "diagnostic": {
+    "cclint": {
+      "repository": {
+        "code_repository": "https://github.com/carlrannaberg/cclint.git",
+        "code_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+        "docs_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+        "resolved_pair_count": 5,
+        "resolved_document_count": 1,
+        "resolved_target_count": 5
+      },
+      "fallback_single_split": {
+        "holdout_count": 1,
+        "recovered_link_count": 1,
+        "recall": 1,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 1,
+        "unique_suggestion_count": 30
+      }
+    },
+    "text-to-speech": {
+      "repository": {
+        "code_repository": "https://github.com/guillempuche/text-to-speech.git",
+        "code_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+        "docs_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+        "resolved_pair_count": 8,
+        "resolved_document_count": 1,
+        "resolved_target_count": 8
+      },
+      "fallback_single_split": {
+        "holdout_count": 2,
+        "recovered_link_count": 1,
+        "recall": 0.5,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 1,
+        "unique_suggestion_count": 7
+      }
+    },
+    "emisso-sii": {
+      "repository": {
+        "code_repository": "https://github.com/emisso-ai/emisso-sii.git",
+        "code_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+        "docs_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+        "resolved_pair_count": 3,
+        "resolved_document_count": 1,
+        "resolved_target_count": 3
+      },
+      "fallback_single_split": {
+        "holdout_count": 1,
+        "recovered_link_count": 0,
+        "recall": 0,
+        "hard_recovered_count": 0,
+        "context_recovered_count": 0,
+        "unique_suggestion_count": 18
+      }
+    }
+  },
+  "convergence": {
+    "fixture": "docs/architecture/codemap-pipeline.md",
+    "initial_dry_run": {
+      "updated_files": 1,
+      "added": 0,
+      "removed": 0,
+      "reason": "managed-section adoption only"
+    },
+    "applied_adoption": true,
+    "second_dry_run": {
+      "updated_files": 0
+    },
+    "conclusion": "mature authored map converges with zero additions/removals and becomes fully idempotent after ownership adoption"
+  }
+}

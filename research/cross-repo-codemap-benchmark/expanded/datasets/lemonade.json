@@ -1,0 +1,521 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 19639,
+      "sha256": "45d4ca56f333943a6990a71c25976422af7ce950a0902a849758d88c15e63b33",
+      "entry_count": 22,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/server.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 204,
+          "column": 1,
+          "end_line": 204,
+          "end_column": 74
+        },
+        "raw_line": "| `src/cpp/server/server.cpp` | HTTP route registration and all handlers |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/server.cpp",
+        "exists": true,
+        "size": 363860,
+        "sha256": "b4186eb3d686e92e39bd97486a4a2ab9e2e2feca6f7846df42683a5a18952492"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/router.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 205,
+          "column": 1,
+          "end_line": 205,
+          "end_column": 79
+        },
+        "raw_line": "| `src/cpp/server/router.cpp` | Request routing and multi-model orchestration |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/router.cpp",
+        "exists": true,
+        "size": 131840,
+        "sha256": "a1d070f073da7c858616b4a6180d2a595072623e8e5d88ef1e9a72ba90ac2daa"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/model_manager.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 206,
+          "column": 1,
+          "end_line": 206,
+          "end_column": 85
+        },
+        "raw_line": "| `src/cpp/server/model_manager.cpp` | Model registry, downloads, recipe resolution |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/model_manager.cpp",
+        "exists": true,
+        "size": 282275,
+        "sha256": "26e430ca73bddd226bb947167639a0f80bbb9d2048dea1be4183b41f3f35ea2a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/wrapped_server.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 207,
+          "column": 1,
+          "end_line": 207,
+          "end_column": 74
+        },
+        "raw_line": "| `src/cpp/include/lemon/wrapped_server.h` | Backend abstract base class |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/wrapped_server.h",
+        "exists": true,
+        "size": 28831,
+        "sha256": "bca24c5cfda28547634712e6b0f8b4249d77a223970ccdcb84519b9b9e21a4b8"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/server_capabilities.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 208,
+          "column": 1,
+          "end_line": 208,
+          "end_column": 81
+        },
+        "raw_line": "| `src/cpp/include/lemon/server_capabilities.h` | Backend capability interfaces |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/server_capabilities.h",
+        "exists": true,
+        "size": 6696,
+        "sha256": "ac2ef79c1e9e54daaff8562a7402e2fbe3fa262389c8416d05bf65df4b92a7bb"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/resources/server_models.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 209,
+          "column": 1,
+          "end_line": 209,
+          "end_column": 59
+        },
+        "raw_line": "| `src/cpp/resources/server_models.json` | Model registry |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/resources/server_models.json",
+        "exists": true,
+        "size": 70557,
+        "sha256": "48f996aa70f590e70e2599e963450f8a54348e72d7047224f8528c2e994a3224"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/resources/backend_versions.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 210,
+          "column": 1,
+          "end_line": 210,
+          "end_column": 68
+        },
+        "raw_line": "| `src/cpp/resources/backend_versions.json` | Backend version pins |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/resources/backend_versions.json",
+        "exists": true,
+        "size": 8003,
+        "sha256": "c8939f80507c01c00f8693d3801b84a890a056ce8a0d7e436f8c0d535ed8853b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "README.md",
+        "exists": true,
+        "size": 23657,
+        "sha256": "134edc7a8358102128a2abff6bd48309c46661a0c5c8fd6e3cd9ea38668c29ab"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "docs/assets/models.js",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/assets/models.js",
+        "exists": true,
+        "size": 21002,
+        "sha256": "ca1940d7e4e5ca9d3b75ebcc19c472993c9cdc1bdebd9016be01c5dcd0c76a8b"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "docs/dev/backends-reference.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/dev/backends-reference.md",
+        "exists": true,
+        "size": 16997,
+        "sha256": "da79fcf93be0ab61d0afb1c094fbbee07dbc0ea3570fdd8f331c71d2fbc9acad"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "docs/guide/cli.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/guide/cli.md",
+        "exists": true,
+        "size": 47994,
+        "sha256": "b2fe2b1639125dd93409e66b370279fa6b50475358bb0fa84f4433993adb97d8"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "docs/tools/gen_backend_boilerplate.py",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/tools/gen_backend_boilerplate.py",
+        "exists": true,
+        "size": 21729,
+        "sha256": "643c96218f6441675610d6ba80c393682d14a59e0abae56624262da5f7e32692"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/resources/defaults.json",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 211,
+          "column": 1,
+          "end_line": 211,
+          "end_column": 534
+        },
+        "raw_line": "| `docs/tools/gen_backend_boilerplate.py` | Regenerates committed artifacts from the C++ backend descriptors. Outputs: the whole of `src/cpp/resources/defaults.json` (per-recipe sections only; global keys stay hand-maintained in that file), and `<!-- BEGIN/END GENERATED -->` regions in `docs/dev/backends-reference.md`, root `README.md`, `docs/guide/cli.md`, `docs/guide/configuration/{README,multi-model,custom-models}.md`, and `docs/assets/models.js`. Don't hand-edit those regions/sections; CI runs `--check` and fails on drift. |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/resources/defaults.json",
+        "exists": true,
+        "size": 3373,
+        "sha256": "b4039de5b1a562df1241272a2b274ad1c397f1347d903618fa2edad603036030"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/anthropic_api.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 212,
+          "column": 1,
+          "end_line": 212,
+          "end_column": 68
+        },
+        "raw_line": "| `src/cpp/server/anthropic_api.cpp` | Anthropic API compatibility |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/anthropic_api.cpp",
+        "exists": true,
+        "size": 52100,
+        "sha256": "8fb35376160af83e885a0f740d64e666cbd579675058432b154edc2483089e9f"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/ollama_api.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 213,
+          "column": 1,
+          "end_line": 213,
+          "end_column": 62
+        },
+        "raw_line": "| `src/cpp/server/ollama_api.cpp` | Ollama API compatibility |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/ollama_api.cpp",
+        "exists": true,
+        "size": 61608,
+        "sha256": "a44d8903d710abce0aa40f1757f46361e8abe86bded949912cc5c7570f4f8952"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/server/mcp_server.cpp",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 214,
+          "column": 1,
+          "end_line": 214,
+          "end_column": 61
+        },
+        "raw_line": "| `src/cpp/server/mcp_server.cpp` | MCP gateway (POST /mcp) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/server/mcp_server.cpp",
+        "exists": true,
+        "size": 58389,
+        "sha256": "5bb1da18d7282832a8e6e066befd00284d2dbfff7b4e868dd2708620dc3c0d9e"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/websocket_server.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 215,
+          "column": 1,
+          "end_line": 215,
+          "end_column": 78
+        },
+        "raw_line": "| `src/cpp/include/lemon/websocket_server.h` | WebSocket Realtime API server |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/websocket_server.h",
+        "exists": true,
+        "size": 6095,
+        "sha256": "a0cf57a30b8f4178998025ba8e57b3bce387bfb0bbcad2e61caff1ce241784f9"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/model_types.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 216,
+          "column": 1,
+          "end_line": 216,
+          "end_column": 76
+        },
+        "raw_line": "| `src/cpp/include/lemon/model_types.h` | Model type and device type enums |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/model_types.h",
+        "exists": true,
+        "size": 6898,
+        "sha256": "9a2d00b64ffce78bca209d33a4cf82f31de57e6d113b9dc3a08f1a61f49ade2a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/config_file.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 217,
+          "column": 1,
+          "end_line": 217,
+          "end_column": 73
+        },
+        "raw_line": "| `src/cpp/include/lemon/config_file.h` | config.json load/save/migrate |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/config_file.h",
+        "exists": true,
+        "size": 4106,
+        "sha256": "f671e2684c0117b62cd38c253fa8fc2c035920b2fa3f3b78330c87f97dd83045"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/cpp/include/lemon/recipe_options.h",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 218,
+          "column": 1,
+          "end_line": 218,
+          "end_column": 76
+        },
+        "raw_line": "| `src/cpp/include/lemon/recipe_options.h` | Per-recipe JSON configuration |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cpp/include/lemon/recipe_options.h",
+        "exists": true,
+        "size": 2720,
+        "sha256": "4de526c4c743dc2251125b96293bb8c630d102e6d845d0d1c6290e4cb6cb99af"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/app/src/renderer/ModelManager.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 220,
+          "column": 1,
+          "end_line": 220,
+          "end_column": 65
+        },
+        "raw_line": "| `src/app/src/renderer/ModelManager.tsx` | Model management UI |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/app/src/renderer/ModelManager.tsx",
+        "exists": true,
+        "size": 111519,
+        "sha256": "00c8a5477ded2458f3aa117d3b01c4e0e640d70c84775c17f60e2d86ded437a5"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "src/app/src/renderer/ChatWindow.tsx",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 221,
+          "column": 1,
+          "end_line": 221,
+          "end_column": 58
+        },
+        "raw_line": "| `src/app/src/renderer/ChatWindow.tsx` | Chat interface |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/app/src/renderer/ChatWindow.tsx",
+        "exists": true,
+        "size": 15152,
+        "sha256": "1bd5f53d2f35c8dd7a9057552cdf8bf533890e2ead1d4a5ade0094c939dba5b4"
+      }
+    }
+  ],
+  "diagnostics": []
+}

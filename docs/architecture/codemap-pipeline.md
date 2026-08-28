@@ -221,6 +221,8 @@ A benchmark threshold failure represents a completed measurement below a request
 
 ## Code map
 
+<!-- doc-ledger:codemap:start -->
+
 - `internal/codemap/` — extraction, datasets, semantic target-resolution contract, managed-section adoption, schema placement seam, and syntax-preserving rendering.
 - `internal/codemaparcana/` — current-snapshot discovery, Arcana JSONL transport, freshness checks, file/symbol resolution, snapshot diff, and mapped semantic-staleness analysis.
 - `internal/codemapsemantic/` — durable per-document semantic validation baselines in `.ddocs`.
@@ -232,6 +234,7 @@ A benchmark threshold failure represents a completed measurement below a request
 - `internal/codemapprecision/` — samples, labels, validation, and evaluation.
 - `internal/app/codemap_*.go` — explicit CLI assembly and output.
 - `internal/review/` — shared decline and reconsideration policy.
+<!-- doc-ledger:codemap:end -->
 
 ## Tests
 

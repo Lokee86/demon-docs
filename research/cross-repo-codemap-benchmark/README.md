@@ -80,6 +80,33 @@ Results at algorithm commit `b7dfc598c9a158e29ba9e9167dbf2fa6016b80d1`:
 
 A generic test-counterpart demotion was rejected after Space Rocks validation showed a large loss of valid hard-link coverage with no precision gain. The final pass contains no broad test-target penalty.
 
+## Step 10 expanded validation
+
+The August 28 Step 10 closeout keeps the original six-repository benchmark frozen and adds a separate `expanded/` corpus at implementation baseline `94d3b463962e149b3b44f6f8274b45ef839f3b03`. This avoids rewriting historical results while testing the completed Arcana-backed algorithm on new repositories.
+
+The expanded corpus contains two primary-sized human-authored `AGENTS.md` Key Files maps and three smaller diagnostic fixtures:
+
+- Lemonade: 22 resolved links across C++, Python, and TypeScript;
+- Seepient: 25 resolved TypeScript links;
+- cclint: 5 resolved TypeScript links;
+- text-to-speech: 8 resolved Python/scripting links; and
+- emisso-sii: 3 resolved TypeScript links.
+
+Lemonade and Seepient use ten deterministic holdout seeds each. The same hidden-link splits are compared with fallback repository evidence and with a current Arcana snapshot:
+
+| Repository | Hidden trials | Fallback recovery | Arcana recovery |
+| --- | ---: | ---: | ---: |
+| Lemonade | 40 | 12/40 (30%) | 14/40 (35%) |
+| Seepient | 50 | 11/50 (22%) | 25/50 (50%) |
+
+All recovered links in this expanded evaluation remained `context` tier. This is intentional evidence that discovery can improve without broadening the automatic mutation surface.
+
+The smaller diagnostic single splits recovered 1/1 for cclint, 1/2 for text-to-speech, and 0/1 for emisso-sii. They are retained only as directional diagnostics because the samples are too small for standalone conclusions.
+
+The expanded evaluation remains a recall test, not a precision study. Unmatched suggestions are not labeled false positives. The retained Space Rocks and frozen cross-repository manual reviews remain the precision evidence.
+
+Expanded artifacts live under `expanded/` so the historical `benchmark-plan.json`, `evaluation.json`, `results.md`, corpus, and reports remain reproducible unchanged. The Demon Docs `docs/architecture/codemap-pipeline.md` self-map is also pinned as the convergence fixture: zero link additions/removals on adoption, followed by a zero-update second dry-run.
+
 ## Acceptance requirements
 
 A primary candidate should normally provide:

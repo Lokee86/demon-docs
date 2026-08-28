@@ -1,0 +1,44 @@
+{
+  "id": "emisso-sii",
+  "class": "native_key_files_section",
+  "languages": [
+    "TypeScript"
+  ],
+  "extraction_mode": "all_paths",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 1,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/emisso-ai/emisso-sii.git",
+  "docs_repository": "https://github.com/emisso-ai/emisso-sii.git",
+  "code_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+  "docs_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 3,
+  "resolved_document_count": 1,
+  "resolved_target_count": 3,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "packages/engine/src/index.ts",
+      "marker": "Key Files",
+      "line": 39,
+      "resolved_target": "packages/engine/src/index.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "packages/api/src/index.ts",
+      "marker": "Key Files",
+      "line": 46,
+      "resolved_target": "packages/api/src/index.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "packages/api/src/adapters/next.ts",
+      "marker": "Key Files",
+      "line": 47,
+      "resolved_target": "packages/api/src/adapters/next.ts"
+    }
+  ]
+}

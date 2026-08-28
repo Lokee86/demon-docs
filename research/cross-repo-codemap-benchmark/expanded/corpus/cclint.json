@@ -1,0 +1,58 @@
+{
+  "id": "cclint",
+  "class": "native_key_files_section",
+  "languages": [
+    "TypeScript"
+  ],
+  "extraction_mode": "all_paths",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 1,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/carlrannaberg/cclint.git",
+  "docs_repository": "https://github.com/carlrannaberg/cclint.git",
+  "code_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+  "docs_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 5,
+  "resolved_document_count": 1,
+  "resolved_target_count": 5,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/lib/utils.ts",
+      "marker": "Key Files to Understand",
+      "line": 351,
+      "resolved_target": "src/lib/utils.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/lib/config.ts",
+      "marker": "Key Files to Understand",
+      "line": 352,
+      "resolved_target": "src/lib/config.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/linters/base.ts",
+      "marker": "Key Files to Understand",
+      "line": 353,
+      "resolved_target": "src/linters/base.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cli.ts",
+      "marker": "Key Files to Understand",
+      "line": 356,
+      "resolved_target": "src/cli.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/types/index.ts",
+      "marker": "Key Files to Understand",
+      "line": 358,
+      "resolved_target": "src/types/index.ts"
+    }
+  ]
+}

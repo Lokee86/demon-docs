@@ -1,0 +1,179 @@
+{
+  "id": "lemonade",
+  "class": "native_key_files_section",
+  "languages": [
+    "C++",
+    "Python",
+    "TypeScript"
+  ],
+  "extraction_mode": "all_paths",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 4,
+  "status": "qualifies",
+  "code_repository": "https://github.com/lemonade-sdk/lemonade.git",
+  "docs_repository": "https://github.com/lemonade-sdk/lemonade.git",
+  "code_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+  "docs_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 22,
+  "resolved_document_count": 1,
+  "resolved_target_count": 22,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/server.cpp",
+      "marker": "Key Files",
+      "line": 204,
+      "resolved_target": "src/cpp/server/server.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/router.cpp",
+      "marker": "Key Files",
+      "line": 205,
+      "resolved_target": "src/cpp/server/router.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/model_manager.cpp",
+      "marker": "Key Files",
+      "line": 206,
+      "resolved_target": "src/cpp/server/model_manager.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/wrapped_server.h",
+      "marker": "Key Files",
+      "line": 207,
+      "resolved_target": "src/cpp/include/lemon/wrapped_server.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/server_capabilities.h",
+      "marker": "Key Files",
+      "line": 208,
+      "resolved_target": "src/cpp/include/lemon/server_capabilities.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/resources/server_models.json",
+      "marker": "Key Files",
+      "line": 209,
+      "resolved_target": "src/cpp/resources/server_models.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/resources/backend_versions.json",
+      "marker": "Key Files",
+      "line": 210,
+      "resolved_target": "src/cpp/resources/backend_versions.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "README.md",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/assets/models.js",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "docs/assets/models.js"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/dev/backends-reference.md",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "docs/dev/backends-reference.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/guide/cli.md",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "docs/guide/cli.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/tools/gen_backend_boilerplate.py",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "docs/tools/gen_backend_boilerplate.py"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/resources/defaults.json",
+      "marker": "Key Files",
+      "line": 211,
+      "resolved_target": "src/cpp/resources/defaults.json"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/anthropic_api.cpp",
+      "marker": "Key Files",
+      "line": 212,
+      "resolved_target": "src/cpp/server/anthropic_api.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/ollama_api.cpp",
+      "marker": "Key Files",
+      "line": 213,
+      "resolved_target": "src/cpp/server/ollama_api.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/server/mcp_server.cpp",
+      "marker": "Key Files",
+      "line": 214,
+      "resolved_target": "src/cpp/server/mcp_server.cpp"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/websocket_server.h",
+      "marker": "Key Files",
+      "line": 215,
+      "resolved_target": "src/cpp/include/lemon/websocket_server.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/model_types.h",
+      "marker": "Key Files",
+      "line": 216,
+      "resolved_target": "src/cpp/include/lemon/model_types.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/config_file.h",
+      "marker": "Key Files",
+      "line": 217,
+      "resolved_target": "src/cpp/include/lemon/config_file.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/cpp/include/lemon/recipe_options.h",
+      "marker": "Key Files",
+      "line": 218,
+      "resolved_target": "src/cpp/include/lemon/recipe_options.h"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/app/src/renderer/ModelManager.tsx",
+      "marker": "Key Files",
+      "line": 220,
+      "resolved_target": "src/app/src/renderer/ModelManager.tsx"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/app/src/renderer/ChatWindow.tsx",
+      "marker": "Key Files",
+      "line": 221,
+      "resolved_target": "src/app/src/renderer/ChatWindow.tsx"
+    }
+  ]
+}

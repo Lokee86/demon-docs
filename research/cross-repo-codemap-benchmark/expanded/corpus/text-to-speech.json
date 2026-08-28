@@ -1,0 +1,81 @@
+{
+  "id": "text-to-speech",
+  "class": "native_key_files_section",
+  "languages": [
+    "Python",
+    "Shell",
+    "PowerShell"
+  ],
+  "extraction_mode": "all_paths",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 2,
+  "status": "diagnostic_or_reject",
+  "code_repository": "https://github.com/guillempuche/text-to-speech.git",
+  "docs_repository": "https://github.com/guillempuche/text-to-speech.git",
+  "code_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+  "docs_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 8,
+  "resolved_document_count": 1,
+  "resolved_target_count": 8,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "pyproject.toml",
+      "marker": "Key Files",
+      "line": 35,
+      "resolved_target": "pyproject.toml"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": ".github/workflows/release.yml",
+      "marker": "Key Files",
+      "line": 36,
+      "resolved_target": ".github/workflows/release.yml"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "README.md",
+      "marker": "Key Files",
+      "line": 66,
+      "resolved_target": "README.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "CONTRIBUTING.md",
+      "marker": "Key Files",
+      "line": 67,
+      "resolved_target": "CONTRIBUTING.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "CHANGELOG.md",
+      "marker": "Key Files",
+      "line": 68,
+      "resolved_target": "CHANGELOG.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "docs/fish-audio.md",
+      "marker": "Key Files",
+      "line": 69,
+      "resolved_target": "docs/fish-audio.md"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "install.sh",
+      "marker": "Key Files",
+      "line": 74,
+      "resolved_target": "install.sh"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "uninstall.sh",
+      "marker": "Key Files",
+      "line": 77,
+      "resolved_target": "uninstall.sh"
+    }
+  ]
+}

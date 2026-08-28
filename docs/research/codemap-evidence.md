@@ -150,7 +150,7 @@ Role and confidence tier answer different questions. Role describes the candidat
 
 ## Current measured baseline
 
-The retained measurements below were produced before the August 27 mutation-policy and authored-provenance repairs. Treat them as historical baseline evidence until the frozen corpora are rerun against the revised algorithm.
+The retained evidence now has two layers: the original frozen precision/recovery corpora and a Step 10 expanded cross-repository validation of the completed Arcana-backed algorithm. Historical measurements remain useful because they own the manual labels; the expanded run adds independent recall evidence without rewriting those samples.
 
 ### Space Rocks labeled sample
 
@@ -170,9 +170,9 @@ The manually reviewed Space Rocks sample contains 150 recommendations across 25 
 
 ### Cross-repository recovery
 
-The ordinary calculation corpus contains five repositories. A monolithic per-file index is retained separately as a stress case.
+The original calculation corpus contains five repositories. A monolithic per-file index is retained separately as a stress case.
 
-| Metric | Current result |
+| Metric | Frozen result |
 |---|---:|
 | Hidden links | 18 |
 | Recovered links | 11 |
@@ -180,6 +180,17 @@ The ordinary calculation corpus contains five repositories. A monolithic per-fil
 | Context recoveries | 7 |
 | Recall | 61.11% |
 | Separate index-stress recovery | 3/10, all context |
+
+Step 10 adds a separate expanded validation at implementation baseline `94d3b463962e149b3b44f6f8274b45ef839f3b03` rather than pooling new repositories into the frozen result. Two new primary-sized human-authored Key Files maps were run across ten deterministic holdout seeds with and without current Arcana state:
+
+| Repository | Resolved authored links | Hidden trials | Fallback recovery | Arcana recovery |
+|---|---:|---:|---:|---:|
+| Lemonade | 22 | 40 | 12/40 (30%) | 14/40 (35%) |
+| Seepient | 25 | 50 | 11/50 (22%) | 25/50 (50%) |
+
+Three smaller fallback-only diagnostics recovered 1/1 for cclint, 1/2 for text-to-speech, and 0/1 for emisso-sii. All recovered relationships in the expanded run remained `context` tier, so the Arcana lift improved discovery without broadening automatic insertion.
+
+The Demon Docs pipeline map also serves as a convergence fixture. It required one ownership-only managed-section adoption with `added=0 removed=0`; the immediately following dry-run reported zero files to update. Mature authored coverage therefore converges without semantic expansion.
 
 ### Frozen cross-repository precision review
 
@@ -214,7 +225,9 @@ The measurements support these conclusions:
 - broader context retention improves relevance coverage but increases plausible-unnecessary output;
 - narrow negative-evidence rules can remove demonstrated noise without broad file-class suppression;
 - the current model is suitable for explicit dogfooding with inspection, dry-run, and persisted declines; and
-- repositories with different languages, naming conventions, or document shapes require independent evaluation.
+- repositories with different languages, naming conventions, or document shapes require independent evaluation;
+- current Arcana relationship evidence can materially improve rediscovery on independent repositories, with Seepient improving from 22% to 50% across identical multi-seed holdouts; and
+- that recall improvement does not require weakening the `hard_link` mutation threshold, because the expanded recoveries remained context-only.
 
 The measurements do not support:
 
@@ -262,9 +275,11 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - The cross-repository precision review has one reviewer.
 - Most non-Space-Rocks evaluation documents are broad repository guidance rather than narrowly scoped feature documents.
 - Few unmatched hard-tier recommendations were available outside Space Rocks.
-- Ordinary cross-repository holdout recovery remains 11/18.
+- The original frozen cross-repository holdout remains 11/18 and should not be pooled mechanically with the later Step 10 multi-seed evaluation.
+- Expanded Step 10 recovery is still based mostly on broad repository-guidance documents rather than narrowly scoped feature documents.
+- The expanded evaluation measures recall only; its unmatched suggestions have not been manually labeled for strict precision.
 - Thresholds are empirical defaults rather than universal constants.
-- The new score-banded role/directory coverage policy and conservative hard-link allocation have not yet been rerun across the frozen labeled corpora.
+- The revised role/directory coverage and Arcana-backed selection policy now has independent recall evidence, but the frozen manual precision labels remain the stronger evidence for mutation safety.
 - Production execution now creates missing codemap sections only through selected effective document schemas; schema placement is separate from ranking quality.
 - Continued tuning on the same frozen errors risks overfitting.
 
@@ -275,7 +290,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - `research/codemap-review/` — reviewed trusted-link artifacts.
 - `research/codemap-precision/` — Space Rocks labeled sample and evaluation.
 - `research/codemap-evidence-validation/` — signal validation work.
-- `research/cross-repo-codemap-benchmark/` — pinned multi-repository holdout corpus.
+- `research/cross-repo-codemap-benchmark/` — original pinned multi-repository holdout corpus plus the separately frozen `expanded/` Step 10 validation.
 - `research/cross-repo-codemap-precision-review/` — frozen cross-repository manual sample and tuning summary.
 
 ## Code map

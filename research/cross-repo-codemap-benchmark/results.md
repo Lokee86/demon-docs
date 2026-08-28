@@ -34,3 +34,23 @@ The precision columns are positive-only holdout precision: unmatched suggestions
 The gbrain result is a stress test: one document owns hundreds of targets, and redacting the authored index removes nearly all topical prose. It is not used to tune or summarize ordinary document-to-code behavior.
 
 This run measures recovery only. Cross-repository precision still requires manual labeling of sampled unmatched suggestions.
+
+## Step 10 expanded validation
+
+The completed Arcana-backed algorithm was separately validated at implementation baseline `94d3b463962e149b3b44f6f8274b45ef839f3b03`. The original result above remains frozen and is not recomputed or pooled with this later run.
+
+| Repository | Resolved authored links | Holdout design | Fallback recovery | Arcana recovery |
+| --- | ---: | --- | ---: | ---: |
+| Lemonade | 22 | 10 seeds x 4 hidden | 12/40 (30%) | 14/40 (35%) |
+| Seepient | 25 | 10 seeds x 5 hidden | 11/50 (22%) | 25/50 (50%) |
+| cclint | 5 | 1 hidden | 1/1 | not run |
+| text-to-speech | 8 | 2 hidden | 1/2 | not run |
+| emisso-sii | 3 | 1 hidden | 0/1 | not run |
+
+All recovered links in the expanded run remained `context` tier. Arcana therefore increased rediscovery without expanding the set of links eligible for automatic insertion under the current `hard_link` mutation policy.
+
+The Seepient result is the strongest independent structural signal: identical deterministic splits improved from 11/50 to 25/50 recovered links with Arcana. Lemonade improved more modestly from 12/40 to 14/40. These are recall measurements only; they do not replace the manually labeled precision corpora.
+
+Pinned candidate definitions, normalized corpora, datasets, discovery metadata, snapshot identities, and aggregate results are retained under `expanded/`.
+
+The self-dogfood convergence fixture also completed cleanly: `docs/architecture/codemap-pipeline.md` required one ownership-only adoption with `added=0 removed=0`, then immediately converged to `0 file(s)` on the second dry-run.

@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "candidates": [
+    {
+      "id": "lemonade",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/lemonade-sdk/lemonade.git",
+      "docs_repository": "https://github.com/lemonade-sdk/lemonade.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["C++", "Python", "TypeScript"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "primary",
+      "holdout_count": 4,
+      "rationale": "Human-authored AGENTS.md Key Files section provides 22 resolvable implementation paths across a mixed C++/Python/TypeScript repository."
+    },
+    {
+      "id": "seepient",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/hashangit/seepient.git",
+      "docs_repository": "https://github.com/hashangit/seepient.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["TypeScript"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "primary",
+      "holdout_count": 5,
+      "rationale": "Human-authored AGENTS.md Key Files section provides 25 resolvable implementation paths and a strong independent TypeScript graph-recovery test."
+    },
+    {
+      "id": "cclint",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/carlrannaberg/cclint.git",
+      "docs_repository": "https://github.com/carlrannaberg/cclint.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["TypeScript"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "rationale": "Small human-authored Key Files mapping retained as a TypeScript diagnostic fixture."
+    },
+    {
+      "id": "text-to-speech",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/guillempuche/text-to-speech.git",
+      "docs_repository": "https://github.com/guillempuche/text-to-speech.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["Python", "Shell", "PowerShell"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 2,
+      "rationale": "Small mixed Python/scripting Key Files mapping retained as a diagnostic fixture."
+    },
+    {
+      "id": "emisso-sii",
+      "class": "native_key_files_section",
+      "code_repository": "https://github.com/emisso-ai/emisso-sii.git",
+      "docs_repository": "https://github.com/emisso-ai/emisso-sii.git",
+      "documents": ["AGENTS.md"],
+      "section_markers": ["Key Files"],
+      "languages": ["TypeScript"],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "rationale": "Small TypeScript monorepo Key Files mapping retained as a diagnostic fixture."
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 18083,
+      "sha256": "a9cb0a60abe1e56c150c28a817577a5ea20eb5092c7e96609366104a4df71178",
+      "entry_count": 5,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files to Understand",
+        "target": "src/lib/utils.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 351,
+          "column": 1,
+          "end_line": 351,
+          "end_column": 63
+        },
+        "raw_line": "- `src/lib/utils.ts` - Path sanitization and security utilities"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/lib/utils.ts",
+        "exists": true,
+        "size": 6689,
+        "sha256": "521963133571d1b3cdd6885c8526286b7b69a1dfa64e5ffa81cfc16c397ea4e3"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files to Understand",
+        "target": "src/lib/config.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 352,
+          "column": 1,
+          "end_line": 352,
+          "end_column": 61
+        },
+        "raw_line": "- `src/lib/config.ts` - Configuration loading with sandboxing"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/lib/config.ts",
+        "exists": true,
+        "size": 13926,
+        "sha256": "7430688a8ae1a79c6edad5072629fecb957dcd1541029f29b414c9be594bf8b0"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files to Understand",
+        "target": "src/linters/base.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 353,
+          "column": 1,
+          "end_line": 353,
+          "end_column": 52
+        },
+        "raw_line": "- `src/linters/base.ts` - Shared validation patterns"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/linters/base.ts",
+        "exists": true,
+        "size": 13845,
+        "sha256": "fa5b29d6a29814f980e15ae74ef6a08e5d51fa8caa8e06de0a5bd673dad300e3"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files to Understand",
+        "target": "src/cli.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 356,
+          "column": 1,
+          "end_line": 356,
+          "end_column": 56
+        },
+        "raw_line": "- `src/cli.ts` - CLI interface and command orchestration"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/cli.ts",
+        "exists": true,
+        "size": 7399,
+        "sha256": "3b1a4acdc1a63ac2cab5482a23f0f2b1e4b23072defb1991dbaa09422ede59fa"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files to Understand",
+        "target": "src/types/index.ts",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 358,
+          "column": 1,
+          "end_line": 358,
+          "end_column": 47
+        },
+        "raw_line": "- `src/types/index.ts` - TypeScript definitions"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "src/types/index.ts",
+        "exists": true,
+        "size": 4725,
+        "sha256": "b34af337336c659a527562099cecc3c65a220f95bd3ca0d5d4c6137d1f95216c"
+      }
+    }
+  ],
+  "diagnostics": []
+}

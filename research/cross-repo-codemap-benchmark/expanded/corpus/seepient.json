@@ -1,0 +1,198 @@
+{
+  "id": "seepient",
+  "class": "native_key_files_section",
+  "languages": [
+    "TypeScript"
+  ],
+  "extraction_mode": "all_paths",
+  "benchmark_mode": "diagnostic",
+  "holdout_count": 5,
+  "status": "qualifies",
+  "code_repository": "https://github.com/hashangit/seepient.git",
+  "docs_repository": "https://github.com/hashangit/seepient.git",
+  "code_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+  "docs_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+  "documents_scanned": [
+    "AGENTS.md"
+  ],
+  "resolved_pair_count": 25,
+  "resolved_document_count": 1,
+  "resolved_target_count": 25,
+  "pairs": [
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/agent-loop.ts",
+      "marker": "Key Files",
+      "line": 286,
+      "resolved_target": "src/domain/agent-loop.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/foundations/types.ts",
+      "marker": "Key Files",
+      "line": 287,
+      "resolved_target": "src/foundations/types.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/foundations/errors.ts",
+      "marker": "Key Files",
+      "line": 288,
+      "resolved_target": "src/foundations/errors.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/foundations/settings-schema.ts",
+      "marker": "Key Files",
+      "line": 290,
+      "resolved_target": "src/foundations/settings-schema.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/foundations/config.ts",
+      "marker": "Key Files",
+      "line": 291,
+      "resolved_target": "src/foundations/config.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "models-catalog.ts",
+      "marker": "Key Files",
+      "line": 291,
+      "resolved_target": "src/foundations/models-catalog.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/tool-executor.ts",
+      "marker": "Key Files",
+      "line": 293,
+      "resolved_target": "src/domain/tool-executor.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/hooks.ts",
+      "marker": "Key Files",
+      "line": 295,
+      "resolved_target": "src/domain/hooks.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "skill-catalog.ts",
+      "marker": "Key Files",
+      "line": 297,
+      "resolved_target": "src/domain/skills/skill-catalog.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/skills/skill-invoker.ts",
+      "marker": "Key Files",
+      "line": 297,
+      "resolved_target": "src/domain/skills/skill-invoker.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/sessions/session-store.ts",
+      "marker": "Key Files",
+      "line": 299,
+      "resolved_target": "src/domain/sessions/session-store.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/settings/settings-manager.ts",
+      "marker": "Key Files",
+      "line": 300,
+      "resolved_target": "src/domain/settings/settings-manager.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/transport/cli/provider-manager-api.ts",
+      "marker": "Key Files",
+      "line": 302,
+      "resolved_target": "src/transport/cli/provider-manager-api.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/tui/overlays/model-manager.tsx",
+      "marker": "Key Files",
+      "line": 303,
+      "resolved_target": "src/ui/tui/overlays/model-manager.tsx"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/tui/components/model-picker.tsx",
+      "marker": "Key Files",
+      "line": 304,
+      "resolved_target": "src/ui/tui/components/model-picker.tsx"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/tui/components/add-account.tsx",
+      "marker": "Key Files",
+      "line": 305,
+      "resolved_target": "src/ui/tui/components/add-account.tsx"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/tui/setup-wizard.tsx",
+      "marker": "Key Files",
+      "line": 306,
+      "resolved_target": "src/ui/tui/setup-wizard.tsx"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/vendors/pi-ai/pi-auth-adapter.ts",
+      "marker": "Key Files",
+      "line": 307,
+      "resolved_target": "src/vendors/pi-ai/pi-auth-adapter.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/prompts/system-prompts.ts",
+      "marker": "Key Files",
+      "line": 314,
+      "resolved_target": "src/domain/prompts/system-prompts.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/cli/index.ts",
+      "marker": "Key Files",
+      "line": 315,
+      "resolved_target": "src/ui/cli/index.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/ui/repl/repl.ts",
+      "marker": "Key Files",
+      "line": 317,
+      "resolved_target": "src/ui/repl/repl.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "connection-registry.ts",
+      "marker": "Key Files",
+      "line": 320,
+      "resolved_target": "src/transport/ws/connection-registry.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "ws-handlers.ts",
+      "marker": "Key Files",
+      "line": 320,
+      "resolved_target": "src/transport/ws/ws-handlers.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/capabilities/inference/aggregate-adapter.ts",
+      "marker": "Key Files",
+      "line": 324,
+      "resolved_target": "src/capabilities/inference/aggregate-adapter.ts"
+    },
+    {
+      "document": "AGENTS.md",
+      "target": "src/domain/providers/provider-runtime.ts",
+      "marker": "Key Files",
+      "line": 324,
+      "resolved_target": "src/domain/providers/provider-runtime.ts"
+    }
+  ]
+}

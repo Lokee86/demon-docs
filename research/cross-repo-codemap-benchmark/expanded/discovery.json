@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "candidate_count": 5,
+  "results": [
+    {
+      "id": "lemonade",
+      "class": "native_key_files_section",
+      "languages": [
+        "C++",
+        "Python",
+        "TypeScript"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 4,
+      "status": "qualifies",
+      "code_repository": "https://github.com/lemonade-sdk/lemonade.git",
+      "docs_repository": "https://github.com/lemonade-sdk/lemonade.git",
+      "code_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+      "docs_revision": "93c888224db3a746986cd748a47d5542c073d3b3",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 22,
+      "resolved_document_count": 1,
+      "resolved_target_count": 22,
+      "unresolved_pair_count": 2,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "docs/guide/configuration/{README,multi-model,custom-models}.md",
+          "marker": "Key Files",
+          "line": 211
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/cpp/tray/tray_app.cpp",
+          "marker": "Key Files",
+          "line": 219
+        }
+      ]
+    },
+    {
+      "id": "seepient",
+      "class": "native_key_files_section",
+      "languages": [
+        "TypeScript"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 5,
+      "status": "qualifies",
+      "code_repository": "https://github.com/hashangit/seepient.git",
+      "docs_repository": "https://github.com/hashangit/seepient.git",
+      "code_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+      "docs_revision": "78b5ea08db72b157d15702ab38bd0a021cf63aea",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 25,
+      "resolved_document_count": 1,
+      "resolved_target_count": 25,
+      "unresolved_pair_count": 23,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "src/foundations/contracts/",
+          "marker": "Key Files",
+          "line": 289
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/foundations/hashline/",
+          "marker": "Key Files",
+          "line": 292
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/domain/permissions/",
+          "marker": "Key Files",
+          "line": 294
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/domain/middleware/",
+          "marker": "Key Files",
+          "line": 296
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/domain/streaming/",
+          "marker": "Key Files",
+          "line": 298
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/domain/providers/",
+          "marker": "Key Files",
+          "line": 301
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "model-manager/",
+          "marker": "Key Files",
+          "line": 303
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/domain/context/",
+          "marker": "Key Files",
+          "line": 308
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/capabilities/inference/",
+          "marker": "Key Files",
+          "line": 309
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/capabilities/tools/",
+          "marker": "Key Files",
+          "line": 310
+        }
+      ]
+    },
+    {
+      "id": "cclint",
+      "class": "native_key_files_section",
+      "languages": [
+        "TypeScript"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/carlrannaberg/cclint.git",
+      "docs_repository": "https://github.com/carlrannaberg/cclint.git",
+      "code_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+      "docs_revision": "47cea00a1ef78209232fddcb36e587b9b611a60c",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 5,
+      "resolved_document_count": 1,
+      "resolved_target_count": 5,
+      "unresolved_pair_count": 9,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "`src/lib/utils.ts`",
+          "marker": "Key Files to Understand",
+          "line": 351
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`src/lib/config.ts`",
+          "marker": "Key Files to Understand",
+          "line": 352
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`src/linters/base.ts`",
+          "marker": "Key Files to Understand",
+          "line": 353
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`src/cli.ts`",
+          "marker": "Key Files to Understand",
+          "line": 356
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`src/schemas/index.ts`",
+          "marker": "Key Files to Understand",
+          "line": 357
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "src/schemas/index.ts",
+          "marker": "Key Files to Understand",
+          "line": 357
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`src/types/index.ts`",
+          "marker": "Key Files to Understand",
+          "line": 358
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "`test-claude-project/`",
+          "marker": "Key Files to Understand",
+          "line": 362
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "test-claude-project/",
+          "marker": "Key Files to Understand",
+          "line": 362
+        }
+      ]
+    },
+    {
+      "id": "text-to-speech",
+      "class": "native_key_files_section",
+      "languages": [
+        "Python",
+        "Shell",
+        "PowerShell"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 2,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/guillempuche/text-to-speech.git",
+      "docs_repository": "https://github.com/guillempuche/text-to-speech.git",
+      "code_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+      "docs_revision": "edfafe3e2ce88b636a7ac7baf33bffc4815fb151",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 8,
+      "resolved_document_count": 1,
+      "resolved_target_count": 8,
+      "unresolved_pair_count": 2,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "~/.config/tts/config.toml",
+          "marker": "Key Files",
+          "line": 58
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "~/.config/tts/credentials",
+          "marker": "Key Files",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "id": "emisso-sii",
+      "class": "native_key_files_section",
+      "languages": [
+        "TypeScript"
+      ],
+      "extraction_mode": "all_paths",
+      "benchmark_mode": "diagnostic",
+      "holdout_count": 1,
+      "status": "diagnostic_or_reject",
+      "code_repository": "https://github.com/emisso-ai/emisso-sii.git",
+      "docs_repository": "https://github.com/emisso-ai/emisso-sii.git",
+      "code_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+      "docs_revision": "cbad5bfc1038b98950f84e0b0d5f0ad2895c5b23",
+      "documents_scanned": [
+        "AGENTS.md"
+      ],
+      "resolved_pair_count": 3,
+      "resolved_document_count": 1,
+      "resolved_target_count": 3,
+      "unresolved_pair_count": 7,
+      "unresolved_examples": [
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/auth/",
+          "marker": "Key Files",
+          "line": 40
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/dte/",
+          "marker": "Key Files",
+          "line": 41
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/rcv/",
+          "marker": "Key Files",
+          "line": 42
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/cert/",
+          "marker": "Key Files",
+          "line": 43
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/portal/",
+          "marker": "Key Files",
+          "line": 44
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/engine/src/types.ts",
+          "marker": "Key Files",
+          "line": 45
+        },
+        {
+          "document": "AGENTS.md",
+          "target": "packages/api/src/db/schema/",
+          "marker": "Key Files",
+          "line": 48
+        }
+      ]
+    }
+  ]
+}

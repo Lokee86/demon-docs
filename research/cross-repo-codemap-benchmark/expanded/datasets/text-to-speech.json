@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "documents": [
+    {
+      "path": "AGENTS.md",
+      "size": 4105,
+      "sha256": "d41bd52c30aa2a91576c4f26bf9497b8d23c6c3da398bb81c220bfd962a2702a",
+      "entry_count": 8,
+      "diagnostic_count": 0
+    }
+  ],
+  "entries": [
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "pyproject.toml",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 35,
+          "column": 1,
+          "end_line": 35,
+          "end_column": 67
+        },
+        "raw_line": "| `pyproject.toml` | Python project config, version, dependencies |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "pyproject.toml",
+        "exists": true,
+        "size": 986,
+        "sha256": "c717d3d5f3c6c44d9902eae067e7a9f3cf559bd2c7adb3186c1b1c49d6a3dcc5"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": ".github/workflows/release.yml",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 36,
+          "column": 1,
+          "end_line": 36,
+          "end_column": 78
+        },
+        "raw_line": "| `.github/workflows/release.yml` | CI/CD: builds binaries, creates releases |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": ".github/workflows/release.yml",
+        "exists": true,
+        "size": 4289,
+        "sha256": "8947288a50fa84e639395e21f001ff72de89d884e95470d230c86b50e5139ae0"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "README.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 66,
+          "column": 1,
+          "end_line": 66,
+          "end_column": 47
+        },
+        "raw_line": "| `README.md` | User-facing install and usage |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "README.md",
+        "exists": true,
+        "size": 7412,
+        "sha256": "ef58efbbf82a064d55e44279ac9880be5ae8f9b7eb6282a380af393e8777c629"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "CONTRIBUTING.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 67,
+          "column": 1,
+          "end_line": 67,
+          "end_column": 54
+        },
+        "raw_line": "| `CONTRIBUTING.md` | Development setup and workflow |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "CONTRIBUTING.md",
+        "exists": true,
+        "size": 1549,
+        "sha256": "0d46f24650f91c6ed1767dc0378e5b4d8cf5788389974d414750489222b07d33"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "CHANGELOG.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 68,
+          "column": 1,
+          "end_line": 68,
+          "end_column": 65
+        },
+        "raw_line": "| `CHANGELOG.md` | Release notes (source of truth for releases) |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "CHANGELOG.md",
+        "exists": true,
+        "size": 2108,
+        "sha256": "59a2e922cf272d95285ba0fcd138e0d4aac1b6586f92c7532472b51f353b956a"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "docs/fish-audio.md",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 69,
+          "column": 1,
+          "end_line": 69,
+          "end_column": 59
+        },
+        "raw_line": "| `docs/fish-audio.md` | Fish Audio SDK and API reference |"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "docs/fish-audio.md",
+        "exists": true,
+        "size": 1611,
+        "sha256": "d95d5f1473f3701c346255b4fffcd1ce96f1324469595cbc779bc9ce420fd932"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "install.sh",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 74,
+          "column": 1,
+          "end_line": 74,
+          "end_column": 90
+        },
+        "raw_line": "- **Install** \u2014 `install.sh`, `install.ps1`, env vars (`TTS_VERSION`, `TTS_INSTALL_DIR`)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "install.sh",
+        "exists": true,
+        "size": 7912,
+        "sha256": "47e69dbf5a3f8912b62be40ea0c24161476017af83729cd3bd7de22e01e8bd4f"
+      }
+    },
+    {
+      "entry": {
+        "document_path": "AGENTS.md",
+        "heading": "Key Files",
+        "target": "uninstall.sh",
+        "kind": "file",
+        "syntax": "bullet",
+        "source": {
+          "line": 77,
+          "column": 1,
+          "end_line": 77,
+          "end_column": 81
+        },
+        "raw_line": "- **Uninstall** \u2014 `uninstall.sh`, `uninstall.ps1`, env vars (`TTS_KEEP_CONFIG`)"
+      },
+      "resolution": {
+        "status": "resolved",
+        "resolved_path": "uninstall.sh",
+        "exists": true,
+        "size": 4557,
+        "sha256": "7c303143ebffefe11d04cab2e72b219ea91d68edf8c91fae874e9f26a2089dd3"
+      }
+    }
+  ],
+  "diagnostics": []
+}
