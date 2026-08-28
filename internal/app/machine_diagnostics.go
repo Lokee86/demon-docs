@@ -6,10 +6,12 @@ import (
 
 	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/links"
+	"github.com/Lokee86/demon-docs/internal/model"
 )
 
-func writeLinkDiagnosticReport(out io.Writer, command string, exitCode int, plan links.Plan, orphanDocuments []string) error {
-	items := make([]diagnostics.Diagnostic, 0, len(plan.Diagnostics)+len(orphanDocuments))
+func writeDiagnosticReport(out io.Writer, command string, exitCode int, indexes model.ReconcileResult, plan links.Plan, orphanDocuments []string) error {
+	items := make([]diagnostics.Diagnostic, 0, len(indexes.Diagnostics)+len(plan.Diagnostics)+len(orphanDocuments))
+	items = append(items, indexes.Diagnostics...)
 	items = append(items, plan.Diagnostics...)
 	for _, path := range orphanDocuments {
 		items = append(items, diagnostics.Diagnostic{

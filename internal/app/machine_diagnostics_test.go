@@ -20,6 +20,7 @@ type machineDiagnosticV1 struct {
 	Target      string   `json:"target"`
 	Replacement string   `json:"replacement"`
 	Candidates  []string `json:"candidates"`
+	Section     string   `json:"section"`
 }
 
 type machineReportV1 struct {
@@ -129,7 +130,101 @@ func TestCheckLinksJSONIncludesOrphanHealthDiagnostic(t *testing.T) {
 	})
 }
 
-func TestJSONDiagnosticsRejectMixedReconciliationSelection(t *testing.T) {
+func TestCheckIndexesJSONDiagnosticContract(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(docs, "page.md"), "# Page\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--indexes", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("missing index code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var missing machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &missing); err != nil {
+			t.Fatal(err)
+		}
+		if len(missing.Diagnostics) != 1 || missing.Diagnostics[0].Code != "indexes.missing" || missing.Diagnostics[0].Severity != "warning" || missing.Diagnostics[0].Subsystem != "indexes" || missing.Diagnostics[0].Path != "docs/INDEX.md" {
+			t.Fatalf("unexpected missing-index report: %#v", missing)
+		}
+
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--indexes"}, &out, &errOut); code != 0 {
+			t.Fatalf("index baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		writeTestFile(t, filepath.Join(docs, "second.md"), "# Second\n")
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--indexes", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("outdated index code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var outdated machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &outdated); err != nil {
+			t.Fatal(err)
+		}
+		if len(outdated.Diagnostics) != 1 || outdated.Diagnostics[0].Code != "indexes.out_of_date" || outdated.Diagnostics[0].Path != "docs/INDEX.md" {
+			t.Fatalf("unexpected outdated-index report: %#v", outdated)
+		}
+	})
+}
+
+func TestCheckJSONComposesLinksAndIndexes(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(docs, "source.md"), "[Target](target.md)\n")
+	target := filepath.Join(docs, "target.md")
+	writeTestFile(t, target, "# Target\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--indexes"}, &out, &errOut); code != 0 {
+			t.Fatalf("index baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--links"}, &out, &errOut); code != 0 {
+			t.Fatalf("link baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if err := os.Remove(target); err != nil {
+			t.Fatal(err)
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--links", "--indexes", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("mixed code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		seen := map[string]bool{}
+		for _, diagnostic := range report.Diagnostics {
+			seen[diagnostic.Code] = true
+		}
+		if !seen["indexes.out_of_date"] || !seen["links.broken"] {
+			t.Fatalf("mixed report missing migrated subsystem diagnostics: %#v", report.Diagnostics)
+		}
+	})
+}
+
+func TestJSONDiagnosticsRejectUnmigratedReconciliationSelection(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")
 	if err := os.MkdirAll(docs, 0o755); err != nil {
@@ -144,7 +239,7 @@ func TestJSONDiagnosticsRejectMixedReconciliationSelection(t *testing.T) {
 		}
 		out.Reset()
 		errOut.Reset()
-		if code := Run(context.Background(), []string{"check", "--links", "--indexes", "--output-format", "json"}, &out, &errOut); code != 2 {
+		if code := Run(context.Background(), []string{"check", "--links", "--frontmatter", "--output-format", "json"}, &out, &errOut); code != 2 {
 			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 	})

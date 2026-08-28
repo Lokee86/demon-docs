@@ -1,6 +1,10 @@
 package model
 
-import "path/filepath"
+import (
+	"path/filepath"
+
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
+)
 
 type FolderInfo struct {
 	Path        string
@@ -32,8 +36,9 @@ type FileUpdate struct {
 }
 
 type ReconcileResult struct {
-	Updates  []FileUpdate
-	Messages []string
+	Updates     []FileUpdate
+	Messages    []string
+	Diagnostics []diagnostics.Diagnostic
 }
 
 func CleanAbs(path string) (string, error) {

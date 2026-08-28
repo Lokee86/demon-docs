@@ -88,12 +88,15 @@ func treeWithIgnoreRoot(root, ignoreRoot string, c config.Config, selectedFolder
 	updates, matched, err := prepareFolderResults(len(preparedFolders), func(index int) (folderPreparationResult, error) {
 		return context.prepare(preparedFolders[index])
 	})
-	result := model.ReconcileResult{Updates: updates}
+	result := model.ReconcileResult{
+		Updates:     updates,
+		Diagnostics: indexUpdateDiagnostics(ignoreRoot, updates),
+	}
 	if err != nil {
 		return result, err
 	}
 	type staleEntry struct {
-		indexPath, section, line string
+		indexPath, section, target, line string
 	}
 	var stale []staleEntry
 	for folder, es := range entries {
@@ -102,7 +105,7 @@ func treeWithIgnoreRoot(root, ignoreRoot string, c config.Config, selectedFolder
 		}
 		for _, e := range es {
 			if !matched[e] {
-				stale = append(stale, staleEntry{filepath.Join(folder, c.IndexFile), e.Section, e.OriginalLine})
+				stale = append(stale, staleEntry{filepath.Join(folder, c.IndexFile), e.Section, e.LinkTarget, e.OriginalLine})
 			}
 		}
 	}
@@ -118,6 +121,7 @@ func treeWithIgnoreRoot(root, ignoreRoot string, c config.Config, selectedFolder
 	})
 	for _, entry := range stale {
 		result.Messages = append(result.Messages, fmt.Sprintf("Removed stale %s entry from %s: %s", entry.section, entry.indexPath, entry.line))
+		result.Diagnostics = append(result.Diagnostics, staleIndexDiagnostic(ignoreRoot, entry.indexPath, entry.section, entry.target))
 	}
 	return result, nil
 }

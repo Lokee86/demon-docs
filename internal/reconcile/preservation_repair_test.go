@@ -19,6 +19,21 @@ func TestStaleEntryRemovalPreservesUnmanagedContent(t *testing.T) {
 	if len(result.Messages) != 3 {
 		t.Fatalf("messages=%v", result.Messages)
 	}
+	if len(result.Diagnostics) != 4 || result.Diagnostics[0].Code != "indexes.out_of_date" || result.Diagnostics[0].Path != "INDEX.md" {
+		t.Fatalf("diagnostics=%#v", result.Diagnostics)
+	}
+	staleSections := map[string]bool{}
+	for _, diagnostic := range result.Diagnostics[1:] {
+		if diagnostic.Code != "indexes.stale_entry" || diagnostic.Path != "INDEX.md" || diagnostic.Target == "" {
+			t.Fatalf("unexpected stale diagnostic: %#v", diagnostic)
+		}
+		staleSections[diagnostic.Section] = true
+	}
+	for _, section := range []string{"files", "folders", "stubs"} {
+		if !staleSections[section] {
+			t.Fatalf("missing structured stale %s diagnostic: %#v", section, result.Diagnostics)
+		}
+	}
 	for _, section := range []string{"files", "folders", "stubs"} {
 		found := false
 		for _, message := range result.Messages {

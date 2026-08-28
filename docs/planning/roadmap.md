@@ -48,11 +48,10 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ### 1. Stable machine-readable diagnostics
 
-The schema-1 native JSON envelope and stable link diagnostic vocabulary are implemented for `ddocs check --links --output-format json` without changing human-readable output.
+The schema-1 native JSON envelope and stable link/index diagnostic vocabularies are implemented for `ddocs check --output-format json` without changing human-readable output. Links and documentation indexes may be selected individually or together.
 
 Remaining work is to migrate the other reconciliation subsystems onto the same envelope:
 
-- indexes;
 - frontmatter;
 - document-body format;
 - reverse indexes; and

@@ -189,19 +189,19 @@ Boundary:
 
 This is not a missing Demon Docs feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
 
-## Machine-readable diagnostics currently cover links only
+## Machine-readable diagnostics currently cover links and indexes
 
-`ddocs check --links --output-format json` now exposes the stable schema-1 native diagnostic contract, including link reconciliation and orphan-document findings. Other `check` subsystems still use their existing human-readable diagnostic surfaces.
+`ddocs check --output-format json` now exposes the stable schema-1 native diagnostic contract for links and documentation indexes, including combined reports and orphan-document findings. Other `check` subsystems still use their existing human-readable diagnostic surfaces.
 
 Impact:
 
-- link-only CI and agent integrations can consume stable diagnostic codes and structured source evidence;
-- mixed-subsystem JSON output is intentionally rejected rather than silently omitting non-link findings; and
-- indexes, frontmatter, document-body format, reverse indexes, and pre-report runtime/configuration failures still require text handling.
+- link/index CI and agent integrations can consume stable diagnostic codes and structured evidence;
+- combinations containing unmigrated subsystems are intentionally rejected rather than silently omitting findings; and
+- frontmatter, document-body format, reverse indexes, and pre-report runtime/configuration failures still require text handling.
 
 Workaround:
 
-Use the JSON contract for link-only verification. Use normal text output and exit status for broader checks until each remaining subsystem migrates onto the same envelope.
+Use the JSON contract for link and/or documentation-index verification. Use normal text output and exit status for broader checks until each remaining subsystem migrates onto the same envelope.
 
 Owning docs:
 

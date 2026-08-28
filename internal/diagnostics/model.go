@@ -19,6 +19,7 @@ type Diagnostic struct {
 	Target      string   `json:"target,omitempty"`
 	Replacement string   `json:"replacement,omitempty"`
 	Candidates  []string `json:"candidates,omitempty"`
+	Section     string   `json:"section,omitempty"`
 }
 
 type Report struct {

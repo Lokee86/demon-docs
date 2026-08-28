@@ -4,7 +4,7 @@ created: "2026-08-28"
 document_id: 019fb711-9205-7fe0-bdd5-9ef5244bcb3e
 document_type: general
 policy_exempt: false
-summary: Versioned JSON diagnostic contract for link verification, including stable envelope fields, link diagnostic codes, severity values, and compatibility rules.
+summary: Versioned JSON diagnostic contract for link and index verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
 ---
 # Machine-Readable Diagnostics
 
@@ -16,19 +16,21 @@ This document defines the first stable machine-readable diagnostic contract expo
 
 ## Current scope
 
-Schema version 1 is intentionally narrow:
+Schema version 1 currently covers links and documentation indexes:
 
 ```bash
 ddocs check --links --output-format json
+ddocs check --indexes --output-format json
+ddocs check --links --indexes --output-format json
 ```
 
-Text remains the default output. JSON currently requires `check --links` with no other reconciliation subsystem selected. Mixed link/index/frontmatter/format/reverse selection is rejected with usage exit code `2` rather than returning a partial machine report.
+Text remains the default output. JSON accepts any selected combination of the migrated link and index subsystems. Frontmatter, document-body format, or reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
 
 `fix` and `watch` do not yet expose this JSON diagnostic contract.
 
 ## Envelope
 
-A completed link check writes exactly one JSON object to stdout followed by a newline:
+A completed supported check writes exactly one JSON object to stdout followed by a newline:
 
 ```json
 {
@@ -84,7 +86,7 @@ Consumers should branch on `code`, not parse `message`. `message` is still part 
 
 Schema 1 defines three severity strings:
 
-- `error` — verification cannot treat the link condition as resolved without additional state or authored input.
+- `error` — verification cannot treat the condition as resolved without additional state or authored input.
 - `warning` — deterministic work or a health issue exists and therefore the check may still fail, but the condition is not an ambiguous destructive decision.
 - `info` — structured informational record that does not itself imply unresolved state.
 
@@ -105,11 +107,21 @@ Command success is defined by the envelope `status` and `exit_code`, not by coun
 | `links.repair_selected` | info | A review-selected candidate has been converted into the normal guarded repair path. |
 | `links.orphan_document` | warning | A managed Markdown document has no meaningful inbound link under the documented orphan rules. |
 
-All reconciliation codes in the table except `links.orphan_document` are emitted directly by `internal/links`. Orphan-document diagnostics are projected by command orchestration from the same link-health pass. `links.repair_selected` is part of the typed link diagnostic model for review-selected repairs even though schema-1 public JSON is currently exposed only by `check`.
+All reconciliation codes in the table except `links.orphan_document` are emitted directly by `internal/links`. Orphan-document diagnostics are projected by command orchestration from the same link-health pass. `links.repair_selected` is part of the typed link diagnostic model for review-selected repairs even though public schema-1 JSON is exposed by `check`.
+
+## Index diagnostic codes
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `indexes.missing` | warning | A managed documentation index does not exist and would be created. |
+| `indexes.out_of_date` | warning | An existing documentation index differs from the deterministic managed result. |
+| `indexes.stale_entry` | warning | A managed index entry no longer corresponds to current repository content. `section` and `target` identify the stale entry when available. |
+
+Index diagnostics are emitted directly by `internal/reconcile`. The optional schema-1 `section` field identifies the managed index section for diagnostics such as stale entries.
 
 ## Ordering
 
-Diagnostics preserve deterministic reconciliation order. Link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
+Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then link reconciliation diagnostics, then orphan-document diagnostics. Link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
 
 Consumers must not infer priority from array position. Use `code`, `severity`, path, and position.
 
@@ -132,13 +144,15 @@ Contract coverage includes:
 
 - clean JSON reports with an empty diagnostic array;
 - failing broken-link reports with stable code, severity, path, line, column, and target;
-- rejection of mixed-subsystem JSON requests; and
-- typed reconciliation tests for initialization, deterministic move repair, and ambiguity evidence.
+- missing and out-of-date index reports;
+- combined link/index reports;
+- rejection when an unmigrated subsystem is selected; and
+- typed reconciliation tests for link identity evidence and stale index entries.
 
 Run:
 
 ```bash
-go test ./internal/links ./internal/app -count=1
+go test ./internal/links ./internal/reconcile ./internal/app -count=1
 ```
 
 ## Related docs
@@ -150,4 +164,4 @@ go test ./internal/links ./internal/app -count=1
 
 ## Notes
 
-Schema 1 establishes the shared diagnostic envelope and link vocabulary first. Other reconciliation subsystems should adopt the same envelope rather than inventing independent JSON formats.
+Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Frontmatter, document-body format, reverse indexes, and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.
