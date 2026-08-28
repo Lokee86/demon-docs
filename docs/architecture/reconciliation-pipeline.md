@@ -57,6 +57,14 @@ Once cross-folder preservation facts and unmatched-name counts are computed seri
 
 The Markdown parent-link regular-expression cache uses concurrent-safe publication because multiple folder preparations may request the same configured label simultaneously.
 
+## Changed-path folder preparation
+
+Watcher batches with complete file-level evidence use `TreeScopedWithIgnoreRoot` and `ConvergeScopedWithin`. The documentation tree is still scanned as one deterministic snapshot so cross-folder description preservation and ownership decisions retain the same evidence as a full pass. Only affected folders enter folder preparation and stale-entry reporting.
+
+For a changed file, the affected set contains its owning folder and that folder's parent. A file inside the configured draft folder maps to the draft folder's owner. A move therefore updates both old and new owning folders when both paths are present in the batch. Directory and uncertain events remain full-pass operations.
+
+Application is unchanged: selected updates are applied serially with expected-old-content guards, validation-cache refresh, and bounded convergence. Path scoping changes planning scope, not write safety or deterministic ordering.
+
 ## Scan Model
 
 The scanner starts from the configured managed root and builds a tree of folders.
@@ -136,6 +144,8 @@ go test ./internal/reconcile -run '^$' -bench '^BenchmarkTreePreparation$' -benc
 
 The optimization targets latency rather than allocation volume. Detached concurrent source and folder results increase transient memory, which remains visible in `-benchmem` output.
 
+A later changed-path benchmark on the same 128-folder/four-file fixture compares the complete stable `Tree` plan with a scoped plan for one file path. Five warmed-host repetitions on the Windows development host averaged about 303.6 milliseconds for the full plan and 163.4 milliseconds for the scoped plan, a 1.86x planning speedup. Mean allocation volume fell from about 249.5 MB to 66.3 MB because only the affected folder preparations are materialized. The retained benchmark is `BenchmarkTreePreparationScoped`.
+
 ## Markdown Link Behavior
 
 Link reconciliation scans Markdown sources throughout the repository root rather than only the configured docs root. It records local inline links, images, reference definitions, explicit and collapsed reference uses, path-based wiki links and embeds, supported local HTML targets, stable file IDs, fingerprints, path history, and reverse-link records in the private `.ddocs/` object repository.
@@ -179,7 +189,8 @@ Those boundaries keep the tool predictable and keep hand-authored prose under hu
 
 - `internal/scan/scan.go` — recursive documentation-tree inventory.
 - `internal/markdown/markdown.go` — managed-section parsing, concurrent-safe parent-pattern reuse, and source-preserving Markdown edits.
-- `internal/reconcile/reconcile.go` — forward-index orchestration and serial application.
+- `internal/reconcile/reconcile.go` — forward-index orchestration, optional selected-folder preparation, and serial application.
+- `internal/reconcile/scoped.go` — changed-path affected-folder derivation and scoped convergence.
 - `internal/reconcile/source_loading.go` — bounded index and parent-editable document loading with deterministic indexed merge.
 - `internal/reconcile/preparation.go` — independent folder preparation and deterministic serial plan merge.
 - `internal/links/` — repository-local link inventory, resolution, state, diagnostics, rewrites, and stateless move planning.

@@ -144,13 +144,13 @@ func TestValidationBatchClassifiesScopedAndConservativeEvents(t *testing.T) {
 		external bool
 	}{
 		{"markdown write", fsnotify.Event{Name: page, Op: fsnotify.Write}, false, page, false, false},
-		{"code write", fsnotify.Event{Name: code, Op: fsnotify.Write}, false, "", false, false},
-		{"external target", fsnotify.Event{Name: filepath.Join(t.TempDir(), "target.txt"), Op: fsnotify.Write}, false, "", false, true},
+		{"code write", fsnotify.Event{Name: code, Op: fsnotify.Write}, false, code, false, false},
+		{"external target", fsnotify.Event{Name: filepath.Join(t.TempDir(), "target.txt"), Op: fsnotify.Write}, true, "", false, true},
 		{"control file", fsnotify.Event{Name: filepath.Join(repositoryRoot, ".docignore"), Op: fsnotify.Write}, true, "", false, false},
 		{"schema change", fsnotify.Event{Name: schema, Op: fsnotify.Write}, true, "", false, false},
 		{"directory", fsnotify.Event{Name: filepath.Join(docsRoot, "nested"), Op: fsnotify.Create}, true, "", true, false},
-		{"remove", fsnotify.Event{Name: page, Op: fsnotify.Remove}, true, "", false, false},
-		{"rename", fsnotify.Event{Name: page, Op: fsnotify.Rename}, true, "", false, false},
+		{"remove", fsnotify.Event{Name: page, Op: fsnotify.Remove}, false, page, false, false},
+		{"rename", fsnotify.Event{Name: page, Op: fsnotify.Rename}, false, page, false, false},
 	}
 	for _, tc := range cases {
 		path, full, relevant := validationBatchForEvent(tc.event, c, policy, docsRoot, repositoryRoot, features, tc.isDir, tc.external)

@@ -24,6 +24,10 @@ func Tree(root string, c config.Config) (model.ReconcileResult, error) {
 }
 
 func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.ReconcileResult, error) {
+	return treeWithIgnoreRoot(root, ignoreRoot, c, nil)
+}
+
+func treeWithIgnoreRoot(root, ignoreRoot string, c config.Config, selectedFolders map[string]bool) (model.ReconcileResult, error) {
 	tree, err := scan.TreeWithIgnoreRoot(root, ignoreRoot, c)
 	if err != nil {
 		return model.ReconcileResult{}, err
@@ -72,8 +76,17 @@ func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.Reconci
 		crossFolders: crossFolders,
 		folderCounts: folderCounts,
 	}
-	updates, matched, err := prepareFolderResults(len(folders), func(index int) (folderPreparationResult, error) {
-		return context.prepare(folders[index])
+	preparedFolders := folders
+	if selectedFolders != nil {
+		preparedFolders = make([]*model.FolderInfo, 0, len(selectedFolders))
+		for _, folder := range folders {
+			if selectedFolders[pathOrderKey(filepath.Clean(folder.Path))] {
+				preparedFolders = append(preparedFolders, folder)
+			}
+		}
+	}
+	updates, matched, err := prepareFolderResults(len(preparedFolders), func(index int) (folderPreparationResult, error) {
+		return context.prepare(preparedFolders[index])
 	})
 	result := model.ReconcileResult{Updates: updates}
 	if err != nil {
@@ -84,6 +97,9 @@ func TreeWithIgnoreRoot(root, ignoreRoot string, c config.Config) (model.Reconci
 	}
 	var stale []staleEntry
 	for folder, es := range entries {
+		if selectedFolders != nil && !selectedFolders[pathOrderKey(filepath.Clean(folder))] {
+			continue
+		}
 		for _, e := range es {
 			if !matched[e] {
 				stale = append(stale, staleEntry{filepath.Join(folder, c.IndexFile), e.Section, e.OriginalLine})

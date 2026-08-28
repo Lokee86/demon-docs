@@ -24,14 +24,7 @@ When forward indexes or links are watched together with reverse indexes, two obs
 
 The scheduler owns timing and run admission. It does not own filesystem scope, reconciliation planning, file replacement, link-state transactions, reverse-index rendering, repository-demon leases, or process lifetime.
 
-For the base watcher, an admitted batch also carries a deterministic set of
-changed Markdown paths and a full-pass flag. Ordinary regular-file Markdown
-create and write events use that path set for frontmatter and document-format
-validation; indexes and links still run at repository scope. Link-target or
-non-Markdown events may run those subsystems without validation unless they
-produce Markdown rewrites. Control files, schema changes, documentation
-directory and remove/rename events, overflow, startup handoff, and uncertain
-Markdown events request a full validation pass.
+For the base watcher, an admitted batch also carries a deterministic changed-path set and a full-pass flag. Ordinary regular-file create, write, remove, and rename events retain their paths. Frontmatter and document-format validation use only relevant Markdown paths; link reconciliation derives affected sources and targets from the complete batch; folder-index reconciliation derives affected owning folders and their parents. Control files, schema changes, directory events, external-target events, overflow, startup handoff, incomplete inventory evidence, and uncertain events request or trigger a full pass.
 
 ## Primary ownership
 
@@ -44,8 +37,7 @@ The scheduling boundary owns:
 - clearing the admitted event batch before execution;
 - retaining events that arrive during execution as later pending work;
 - returning reconciliation errors to the watcher loop;
-- coalescing changed Markdown paths and conservatively overriding them with a
-  full-pass request when event detail is unsafe; and
+- coalescing changed file paths and conservatively overriding them with a full-pass request when event detail is unsafe; and
 - accepting an optional shared run lock for serialization with another watcher; and
 - allowing context cancellation and observer shutdown to terminate the surrounding watch loop cleanly.
 
@@ -218,13 +210,9 @@ time until the final relevant filesystem event
 
 Every admitted event updates the latest-event timestamp, so noisy editor saves or directory operations can extend the quiet interval repeatedly. File moves observed as paired rename/create events have one targeted immediate-repair allowance per scheduled batch. Additional recognized renames mark the batch as bulk activity and wait until no new observed rename has arrived for a quiet period equal to the configured debounce, with a minimum of 500 milliseconds.
 
-The watcher passes the path snapshot to scoped frontmatter and document-format
-builders. Those builders may walk the Markdown tree to retain active cache
-paths, but they do not read untouched Markdown files when reusable clean cache
-entries exist. Missing clean reuse requests a conservative full validation pass.
-Indexes and links retain their repository-wide behavior, and generated link
-rewrites plus newly prepared index files are added to the validation path set
-when their paths are available.
+The watcher passes the path snapshot to the scoped subsystem seams. Frontmatter and document-format builders use relevant Markdown paths and reusable cache evidence. Link reconciliation builds the authoritative inventory, verifies that the batch accounts for every observed inventory change, and then reparses only affected Markdown sources. Folder-index reconciliation retains the complete documentation tree as cross-folder evidence but prepares and converges only the changed owning folders and their parents. Generated link rewrites plus newly prepared index files are added to the validation path set for scoped post-write link tracking.
+
+If scoped link reconciliation detects an inventory change missing from the batch, it refuses scoped execution and the watcher immediately retries through the full link path. Directory, external-target, overflow, control-file, schema, and other uncertain events also remain conservative full-pass triggers.
 
 ## Selected-feature execution
 
@@ -392,7 +380,9 @@ Primary implementation:
 
 - `internal/watch/scheduler.go` — pending count, latest-event timestamp, debounce admission, and single-run state.
 - `internal/watch/watch.go` — immediate initial run, base event loop, scheduler polling, suppression intake, cancellation, and optional run lock.
-- `internal/watch/features.go` — selected-feature scope and external target watch helpers.
+- `internal/watch/features.go` — selected-feature scope, changed-path classification, and conservative full-pass event classes.
+- `internal/links/scoped_reconcile.go` — changed-path link repair/track selection and completeness fallback.
+- `internal/reconcile/scoped.go` — changed-path folder-index selection and scoped convergence.
 - `internal/app/reverse_index.go` — mixed-watch goroutines, synchronized output, shared run lock, cancellation, and result joining.
 - `internal/reverseindex/watch.go` — reverse-index debounce timer, watch refresh worker, optional run lock, and draining shutdown.
 - `internal/links/suppression.go` — generated-write event suppression consumed before scheduling.

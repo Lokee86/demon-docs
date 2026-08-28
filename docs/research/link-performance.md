@@ -50,6 +50,32 @@ Index, frontmatter, document-format, and reverse-index writes no longer force a 
 
 Explicit `--links` remains a full reconciliation path. The optimization changes post-write refresh scope, not repair evidence, review publication, rollback, or generated-write verification.
 
+## Changed-path watcher reconciliation measurements
+
+The August 28 changed-path implementation retains ordinary file create, write, remove, and rename batches and scopes link-source and folder-index planning when the batch is complete. Link inventory and documentation-tree evidence remain authoritative and scoped link execution fails closed to the full path when inventory comparison exposes an unreported change.
+
+Controlled Windows measurements used the same development host (`GOMAXPROCS=16`) and five repetitions per benchmark.
+
+| Measurement | Full path mean | Scoped path mean | Improvement |
+|---|---:|---:|---:|
+| 500-document single-source link update | 201.4 ms | 169.5 ms | 1.19x / 15.8% lower |
+| 128-folder stable index preparation | 303.6 ms | 163.4 ms | 1.86x / 46.2% lower |
+| Watcher file-create event to reconciliation completion | 828.8 ms | 566.9 ms | 1.46x / 31.6% lower |
+
+The watcher benchmark uses 128 folders with four Markdown documents each. The scoped case injects one ordinary file-create event. The comparison case forces the same watcher through its conservative full-pass path using the event-overflow signal, then measures until the `ddocs watch updated` completion line. Both include scheduler polling, link handling, index planning/application, post-write link tracking, and private-state publication. Mean reported allocation volume dropped from about 768 MB on the full path to 347 MB on the scoped path.
+
+`BenchmarkObservedRenameImmediateRepair` separately measures the existing first-rename fast path. Five five-iteration repetitions averaged 137.9 ms from filesystem rename through immediate link repair and state publication; between-iteration normalization is intentionally outside the timed region.
+
+Run the retained comparisons with:
+
+```bash
+go test ./internal/links -run '^$' -bench '^(BenchmarkSingleFileIncrementalUpdate|BenchmarkScopedSingleFileIncrementalUpdate|BenchmarkObservedRenameImmediateRepair)$' -benchmem -count=5
+go test ./internal/reconcile -run '^$' -bench '^(BenchmarkTreePreparation|BenchmarkTreePreparationScoped)$' -benchmem -count=5
+go test ./internal/watch -run '^$' -bench '^(BenchmarkScopedWatcherSingleFileCreate|BenchmarkFullWatcherSingleFileCreate)$' -benchmem -benchtime=5x -count=5
+```
+
+The link-only gain is smaller because state loading, authoritative inventory construction, and complete private-state publication remain broad costs. The end-to-end watcher result confirms that path scoping improves actual completion latency, while also identifying state/evidence I/O as the next performance ceiling rather than source/folder selection.
+
 ## Warm validation-cache measurements
 
 A synthetic 1,000-document corpus measured the warmed clean-validation path after revision `ee256e5`:

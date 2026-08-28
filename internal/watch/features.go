@@ -34,22 +34,22 @@ func validationBatchForEvent(event fsnotify.Event, c config.Config, policy ignor
 	if policy.IsControlFile(event.Name) || schemaEvent {
 		return "", true, true
 	}
-	if isExternal || !repository.Contains(docsRoot, event.Name) {
-		return "", false, true
-	}
-	removeOrRename := event.Op&(fsnotify.Remove|fsnotify.Rename) != 0
-	if wasDirectory || removeOrRename {
+	if isExternal {
 		return "", true, true
 	}
-	if !strings.EqualFold(filepath.Ext(event.Name), ".md") {
-		return "", false, true
+	if wasDirectory {
+		return "", true, true
 	}
-	ordinaryMarkdown := event.Op&(fsnotify.Create|fsnotify.Write) != 0
-	if ordinaryMarkdown {
+	removeOrRename := event.Op&(fsnotify.Remove|fsnotify.Rename) != 0
+	if removeOrRename {
+		return filepath.Clean(event.Name), false, true
+	}
+	ordinaryFile := event.Op&(fsnotify.Create|fsnotify.Write) != 0
+	if ordinaryFile {
 		info, err := os.Stat(event.Name)
-		ordinaryMarkdown = err == nil && info.Mode().IsRegular()
+		ordinaryFile = err == nil && info.Mode().IsRegular()
 	}
-	if !ordinaryMarkdown {
+	if !ordinaryFile {
 		return "", true, true
 	}
 	return filepath.Clean(event.Name), false, true

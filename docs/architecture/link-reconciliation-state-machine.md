@@ -161,7 +161,17 @@ Any non-`valid` status forces the source through parsing on the next pass. This 
 
 After index, frontmatter, document-format, or reverse-index writes, command orchestration may request `TrackSources` for only the changed Markdown paths. Those sources are read and parsed from current bytes, while every unselected source record, incoming-link group, identity, historical path, and pending watcher suppression remains in the projection. A clean non-link fix skips this path entirely and does not initialize absent link state.
 
-This is a state refresh after known authored-file changes, not full repair discovery. Explicit link selection still uses complete reconciliation.
+This is a state refresh after known authored-file changes, not repair discovery.
+
+### Changed-path reconciliation path
+
+Watcher batches with complete file-level event evidence may call `ReconcileChangedPaths` or `TrackChangedPaths`. The current repository inventory is still built authoritatively so file identity, path history, `document_id`, fingerprints, and ambiguity rules remain identical to a full pass. The changed-path batch then selects only affected Markdown sources for parsing and link planning.
+
+A source is selected when it changed directly, when one of its persisted target identities or resolved/candidate paths changed, or when an unresolved target name could be affected by a changed file. Unselected source records are retained without reparsing.
+
+Scoped reconciliation is fail-closed. Before planning, the current inventory is compared with persisted state. If any creation, removal, move, or content-identity change is not represented by the supplied path batch, scoped reconciliation returns `ErrScopedReconciliationUnavailable`; watcher orchestration immediately runs the normal full reconciliation instead. Directory batches, absent baseline state, event-buffer overflow, control/schema changes, and other uncertain event classes likewise use the full path.
+
+This makes the path set an optimization hint backed by complete deterministic evidence, not a weaker correctness mode.
 
 ### Parsed-source path
 
@@ -395,6 +405,8 @@ The current `refs/ddocs/state` projection remains unchanged. Authored source rew
 - `internal/links/filemeta.go` — file identity, fingerprint, size/mtime reuse, and Markdown document-identity metadata.
 - `internal/links/document_aliases.go` — unambiguous `document_id` alias collapse, reference remapping, and history merging.
 - `internal/links/scoped_tracking.go` — changed-source-only graph refresh after non-link writes.
+- `internal/links/scoped_reconcile.go` — scoped repair/track orchestration.
+- `internal/links/scoped_selection.go` — changed-path normalization, complete-batch validation, and affected-source selection.
 - `internal/links/target.go` — local target resolution and candidate discovery.
 - `internal/links/syntax_targets.go` — syntax-specific exact and candidate resolution.
 - `internal/links/parser.go` and parser extensions — current Markdown occurrence extraction.
@@ -411,6 +423,7 @@ Focused state-machine coverage includes:
 - `internal/links/reconcile_test.go` — baseline, exact resolution, moves, ambiguity, undefined references, and identity behavior.
 - `internal/links/document_aliases_test.go` and `observed_rename_test.go` — duplicate private identity collapse and historical-path recovery.
 - `internal/links/scoped_tracking_test.go` — selected-source refresh and preservation of unselected records and suppressions.
+- `internal/links/scoped_reconcile_test.go` — changed-target selection, fingerprint recovery without link target identity, and incomplete-batch fallback.
 - `internal/links/inventory_test.go` — deterministic bounded reads and metadata reuse.
 - `internal/links/parser_test.go` — occurrence ordering and syntax extraction.
 - `internal/links/review_integration_test.go` — blocked and stale-block transitions.

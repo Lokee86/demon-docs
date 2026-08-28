@@ -17,6 +17,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 	"github.com/Lokee86/demon-docs/internal/links"
+	"github.com/Lokee86/demon-docs/internal/model"
 	"github.com/Lokee86/demon-docs/internal/reconcile"
 	"github.com/Lokee86/demon-docs/internal/repository"
 	"github.com/Lokee86/demon-docs/internal/scan"
@@ -102,10 +103,25 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		if features.TrackLinks {
 			var plan links.Plan
 			var err error
-			if features.Links {
-				plan, err = links.Reconcile(repositoryRoot)
+			if fullValidation || len(changedPaths) == 0 {
+				if features.Links {
+					plan, err = links.Reconcile(repositoryRoot)
+				} else {
+					plan, err = links.Track(repositoryRoot)
+				}
 			} else {
-				plan, err = links.Track(repositoryRoot)
+				if features.Links {
+					plan, err = links.ReconcileChangedPaths(repositoryRoot, changedPaths)
+				} else {
+					plan, err = links.TrackChangedPaths(repositoryRoot, changedPaths)
+				}
+				if errors.Is(err, links.ErrScopedReconciliationUnavailable) {
+					if features.Links {
+						plan, err = links.Reconcile(repositoryRoot)
+					} else {
+						plan, err = links.Track(repositoryRoot)
+					}
+				}
 			}
 			if err != nil {
 				return err
@@ -135,7 +151,13 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 		}
 		if features.Indexes {
-			result, err := reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
+			var result model.ReconcileResult
+			var err error
+			if fullValidation || len(changedPaths) == 0 {
+				result, err = reconcile.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)
+			} else {
+				result, err = reconcile.TreeScopedWithIgnoreRoot(docsRoot, repositoryRoot, c, changedPaths)
+			}
 			if err != nil {
 				return err
 			}
@@ -208,7 +230,14 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 		}
 		if features.Indexes {
-			result, count, err := reconcile.ConvergeWithin(docsRoot, repositoryRoot, c)
+			var result model.ReconcileResult
+			var count int
+			var err error
+			if fullValidation || len(changedPaths) == 0 {
+				result, count, err = reconcile.ConvergeWithin(docsRoot, repositoryRoot, c)
+			} else {
+				result, count, err = reconcile.ConvergeScopedWithin(docsRoot, repositoryRoot, c, changedPaths)
+			}
 			if err != nil {
 				return err
 			}
@@ -216,18 +245,30 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			diagnostics = append(diagnostics, result.Messages...)
 		}
 		if features.Indexes || features.Frontmatter || features.Format {
-			refreshPlan, err := links.Track(repositoryRoot)
+			paths := validationPaths()
+			var refreshPlan links.Plan
+			var err error
+			switch {
+			case fullValidation:
+				refreshPlan, err = links.Track(repositoryRoot)
+			case len(paths) > 0:
+				refreshPlan, err = links.TrackSources(repositoryRoot, paths)
+			default:
+				refreshPlan = links.Plan{RepositoryRoot: repositoryRoot}
+			}
 			if err != nil {
 				return err
 			}
 			if features.TrackLinks || refreshPlan.Initialized {
-				if err := links.Save(refreshPlan); err != nil {
-					return err
-				}
-				externalDirectories = externalWatchDirectories(refreshPlan.Files)
-				if watcher != nil {
-					if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
-						return fmt.Errorf("watch external link targets: %w", err)
+				if refreshPlan.RepositoryRoot != "" {
+					if err := links.Save(refreshPlan); err != nil {
+						return err
+					}
+					externalDirectories = externalWatchDirectories(refreshPlan.Files)
+					if watcher != nil {
+						if err := addExternalWatches(watcher, externalDirectories, externalWatched); err != nil {
+							return fmt.Errorf("watch external link targets: %w", err)
+						}
 					}
 				}
 			}

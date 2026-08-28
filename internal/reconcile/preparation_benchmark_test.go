@@ -38,6 +38,36 @@ func BenchmarkTreePreparation(b *testing.B) {
 	}
 }
 
+func BenchmarkTreePreparationScoped(b *testing.B) {
+	root := b.TempDir()
+	cfg := config.Default()
+	const folderCount = 128
+	const filesPerFolder = 4
+
+	for folderIndex := 0; folderIndex < folderCount; folderIndex++ {
+		folder := filepath.Join(root, fmt.Sprintf("group-%03d", folderIndex))
+		for fileIndex := 0; fileIndex < filesPerFolder; fileIndex++ {
+			path := filepath.Join(folder, fmt.Sprintf("document-%02d.md", fileIndex))
+			benchmarkWriteIndexFile(b, path, fmt.Sprintf("# Document %d %d\n\nBody text.\n", folderIndex, fileIndex))
+		}
+	}
+	if _, _, err := ConvergeWithin(root, root, cfg); err != nil {
+		b.Fatal(err)
+	}
+	changedPath := filepath.Join(root, "group-064", "document-02.md")
+
+	b.ResetTimer()
+	for iteration := 0; iteration < b.N; iteration++ {
+		result, err := TreeScopedWithIgnoreRoot(root, root, cfg, []string{changedPath})
+		if err != nil {
+			b.Fatal(err)
+		}
+		if len(result.Updates) != 0 {
+			b.Fatalf("stable scoped tree produced %d updates", len(result.Updates))
+		}
+	}
+}
+
 func benchmarkWriteIndexFile(b *testing.B, path, contents string) {
 	b.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

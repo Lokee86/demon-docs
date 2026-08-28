@@ -236,37 +236,34 @@ Removal condition:
 
 A complete cross-platform symlink ownership and containment policy is implemented. Silent traversal should remain prohibited.
 
-## Watcher latency still includes broad link and index work
+## Scoped watcher reconciliation still retains broad evidence costs
 
-The configured watcher debounce is only the quiet interval before work is admitted. It is not an end-to-end repair-latency target.
+The watcher now carries ordinary file create, write, remove, and rename paths into fail-closed scoped link and folder-index reconciliation. Affected Markdown link sources and affected index folders are planned selectively; frontmatter and document-format validation already use scoped cache-backed paths. Directory, external-target, control/schema, overflow, startup, incomplete-batch, and uncertain events still use the full path.
 
-Ordinary regular-file Markdown create and write events now retain changed paths for frontmatter and document-format validation. Untouched documents reuse clean cache records without being read or parsed. Missing cache coverage, duplicate document identities, schema or control-file changes, directory events, removals, renames, overflow, startup handoff, and uncertain events still request conservative full validation.
-
-Link and folder-index reconciliation remain repository- or documentation-scope operations. Repeated filesystem events reset the quiet interval, directory moves can emit large create, rename, and remove bursts, and bulk file renames use an additional quiet period of at least 500 milliseconds. Only the first recognized file rename in one batch receives the immediate targeted repair path; remaining changes converge through the normal selected reconciliation callback. Execution time is added after debounce and scheduler polling, so a sub-second configuration can still appear to take several seconds.
+Scoped execution intentionally retains some repository-wide evidence work. Link reconciliation still loads persisted state, builds the authoritative inventory, and publishes the complete private projection. Folder-index reconciliation still scans the complete documentation tree and loads shared cross-folder evidence before preparing only affected folders. These costs preserve identity, ambiguity, cross-folder description, and missed-event detection without weakening correctness.
 
 Impact:
 
-- `debounce_seconds` should not be interpreted as maximum repair latency;
-- lowering debounce further may increase churn without materially reducing broad-pass execution time;
-- large directory moves or rapid editor-generated changes may schedule expensive follow-up passes;
-- ordinary Markdown frontmatter and format validation is incremental only while reusable cache evidence remains complete;
-- detached demon logs report completion after reconciliation, which can make processing time look like debounce time; and
-- current watcher performance is suitable for a correctness-first hackathon prototype and modest repositories, not a production low-latency claim for large or high-churn trees.
+- `debounce_seconds` remains a quiet-period setting, not a maximum repair-latency guarantee;
+- ordinary file events avoid broad source/folder preparation but still pay state, inventory/tree, scheduler-polling, and publication costs;
+- large directory operations and event-buffer overflow intentionally fall back to full reconciliation;
+- bulk rename bursts retain the additional quiet-period policy after the first immediate observed-rename repair; and
+- further latency reduction now requires narrowing evidence/state I/O rather than merely adding another path filter.
 
 Workaround:
 
-Use explicit `ddocs mv` for planned moves, select only the required subsystem when running foreground watch, and use `ddocs fix` or `ddocs check` as the authoritative recovery and verification surfaces. Treat the watcher and repository demon as convenience automation.
+Use explicit `ddocs mv` for planned large directory refactors and `ddocs fix` or `ddocs check` as authoritative recovery surfaces. The watcher automatically falls back to full reconciliation when scoped evidence is incomplete.
 
 Owning docs:
 
 - [Watcher and Automation](../operations/watcher-and-automation.md)
 - [Watch Scheduler and Reconciliation Serialization](../architecture/watch-scheduler.md)
 - [Reconciliation Pipeline](../architecture/reconciliation-pipeline.md)
-- [Roadmap](../planning/roadmap.md)
+- [Markdown Link Performance](../research/link-performance.md)
 
 Removal condition:
 
-Link and index watch events produce path-aware dirty sets, each remaining broad subsystem can reconcile only affected sources and targets, repeated state reads and writes are reduced or batched, large moves have bounded targeted handling, and retained benchmarks establish end-to-end latency expectations across representative repository sizes and event bursts.
+Measured need justifies incremental private-state loading/publication or narrower authoritative inventory/tree snapshots without weakening identity recovery, ambiguity refusal, missed-event detection, or cross-folder correctness.
 
 ## Cold validation retains serial coordination stages
 

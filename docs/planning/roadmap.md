@@ -29,7 +29,7 @@ The current main branch provides:
 - frontmatter and document-format policy with independent caches;
 - authored codemap management and file/folder/exact-symbol reverse projections;
 - review decisions, guarded undo, and repair blocks;
-- foreground watching and the optional repository demon; and
+- foreground watching and the optional repository demon, including fail-closed changed-path link/index reconciliation for ordinary file events; and
 - a checked-in correctness smoke harness for source and release binaries.
 
 The latest tagged release is `v0.3.5`. Exact behavior is documented outside this roadmap.
@@ -46,18 +46,7 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Path-scoped link and index reconciliation
-
-Ordinary Markdown edits already scope frontmatter and document-format validation. Link and folder-index maintenance still performs broader work than necessary.
-
-- retain changed-source and changed-target batches;
-- update only affected link sources and index folders when evidence is complete;
-- preserve deterministic ordering and serial writes; and
-- fall back to full reconciliation on overflow, uncertain events, configuration changes, or incomplete state.
-
-Measure end-to-end watcher and move latency rather than debounce duration alone.
-
-### 2. Stable machine-readable diagnostics
+### 1. Stable machine-readable diagnostics
 
 Add a versioned native JSON format without destabilizing human-readable output.
 
@@ -68,7 +57,7 @@ Add a versioned native JSON format without destabilizing human-readable output.
 
 Consider SARIF only after the smaller native contract is stable.
 
-### 3. Link and reverse-index correctness
+### 2. Link and reverse-index correctness
 
 - validate heading fragments against one documented deterministic anchor model;
 - improve reverse-index coverage, unresolved-target, and scope diagnostics; and
@@ -76,7 +65,7 @@ Consider SARIF only after the smaller native contract is stable.
 
 External network reachability remains a separate opt-in candidate, not part of local path reconciliation.
 
-### 4. Watcher and demon resilience
+### 3. Watcher and demon resilience
 
 - stress large moves and watcher-event bursts;
 - retain race-focused single-owner lease coverage;
@@ -86,7 +75,7 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain authoritative recovery surfaces.
 
-### 5. Review and codemap evidence hardening
+### 4. Review and codemap evidence hardening
 
 - validate recommendations on broader labeled repositories;
 - compare scoring changes against pinned precision and holdout samples;
@@ -98,12 +87,11 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 Priority order:
 
-1. Path-scoped link and index reconciliation.
-2. Stable machine-readable diagnostics.
-3. Heading-fragment and reverse-index diagnostics.
-4. Watcher, lease, and large-move stress coverage.
-5. Review-ledger and codemap corpus hardening.
-6. Broader release-platform and installation verification.
+1. Stable machine-readable diagnostics.
+2. Heading-fragment and reverse-index diagnostics.
+3. Watcher, lease, and large-move stress coverage.
+4. Review-ledger and codemap corpus hardening.
+5. Broader release-platform and installation verification.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 
