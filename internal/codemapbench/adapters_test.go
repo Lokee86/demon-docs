@@ -137,10 +137,13 @@ func TestSuggestionsFromEvidenceSeparatesHardLinksFromContext(t *testing.T) {
 	if got := byTarget["src/dependency_hard.go"]; got.Score < HardLinkDependencyMinimumScore || got.Tier != SuggestionTierHardLink {
 		t.Fatalf("dependency-backed hard link = %#v", got)
 	}
-	for _, target := range []string{"src/related_hard.go", "src/test_supported_hard_test.go", "src/implementation_counterpart_hard.go"} {
+	for _, target := range []string{"src/test_supported_hard_test.go", "src/implementation_counterpart_hard.go"} {
 		if got := byTarget[target]; got.Tier != SuggestionTierHardLink {
 			t.Fatalf("%s tier = %q, want hard link: %#v", target, got.Tier, suggestions)
 		}
+	}
+	if got := byTarget["src/related_hard.go"]; got.Tier != SuggestionTierContext {
+		t.Fatalf("third supporting candidate should remain context after role coverage cap: %#v", got)
 	}
 	for _, target := range []string{
 		"src/dependency_context.go",
@@ -176,7 +179,7 @@ func TestIsTestTargetRecognizesCommonConventions(t *testing.T) {
 	}
 }
 
-func TestSuggestionsFromEvidenceCapsHardLinkSurface(t *testing.T) {
+func TestSuggestionsFromEvidenceCapsHardLinksPerRole(t *testing.T) {
 	candidates := make([]evidence.Candidate, 0, HardLinkSuggestionLimitPerDocument+1)
 	for index := 0; index <= HardLinkSuggestionLimitPerDocument; index++ {
 		candidates = append(candidates, evidence.Candidate{
@@ -190,14 +193,14 @@ func TestSuggestionsFromEvidenceCapsHardLinkSurface(t *testing.T) {
 	}
 
 	suggestions := SuggestionsFromEvidence("docs/runtime.md", candidates)
-	for index, suggestion := range suggestions {
-		want := SuggestionTierContext
-		if index < HardLinkSuggestionLimitPerDocument {
-			want = SuggestionTierHardLink
+	hardLinks := 0
+	for _, suggestion := range suggestions {
+		if suggestion.Tier == SuggestionTierHardLink {
+			hardLinks++
 		}
-		if suggestion.Tier != want {
-			t.Fatalf("suggestion %d tier = %q, want %q: %#v", index, suggestion.Tier, want, suggestions)
-		}
+	}
+	if hardLinks != 2 {
+		t.Fatalf("hard links = %d, want 2 primary-implementation links: %#v", hardLinks, suggestions)
 	}
 }
 

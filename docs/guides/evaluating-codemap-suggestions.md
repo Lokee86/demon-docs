@@ -170,7 +170,7 @@ Report at least:
 - labeling limitations; and
 - whether thresholds changed.
 
-A result from one repository or curated sample does not establish universal product quality. Current evaluation includes `by_role` metrics so role quality can be checked independently before roles are allowed to influence ranking. Compare like-for-like reports and add new independently labeled corpora before broadening claims.
+A result from one repository or curated sample does not establish universal product quality. Current evaluation includes `by_role` metrics so the new score-banded role/directory selection policy can be measured independently rather than inferred from aggregate precision alone. Compare like-for-like reports and add new independently labeled corpora before broadening claims.
 
 ## Use repository decision policy
 

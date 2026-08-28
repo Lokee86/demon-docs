@@ -146,7 +146,7 @@ interface_boundary
 context_only
 ```
 
-Role and confidence tier answer different questions. Role describes the candidate's apparent function relative to the document; tier describes whether current mutation policy considers the candidate strong enough for automatic insertion. Step 6 deliberately keeps roles descriptive: they do not yet alter score, ordering, hard-link thresholds, or output caps. Precision evaluation exposes `by_role` metrics so role quality can be measured before the next coverage-aware selection pass relies on it.
+Role and confidence tier answer different questions. Role describes the candidate's apparent function relative to the document; tier describes whether current mutation policy considers the candidate strong enough for automatic insertion. Role does not alter the numeric evidence score. Current selection uses role and target-directory coverage only among candidates in the same coarse score band, and hard-link allocation limits one role to two slots and one target directory to three. Precision evaluation exposes `by_role` metrics so this policy can be measured directly.
 
 ## Current measured baseline
 
@@ -264,7 +264,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - Few unmatched hard-tier recommendations were available outside Space Rocks.
 - Ordinary cross-repository holdout recovery remains 11/18.
 - Thresholds are empirical defaults rather than universal constants.
-- Candidate roles are currently descriptive metadata; coverage-aware selection by role is not yet implemented.
+- The new score-banded role/directory coverage policy and conservative hard-link allocation have not yet been rerun across the frozen labeled corpora.
 - Production execution now creates missing codemap sections only through selected effective document schemas; schema placement is separate from ranking quality.
 - Continued tuning on the same frozen errors risks overfitting.
 
@@ -283,7 +283,7 @@ These contracts are documented in [Codemap Managed Execution](../architecture/co
 - `internal/codemap/` — extraction, target normalization, datasets, authored-section stripping, and managed reconciliation.
 - `internal/codemapcorpus/` — repository paths, dependency/symbol providers, bounded per-document relationship facts, related documents, and Git history adapters.
 - `internal/evidence/` — deterministic evidence collection and fingerprints.
-- `internal/codemaprecommend/` — production admission, deterministic candidate roles, ranking, negative evidence, bounds, and tiers.
+- `internal/codemaprecommend/` — production admission, deterministic candidate roles, scoring, coverage-aware selection, negative evidence, bounds, and tiers.
 - `internal/codemaprun/` — production decline filtering, pruning evaluation, and rewrite planning.
 - `internal/codemapbench/` — holdout orchestration and reports using the production ranker.
 - `internal/codemapprecision/` — curated-label sampling and metric aggregation.

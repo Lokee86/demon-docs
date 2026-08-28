@@ -26,7 +26,9 @@ Existing or schema-required codemap section
 -> visible-target-bounded Arcana relationship evidence when current
 -> evidence candidates and fingerprints
 -> deterministic candidate role
--> production admission, score, order, and tier
+-> production admission and score
+-> score-banded role/directory coverage selection
+-> conservative hard-link allocation
 -> shared decline-policy filtering
 -> unified managed-section reconciliation
 -> atomic foreground write
@@ -113,7 +115,7 @@ See [Codemap Corpus and Adapters](codemap-corpus-adapters.md).
 
 ### 3. Evidence and ranking
 
-`internal/evidence` constructs candidates and evidence fingerprints after excluding the document and existing visible targets. `internal/codemaprecommend` owns production admission, deterministic candidate-role classification, scoring, bounding, ordering, negative-evidence filtering, and tiering. Roles distinguish primary implementation, supporting implementation, verification/test, interface/boundary, and context-only relationships without yet affecting score or tier. `internal/codemapbench` consumes that package rather than owning a second algorithm.
+`internal/evidence` constructs candidates and evidence fingerprints after excluding the document and existing visible targets. `internal/codemaprecommend` owns production admission, deterministic candidate-role classification, scoring, coverage-aware selection, bounding, ordering, negative-evidence filtering, and tiering. Roles distinguish primary implementation, supporting implementation, verification/test, interface/boundary, and context-only relationships. Role does not change numeric score; it is used within comparable score bands to preserve semantic/directory coverage and to prevent one role from monopolizing the hard-link surface. `internal/codemapbench` consumes that package rather than owning a second algorithm.
 
 See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
@@ -191,7 +193,9 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 - Pattern matches and directory descendants do not become independent outward evidence seeds.
 - Holdout answers are absent from generator inputs.
 - Evidence and deterministic candidate roles remain inspectable in reports.
-- Candidate role does not currently alter score, ordering, hard-link thresholds, or mutation eligibility.
+- Candidate role never changes numeric score; selection uses it only within score bands and hard-link coverage limits.
+- Lower score bands cannot displace higher-band candidates in the normal bounded surface.
+- No role may consume more than two hard-link slots and no target directory more than three.
 - Output per document is bounded.
 - `hard_link` and `context` remain deterministic recommendation tiers; only `hard_link` is an automatic generation tier.
 - Existing links are retained unless configured removal policy applies.

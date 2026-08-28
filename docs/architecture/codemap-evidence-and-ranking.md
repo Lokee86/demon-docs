@@ -24,8 +24,8 @@ Corpus facts + visible authored targets
 -> candidate admission
 -> deterministic role classification
 -> weighted scoring and fan-out discount
--> bounded deterministic ordering
--> suggestion tier
+-> score-banded coverage-aware selection
+-> conservative hard-link allocation
 ```
 
 Evidence explains why a target may be relevant. Ranking decides which candidates are surfaced first. Neither establishes universal semantic truth. The explicit production codemap command automatically adds only selected non-declined `hard_link` candidates; `context` remains an inspect/review surface. Mutation ownership remains in `internal/codemaprun` and `internal/codemap`, not in the ranker.
@@ -53,8 +53,9 @@ This boundary owns:
 - repeated-occurrence handling;
 - evidence-atom fan-out discounting;
 - per-document suggestion bounds and repeated-mention reserve;
-- deterministic score and target ordering; and
-- assignment of `hard_link` and `context` tiers.
+- score-banded role/directory coverage selection;
+- deterministic final score and target ordering; and
+- conservative assignment of `hard_link` and `context` tiers.
 
 ## Does not own
 
@@ -197,7 +198,7 @@ Current precedence is:
 
 The opposite side of `implements`/`extends`/`overrides` remains supporting implementation rather than interface/boundary. An outgoing Arcana `tests` edge means the candidate is the thing under test, not verification; an incoming `tests` edge means the candidate performs verification.
 
-This classification is intentionally conservative and evidence-derived. It does not use an LLM, repository naming guesses for interfaces, or unbounded graph traversal. Step 7 may use roles for coverage-aware selection, but Step 6 does **not** alter score, ordering, hard-link thresholds, or automatic mutation eligibility.
+This classification is intentionally conservative and evidence-derived. It does not use an LLM, repository naming guesses for interfaces, or unbounded graph traversal. Role never changes the numeric evidence score; the selection stage now uses it only to preserve coverage among candidates of comparable score and to prevent one role from monopolizing the hard-link surface.
 
 Roles are emitted in inspect output and benchmark/precision reports. Legacy reports may omit role; current consumers treat an empty legacy role as `context_only` for role-level evaluation.
 
@@ -236,9 +237,20 @@ Dependency, semantic-relationship, and declared-symbol evidence retain detail be
 
 Changing atom identity changes ranking behavior and requires benchmark review.
 
-## Selection bounds
+## Coverage-aware selection
 
-Suggestions are first sorted by descending score and target-path tie-breaker.
+Suggestions are first sorted by descending score and target-path tie-breaker. The normal 30-item surface is then selected by coarse score band and semantic coverage rather than a flat top-30 cutoff.
+
+A score band is `floor(log2(score))`. Higher bands are exhausted before lower bands, so coverage cannot pull a much weaker candidate across a factor-of-two confidence boundary. Within one band, selection prefers, in order:
+
+1. an unseen non-context role in an unseen target directory;
+2. an unseen non-context role;
+3. a non-context role in an unseen target directory;
+4. an unseen role/directory pair;
+5. a context-only candidate in an unseen target directory; and
+6. otherwise the higher raw score and target-path tie-breaker.
+
+This makes the cutoff coverage-aware without rewriting the evidence score. A directory is the repository-relative parent directory of the target; it is a lightweight implementation-seam proxy, not a semantic graph boundary.
 
 Current bounds:
 
@@ -248,13 +260,15 @@ additional repeated exact-path reserve: 2
 minimum repeated explicit mentions: 2
 ```
 
-The reserve may include high-count exact-path candidates outside the normal top 30. The final union is resorted by score and target.
+The repeated-mention reserve remains independent of the normal cutoff and may add high-count exact-path candidates outside the selected 30. The final union is resorted by raw score and target for stable inspection output.
 
 ## Tier assignment
 
 All selected suggestions default to `context`.
 
-At most five ordered suggestions receive `hard_link`. Eligibility requires one of the implemented paths:
+At most five suggestions receive `hard_link`. Existing evidence qualification rules remain unchanged, but qualified candidates are allocated through the same coverage model rather than simply taking the first five by raw score. A hard-link surface additionally permits at most two candidates from one semantic role and at most three from one target directory. `context_only` candidates are never hard links.
+
+Eligibility requires one of the implemented paths:
 
 - a declared-symbol mention;
 - an exact path mentioned at least twice and independently corroborated by declared-symbol or dependency evidence;
@@ -292,9 +306,11 @@ Production execution strips the codemap section from document text before collec
 - Weak history or sibling evidence alone is not admitted.
 - Semantic relationships may surface context candidates but cannot independently promote a candidate to `hard_link`.
 - Broad evidence fan-out is discounted.
-- Ordering is deterministic for identical inputs.
+- Ordering and coverage selection are deterministic for identical inputs.
+- Higher score bands cannot be displaced by lower-band coverage candidates.
 - Per-document output is bounded.
-- Role is deterministic relationship metadata and does not currently affect score or mutation policy.
+- Role never changes numeric score; it affects only comparable-score coverage and hard-link allocation.
+- No role may consume more than two hard-link slots, and no target directory may consume more than three.
 - Tier is confidence and mutation-policy metadata.
 - Explicit production generation adds only non-declined `hard_link` recommendations; `context` remains non-mutating.
 - A planned write still passes through managed-section reconciliation and source-hash guards.
@@ -311,7 +327,9 @@ A ranking change can pass unit tests while reducing real precision. Such changes
 - `collect.go` and `target_selection.go` — candidate aggregation, exclusions, and distinct file-versus-semantic expansion seed selection.
 - `mentions.go`, `structure.go`, `symbols.go`, and `history.go` — current signal collectors.
 - `internal/codemaprecommend/roles.go` — deterministic candidate-role classification.
-- `internal/codemaprecommend/suggestions.go` — weights, admission, fan-out discount, bounds, and tiers.
+- `internal/codemaprecommend/selection.go` — score bands, role/directory coverage selection, and repeated-mention reserve.
+- `internal/codemaprecommend/hard_selection.go` — conservative hard-link allocation and role/directory caps.
+- `internal/codemaprecommend/suggestions.go` — evidence weights, admission, score construction, and hard-link qualification predicates.
 - `internal/codemaprecommend/suggestion_negative_evidence.go` — narrow incidental-target filtering.
 - `internal/codemaprun/build.go` — production recommendation, decline, and pruning planning.
 - `internal/codemapbench/adapters.go` — conversion between dataset/evidence/report models.

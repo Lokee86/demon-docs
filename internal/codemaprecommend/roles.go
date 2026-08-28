@@ -6,9 +6,9 @@ import (
 	"github.com/Lokee86/demon-docs/internal/evidence"
 )
 
-// classifySuggestionRole assigns one deterministic documentation role without
-// changing candidate score, ordering, or mutation eligibility. Step 7 may use
-// these roles for coverage-aware selection; this phase only publishes them.
+// classifySuggestionRole assigns one deterministic documentation role. Role
+// classification does not change candidate score; the selector uses the role
+// only for bounded coverage and hard-link allocation.
 func classifySuggestionRole(target string, items []evidence.Evidence) SuggestionRole {
 	if IsTestTarget(target) || hasVerificationRelationship(items) {
 		return SuggestionRoleVerification

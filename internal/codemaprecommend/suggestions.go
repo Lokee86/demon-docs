@@ -121,67 +121,6 @@ func SuggestionsFromEvidence(document string, candidates []evidence.Candidate) [
 	return selectRankedSuggestions(ranked)
 }
 
-func selectRankedSuggestions(ranked []rankedSuggestion) []Suggestion {
-	sort.Slice(ranked, func(i, j int) bool {
-		if ranked[i].suggestion.Score != ranked[j].suggestion.Score {
-			return ranked[i].suggestion.Score > ranked[j].suggestion.Score
-		}
-		return ranked[i].suggestion.Target < ranked[j].suggestion.Target
-	})
-
-	selected := make(map[string]rankedSuggestion)
-	limit := min(DefaultSuggestionLimitPerDocument, len(ranked))
-	for _, item := range ranked[:limit] {
-		selected[item.suggestion.Target] = item
-	}
-
-	repeated := append([]rankedSuggestion(nil), ranked...)
-	sort.Slice(repeated, func(i, j int) bool {
-		if repeated[i].repeatedMentionCount != repeated[j].repeatedMentionCount {
-			return repeated[i].repeatedMentionCount > repeated[j].repeatedMentionCount
-		}
-		if repeated[i].suggestion.Score != repeated[j].suggestion.Score {
-			return repeated[i].suggestion.Score > repeated[j].suggestion.Score
-		}
-		return repeated[i].suggestion.Target < repeated[j].suggestion.Target
-	})
-	reserved := 0
-	for _, item := range repeated {
-		if item.repeatedMentionCount < RepeatedMentionMinimumCount || reserved >= RepeatedMentionReservePerDocument {
-			break
-		}
-		if _, exists := selected[item.suggestion.Target]; exists {
-			continue
-		}
-		selected[item.suggestion.Target] = item
-		reserved++
-	}
-
-	ordered := make([]rankedSuggestion, 0, len(selected))
-	for _, item := range selected {
-		ordered = append(ordered, item)
-	}
-	sort.Slice(ordered, func(i, j int) bool {
-		if ordered[i].suggestion.Score != ordered[j].suggestion.Score {
-			return ordered[i].suggestion.Score > ordered[j].suggestion.Score
-		}
-		return ordered[i].suggestion.Target < ordered[j].suggestion.Target
-	})
-
-	result := make([]Suggestion, 0, len(ordered))
-	hardLinks := 0
-	for _, item := range ordered {
-		suggestion := item.suggestion
-		suggestion.Tier = SuggestionTierContext
-		if hardLinks < HardLinkSuggestionLimitPerDocument && item.isHardLinkCandidate() {
-			suggestion.Tier = SuggestionTierHardLink
-			hardLinks++
-		}
-		result = append(result, suggestion)
-	}
-	return result
-}
-
 func (item rankedSuggestion) isHardLinkCandidate() bool {
 	// A single exact path mention is explicit document context, but repeated
 	// references plus independent semantic structure indicate that the document

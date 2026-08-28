@@ -309,6 +309,18 @@ The role field is orthogonal to `hard_link`/`context`. This phase does not chang
 
 Roles are emitted by inspect and benchmark report surfaces. Precision evaluation now includes `by_role` metrics and role sampling coverage, while legacy schema-1 suggestions with no role are interpreted as `context_only` for role-level evaluation. The precision helper was also corrected to recognize `semantic_relationship` at its implemented weight when selecting a primary evidence kind.
 
+### Phase 16: Coverage-aware selection
+
+The next phase replaced the flat top-30 cutoff with deterministic coverage-aware selection while leaving evidence weights unchanged. Candidates remain raw-score ordered into coarse `floor(log2(score))` bands. Higher bands are exhausted before lower ones; only candidates with comparable evidence magnitude compete on coverage.
+
+Within one band, selection prefers uncovered non-context roles and uncovered target directories before redundant candidates. Target parent directory is used only as a lightweight implementation-seam proxy. The repeated exact-path reserve remains independent, and final inspect/report order remains raw score plus target path.
+
+Hard-link qualification predicates and numeric thresholds were retained, but allocation became more conservative: `context_only` cannot promote, no semantic role may consume more than two of the five hard-link slots, and no target directory may consume more than three. This prevents one test family, one implementation role, or one dense package from monopolizing the permanent map while still allowing a package-centered document to retain several distinct seam representatives.
+
+Focused synthetic coverage pins both sides of the policy: same-band role/directory candidates can survive a crowded cutoff, while lower score bands cannot displace stronger-band candidates.
+
+Live Demon Docs dogfooding against a freshly rebuilt matching Lexicon/Arcana snapshot showed the intended hard-link redistribution on `docs/architecture/codemap-extraction-and-dataset.md`. Before the selection rewrite, its five hard links were four `verification_test` candidates plus one `primary_implementation`. After the rewrite, the five slots were two verification candidates, one primary implementation, and two supporting implementations. `docs/architecture/codemap-pipeline.md` still produced zero additions and zero removals. This is a behavioral/convergence check, not a precision claim. Fresh cross-corpus precision and recall measurement remains deferred to the final benchmark/tuning phase.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories

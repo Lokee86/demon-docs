@@ -141,7 +141,7 @@ The deterministic evidence pipeline and explicit production writer are implement
 Impact:
 
 - explicit codemap execution automatically adds only selected non-declined `hard_link` candidates; `context` remains non-mutating;
-- Arcana-backed file/symbol target resolution and bounded one-hop semantic relationship evidence are wired when a current matching Arcana/Lexicon snapshot and query executable are available; repository-wide dependency/symbol facts still default to the built-in shallow local provider, and candidate roles are now deterministic metadata only rather than a coverage-aware ranking policy;
+- Arcana-backed file/symbol target resolution and bounded one-hop semantic relationship evidence are wired when a current matching Arcana/Lexicon snapshot and query executable are available; repository-wide dependency/symbol facts still default to the built-in shallow local provider, and the new role/directory coverage policy has not yet been rebenchmarked across the frozen corpora;
 - a repository may receive plausible but unnecessary `context` links;
 - new repository populations need independent labels;
 - self-authored Demon Docs codemaps are not an independent benchmark; and
