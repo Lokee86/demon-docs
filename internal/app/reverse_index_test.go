@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -182,6 +183,107 @@ func TestReverseCheckReportsDeterministicOrphansWithoutFixFailure(t *testing.T) 
 		if out.String() != want {
 			t.Fatalf("check output=%q want %q", out.String(), want)
 		}
+	})
+}
+
+func TestReverseJSONReportsMissingIndex(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	mustMakeDir(t, filepath.Join(repositoryRoot, "src"))
+	mustMakeDir(t, docsRoot)
+	mustWriteAppFile(t, filepath.Join(docsRoot, "feature.md"), "# Feature Guide\n\n## Code map\n\n- `src/feature.go`\n")
+	mustWriteAppFile(t, filepath.Join(repositoryRoot, "src", "feature.go"), "package src\n")
+
+	withWorkingDirectory(t, repositoryRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--reverse", "--reverse-root", "src", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if errOut.Len() != 0 {
+			t.Fatalf("machine diagnostics wrote stderr: %q", errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "reverse_indexes.index_missing" && diagnostic.Severity == "warning" && diagnostic.Subsystem == "reverse_indexes" && diagnostic.Path == "src/INDEX.md" {
+				return
+			}
+		}
+		t.Fatalf("missing-index diagnostic absent: %#v", report.Diagnostics)
+	})
+}
+
+func TestReverseJSONReportsUnresolvedTarget(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	mustMakeDir(t, filepath.Join(repositoryRoot, "src"))
+	mustMakeDir(t, docsRoot)
+	mustWriteAppFile(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `src/missing.go`\n")
+
+	withWorkingDirectory(t, repositoryRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--reverse", "--reverse-root", "src", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "reverse_indexes.target_missing" && diagnostic.Severity == "error" && diagnostic.Path == "docs/feature.md" && diagnostic.Target == "src/missing.go" && diagnostic.Line == 5 {
+				return
+			}
+		}
+		t.Fatalf("target diagnostic absent: %#v", report.Diagnostics)
+	})
+}
+
+func TestReverseJSONReportsOrphanCodeFile(t *testing.T) {
+	repositoryRoot := t.TempDir()
+	docsRoot := filepath.Join(repositoryRoot, "docs")
+	mustMakeDir(t, filepath.Join(repositoryRoot, "src"))
+	mustMakeDir(t, docsRoot)
+	mustWriteAppFile(t, filepath.Join(docsRoot, "feature.md"), "# Feature\n\n## Code map\n\n- `src/referenced.go`\n")
+	mustWriteAppFile(t, filepath.Join(repositoryRoot, "src", "referenced.go"), "package src\n")
+	mustWriteAppFile(t, filepath.Join(repositoryRoot, "src", "orphan.go"), "package src\n")
+
+	withWorkingDirectory(t, repositoryRoot, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--reverse", "--reverse-root", "src"}, &out, &errOut); code != 0 {
+			t.Fatalf("baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--reverse", "--reverse-root", "src", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		for _, diagnostic := range report.Diagnostics {
+			if diagnostic.Code == "reverse_indexes.orphan_code_file" && diagnostic.Severity == "warning" && diagnostic.Path == "src/orphan.go" {
+				return
+			}
+		}
+		t.Fatalf("orphan diagnostic absent: %#v", report.Diagnostics)
 	})
 }
 

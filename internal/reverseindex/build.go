@@ -56,6 +56,7 @@ func buildWithResolver(ctx context.Context, repositoryRoot, docsRoot string, roo
 			if item.Resolution.Status != codemap.ResolutionUnsupported &&
 				(entryPotentiallyInScope(repositoryRoot, roots, item.Entry, format) || semanticResolutionInScope(repositoryRoot, roots, item.Resolution)) {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s target %s", item.Entry.DocumentPath, item.Entry.Source.Line, item.Resolution.Status, item.Entry.Target))
+				plan.MachineDiagnostics = append(plan.MachineDiagnostics, targetResolutionDiagnostic(item.Entry, item.Resolution))
 			}
 			continue
 		}
@@ -64,6 +65,7 @@ func buildWithResolver(ctx context.Context, repositoryRoot, docsRoot string, roo
 			accepted, targetErr := collected.addTarget(repositoryRoot, roots, folders, hierarchy, relative, item.Entry.DocumentPath, !symbolProjection)
 			if targetErr != nil {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", item.Entry.DocumentPath, item.Entry.Source.Line, targetErr))
+				plan.MachineDiagnostics = append(plan.MachineDiagnostics, targetErrorDiagnostic(item.Entry, diagnosticTargetUnavailable, targetErr.Error()))
 				continue
 			}
 			if !accepted {
@@ -74,6 +76,7 @@ func buildWithResolver(ctx context.Context, repositoryRoot, docsRoot string, roo
 				if symbolErr := collected.addSymbolReference(item.Resolution, item.Entry.DocumentPath); symbolErr != nil {
 					addReference(collected.fileDocs, relative, item.Entry.DocumentPath)
 					plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", item.Entry.DocumentPath, item.Entry.Source.Line, symbolErr))
+					plan.MachineDiagnostics = append(plan.MachineDiagnostics, targetErrorDiagnostic(item.Entry, diagnosticSymbolProjection, symbolErr.Error()))
 				}
 			}
 		}
@@ -104,6 +107,9 @@ func buildWithResolver(ctx context.Context, repositoryRoot, docsRoot string, roo
 	plan.Updates = append(plan.Updates, updates...)
 	plan.IndexCount += indexCount
 	sort.Strings(plan.Diagnostics)
+	sortReverseDiagnostics(plan.MachineDiagnostics)
+	plan.MachineDiagnostics = append(plan.MachineDiagnostics, reverseIndexUpdateDiagnostics(repositoryRoot, plan.Updates)...)
+	plan.MachineDiagnostics = append(plan.MachineDiagnostics, reverseOrphanDiagnostics(plan.Orphans)...)
 	return plan, nil
 }
 

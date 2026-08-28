@@ -48,12 +48,9 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ### 1. Stable machine-readable diagnostics
 
-The schema-1 native JSON envelope and stable link/index/frontmatter/document-format diagnostic vocabularies are implemented for `ddocs check --output-format json` without changing human-readable output. Links, documentation indexes, frontmatter, and document-body format may be selected individually or together.
+The schema-1 native JSON envelope and stable link/index/frontmatter/document-format/reverse-index diagnostic vocabularies are implemented for `ddocs check --output-format json` without changing human-readable output. Every reconciliation subsystem may be selected individually or in combination.
 
-Remaining work is to migrate the other reconciliation subsystems onto the same envelope:
-
-- reverse indexes; and
-- runtime/configuration failures where a completed machine report is appropriate.
+Remaining work is limited to auditing runtime/configuration failures and defining machine output only where a completed diagnostic report is semantically appropriate. Usage errors and failures that prevent planning should not be disguised as reconciliation results.
 
 Keep stable code, severity, subsystem, repository-relative path, source position, and documented exit semantics as each subsystem migrates. Consider SARIF only after the native contract covers the core check surface.
 

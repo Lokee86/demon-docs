@@ -9,13 +9,15 @@ import (
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/reverseindex"
 )
 
-func writeDiagnosticReport(out io.Writer, command string, exitCode int, indexes model.ReconcileResult, frontmatterPlan frontmatter.Plan, formatPlan documentpolicy.Plan, plan links.Plan, orphanDocuments []string) error {
-	items := make([]diagnostics.Diagnostic, 0, len(indexes.Diagnostics)+len(frontmatterPlan.Diagnostics)+len(formatPlan.Diagnostics)+len(plan.Diagnostics)+len(orphanDocuments))
+func writeDiagnosticReport(out io.Writer, command string, exitCode int, indexes model.ReconcileResult, frontmatterPlan frontmatter.Plan, formatPlan documentpolicy.Plan, reversePlan reverseindex.Plan, plan links.Plan, orphanDocuments []string) error {
+	items := make([]diagnostics.Diagnostic, 0, len(indexes.Diagnostics)+len(frontmatterPlan.Diagnostics)+len(formatPlan.Diagnostics)+len(reversePlan.MachineDiagnostics)+len(plan.Diagnostics)+len(orphanDocuments))
 	items = append(items, indexes.Diagnostics...)
 	items = append(items, machineFrontmatterDiagnostics(frontmatterPlan.Diagnostics)...)
 	items = append(items, machineFormatDiagnostics(formatPlan.Diagnostics)...)
+	items = append(items, reversePlan.MachineDiagnostics...)
 	items = append(items, plan.Diagnostics...)
 	for _, path := range orphanDocuments {
 		items = append(items, diagnostics.Diagnostic{

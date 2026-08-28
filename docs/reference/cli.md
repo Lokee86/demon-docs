@@ -84,7 +84,7 @@ Computes reconciliation without writing selected authored surfaces or frontmatte
 
 Mutation scope: no authored-file writes. Internal read/cache behavior remains implementation-owned.
 
-`ddocs check --output-format json` emits the versioned schema-1 machine-readable diagnostic report when only migrated subsystems are selected. Links, documentation indexes, frontmatter, and document-body format are currently supported in any selected combination; reverse-index selection fails with usage exit code `2` rather than returning an incomplete report. See [Machine-Readable Diagnostics](machine-readable-diagnostics.md).
+`ddocs check --output-format json` emits the versioned schema-1 machine-readable diagnostic report when only migrated subsystems are selected. Links, documentation indexes, frontmatter, document-body format, and reverse indexes are supported in any selected combination. Reverse-index roots/headings and other planning preconditions still apply; failures before a completed check use the normal CLI/runtime error surface rather than a partial JSON report. See [Machine-Readable Diagnostics](machine-readable-diagnostics.md).
 
 ### `ddocs fix`
 
@@ -326,6 +326,7 @@ ddocs check --links --output-format json
 ddocs check --indexes --output-format json
 ddocs check --frontmatter --output-format json
 ddocs check --format --output-format json
+ddocs check --reverse --reverse-root services/api --output-format json
 ddocs check --links --indexes --frontmatter --format --output-format json
 
 # Review unresolved suggestions and recorded changes.

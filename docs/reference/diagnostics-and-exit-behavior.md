@@ -165,7 +165,7 @@ whether a write occurred
 whether user selection is required
 ```
 
-Machine-readable output is not implied unless a command explicitly documents such a format. The stable schema-1 `check --output-format json` contract currently covers links, documentation indexes, frontmatter, and document-body format in any selected combination; its schema, codes, severity values, and compatibility policy are defined in [Machine-Readable Diagnostics](machine-readable-diagnostics.md).
+Machine-readable output is not implied unless a command explicitly documents such a format. The stable schema-1 `check --output-format json` contract covers every reconciliation subsystem—links, documentation indexes, frontmatter, document-body format, and reverse indexes—in any selected combination; its schema, codes, severity values, and compatibility policy are defined in [Machine-Readable Diagnostics](machine-readable-diagnostics.md). Command and precondition failures that prevent a completed check remain on the normal error surface.
 
 ## Failure safety
 

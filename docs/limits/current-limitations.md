@@ -189,19 +189,19 @@ Boundary:
 
 This is not a missing Demon Docs feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
 
-## Machine-readable diagnostics currently cover links, indexes, frontmatter, and document format
+## Machine-readable diagnostics cover reconciliation, not precondition failures
 
-`ddocs check --output-format json` now exposes the stable schema-1 native diagnostic contract for links, documentation indexes, frontmatter, and document-body format, including combined reports and orphan-document findings. Other `check` subsystems still use their existing human-readable diagnostic surfaces.
+`ddocs check --output-format json` now exposes the stable schema-1 native diagnostic contract for every reconciliation subsystem: links, documentation indexes, frontmatter, document-body format, and reverse indexes. Combined reports include the selected subsystem findings plus link and reverse-index health findings where applicable. Failures that prevent reconciliation planning from completing still use the normal CLI/runtime error surface.
 
 Impact:
 
-- link/index/frontmatter/format CI and agent integrations can consume stable diagnostic codes and structured evidence;
-- combinations containing unmigrated subsystems are intentionally rejected rather than silently omitting findings; and
-- reverse indexes and pre-report runtime/configuration failures still require text handling.
+- CI and agent integrations can consume stable diagnostic codes and structured evidence for every completed reconciliation check;
+- reverse-index target, generated-index, and orphan-code health is included in the same envelope; and
+- usage, configuration, filesystem, or runtime failures that prevent a completed plan still require the normal error surface.
 
 Workaround:
 
-Use the JSON contract for any selected combination of links, documentation indexes, frontmatter, and document-body format. Use normal text output and exit status for broader checks until each remaining subsystem migrates onto the same envelope.
+Use the JSON contract for completed reconciliation checks. Treat exit code `2` and stderr as a command/precondition failure rather than attempting to parse it as a schema-1 reconciliation report.
 
 Owning docs:
 
@@ -211,7 +211,7 @@ Owning docs:
 
 Removal condition:
 
-All core `check` subsystems emit the shared versioned native diagnostic contract, and mixed-subsystem JSON reports are complete rather than rejected.
+A future contract explicitly defines machine-readable command/precondition failures where doing so is useful without conflating them with completed reconciliation findings.
 
 ## Symlink entries are not owned traversal trees
 

@@ -4,7 +4,7 @@ created: "2026-08-28"
 document_id: 019fb711-9205-7fe0-bdd5-9ef5244bcb3e
 document_type: general
 policy_exempt: false
-summary: Versioned JSON diagnostic contract for link, index, frontmatter, and document-format verification, including stable envelope fields, diagnostic codes, severity values, and compatibility rules.
+summary: Versioned JSON diagnostic contract for all Demon Docs reconciliation checks, including stable envelope fields, subsystem diagnostic codes, severity values, and compatibility rules.
 ---
 # Machine-Readable Diagnostics
 
@@ -16,17 +16,18 @@ This document defines the first stable machine-readable diagnostic contract expo
 
 ## Current scope
 
-Schema version 1 currently covers links, documentation indexes, frontmatter, and document-body format:
+Schema version 1 covers all reconciliation subsystems: links, documentation indexes, frontmatter, document-body format, and reverse indexes:
 
 ```bash
 ddocs check --links --output-format json
 ddocs check --indexes --output-format json
 ddocs check --frontmatter --output-format json
 ddocs check --format --output-format json
+ddocs check --reverse --reverse-root services/api --output-format json
 ddocs check --links --indexes --frontmatter --format --output-format json
 ```
 
-Text remains the default output. JSON accepts any selected combination of the migrated link, index, frontmatter, and document-format subsystems. Reverse-index selection is rejected with usage exit code `2` rather than returning a partial machine report.
+Text remains the default output. JSON accepts any selected combination of reconciliation subsystems. Reverse-index checks retain their normal root and codemap preconditions; failures that prevent a reconciliation plan from being completed remain CLI/runtime errors rather than partial schema-1 reports.
 
 `fix` and `watch` do not yet expose this JSON diagnostic contract.
 
@@ -165,9 +166,27 @@ Frontmatter diagnostics originate in `internal/frontmatter` and are projected in
 
 Document-format diagnostics originate in `internal/documentpolicy`. The optional `section` field identifies the affected heading, and `options` preserves explicit manual-resolution choices for ambiguous or unknown authored sections. As with frontmatter, warning-only format diagnostics do not themselves fail a completed check.
 
+## Reverse-index diagnostic codes
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `reverse_indexes.target_missing` | error | An in-scope authored codemap target does not exist. |
+| `reverse_indexes.target_outside_repository` | error | An authored target resolves outside the repository boundary. |
+| `reverse_indexes.target_kind_mismatch` | error | The resolved target kind does not match the authored codemap target kind. |
+| `reverse_indexes.pattern_missing` | error | An in-scope authored pattern has no matches. |
+| `reverse_indexes.target_ambiguous` | error | More than one target satisfies the authored codemap reference. `candidates` contains deterministic alternatives when available. |
+| `reverse_indexes.target_unresolved` | error | A target cannot be projected and has no more specific schema-1 resolution code. |
+| `reverse_indexes.target_unavailable` | error | A previously resolved target cannot be inspected or accepted by reverse-index scope validation. |
+| `reverse_indexes.symbol_projection_error` | error | A verified symbol target cannot be projected safely because semantic identity or span evidence is inconsistent. |
+| `reverse_indexes.index_missing` | warning | A required managed reverse index does not yet exist. |
+| `reverse_indexes.index_out_of_date` | warning | An existing managed reverse index differs from the deterministic projection. |
+| `reverse_indexes.orphan_code_file` | warning | An eligible in-scope code file has no resolved authored documentation target. |
+
+Target diagnostics carry the authored document path, source line, target, and candidates when applicable. Reverse-index file and orphan diagnostics carry repository-relative paths. Index drift and orphan findings are warnings, but `check` still fails when they are present because reverse-index health explicitly treats either condition as check failure.
+
 ## Ordering
 
-Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then frontmatter diagnostics, then document-format diagnostics, then link reconciliation diagnostics, then orphan-document diagnostics. Frontmatter and format diagnostics retain deterministic path/field or path/section ordering; link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
+Diagnostics preserve deterministic reconciliation order. In a combined report, index diagnostics are emitted first, then frontmatter diagnostics, then document-format diagnostics, then reverse-index diagnostics, then link reconciliation diagnostics, then orphan-document diagnostics. Reverse-index target diagnostics are sorted deterministically before reverse-index file drift and orphan findings; frontmatter and format diagnostics retain deterministic path/field or path/section ordering; link diagnostics follow deterministic source/occurrence processing; orphan-document diagnostics are appended in sorted path order.
 
 Consumers must not infer priority from array position. Use `code`, `severity`, path, and position.
 
@@ -194,14 +213,14 @@ Contract coverage includes:
 - failing frontmatter value reports with stable field evidence;
 - non-failing frontmatter warning reports;
 - document-format reports with stable section codes and authored-resolution options;
-- combined migrated-subsystem reports;
-- rejection when an unmigrated subsystem is selected; and
-- typed reconciliation tests for link identity evidence, stale index entries, frontmatter policy findings, and document-format conditions.
+- reverse-index target, index-drift, and orphan-code reports;
+- combined all-subsystem ordering; and
+- typed reconciliation tests for link identity evidence, stale index entries, frontmatter policy findings, document-format conditions, and reverse-index projection health.
 
 Run:
 
 ```bash
-go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/documentpolicy ./internal/app -count=1
+go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/documentpolicy ./internal/reverseindex ./internal/app -count=1
 ```
 
 ## Related docs
@@ -213,4 +232,4 @@ go test ./internal/links ./internal/reconcile ./internal/frontmatter ./internal/
 
 ## Notes
 
-Schema 1 establishes one shared diagnostic envelope across migrated subsystems. Reverse indexes and suitable runtime/configuration failures should adopt this envelope rather than inventing independent JSON formats.
+Schema 1 establishes one shared diagnostic envelope across every reconciliation subsystem. Usage errors and failures that prevent a check plan from completing remain outside this report contract unless a future version explicitly defines a machine-readable precondition/error envelope.

@@ -14,6 +14,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 	"github.com/Lokee86/demon-docs/internal/links"
 	"github.com/Lokee86/demon-docs/internal/model"
+	"github.com/Lokee86/demon-docs/internal/reverseindex"
 )
 
 type machineDiagnosticV1 struct {
@@ -45,15 +46,16 @@ func TestMachineDiagnosticSubsystemOrdering(t *testing.T) {
 	indexes := model.ReconcileResult{Diagnostics: []diagnostics.Diagnostic{{Code: "indexes.test", Severity: diagnostics.SeverityWarning, Subsystem: "indexes", Message: "index"}}}
 	frontmatterPlan := frontmatter.Plan{Diagnostics: []frontmatter.Diagnostic{{Code: "frontmatter.test", Message: "frontmatter"}}}
 	formatPlan := documentpolicy.Plan{Diagnostics: []documentpolicy.Diagnostic{{Code: "format.test", Message: "format"}}}
+	reversePlan := reverseindex.Plan{MachineDiagnostics: []diagnostics.Diagnostic{{Code: "reverse_indexes.test", Severity: diagnostics.SeverityWarning, Subsystem: "reverse_indexes", Message: "reverse"}}}
 	linkPlan := links.Plan{Diagnostics: []diagnostics.Diagnostic{{Code: "links.test", Severity: diagnostics.SeverityError, Subsystem: "links", Message: "link"}}}
-	if err := writeDiagnosticReport(&out, "check", 1, indexes, frontmatterPlan, formatPlan, linkPlan, []string{"docs/orphan.md"}); err != nil {
+	if err := writeDiagnosticReport(&out, "check", 1, indexes, frontmatterPlan, formatPlan, reversePlan, linkPlan, []string{"docs/orphan.md"}); err != nil {
 		t.Fatal(err)
 	}
 	var report machineReportV1
 	if err := json.Unmarshal(out.Bytes(), &report); err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"indexes.test", "frontmatter.test", "format.test", "links.test", "links.orphan_document"}
+	want := []string{"indexes.test", "frontmatter.test", "format.test", "reverse_indexes.test", "links.test", "links.orphan_document"}
 	if len(report.Diagnostics) != len(want) {
 		t.Fatalf("diagnostics=%#v", report.Diagnostics)
 	}
@@ -438,7 +440,7 @@ func TestCheckFormatJSONWarningDoesNotFail(t *testing.T) {
 	})
 }
 
-func TestJSONDiagnosticsRejectUnmigratedReconciliationSelection(t *testing.T) {
+func TestJSONDiagnosticsPreservePreconditionErrors(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")
 	if err := os.MkdirAll(docs, 0o755); err != nil {
@@ -455,6 +457,9 @@ func TestJSONDiagnosticsRejectUnmigratedReconciliationSelection(t *testing.T) {
 		errOut.Reset()
 		if code := Run(context.Background(), []string{"check", "--links", "--reverse", "--output-format", "json"}, &out, &errOut); code != 2 {
 			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if out.Len() != 0 || !strings.Contains(errOut.String(), "no reverse-index roots configured") {
+			t.Fatalf("precondition failure should remain on stderr: out=%q err=%q", out.String(), errOut.String())
 		}
 	})
 }

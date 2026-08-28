@@ -2,17 +2,19 @@ package reverseindex
 
 import (
 	"github.com/Lokee86/demon-docs/internal/codemap"
+	"github.com/Lokee86/demon-docs/internal/diagnostics"
 	"github.com/Lokee86/demon-docs/internal/model"
 )
 
 const section = "reverse-index"
 
 type Plan struct {
-	Updates        []model.FileUpdate
-	Diagnostics    []string
-	Orphans        []string
-	IndexCount     int
-	ReferenceCount int
+	Updates            []model.FileUpdate
+	Diagnostics        []string
+	MachineDiagnostics []diagnostics.Diagnostic
+	Orphans            []string
+	IndexCount         int
+	ReferenceCount     int
 }
 
 func (p Plan) Failed() bool { return len(p.Updates) > 0 || len(p.Diagnostics) > 0 }
