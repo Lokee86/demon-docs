@@ -16,9 +16,9 @@ This document describes the implemented reverse-index projection from authored d
 
 ## Overview
 
-Reverse indexing is the third reconciliation subsystem alongside documentation indexes and local links. It reads explicit targets from configured codemap sections, resolves those targets against the current repository filesystem, inventories selected code roots, and writes deterministic managed blocks into code-folder index files.
+Reverse indexing is the third reconciliation subsystem alongside documentation indexes and local links. It reads explicit targets from configured codemap sections, resolves those targets against the current repository filesystem and optional current Arcana/Lexicon semantic state, inventories selected code roots, and writes deterministic managed blocks into code-folder index files.
 
-The current implementation deliberately operates at file and folder level. General repository relationships and symbol adapters belong to ArcanaGraph; Demon Docs reverse indexes do not infer semantic ownership or use LLM judgment.
+Reverse-index relationships still come only from authored codemap targets. File and folder targets are projected directly. Exact symbol targets may additionally be projected at declaration level when Arcana deterministically resolves the authored target against a current matching snapshot. Arcana owns declaration identity and code relationships; Demon Docs consumes only the verified node attached to the authored target and never turns raw graph neighbours, calls, dependencies, or other Arcana edges into documentation backlinks.
 
 ## Code root
 
@@ -36,7 +36,8 @@ The reverse-index boundary owns:
 - loading repository-root and nested `.docignore` rules during traversal;
 - extracting authored codemap targets through `internal/codemap`;
 - resolving existing file and folder targets;
-- grouping source documents by resolved code target;
+- resolving authored exact symbol targets through the shared current Arcana target resolver when safely available;
+- grouping source documents by resolved file, folder, or verified symbol target;
 - inventorying eligible code files under selected folders;
 - rendering one deterministic managed reverse-index block per selected folder;
 - reporting unresolved in-scope codemap targets;
@@ -50,8 +51,8 @@ Reverse indexing does not own:
 - authored codemap relationships;
 - missing-link candidate generation or ranking;
 - ordinary Markdown link reconciliation;
-- symbol-level code references;
-- dependency or call graphs;
+- language parsing, declaration discovery, or symbol identity generation;
+- dependency, call, implementation, or other graph-derived documentation relationships;
 - judgments that an existing codemap link is irrelevant;
 - repair of ambiguous authored targets; or
 - code-root selection beyond explicit configuration or command flags.
@@ -70,7 +71,7 @@ current repository files
 current .docignore hierarchy
 ```
 
-`codemap.BuildDataset` extracts targets from documents under the documentation root. The reverse-index builder then accepts resolved targets only when they fall inside a selected reverse root and survive traversal exclusions.
+`codemap.BuildDatasetContext` extracts targets from documents under the documentation root. The reverse-index builder attempts to open the same conservative current Arcana resolver used by codemap execution; unavailable or stale semantic state degrades without making Arcana mandatory. The builder then accepts resolved targets only when their backing path falls inside a selected reverse root and survives traversal exclusions.
 
 The builder fails when no reverse roots are selected, no configured codemap section exists, or matching codemap sections contain no targets. Individual unresolved targets that could belong to the selected scope become sorted diagnostics rather than guessed relationships.
 
@@ -101,16 +102,19 @@ For each selected folder, inventory identifies eligible direct files. Existing f
 
 ## Target facts
 
-Resolved codemap targets become one of two current fact types:
+Resolved codemap targets become one of three projection types:
 
 ```text
-folder target -> documentation references attached to that folder
-file target   -> documentation references attached to that exact file
+folder target          -> documentation references attached to that folder
+file target            -> documentation references attached to that exact file
+verified symbol target -> documentation references attached to that exact declaration under its backing file
 ```
 
-A file target does not imply documentation for its containing folder. A folder target is rendered as folder documentation and does not automatically mark every descendant file as documented.
+A file target does not imply documentation for its containing folder. A folder target is rendered as folder documentation and does not automatically mark every descendant file as documented. A verified symbol target marks its backing file as covered for reverse-index orphan health, but it does not masquerade as a generic file-level documentation reference: the generated backlink remains attached to the exact symbol identity and current source span.
 
-Multiple documents may reference the same target. Every distinct source document is retained and rendered in sorted order.
+A path-qualified symbol whose semantic resolver is unavailable or stale retains the existing explicit file-path fallback because the authored path itself is deterministic. A standalone `symbol:...` target requires a unique verified semantic resolution before it can project a backlink. Missing or ambiguous symbol targets remain diagnostics; Demon Docs never selects a candidate.
+
+Multiple documents may reference the same target. Every distinct source document is retained and rendered in sorted order. Symbol grouping prefers Arcana's stable node key and otherwise uses the durable external identity supplied by the verified resolver.
 
 ## Generated format
 
@@ -126,6 +130,8 @@ Folder documentation:
 
 - [server.go](server.go)
   - [Server Architecture](../../docs/architecture/server.md)
+  - Symbol `server.go::Serve` (function, lines 24-61)
+    - [Request Lifecycle](../../docs/architecture/request-lifecycle.md)
 
 <!-- doc-ledger:reverse-index:end -->
 ```
@@ -139,8 +145,8 @@ An incomplete marker pair is an error. Reverse indexing does not take ownership 
 ```text
 resolve roots and codemap headings
 -> discover scoped folders and ignore hierarchy
--> build authored codemap dataset
--> resolve in-scope file and folder targets
+-> build authored codemap dataset with optional current Arcana target resolution
+-> resolve in-scope file, folder, and verified symbol targets
 -> inventory eligible files and existing managed indexes through bounded workers
 -> prepare rendered blocks and current-index comparisons through bounded workers
 -> merge updates and errors serially in sorted folder order
@@ -178,13 +184,14 @@ Fatal build errors include:
 
 Non-fatal target diagnostics identify source document, source line, resolution status, and target. Diagnostics are sorted before output.
 
-Eligible files in the selected inventory with no entry in the resolved authored file facts are reported during `check --reverse` as sorted `message: Reverse-index orphan: <repo-relative-path>` messages. The inventory already excludes hard ignores, `.docignore` paths, generated reverse-index files, and files outside selected roots.
+Eligible files in the selected inventory with neither an authored file backlink nor a uniquely verified authored symbol backlink are reported during `check --reverse` as sorted `message: Reverse-index orphan: <repo-relative-path>` messages. A symbol backlink only proves that some exact declaration in the file is explicitly documented; it does not create a generic file-level documentation edge or imply coverage of the rest of the file. The inventory already excludes hard ignores, `.docignore` paths, generated reverse-index files, and files outside selected roots.
 
 ## Invariants and safety boundaries
 
 - Authored codemap sections are the only source of documentation-to-code relationships.
 - Existing codemap links are never classified as irrelevant or removal candidates.
-- Only explicit file and folder targets create current reverse-index facts.
+- Only explicit authored file, folder, or uniquely verified symbol targets create reverse-index facts.
+- Arcana graph relationships never create reverse-index backlinks by themselves.
 - Unresolved or out-of-scope targets do not create substitute edges.
 - Orphan health does not create substitute edges or alter the fix/watch projection path.
 - Output is deterministic for the same repository snapshot and configuration.
@@ -199,9 +206,13 @@ Eligible files in the selected inventory with no entry in the resolved authored 
 - `internal/reverseindex/scope.go` - root validation and scope normalization.
 - `internal/reverseindex/traversal.go` - folder discovery and nested ignore loading.
 - `internal/reverseindex/inventory.go` - bounded folder inventory, shared worker scheduling, and deterministic indexed merge.
-- `internal/reverseindex/targets.go` - resolved target acceptance and grouping.
+- `internal/reverseindex/targets.go` - resolved file/folder acceptance and backing-file coverage.
+- `internal/reverseindex/symbols.go` - verified authored-symbol grouping and stable identity validation.
+- `internal/reverseindex/symbol_render.go` - deterministic symbol labels and ordering.
+- `internal/reverseindex/semantic_scope.go` - reverse-root scope checks for semantic candidates.
+- `internal/reverseindex/build_context.go` - optional current Arcana resolver lifecycle and fallback.
 - `internal/reverseindex/build.go` - complete deterministic build, bounded folder reconciliation preparation, and serial plan merge.
-- `internal/reverseindex/render.go` - managed block and document-link rendering.
+- `internal/reverseindex/render.go` - managed block, file/folder backlinks, symbol projections, and document-link rendering.
 - `internal/reverseindex/apply.go` - file-update application.
 - `internal/reverseindex/watch.go` - reverse-index watch scheduling.
 - `internal/app/reverse_index.go` - CLI option resolution and mixed-feature watch coordination.
@@ -226,4 +237,4 @@ go test ./internal/reverseindex ./internal/app -count=1
 
 ## Notes
 
-Symbol references, dependency facts, move-aware authored-target repair, and richer coverage exports remain future work. They must not be inferred from the current file/folder projection.
+Dependency-aware reverse projection, graph-neighbour backlinks, and richer coverage exports remain outside the current reverse-index contract. Exact authored symbol targets are now supported only through verified Arcana node metadata; this does not transfer general symbol discovery or graph ownership into Demon Docs.

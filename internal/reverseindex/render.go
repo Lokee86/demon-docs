@@ -29,6 +29,12 @@ func renderBlock(repositoryRoot, indexPath, folder string, files []string, f fac
 		for _, document := range sortedReferences(f.fileDocs[relative]) {
 			lines = append(lines, "  - "+documentLink(indexPath, repositoryRoot, document, f.titles))
 		}
+		for _, symbol := range sortedSymbolReferences(f.symbolDocs[relative]) {
+			lines = append(lines, "  - "+symbolLabel(symbol))
+			for _, document := range sortedReferences(symbol.Documents) {
+				lines = append(lines, "    - "+documentLink(indexPath, repositoryRoot, document, f.titles))
+			}
+		}
 	}
 	lines = append(lines, "", markerEnd(c))
 	return strings.Join(lines, "\n")

@@ -24,7 +24,7 @@ Use `check --reverse` to preview required generated changes, `fix --reverse` to 
 
 - Demon Docs is initialized because this guide places reverse-index outputs in code roots outside the docs root; initialization establishes the wider repository boundary.
 - The configured documentation root exists.
-- At least one documentation page contains a configured codemap section with file or folder targets.
+- At least one documentation page contains a configured codemap section with file, folder, or exact symbol targets.
 - The intended code roots are inside the repository and outside the documentation root.
 - Generated code-folder index files are acceptable in the selected roots.
 
@@ -86,7 +86,15 @@ ddocs check --reverse
 
 Review every created or changed code-folder index. Demon Docs owns only the `reverse-index` marker block. Existing prose outside that block should remain unchanged.
 
-A generated block lists direct files and nests documentation backlinks below exact file targets. Folder-level documentation appears separately as folder documentation.
+A generated block lists direct files and nests documentation backlinks below exact file targets. Folder-level documentation appears separately as folder documentation. When a uniquely resolved authored symbol target is backed by current matching Arcana/Lexicon state, its backlink is nested one level deeper beneath the backing file, for example:
+
+```markdown
+- [runtime.go](runtime.go)
+  - Symbol `service/runtime.go::Run` (function, line 42)
+    - [Runtime Guide](../docs/runtime.md)
+```
+
+The symbol label is a deterministic projection of the authored target's verified Arcana node and current source span. It is not inferred from graph neighbours.
 
 ## Run with other subsystems
 
@@ -119,9 +127,11 @@ Watch mode is a convenience. A later static `ddocs check --reverse` must reprodu
 
 - Selected code folders contain deterministic managed reverse-index blocks.
 - Explicit folder and file targets link back to their source documentation.
+- Uniquely verified exact symbol targets render declaration-level backlinks beneath their backing files.
+- A verified symbol target satisfies reverse-index coverage for its backing file without being flattened into a generic file backlink.
 - Eligible direct code files remain visible even when no document targets them.
-- Unresolved authored targets remain diagnostics rather than guessed backlinks.
-- `check --reverse` reports every eligible in-scope code file with no resolved authored file target as `message: Reverse-index orphan: PATH` and returns non-zero.
+- Unresolved or ambiguous authored targets remain diagnostics rather than guessed backlinks.
+- `check --reverse` reports every eligible in-scope code file with neither a resolved authored file target nor a uniquely verified authored symbol target as `message: Reverse-index orphan: PATH` and returns non-zero.
 - Ignored files, generated reverse-index files, and files outside the selected roots are excluded from orphan health checks.
 - A second `fix --reverse` changes no files.
 - `check --reverse` succeeds once the projection is current and every eligible file has an authored file target.
@@ -138,11 +148,11 @@ Confirm `[codemap].headings` matches an actual heading under the configured docs
 
 ### Codemap section contains no targets
 
-Add explicit file or folder targets, or remove reverse indexing from the repository until authored targets exist.
+Add explicit file, folder, or exact symbol targets, or remove reverse indexing from the repository until authored targets exist.
 
 ### A target is unresolved
 
-Correct the authored target. Reverse indexes do not select among missing or ambiguous destinations.
+Correct the authored target. Reverse indexes do not select among missing or ambiguous destinations. A path-qualified symbol can fall back to its explicit file path when semantic verification is unavailable; a standalone `symbol:...` target requires current unique Arcana resolution before it can produce a backlink.
 
 ### A reverse-index orphan is reported
 
@@ -167,4 +177,4 @@ Repair the marker pair manually after reviewing the file. Demon Docs will not gu
 
 ## Notes
 
-Reverse indexes are file/folder projections today. Symbol-level backlinks and dependency-aware projections belong to the planned code-intelligence track.
+Reverse indexes now support file, folder, and uniquely verified exact-symbol projections from authored codemap targets. Arcana still owns declaration identity and repository relationships. Dependency/call/implementation-aware backlinks are intentionally excluded: raw graph relationships never become documentation ownership.

@@ -28,7 +28,7 @@ func WatchWithRunLock(ctx context.Context, repositoryRoot, docsRoot string, root
 			runLock.Lock()
 			defer runLock.Unlock()
 		}
-		plan, err := Build(repositoryRoot, docsRoot, roots, c, format)
+		plan, err := BuildContext(ctx, repositoryRoot, docsRoot, roots, c, format)
 		if err != nil {
 			return err
 		}

@@ -487,7 +487,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 			changed += count
 		}
 		if features.Reverse {
-			reversePlan, err = reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
+			reversePlan, err = reverseindex.BuildContext(ctx, scope.RepositoryRoot, scope.DocsRoot, reverseOptions.roots, c, reverseOptions.format)
 			if err != nil {
 				return fail(errOut, err)
 			}
@@ -557,7 +557,7 @@ func runTree(ctx context.Context, command string, args []string, out, errOut io.
 		return 0
 	}
 
-	plans, err := buildCheckPlans(scope, c, features, reverseOptions)
+	plans, err := buildCheckPlans(ctx, scope, c, features, reverseOptions)
 	if err != nil {
 		return fail(errOut, err)
 	}

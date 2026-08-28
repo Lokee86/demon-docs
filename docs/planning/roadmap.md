@@ -27,7 +27,7 @@ The current main branch provides:
 - recursive indexes, parent navigation, orphan health, and local-link repair;
 - explicit link-aware moves and observed filesystem-move recovery;
 - frontmatter and document-format policy with independent caches;
-- authored codemap management and file/folder reverse indexes;
+- authored codemap management and file/folder/exact-symbol reverse projections;
 - review decisions, guarded undo, and repair blocks;
 - foreground watching and the optional repository demon; and
 - a checked-in correctness smoke harness for source and release binaries.
@@ -38,7 +38,7 @@ The latest tagged release is `v0.3.5`. Exact behavior is documented outside this
 
 Demon Docs owns deterministic maintenance of repository-owned Markdown and explicit managed surfaces. It may exchange versioned facts with sibling Warlock tools without absorbing their implementation responsibilities.
 
-It does not own polyglot repository graphs, symbols, dependencies, impact analysis, agent context delivery, or autonomous prose generation.
+It does not own polyglot repository graphs, declaration discovery/identity generation, dependencies, impact analysis, agent context delivery, or autonomous prose generation. It may consume verified symbol facts from Arcana for explicit authored targets without absorbing that ownership.
 
 ## Current Product: Implemented in the Current Branch
 
@@ -143,7 +143,7 @@ Optional LLM assistance may propose changes from deterministic evidence, but it 
 
 - `internal/reconcile/` and `internal/links/` — indexes, link state, moves, and rewrites.
 - `internal/frontmatter/` and `internal/documentpolicy/` — document policy.
-- `internal/reverseindex/` — file/folder reverse projections.
+- `internal/reverseindex/` — authored file/folder and verified exact-symbol reverse projections.
 - `internal/watch/` and `internal/demon/` — automation and ownership lifecycle.
 - `internal/review/`, `internal/codemap*`, and `internal/evidence/` — decisions, codemap execution, and research.
 - `tools/smoke/` — black-box correctness verification.

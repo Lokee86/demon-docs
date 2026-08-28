@@ -150,7 +150,7 @@ func orphanFiles(repositoryRoot string, folderFiles map[string][]string, f facts
 				continue
 			}
 			relative = filepath.ToSlash(filepath.Clean(relative))
-			if len(f.fileDocs[relative]) == 0 {
+			if len(f.fileDocs[relative]) == 0 && len(f.symbolDocs[relative]) == 0 {
 				orphans = append(orphans, relative)
 			}
 		}

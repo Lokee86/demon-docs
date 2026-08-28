@@ -10,7 +10,7 @@ import (
 	ignorepolicy "github.com/Lokee86/demon-docs/internal/ignore"
 )
 
-func (f facts) addTarget(repositoryRoot string, roots []string, folders map[string]struct{}, hierarchy *ignorepolicy.Hierarchy, relative, document string) (bool, error) {
+func (f facts) addTarget(repositoryRoot string, roots []string, folders map[string]struct{}, hierarchy *ignorepolicy.Hierarchy, relative, document string, projectDocument bool) (bool, error) {
 	relative = filepath.ToSlash(filepath.Clean(relative))
 	full := filepath.Join(repositoryRoot, filepath.FromSlash(relative))
 	if !insideAny(full, roots) {
@@ -38,7 +38,9 @@ func (f facts) addTarget(repositoryRoot string, roots []string, folders map[stri
 	if _, ok := folders[parent]; !ok {
 		return false, nil
 	}
-	addReference(f.fileDocs, relative, document)
+	if projectDocument {
+		addReference(f.fileDocs, relative, document)
+	}
 	f.exactFiles[relative] = struct{}{}
 	return true, nil
 }

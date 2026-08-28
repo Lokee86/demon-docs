@@ -26,7 +26,7 @@ Transferred historical design. Existing Demon Docs codemap corpus adapters colle
 
 ArcanaGraph owns normalized observed facts, capability metadata, deterministic graph projections, bounds, unresolved states, and report composition.
 
-This document is retained as design provenance. References below to a future Demon Docs code graph are superseded. Demon Docs does not require these capabilities for documentation-folder reconciliation, link repair, codemap extraction, or file/folder reverse indexes.
+This document is retained as design provenance. References below to a future Demon Docs code graph are superseded. Demon Docs does not require general dependency/entanglement graph capabilities for documentation-folder reconciliation, link repair, codemap extraction, or authored reverse projections; exact symbol reverse backlinks consume only the verified Arcana node attached to an authored target.
 
 ## Scope and Deterministic Basis
 

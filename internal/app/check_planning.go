@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -26,7 +27,7 @@ type checkPlanningResult struct {
 	validationCache *validationcache.Store
 }
 
-func buildCheckPlans(scope repository.Scope, cfg config.Config, features watch.Features, reverse reverseOptions) (checkPlanningResult, error) {
+func buildCheckPlans(ctx context.Context, scope repository.Scope, cfg config.Config, features watch.Features, reverse reverseOptions) (checkPlanningResult, error) {
 	result := checkPlanningResult{}
 	if features.Frontmatter || features.Format {
 		cache, err := validationcache.Open(scope.RepositoryRoot)
@@ -46,7 +47,7 @@ func buildCheckPlans(scope repository.Scope, cfg config.Config, features watch.F
 	}
 	if features.Reverse {
 		planners = append(planners, func() error {
-			planned, err := reverseindex.Build(scope.RepositoryRoot, scope.DocsRoot, reverse.roots, cfg, reverse.format)
+			planned, err := reverseindex.BuildContext(ctx, scope.RepositoryRoot, scope.DocsRoot, reverse.roots, cfg, reverse.format)
 			result.reverse = planned
 			return err
 		})

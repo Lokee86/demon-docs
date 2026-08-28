@@ -110,29 +110,31 @@ Removal condition:
 
 A separately scoped, opt-in network checker is implemented without entering deterministic path-repair ownership.
 
-## Reverse indexes deliberately remain file and folder level
+## Reverse indexes project authored targets, not graph relationships
 
-Current reverse indexes project authored targets onto files and folders. General declaration identity and symbol-level repository projections are owned by ArcanaGraph rather than treated as unfinished Demon Docs behavior.
+Reverse indexes now project authored file and folder targets plus uniquely verified exact symbol targets. Arcana owns declaration identity, parsing, and repository graph relationships; Demon Docs consumes only the verified semantic node attached to an authored codemap target.
 
 Impact:
 
-- Demon Docs codemaps cannot identify one declaration inside an overloaded file as their managed target;
-- rename-aware symbol repair is unavailable inside Demon Docs;
-- dependency and call relationships are not part of reverse coverage; and
+- exact symbol backlinks require current matching Arcana/Lexicon state and a uniquely resolved authored target;
+- a path-qualified symbol falls back to its explicit backing file when semantic verification is unavailable, while a standalone `symbol:...` target cannot be projected without semantic resolution;
+- rename/move awareness is surfaced through codemap semantic staleness rather than speculative reverse-index rewriting;
+- dependency, call, implementation, and arbitrary graph-neighbour relationships are not part of reverse coverage; and
 - generated reverse indexes must not be described as a repository code graph.
 
 Workaround:
 
-Target the narrowest current file or folder and use prose to name the declaration when needed.
+Use explicit file or folder targets when declaration-level resolution is unavailable. For declaration-level backlinks, prepare current Lexicon/Arcana state and use an exact symbol target that resolves uniquely.
 
 Owning docs:
 
 - [Reverse Index Architecture](../architecture/reverse-indexes.md)
+- [Codemap Extraction and Dataset](../architecture/codemap-extraction-and-dataset.md)
 - [Transferred Code-Intelligence Design](../planning/code-intelligence/INDEX.md)
 
 Boundary:
 
-This is not scheduled for removal inside Demon Docs. [ArcanaGraph](https://github.com/Lokee86/arcana-graph) owns language-independent repository relationships and symbol-level projections. Demon Docs may later exchange explicit facts with it without adopting the graph implementation.
+[ArcanaGraph](https://github.com/Lokee86/arcana-graph) continues to own language-independent repository relationships and symbol identity. Demon Docs owns only the authored-document projection: raw Arcana relationships never create reverse backlinks.
 
 ## Codemap generation quality is corpus-dependent
 

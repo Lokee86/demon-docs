@@ -26,7 +26,7 @@ Transferred historical design. No general polyglot code graph is part of Demon D
 
 ArcanaGraph owns the language-neutral relationship model, provider contracts, node and edge semantics, provenance, resolution, invalidation, and graph projections. Language adapters remain outside the normalized graph model.
 
-This document is retained as design provenance. References below to a future Demon Docs graph or graph core are superseded by the ArcanaGraph product boundary. Demon Docs retains its focused Markdown/link model and file/folder documentation projections.
+This document is retained as design provenance. References below to a future Demon Docs graph or graph core are superseded by the ArcanaGraph product boundary. Demon Docs retains its focused Markdown/link model and authored documentation projections; exact symbol projections consume verified Arcana node facts without importing graph ownership.
 
 Demon Docs already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
 

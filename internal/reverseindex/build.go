@@ -1,6 +1,7 @@
 package reverseindex
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/textio"
 )
 
-func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format) (Plan, error) {
+func buildWithResolver(ctx context.Context, repositoryRoot, docsRoot string, roots []string, c config.Config, format codemap.Format, resolver codemap.TargetResolver) (Plan, error) {
 	repositoryRoot, err := filepath.Abs(repositoryRoot)
 	if err != nil {
 		return Plan{}, err
@@ -29,7 +30,7 @@ func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, for
 	if err != nil {
 		return Plan{}, err
 	}
-	dataset, err := codemap.BuildDataset(repositoryRoot, docsRoot, format)
+	dataset, err := codemap.BuildDatasetContext(ctx, repositoryRoot, docsRoot, format, resolver)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -52,19 +53,28 @@ func Build(repositoryRoot, docsRoot string, roots []string, c config.Config, for
 	for _, item := range dataset.Entries {
 		paths := resolvedPaths(item.Resolution)
 		if len(paths) == 0 {
-			if item.Resolution.Status != codemap.ResolutionUnsupported && entryPotentiallyInScope(repositoryRoot, roots, item.Entry, format) {
+			if item.Resolution.Status != codemap.ResolutionUnsupported &&
+				(entryPotentiallyInScope(repositoryRoot, roots, item.Entry, format) || semanticResolutionInScope(repositoryRoot, roots, item.Resolution)) {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s target %s", item.Entry.DocumentPath, item.Entry.Source.Line, item.Resolution.Status, item.Entry.Target))
 			}
 			continue
 		}
+		symbolProjection := item.Entry.Kind == codemap.TargetSymbol && item.Resolution.Status == codemap.ResolutionResolved && item.Resolution.SemanticNode != nil
 		for _, relative := range paths {
-			accepted, targetErr := collected.addTarget(repositoryRoot, roots, folders, hierarchy, relative, item.Entry.DocumentPath)
+			accepted, targetErr := collected.addTarget(repositoryRoot, roots, folders, hierarchy, relative, item.Entry.DocumentPath, !symbolProjection)
 			if targetErr != nil {
 				plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", item.Entry.DocumentPath, item.Entry.Source.Line, targetErr))
 				continue
 			}
-			if accepted {
-				plan.ReferenceCount++
+			if !accepted {
+				continue
+			}
+			plan.ReferenceCount++
+			if symbolProjection {
+				if symbolErr := collected.addSymbolReference(item.Resolution, item.Entry.DocumentPath); symbolErr != nil {
+					addReference(collected.fileDocs, relative, item.Entry.DocumentPath)
+					plan.Diagnostics = append(plan.Diagnostics, fmt.Sprintf("%s:%d: %s", item.Entry.DocumentPath, item.Entry.Source.Line, symbolErr))
+				}
 			}
 		}
 	}

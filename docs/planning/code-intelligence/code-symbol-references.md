@@ -20,13 +20,13 @@ The transferred design allows documentation systems to identify code declaration
 
 ## Current status
 
-Transferred historical design. Demon Docs reverse indexes and authored codemap targets remain file/folder based; general symbol identity and declaration-reference contracts belong to ArcanaGraph.
+Transferred historical design. General symbol identity, declaration discovery, and declaration-reference contracts belong to ArcanaGraph. Demon Docs now consumes uniquely verified Arcana nodes for explicit authored symbol targets, including target resolution, semantic-staleness analysis, and symbol-level reverse-index backlinks, without owning the underlying language or graph machinery.
 
 ## Expected ownership
 
 ArcanaGraph owns declaration identities, provider resolution, and symbol-level relationship facts. Documentation tools may consume explicit versioned facts without becoming language-specific parsers.
 
-This document is retained as design provenance. References below to implementing symbol identities or declaration-level graph projections inside Demon Docs are superseded. Demon Docs continues to own explicit Markdown and file/folder codemap behavior.
+This document is retained as design provenance. References below to implementing symbol identities or declaration-level graph construction inside Demon Docs are superseded. Demon Docs continues to own explicit Markdown, authored codemap behavior, and generated documentation projections from externally verified facts.
 
 ## Goals
 
@@ -167,7 +167,7 @@ Symbol references feed generated projections without replacing authored document
 - impact reports identify affected symbol references and governing documents for a changed declaration; and
 - deterministic context bundles contain only the selected declarations plus the governing documents and indexes needed to interpret them.
 
-Symbol resolution does not widen coverage. A symbol-level reference does not imply file- or folder-level coverage, a file-level reference does not imply symbol- or folder-level coverage, and a folder-level reference does not imply coverage of its files, symbols, or descendants. Reverse projections retain these levels and any direct-versus-descendant scope explicitly.
+Symbol resolution does not widen the authored relationship. A symbol-level reference does not become a generic file- or folder-level documentation edge, a file-level reference does not imply symbol- or folder-level coverage, and a folder-level reference does not imply coverage of its files, symbols, or descendants. Reverse projections retain these levels explicitly. The current reverse-index orphan check does treat a verified symbol backlink as evidence that its backing file is not wholly unreferenced, but that binary health signal is not equivalent to a file-level documentation relationship.
 
 Context bundles are bounded by explicit selectors and configured size or depth limits. They do not expand into arbitrary neighboring code or inferred prose.
 

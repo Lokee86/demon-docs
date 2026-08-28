@@ -106,7 +106,7 @@ New stateful behavior must be added here when its ownership cannot be explained 
 
 | Package | Responsibility | Canonical current docs |
 | --- | --- | --- |
-| `internal/reverseindex/` | Root scope, traversal, codemap projection, rendering, apply, watch | [Reverse Index Architecture](../architecture/reverse-indexes.md), [Adopting Reverse Indexes](../guides/reverse-indexes.md) |
+| `internal/reverseindex/` | Root scope, traversal, authored file/folder projection, verified exact-symbol projection, rendering, apply, watch | [Reverse Index Architecture](../architecture/reverse-indexes.md), [Adopting Reverse Indexes](../guides/reverse-indexes.md) |
 
 ## Watcher and daemon coverage
 

@@ -331,6 +331,14 @@ The result is advisory staleness, not pruning authority. `inspect` emits the map
 
 Baseline advancement is conservative. A missing baseline is initialized on successful `fix`; unchanged mapped semantics advance to the newest snapshot automatically. If mapped semantics changed while the document itself stayed byte-identical, `fix` does not advance the baseline, so repeated runs cannot clear the warning. Once the document is edited and `fix` succeeds, the current snapshot becomes its new accepted baseline.
 
+### Phase 18: Symbol-level reverse projection from adopted targets
+
+Reverse indexes now consume the same optional current Arcana target resolver used by codemap dataset construction. Ownership remains unchanged: only explicit targets already authored in codemap sections can create documentation backlinks. Raw Arcana graph relationships, neighbourhoods, dependencies, calls, and implementation edges are never reverse-index inputs.
+
+A uniquely resolved authored symbol target is projected beneath its exact backing file using Arcana's stable node key/external identity, declaration kind, qualified name, and current source span. The symbol target satisfies reverse-index coverage for that backing file without being flattened into a generic file-level documentation backlink. Path-qualified symbols retain the existing explicit file-path fallback when semantic state is unavailable; standalone `symbol:...` targets require unique semantic resolution and ambiguous in-scope candidates remain diagnostics.
+
+A live disposable Go repository with matching prepared Lexicon/Arcana state verified `service/runtime.go#Run` renders as a `function` symbol at line 3 with its documentation nested underneath. Removing Arcana state from the same fixture produced the conservative file-level fallback. The second Arcana-backed `check --reverse` was clean.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories

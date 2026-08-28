@@ -123,6 +123,7 @@ A test passing does not authorize undocumented contract changes. A document clai
 | Reverse roots require explicit safe scope and cannot contain the docs root | [Reverse Index Architecture](../architecture/reverse-indexes.md) | `root_scope_test.go` | `go test ./internal/reverseindex ./internal/app -count=1` |
 | Reverse traversal honors nested `.docignore` domains | [Reverse Index Architecture](../architecture/reverse-indexes.md) | `TestBuildHonorsNestedDocignoreFiles`, watch reload test | reverse-index integration suite |
 | Missing or unresolved scoped codemap targets fail check deterministically | [Reverse Index Architecture](../architecture/reverse-indexes.md) | reverse-index build and app tests | `ddocs check --reverse` on fixtures |
+| Reverse projections derive only from authored codemap entries; uniquely verified symbol targets retain Arcana identity/span under their backing file, while raw Arcana relationships never create backlinks | [Reverse Index Architecture](../architecture/reverse-indexes.md) | `symbol_projection_test.go` | `go test ./internal/reverseindex ./internal/app -count=1` |
 | Reverse watch participates in shared serialization | [Watcher and Automation](../operations/watcher-and-automation.md) | `TestWatchWithRunLockSerializesReconciliation` | combined watch suite |
 
 ## Codemap analysis contracts
