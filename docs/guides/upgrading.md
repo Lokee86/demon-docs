@@ -20,9 +20,11 @@ Demon Docs keeps authored documentation in normal repository files and private s
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
-## Licensing change after version 0.3.5
+## Licensing changes after version 0.3.5
 
-The repository license changed from MIT to the Apache License, Version 2.0 after the `v0.3.5` release. Existing tags and release archives retain the license text distributed with those versions. New source distributions and release archives include both `LICENSE` and `NOTICE`.
+The `v0.3.5` release and earlier release artifacts remain under the MIT License distributed with those versions. The repository subsequently moved to Apache License 2.0. The tag `pre-shield-2026-08-28` preserves the final Apache-licensed repository state at commit `45f5b000c8d520fcf9b73b3e4959240c61b7d1c8`.
+
+Beginning with the commit after that tag, current Demon Docs source code and documentation are offered under the PolyForm Shield License 1.0.0. Previously granted MIT and Apache rights are not revoked. New source distributions and release archives include `LICENSE.md` and `LICENSING.md`.
 
 No code, configuration, authored-document, or private-state migration is required.
 

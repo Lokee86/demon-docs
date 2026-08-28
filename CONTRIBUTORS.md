@@ -16,4 +16,4 @@ These systems are development tools, not project maintainers, copyright holders,
 
 Git history and the GitHub contributor graph are the authoritative record of code and documentation contributions. Future contributors are credited through their commits and pull requests rather than through a manually maintained exhaustive list.
 
-Unless stated otherwise, contributions are accepted under the repository's [Apache License 2.0](LICENSE).
+Code or documentation contributions require a separate written contributor agreement approved by the licensor. See [CONTRIBUTING.md](CONTRIBUTING.md) for the current contribution policy.

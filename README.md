@@ -3,7 +3,7 @@
 [![CI](https://github.com/Lokee86/demon-docs/actions/workflows/ci.yml/badge.svg)](https://github.com/Lokee86/demon-docs/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Lokee86/demon-docs)](https://github.com/Lokee86/demon-docs/releases/latest)
 [![Go](https://img.shields.io/github/go-mod/go-version/Lokee86/demon-docs)](go.mod)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-PolyForm%20Shield%201.0.0-purple.svg)](LICENSE.md)
 
 Demon Docs is a deterministic documentation maintenance engine for repository-owned Markdown.
 
@@ -406,4 +406,4 @@ See [Roadmap](docs/planning/roadmap.md) for current status and sequencing.
 
 ## License
 
-The current Demon Docs source tree is licensed under the [Apache License, Version 2.0](LICENSE). Attribution information is recorded in [NOTICE](NOTICE). Historical tags and release archives retain the license distributed with that version.
+The current Demon Docs source tree is available under the [PolyForm Shield License 1.0.0](LICENSE.md). Competing products and services require a separate commercial license. See [LICENSING.md](LICENSING.md) for the current licensing boundary, permitted-use guidance, and earlier-version history.

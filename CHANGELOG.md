@@ -2,6 +2,14 @@
 
 This file records notable user-facing changes to Demon Docs. Exact command contracts and current behavior remain documented in the README and the canonical documentation tree.
 
+## Unreleased
+
+### Licensing
+
+- Current source code and documentation are offered under the PolyForm Shield License 1.0.0 beginning after the `pre-shield-2026-08-28` tag.
+- The pre-Shield repository state remains available under Apache License 2.0, while `v0.3.5` and earlier release artifacts retain the MIT License distributed with those versions.
+- Release archives now include `LICENSE.md` and `LICENSING.md`.
+
 ## [0.3.5] - 2026-07-21
 
 ### Initial public release
