@@ -125,13 +125,13 @@ func runCodemapExecution(ctx context.Context, command string, args []string, out
 		writeCodemapInspection(out, plan)
 		return 0
 	case "check":
-		if plan.ChangedCount() == 0 {
+		if plan.ChangedCount() == 0 && plan.StaleCount() == 0 {
 			fmt.Fprintln(out, "ddocs codemaps check passed")
 			return 0
 		}
 		fmt.Fprintln(out, "ddocs codemaps check failed")
 		for _, document := range plan.Documents {
-			if document.Changed {
+			if document.Changed || len(document.SemanticChanges) > 0 {
 				fmt.Fprintln(out, document.Path)
 			}
 		}

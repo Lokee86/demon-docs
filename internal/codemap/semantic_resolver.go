@@ -20,6 +20,7 @@ type SemanticSpan struct {
 }
 
 type SemanticNode struct {
+	Key           string        `json:"key,omitempty"`
 	Identity      string        `json:"identity,omitempty"`
 	Kind          string        `json:"kind"`
 	Path          string        `json:"path"`
@@ -37,6 +38,32 @@ type SymbolQuery struct {
 	Name          string
 	Path          string
 	QualifiedName string
+}
+
+type SemanticChangeKind string
+
+const (
+	SemanticChangeDisappeared         SemanticChangeKind = "disappeared"
+	SemanticChangeMoved               SemanticChangeKind = "moved"
+	SemanticChangeIdentity            SemanticChangeKind = "identity_changed"
+	SemanticChangeOwnership           SemanticChangeKind = "ownership_changed"
+	SemanticChangeMetadata            SemanticChangeKind = "metadata_changed"
+	SemanticChangeRelationships       SemanticChangeKind = "relationships_changed"
+	SemanticChangeResolutionAmbiguous SemanticChangeKind = "resolution_ambiguous"
+)
+
+type SemanticChange struct {
+	Target        string             `json:"target"`
+	Kind          SemanticChangeKind `json:"kind"`
+	PreviousPath  string             `json:"previous_path,omitempty"`
+	CurrentPath   string             `json:"current_path,omitempty"`
+	Identity      string             `json:"identity,omitempty"`
+	QualifiedName string             `json:"qualified_name,omitempty"`
+}
+
+type SemanticStalenessProvider interface {
+	SnapshotID() string
+	AnalyzeStaleness(context.Context, string, []DatasetEntry) ([]SemanticChange, error)
 }
 
 // TargetResolver resolves exact repository files and symbols against an

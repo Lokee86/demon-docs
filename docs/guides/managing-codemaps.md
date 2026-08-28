@@ -39,7 +39,7 @@ After a successful workflow:
 - existing valid links remain unless an explicit pruning policy selected them;
 - qualified missing links are present once;
 - unwanted unchanged additions remain suppressed through review policy;
-- `codemap check` reports clean; and
+- `codemap check` reports clean, including no unresolved semantic-staleness findings when an Arcana baseline exists; and
 - a second `codemap fix` is a no-op.
 
 ## Prerequisites
@@ -175,7 +175,22 @@ A clean result returns zero and prints:
 ddocs codemaps check passed
 ```
 
-Pending deterministic changes return non-zero and list affected documents.
+Pending deterministic changes return non-zero and list affected documents. When current matching Arcana state and a prior codemap semantic baseline are available, `check` also returns non-zero for documents whose mapped implementation changed semantically even when the codemap text itself would not change.
+
+### Review semantic staleness
+
+A successful explicit `codemaps fix` can establish a private semantic validation baseline containing the document digest and current Arcana snapshot. Later runs compare an unchanged document against newer retained Arcana snapshots.
+
+Use `inspect` to see the deterministic reason:
+
+```text
+semantic-stale src/runtime.go kind=relationships_changed
+semantic-stale src/old.go#Run kind=moved previous=src/old.go current=src/new.go
+```
+
+Current change kinds include disappeared or ambiguous mapped targets, declaration moves/identity changes, ownership-like qualified-name changes, definition metadata changes, and mapped-node relationship changes. This is a review signal: it does **not** remove a codemap entry or prove the prose is wrong.
+
+If mapped semantics changed while the document stayed byte-identical, rerunning `codemaps fix` does not silently accept the new snapshot. Review the document and implementation. Once the document is deliberately updated, a successful explicit fix accepts the current Arcana snapshot as the new baseline. If the prior Arcana snapshot has been deleted, the historical comparison cannot be performed; retain Arcana snapshots needed for active baselines or deliberately rebaseline after review.
 
 Also inspect the repository diff:
 
@@ -407,6 +422,14 @@ The transaction layer attempts guarded rollback. Inspect the reported error and 
 git status --short
 git diff
 ```
+
+### Check reports semantic staleness with no Markdown diff
+
+Run `codemaps inspect` on the listed document and review each `semantic-stale` record. Semantic staleness is intentionally separate from pruning: do not enable removal flags merely to clear it. Update/review the owning document as appropriate, then run explicit `codemaps fix` to accept the current semantic baseline.
+
+### Semantic baseline publication fails after a source update
+
+Codemap source rewrites are published before the rebuildable semantic baseline. If private-state publication fails afterward, the authored source remains updated and the command reports failure. Preserve the source change, repair the `.ddocs` state problem, and rerun the explicit codemap command; do not roll back correct authored changes solely to recreate an analysis baseline.
 
 ### A link keeps returning after manual deletion
 

@@ -10,10 +10,12 @@ import (
 
 func writeCodemapSummary(out io.Writer, plan codemaprun.Plan) {
 	for _, document := range plan.Documents {
-		if !document.Changed {
-			continue
+		if document.Changed {
+			fmt.Fprintf(out, "%s: added=%d removed=%d adopted=%t created=%t\n", document.Path, len(document.Added), len(document.Removed), document.SectionFound && !document.SectionCreated, document.SectionCreated)
 		}
-		fmt.Fprintf(out, "%s: added=%d removed=%d adopted=%t created=%t\n", document.Path, len(document.Added), len(document.Removed), document.SectionFound && !document.SectionCreated, document.SectionCreated)
+		if len(document.SemanticChanges) > 0 {
+			fmt.Fprintf(out, "%s: semantic_stale=%d\n", document.Path, len(document.SemanticChanges))
+		}
 	}
 }
 
@@ -41,6 +43,16 @@ func writeCodemapInspection(out io.Writer, plan codemaprun.Plan) {
 		}
 		for _, target := range document.Removed {
 			fmt.Fprintf(out, "  remove %s\n", target)
+		}
+		for _, change := range document.SemanticChanges {
+			fmt.Fprintf(out, "  semantic-stale %s kind=%s", change.Target, change.Kind)
+			if change.PreviousPath != "" {
+				fmt.Fprintf(out, " previous=%s", change.PreviousPath)
+			}
+			if change.CurrentPath != "" {
+				fmt.Fprintf(out, " current=%s", change.CurrentPath)
+			}
+			fmt.Fprintln(out)
 		}
 	}
 }

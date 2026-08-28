@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Lokee86/demon-docs/internal/codemap"
 	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
 	"github.com/Lokee86/demon-docs/internal/codemaprun"
 	"github.com/Lokee86/demon-docs/internal/config"
@@ -51,6 +52,21 @@ func TestCodemapInspectionDistinguishesContextFromAdditions(t *testing.T) {
 	writeCodemapInspection(&output, plan)
 	if !strings.Contains(output.String(), "context src/context.go") || !strings.Contains(output.String(), "add src/hard.go") {
 		t.Fatalf("inspection did not distinguish policy outcomes:\n%s", output.String())
+	}
+}
+
+func TestCodemapInspectionReportsSemanticStaleness(t *testing.T) {
+	plan := codemaprun.Plan{Documents: []codemaprun.DocumentPlan{{
+		Path: "docs/runtime.md",
+		SemanticChanges: []codemap.SemanticChange{{
+			Target: "src/runtime.go", Kind: codemap.SemanticChangeRelationships,
+			PreviousPath: "src/runtime.go", CurrentPath: "src/runtime.go",
+		}},
+	}}}
+	var output bytes.Buffer
+	writeCodemapInspection(&output, plan)
+	if !strings.Contains(output.String(), "semantic-stale src/runtime.go kind=relationships_changed") {
+		t.Fatalf("inspection omitted semantic staleness:\n%s", output.String())
 	}
 }
 

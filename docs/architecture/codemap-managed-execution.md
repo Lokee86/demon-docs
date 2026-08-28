@@ -28,7 +28,8 @@ configured repository and docs root
 -> optional existing-link pruning evaluation
 -> unified managed-section reconciliation
 -> exact before/after plan
--> hash-guarded transactional publication
+-> hash-guarded authored-file publication
+-> codemap semantic-baseline publication when available
 ```
 
 The codemap is one artifact. Demon Docs does not maintain separate authored and generated lists after adoption. Existing links, newly discovered links, explanatory prose inside the section, and the codemap-specific markers belong to one managed section lifecycle.
@@ -85,8 +86,10 @@ This boundary owns:
 - adoption of the complete matching section under codemap-specific markers;
 - preservation of supported existing fenced or bullet rendering conventions;
 - exact before/after planning;
-- read-only check, inspect, and dry-run behavior; and
-- hash-guarded transactional file publication for `fix`.
+- read-only check, inspect, and dry-run behavior;
+- semantic-staleness reporting against an accepted prior Arcana baseline;
+- hash-guarded transactional file publication for `fix`; and
+- post-file publication of rebuildable codemap semantic baselines in `.ddocs`.
 
 ## Does not own
 
@@ -200,10 +203,12 @@ For each invocation it:
 9. applies decline policy to each recommendation and selects only non-declined `hard_link` targets for addition;
 10. evaluates configured pruning policies for current resolved entries;
 11. reconciles the complete codemap section;
-12. compares exact encoded before and after bytes; and
-13. creates a prepared `filetxn.Rewrite` only when bytes differ.
+12. compares exact encoded before and after bytes;
+13. creates a prepared `filetxn.Rewrite` only when bytes differ;
+14. compares an unchanged document's prior accepted Arcana snapshot with the current snapshot when semantic-baseline state is available; and
+15. plans a baseline update only when initialization/rebaseline is appropriate or no mapped semantic change remains unresolved.
 
-A document plan records section status, existing targets, recommendations, suppressed additions, selected additions, selected removals, and exact before/after content.
+A document plan records section status, existing targets, recommendations, suppressed additions, selected additions, selected removals, semantic-staleness findings, and exact before/after content. Baseline updates are private-state plan data and are not authored codemap mutations.
 
 ## Recommendation generation
 
@@ -330,6 +335,7 @@ persisted-decline decisions
 score and tier
 evidence lines
 configured removals
+semantic-staleness findings when an Arcana baseline is comparable
 ```
 
 A missing section can still have computed recommendations. It is created only when the selected effective schema requires a codemap section; otherwise the document remains unchanged.
@@ -341,8 +347,8 @@ A missing section can still have computed recommendations. It is created only wh
 It returns:
 
 ```text
-0 when no selected document would change
-1 when one or more selected documents would change
+0 when no selected document would change and no semantic-staleness finding remains
+1 when one or more selected documents would change or are semantically stale
 2 for command-line usage failures
 non-zero for configuration, scope, extraction, planning, or read failures
 ```
@@ -351,11 +357,11 @@ Changed document paths are printed in sorted plan order.
 
 ### `fix --dry-run`
 
-Dry-run builds the same plan, reports the number of files that would change and per-document add/remove/adopt/create counts, and performs no file or review-state writes.
+Dry-run builds the same plan, reports the number of files that would change plus add/remove/adopt/create and semantic-staleness counts, and performs no authored-file or private-state writes.
 
 ### `fix`
 
-`fix` applies only prepared changed rewrites. A clean plan reports zero updated files and performs no authored-file write.
+`fix` applies prepared changed rewrites first, then publishes any planned semantic-baseline updates. A clean source plan may therefore report zero updated files while still initializing or advancing rebuildable private semantic-baseline state.
 
 ## Transaction and concurrent-edit safety
 
@@ -376,7 +382,9 @@ The transaction layer:
 
 A file changed after planning causes failure rather than overwrite. Rollback is also hash-guarded so it does not erase content created after Demon Docs' attempted write.
 
-Codemap execution currently publishes no separate codemap state after the file transaction. Persisted decline policy is read, not mutated, by `fix`.
+After the authored-file transaction succeeds, `codemaprun.Apply` publishes planned codemap semantic baselines through the existing `.ddocs` object repository under `refs/ddocs/state`. Persisted decline policy remains read-only during `fix`.
+
+Semantic-baseline state is rebuildable analysis state, so a baseline-publication failure does not roll back already verified authored-file updates. The command returns an error and leaves the prior baseline intact; the next explicit codemap run can recover after the private-state problem is corrected. This is an explicit partial-completion boundary, not an atomic source+analysis transaction.
 
 ## Daemon and watcher exclusion
 
@@ -415,6 +423,7 @@ Durable shared state:
 ```text
 decline and reconsideration events under refs/ddocs/review
 normal link identity and path state under refs/ddocs/state
+codemap semantic validation baselines under refs/ddocs/state
 ```
 
 The codemap command does not create a separate provenance ledger for links. The managed source section is the canonical codemap artifact.
@@ -433,7 +442,9 @@ The codemap command does not create a separate provenance ledger for links. The 
 - Multiple matching sections and malformed ownership markers are errors.
 - Identical inputs produce identical plans and bytes.
 - A second successful `fix` is a no-op.
-- Check, inspect, and dry-run do not write authored files.
+- Check, inspect, and dry-run do not write authored files or semantic-baseline state.
+- Semantic staleness never authorizes codemap pruning or removal.
+- An untouched semantically stale document does not advance its accepted Arcana baseline merely because `fix` was rerun.
 - A concurrent source edit is never overwritten silently.
 - The daemon and watcher never execute codemap generation.
 
@@ -475,6 +486,10 @@ The hash preflight fails. Review the intervening edit, rerun `inspect` or `check
 
 The transaction layer attempts guarded rollback of prior writes. Inspect the reported path and current repository diff before rerunning.
 
+### Semantic-baseline publication fails after source publication
+
+The authored-file batch has already completed and is not rolled back for failure of rebuildable analysis state. Preserve the verified source result, repair the `.ddocs` state failure, and rerun the explicit codemap command. The prior accepted semantic baseline remains authoritative until a later baseline write succeeds.
+
 ## Extension seams
 
 The intended extension points are:
@@ -495,7 +510,10 @@ A new renderer or schema provider must preserve complete-section ownership, dete
 - `internal/app/codemap_execute_output.go` — human-readable summaries and inspection evidence.
 - `internal/codemaprun/build.go` — dataset/corpus construction, review-policy replay, recommendation planning, pruning evaluation, rewrite construction.
 - `internal/codemaprun/model.go` — invocation options and per-document plan model.
-- `internal/codemaprun/apply.go` — shared transaction publication boundary.
+- `internal/codemaprun/apply.go` — authored-file publication followed by semantic-baseline state publication.
+- `internal/codemaprun/semantic_staleness.go` — baseline comparison/advancement policy.
+- `internal/codemapsemantic/` — durable semantic-baseline encoding and `.ddocs` storage.
+- `internal/codemaparcana/staleness*.go` — Arcana snapshot-diff interpretation for adopted mapped targets.
 - `internal/codemap/managed.go` — schema gating, unified adoption, addition/removal reconciliation.
 - `internal/codemap/managed_section.go` — Markdown-aware section location and schema insertion validation.
 - `internal/codemap/managed_render.go` — marker validation, fence/bullet rendering, line removal, normalization.

@@ -321,6 +321,16 @@ Focused synthetic coverage pins both sides of the policy: same-band role/directo
 
 Live Demon Docs dogfooding against a freshly rebuilt matching Lexicon/Arcana snapshot showed the intended hard-link redistribution on `docs/architecture/codemap-extraction-and-dataset.md`. Before the selection rewrite, its five hard links were four `verification_test` candidates plus one `primary_implementation`. After the rewrite, the five slots were two verification candidates, one primary implementation, and two supporting implementations. `docs/architecture/codemap-pipeline.md` still produced zero additions and zero removals. This is a behavioral/convergence check, not a precision claim. Fresh cross-corpus precision and recall measurement remains deferred to the final benchmark/tuning phase.
 
+### Phase 17: Semantic staleness from Arcana snapshot diffs
+
+Codemap generation now records a per-document semantic validation baseline in `.ddocs`: the accepted Arcana snapshot ID plus the document digest at that point. On later runs, unchanged documents are compared against the current Arcana snapshot with the protocol `diff` operation.
+
+The detector is intentionally scoped to adopted mapped semantics. It reports mapped targets whose Arcana node disappeared, moved, changed identity/qualified ownership, changed definition metadata, became ambiguous, or changed outgoing logical relationships. Directory and glob abstractions are not promoted into semantic nodes for this purpose.
+
+The result is advisory staleness, not pruning authority. `inspect` emits the mapped target and deterministic change kind. `check` treats a semantic-stale document as failing even when the managed codemap text is unchanged. Existing removal policy remains separate.
+
+Baseline advancement is conservative. A missing baseline is initialized on successful `fix`; unchanged mapped semantics advance to the newest snapshot automatically. If mapped semantics changed while the document itself stayed byte-identical, `fix` does not advance the baseline, so repeated runs cannot clear the warning. Once the document is edited and `fix` succeeds, the current snapshot becomes its new accepted baseline.
+
 ## Rejected or Revised Experiments
 
 ### Pooling the monolithic index with ordinary repositories

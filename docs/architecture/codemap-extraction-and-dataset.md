@@ -161,7 +161,7 @@ Demon Docs does not choose among ambiguous roots or coerce a directory into a fi
 
 `BuildDatasetContext` accepts a narrow `TargetResolver`. The current production, export, benchmark, and precision paths attempt to open the current Arcana snapshot through `internal/codemaparcana`; `BuildDataset` remains the compatibility path with no semantic resolver.
 
-The Arcana integration uses the versioned `arcana.query.v1` JSONL process protocol and only the `resolve_file` and `resolve_symbol` operations in this phase. Demon Docs never reads Arcana's packed graph storage directly.
+The Arcana integration uses the versioned `arcana.query.v1` JSONL process protocol. Target resolution itself uses `resolve_file` and `resolve_symbol`; the shared production session also requires `list_nodes`/`neighbors` for bounded relationship evidence and `diff` for semantic-staleness comparison. Demon Docs never reads Arcana's packed graph storage directly.
 
 Before a resolver is trusted, `.arcana/CURRENT` must equal `.lexicon/CURRENT`, the Arcana snapshot must be bound to that same Lexicon snapshot, and the content-addressed Lexicon snapshot manifest must verify against its published ID. Path-qualified symbol/file queries are used only when the current file SHA-256 still matches the Lexicon manifest content ID. Standalone/global symbols are more conservative: they require the Lexicon preparation Git head to equal the current clean repository head. If those checks cannot establish freshness, semantic resolution is not attempted.
 
@@ -181,7 +181,7 @@ symbol:Name / standalone symbol
   Arcana unavailable/stale        -> unsupported
 ```
 
-Resolved semantic records retain Arcana's durable external node identity, node kind, repository path, qualified name, and exact source span when present. Plain file existence remains filesystem truth; Arcana file resolution adds semantic identity but does not turn an existing unsupported-language file into a missing file.
+Resolved semantic records retain Arcana's stable node key, durable external node identity, node kind, repository path, qualified name, and exact source span when present. The stable node key is used to pair logical declarations across snapshots even when path/identity metadata changes. Plain file existence remains filesystem truth; Arcana file resolution adds semantic identity but does not turn an existing unsupported-language file into a missing file.
 
 An Arcana executable is discovered next to the running Demon Docs binary or on `PATH`; `DDOCS_ARCANA_COMMAND` is available as a development/host override. Missing or structurally stale Arcana state degrades to the explicit fallback states above. Once a current Arcana protocol session has been opened, query/protocol failures abort the operation rather than silently mixing partial semantic truth with fallback results.
 

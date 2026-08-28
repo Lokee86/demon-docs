@@ -11,6 +11,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/codemaparcana"
 	"github.com/Lokee86/demon-docs/internal/codemapcorpus"
 	"github.com/Lokee86/demon-docs/internal/codemaprecommend"
+	"github.com/Lokee86/demon-docs/internal/codemapsemantic"
 	"github.com/Lokee86/demon-docs/internal/evidence"
 	"github.com/Lokee86/demon-docs/internal/filetxn"
 	"github.com/Lokee86/demon-docs/internal/review"
@@ -22,7 +23,8 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 	format.SectionHeadings = append([]string(nil), options.Headings...)
 	resolver := options.TargetResolver
 	relationshipProvider := options.RelationshipProvider
-	if resolver == nil || relationshipProvider == nil {
+	semanticStaleness := options.SemanticStaleness
+	if resolver == nil || relationshipProvider == nil || semanticStaleness == nil {
 		arcanaResolver, _, openErr := codemaparcana.OpenCurrent(ctx, options.RepositoryRoot)
 		if openErr != nil {
 			return Plan{}, fmt.Errorf("open Arcana codemap provider: %w", openErr)
@@ -34,6 +36,9 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 			}
 			if relationshipProvider == nil {
 				relationshipProvider = arcanaResolver
+			}
+			if semanticStaleness == nil {
+				semanticStaleness = arcanaResolver
 			}
 		}
 	}
@@ -54,7 +59,22 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 	entriesByDocument := datasetEntriesByDocument(dataset)
 	files := append([]string(nil), options.TargetFiles...)
 	sort.Strings(files)
-	plan := Plan{Documents: make([]DocumentPlan, 0, len(files))}
+	documentPaths := make([]string, 0, len(files))
+	for _, filePath := range files {
+		relative, relErr := filepath.Rel(options.RepositoryRoot, filePath)
+		if relErr != nil {
+			return Plan{}, relErr
+		}
+		documentPaths = append(documentPaths, filepath.ToSlash(filepath.Clean(relative)))
+	}
+	baselines := map[string]codemapsemantic.Baseline{}
+	if semanticStaleness != nil && semanticStaleness.SnapshotID() != "" {
+		baselines, err = codemapsemantic.LoadMany(options.RepositoryRoot, documentPaths)
+		if err != nil {
+			return Plan{}, fmt.Errorf("load codemap semantic baselines: %w", err)
+		}
+	}
+	plan := Plan{Documents: make([]DocumentPlan, 0, len(files)), RepositoryRoot: options.RepositoryRoot}
 	for _, filePath := range files {
 		if err := ctx.Err(); err != nil {
 			return Plan{}, err
@@ -71,6 +91,17 @@ func Build(ctx context.Context, options Options) (Plan, error) {
 		docPlan, err := buildDocument(ctx, documentPath, document, format, corpus, entriesByDocument[documentPath], policy, options)
 		if err != nil {
 			return Plan{}, fmt.Errorf("plan codemap %s: %w", documentPath, err)
+		}
+		baseline, exists := baselines[documentPath]
+		changes, update, semanticErr := planSemanticBaseline(
+			ctx, semanticStaleness, baseline, exists, documentPath, docPlan.Before, docPlan.After, entriesByDocument[documentPath],
+		)
+		if semanticErr != nil {
+			return Plan{}, fmt.Errorf("analyze codemap semantic staleness %s: %w", documentPath, semanticErr)
+		}
+		docPlan.SemanticChanges = changes
+		if update != nil {
+			plan.BaselineUpdates = append(plan.BaselineUpdates, *update)
 		}
 		plan.Documents = append(plan.Documents, docPlan)
 		if docPlan.Changed {

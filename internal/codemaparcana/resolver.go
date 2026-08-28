@@ -9,44 +9,21 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/Lokee86/demon-docs/internal/codemap"
 )
-
-type queryClient interface {
-	query(context.Context, map[string]any, any) error
-	Close() error
-}
 
 type Resolver struct {
 	repositoryRoot string
 	state          snapshotState
 	client         queryClient
-}
+	openSnapshot   func(context.Context, string) (queryClient, error)
 
-type nodeList struct {
-	Count     int            `json:"count"`
-	Returned  int            `json:"returned"`
-	Truncated bool           `json:"truncated"`
-	Nodes     []protocolNode `json:"nodes"`
-}
-
-type protocolNode struct {
-	NodeID        uint32        `json:"node_id"`
-	Identity      string        `json:"identity"`
-	Kind          string        `json:"kind"`
-	Path          string        `json:"path"`
-	Name          string        `json:"name"`
-	QualifiedName string        `json:"qualified_name"`
-	Span          *protocolSpan `json:"span"`
-}
-
-type protocolSpan struct {
-	Path        string `json:"path"`
-	StartLine   uint32 `json:"start_line"`
-	StartColumn uint32 `json:"start_column"`
-	EndLine     uint32 `json:"end_line"`
-	EndColumn   uint32 `json:"end_column"`
+	historyMu         sync.Mutex
+	historicalClients map[string]queryClient
+	stalenessMu       sync.Mutex
+	stalenessDiffs    map[string]semanticDiffResult
 }
 
 func OpenCurrent(ctx context.Context, repositoryRoot string) (*Resolver, Availability, error) {
@@ -83,14 +60,16 @@ func openWithState(ctx context.Context, repositoryRoot, command string, state sn
 	if err != nil {
 		return nil, fmt.Errorf("open Arcana snapshot %s: %w", state.id, err)
 	}
-	return &Resolver{repositoryRoot: repositoryRoot, state: state, client: client}, nil
-}
-
-func (resolver *Resolver) Close() error {
-	if resolver == nil || resolver.client == nil {
-		return nil
-	}
-	return resolver.client.Close()
+	return &Resolver{
+		repositoryRoot: repositoryRoot,
+		state:          state,
+		client:         client,
+		openSnapshot: func(ctx context.Context, directory string) (queryClient, error) {
+			return startProtocolClient(ctx, command, directory)
+		},
+		historicalClients: map[string]queryClient{},
+		stalenessDiffs:    map[string]semanticDiffResult{},
+	}, nil
 }
 
 func (resolver *Resolver) ResolveFile(ctx context.Context, path string) (codemap.SemanticResolution, error) {
@@ -158,7 +137,7 @@ func semanticNodes(nodes []protocolNode, qualifiedName string, files map[string]
 			continue
 		}
 		item := codemap.SemanticNode{
-			Identity: node.Identity, Kind: node.Kind, Path: path,
+			Key: node.Key, Identity: node.Identity, Kind: node.Kind, Path: path,
 			Name: node.Name, QualifiedName: node.QualifiedName,
 		}
 		if node.Span != nil {

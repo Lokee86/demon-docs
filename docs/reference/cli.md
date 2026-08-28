@@ -182,7 +182,7 @@ Common execution flags are:
 
 A file root must already exist and have the `.md` extension. A directory root selects regular `.md` files recursively, honors `.docignore`, skips symbolic-link entries, and prunes `.worktrees/` and `.workingtrees/`. Every explicit root must remain beneath the configured documentation root.
 
-`codemap fix` may omit `--root`; it then targets the configured documentation root. It adopts the complete matching section as one managed unit, filters deterministic recommendations through shared decline policy, preserves existing valid links by default, applies configured removals, and publishes changed files through the shared content-addressed transaction layer.
+`codemap fix` may omit `--root`; it then targets the configured documentation root. It adopts the complete matching section as one managed unit, filters deterministic recommendations through shared decline policy, preserves existing valid links by default, applies configured removals, publishes changed files through the shared content-addressed transaction layer, and then publishes any planned codemap semantic validation baselines into private `.ddocs` state.
 
 `--dry-run` builds the same plan and prints:
 
@@ -191,20 +191,20 @@ ddocs codemaps fix would update N file(s)
 PATH: added=N removed=N adopted=true|false created=true|false
 ```
 
-Dry-run performs no document or review-state writes.
+Dry-run performs no document, review-state, or codemap semantic-baseline writes. When semantic staleness exists, the summary may additionally print `PATH: semantic_stale=N`.
 
 A successful mutating run prints the corresponding `updated N file(s)` summary. A clean plan reports zero updated files.
 
 `codemap check` requires `--root`. It builds the production plan without writing. Exit behavior is:
 
 ```text
-0  no selected document would change
-1  one or more selected documents would change
+0  no selected document would change and no semantic-staleness finding remains
+1  one or more selected documents would change or are semantically stale
 2  command-line usage failure
 non-zero configuration, scope, read, extraction, or planning failure
 ```
 
-When stale, it prints `ddocs codemaps check failed` followed by changed document paths. When clean, it prints `ddocs codemaps check passed`.
+When stale, it prints `ddocs codemaps check failed` followed by affected document paths. A path may be listed because its managed codemap bytes would change or because its accepted Arcana baseline reports mapped semantic changes. When clean, it prints `ddocs codemaps check passed`.
 
 `codemap inspect` requires `--root` and writes nothing. For every selected document it reports:
 
@@ -216,6 +216,7 @@ context TARGET score=SCORE tier=context
 declined TARGET score=SCORE tier=TIER
 evidence lines
 remove TARGET
+semantic-stale TARGET kind=CHANGE_KIND [previous=PATH] [current=PATH]
 ```
 
 Configured heading matching is case-insensitive and ignores heading-like lines inside fenced code blocks. Multiple matching sections are an error. Malformed or duplicated codemap ownership markers are an error.

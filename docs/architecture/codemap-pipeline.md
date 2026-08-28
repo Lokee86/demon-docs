@@ -29,6 +29,7 @@ Existing or schema-required codemap section
 -> production admission and score
 -> score-banded role/directory coverage selection
 -> conservative hard-link allocation
+-> semantic-baseline comparison against prior Arcana snapshot
 -> shared decline-policy filtering
 -> unified managed-section reconciliation
 -> atomic foreground write
@@ -119,23 +120,31 @@ See [Codemap Corpus and Adapters](codemap-corpus-adapters.md).
 
 See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
-### 4. Foreground generation
+### 4. Semantic staleness
+
+When current Arcana state is available, Demon Docs compares each document against the Arcana snapshot recorded by its last accepted semantic baseline in `.ddocs`. Arcana's deterministic snapshot `diff` identifies mapped nodes whose definition metadata, ownership-like identity, or relationships changed, and detects mapped targets that disappeared or moved. Directory and glob targets are not treated as semantic nodes.
+
+Semantic staleness is analysis only. It does not remove authored links, alter recommendation score, or authorize pruning. `inspect` reports the individual mapped targets and change kinds; `check` fails when a document has semantic-staleness findings even if its managed codemap text would not change.
+
+A successful `codemaps fix` initializes a missing baseline and advances a baseline when mapped semantics are unchanged. If semantic changes exist and the document itself has not changed since the prior baseline, `fix` deliberately leaves the old baseline in place, so rerunning the command cannot silently clear the warning. Editing the document and then running `fix` accepts the current snapshot as its new baseline.
+
+### 5. Foreground generation
 
 `internal/codemaprun` computes current recommendations with all existing links visible, projects them through persisted decline and staleness policy, and reconciles the complete codemap section. Existing sections are processed regardless of schema. The application supplies the document-policy schema provider, so a required missing codemap section is created at its schema-defined position; schemas without one leave the document unchanged.
 
-### 5. Controlled holdout
+### 6. Controlled holdout
 
 Benchmark mode hides a deterministic subset of trusted exact links and removes answer leakage from map text, visible targets, and related-document inputs before generation.
 
 See [Codemap Benchmark Methodology](../research/codemap-benchmark-methodology.md).
 
-### 6. Precision evaluation
+### 7. Precision evaluation
 
 Precision mode builds a deterministic stratified sample of current unmatched suggestions. Human reviewers label and audit each candidate before validated metric aggregation.
 
 See [Codemap Precision Governance](../research/codemap-precision-governance.md).
 
-### 7. Unified reconciliation
+### 8. Unified reconciliation
 
 The codemap section is adopted under codemap-specific managed markers. Existing syntax is preserved where possible: fenced Space Rocks-style path lists remain fenced, and bullet maps retain their bullet prefix. Qualified non-declined `hard_link` recommendations are added automatically; `context` recommendations remain visible to inspection and review without being written. Existing links are retained unless an explicit removal policy applies. Writes use the shared content-addressed transactional file layer. The detailed scope, adoption, rendering, pruning, transaction, and failure lifecycle is owned by [Codemap Managed Execution](codemap-managed-execution.md).
 
@@ -178,6 +187,7 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 ## State and data ownership
 
 - datasets, corpora, candidates, recommendations, benchmark reports, and evaluations are rebuildable analysis artifacts;
+- per-document semantic validation baselines are stored in `.ddocs` and record document digest plus the accepted Arcana snapshot;
 - source reports and labels may be retained as research evidence;
 - decline and reconsideration state belongs to `internal/review` under `refs/ddocs/review`;
 - Demon Docs owns the complete recognized codemap section while preserving existing valid links by default.
@@ -212,7 +222,8 @@ A benchmark threshold failure represents a completed measurement below a request
 ## Code map
 
 - `internal/codemap/` — extraction, datasets, semantic target-resolution contract, managed-section adoption, schema placement seam, and syntax-preserving rendering.
-- `internal/codemaparcana/` — current-snapshot discovery, Arcana JSONL transport, freshness checks, and file/symbol resolution.
+- `internal/codemaparcana/` — current-snapshot discovery, Arcana JSONL transport, freshness checks, file/symbol resolution, snapshot diff, and mapped semantic-staleness analysis.
+- `internal/codemapsemantic/` — durable per-document semantic validation baselines in `.ddocs`.
 - `internal/codemapcorpus/` — repository facts and polyglot adapters.
 - `internal/evidence/` — candidate evidence and fingerprints.
 - `internal/codemaprecommend/` — production role classification, ranking, filtering, ordering, and tiers.
