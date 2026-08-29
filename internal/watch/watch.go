@@ -330,6 +330,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 		}
 	}
 	scheduler := NewScopedScheduler(run, time.Duration(seconds*float64(time.Second)))
+	retryPolicy := reconciliationRetryPolicy{}
 	// Close the startup handoff gap with one pass after watch registration.
 	scheduler.MarkFullPass()
 	if ready != nil {
@@ -492,14 +493,15 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 			}
 			ran, err := scheduler.RunIfPending()
 			if err != nil {
-				if links.IsTransientFilesystemRace(err) {
-					fmt.Fprintf(out, "%s ddocs watch deferred stale reconciliation plan: %v\n", timestamp(), err)
-					scheduler.MarkChanged()
+				if retry, reason := retryPolicy.classify(err); retry {
+					fmt.Fprintf(out, "%s ddocs watch deferred %s: %v\n", timestamp(), reason, err)
+					scheduler.MarkFullPass()
 					continue
 				}
 				return err
 			}
 			if ran {
+				retryPolicy.succeeded()
 				immediateRenameRepairs = 0
 				bulkRenameObserved = false
 				lastObservedRename = time.Time{}
@@ -627,15 +629,18 @@ func formatDiagnostic(diagnostic documentpolicy.Diagnostic) string {
 }
 
 func runInitialUntilStable(ctx context.Context, run func() error, retryDelay time.Duration, out io.Writer) error {
+	retryPolicy := reconciliationRetryPolicy{}
 	for {
 		err := run()
 		if err == nil {
+			retryPolicy.succeeded()
 			return nil
 		}
-		if !links.IsTransientFilesystemRace(err) {
+		retry, reason := retryPolicy.classify(err)
+		if !retry {
 			return err
 		}
-		fmt.Fprintf(out, "%s ddocs watch deferred stale initial reconciliation plan: %v\n", timestamp(), err)
+		fmt.Fprintf(out, "%s ddocs watch deferred initial %s: %v\n", timestamp(), reason, err)
 		timer := time.NewTimer(retryDelay)
 		select {
 		case <-ctx.Done():

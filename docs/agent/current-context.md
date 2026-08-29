@@ -23,13 +23,11 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 - The repository may contain unrelated user changes; do not clean or revert them casually.
 - Exclude nested `.worktrees/` from broad scans, tests, formatters, documentation tools, and file watching.
 - Do not hand-edit implementation-owned `.ddocs/` state while commands, watchers, or the repository demon are active.
-- `TestClaimAllowsExactlyOneOwner` has shown intermittent full-suite timing behavior even when focused repetitions pass; do not hide or casually normalize that result.
 - Normal reconciliation, watch, and demon paths must not invoke codemap generation.
 
 ## Current active gaps
 
-- Reverse-index hardening still needs focused move-aware authored-reference and nested-root coverage.
-- Watcher reconciliation retains broad authoritative evidence costs, and lifecycle/stress verification remains active hardening work.
+- Watcher large-move/event-burst stress and slow/failed reconciliation observability remain active hardening work.
 - Review-ledger and codemap quality claims still require broader pinned-corpus validation.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.

@@ -74,8 +74,13 @@ func (h *harness) daemonScenario() error {
 	}); err != nil {
 		return h.daemonFailure(err)
 	}
-	_, err := h.command(h.repo, h.ddocs, "demon", "run", "--false")
-	return err
+	if _, err := h.command(h.repo, h.ddocs, "demon", "run", "--false"); err != nil {
+		return err
+	}
+	if err := h.daemonLifecycleScenario(); err != nil {
+		return err
+	}
+	return h.daemonLinkedWorktreeScenario()
 }
 
 func (h *harness) daemonFailure(cause error) error {

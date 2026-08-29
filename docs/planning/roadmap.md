@@ -48,10 +48,7 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ### 1. Watcher and demon resilience
 
-- stress large moves and watcher-event bursts;
-- retain race-focused single-owner lease coverage;
-- verify stale-owner recovery and repeated restarts;
-- verify Windows, Bash, PowerShell, and linked-worktree lifecycle paths; and
+- stress large moves and watcher-event bursts; and
 - improve diagnostics for slow or failed reconciliation.
 
 `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain authoritative recovery surfaces.

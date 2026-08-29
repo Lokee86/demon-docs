@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,8 +50,43 @@ func TestInitialReconciliationRetriesTransientFilesystemRaces(t *testing.T) {
 	if attempts != 3 {
 		t.Fatalf("attempts=%d", attempts)
 	}
-	if !strings.Contains(out.String(), "deferred stale initial reconciliation plan") {
+	if !strings.Contains(out.String(), "deferred initial stale reconciliation plan") {
 		t.Fatalf("retry was not logged: %q", out.String())
+	}
+}
+
+func TestInitialReconciliationRetriesTemporaryPermissionErrors(t *testing.T) {
+	attempts := 0
+	var out bytes.Buffer
+	err := runInitialUntilStable(context.Background(), func() error {
+		attempts++
+		if attempts < 3 {
+			return fmt.Errorf("read indexed file: %w", fs.ErrPermission)
+		}
+		return nil
+	}, time.Millisecond, &out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if attempts != 3 {
+		t.Fatalf("attempts=%d", attempts)
+	}
+	if !strings.Contains(out.String(), "transient filesystem access error") {
+		t.Fatalf("permission retry was not logged: %q", out.String())
+	}
+}
+
+func TestInitialReconciliationStopsAfterPersistentPermissionErrors(t *testing.T) {
+	attempts := 0
+	err := runInitialUntilStable(context.Background(), func() error {
+		attempts++
+		return fmt.Errorf("read indexed file: %w", fs.ErrPermission)
+	}, time.Millisecond, io.Discard)
+	if !errors.Is(err, fs.ErrPermission) {
+		t.Fatalf("err=%v", err)
+	}
+	if attempts != permissionRetryLimit+1 {
+		t.Fatalf("attempts=%d want=%d", attempts, permissionRetryLimit+1)
 	}
 }
 

@@ -68,7 +68,10 @@ go test ./... -count=1
 - detached-daemon link repair after an ordinary rename;
 - daemon index insertion and stale-entry removal after ordinary create/delete operations;
 - confirmation that daemon maintenance does not apply frontmatter or document-format policy; and
-- daemon reverse-index refresh after a codemap source change.
+- daemon reverse-index refresh after a codemap source change;
+- five repeated detached-daemon start/agent-feed/stop/restart cycles with runtime cleanup checks;
+- black-box shell-feeder enter/leave lifecycle through the same hidden protocol used by generated shell hooks; and
+- linked-worktree read-only discovery, first-mutating-entry bootstrap, independent watcher ownership, and filesystem maintenance.
 
 Run it directly with:
 
@@ -94,7 +97,7 @@ It is not a performance, soak, or stress harness. It does not currently test:
 - large rename or move batches;
 - rapid watcher-event bursts;
 - concurrent mutating CLI operations;
-- repeated daemon crashes, restarts, or lease contention;
+- repeated unclean daemon crashes or sustained cross-process lease contention;
 - sustained memory, handle, CPU, or storage growth; or
 - latency and throughput thresholds under load.
 
@@ -190,7 +193,7 @@ See [Markdown Link Performance](../research/link-performance.md) for the complet
 
 Daemon tests cover:
 
-- exactly-one fresh owner claims and stale-owner recovery;
+- exactly-one fresh owner claims, high-contention claims, abandoned locks, and stale-owner recovery;
 - feeder registration, reuse, expiry, counting, and removal;
 - shutdown requests and grace periods;
 - read-only status behavior;
@@ -199,7 +202,7 @@ Daemon tests cover:
 - linked-worktree discovery and first-mutating-entry bootstrap; and
 - persistent enable and disable behavior.
 
-`TestClaimAllowsExactlyOneOwner` has now failed intermittently in more than one full-suite run by allowing a second owner after the first lease aged during the concurrent test. The same test passed 50 focused repetitions. Treat this as an unresolved suite-context reliability issue: retain focused stress coverage, reproduce the timing interaction, and do not call daemon ownership fully settled until the cause is fixed or the test contract is corrected.
+`internal/demon/ownership_stress_test.go` retains repeated high-contention and stale-owner recovery coverage. The black-box smoke harness additionally verifies five orderly real-process stop/restart cycles, agent acquire/heartbeat/release, shell-feeder enter/leave cleanup, complete runtime cleanup, and independent linked-worktree daemon ownership.
 
 ## Codemap Tests and Benchmarks
 
