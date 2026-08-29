@@ -32,7 +32,7 @@ This boundary owns link parsing, local target resolution, file identity and path
 
 ## Does not own
 
-It does not own authored link labels or prose, external target contents, semantic documentation relationships, codemap inference, heading-anchor validation, or selection among ambiguous destinations.
+It does not own authored link labels or prose, external target contents, semantic documentation relationships, codemap inference, or selection among ambiguous destinations.
 
 ## Invariants and safety boundaries
 
@@ -76,7 +76,7 @@ Explicit and collapsed reference uses such as `[Guide][guide]` and `[guide][]` a
 
 HTML target coverage includes `a[href]`, `link[href]`, `img[src]`, `script[src]`, `source[src]`, `video[src]`, `video[poster]`, `audio[src]`, and `iframe[src]`.
 
-Link-like text inside fenced code blocks and inline code spans is ignored. Heading fragments and query strings are preserved when a path is rewritten. Heading-anchor existence is not yet validated.
+Link-like text inside fenced code blocks and inline code spans is ignored. Query strings and heading fragments are preserved when a path is rewritten. For Markdown targets, non-empty fragments are validated against GitHub-style section anchors derived from rendered heading text parsed by the shared Goldmark parser, including same-document links and duplicate-heading disambiguation.
 
 ## Persistent State
 
@@ -125,7 +125,7 @@ If stored occurrence offsets no longer match current source text despite unchang
 
 Before writing, every source must still match its expected old hash. Writes use a same-directory temporary file and atomic replacement. The known graph mutation is then published directly. Reparsing the rewritten source is limited to verifying the expected links and refreshing byte offsets, line numbers, and fingerprints.
 
-If a source changed concurrently, the generated rewrite aborts without overwriting the user's content. The next reconciliation processes that source through the external-edit path.
+If a source changed concurrently, the generated rewrite aborts without overwriting the user's content. The next reconciliation processes that source through the external-edit path. Fragment-bearing links also depend on the target Markdown fingerprint: changing target content forces revalidation even when the source and target path are unchanged, and a moved target whose content also changed bypasses the stored-offset move fast path.
 
 After index, frontmatter, document-format, or reverse-index writes, application orchestration calls scoped link tracking only for Markdown source paths that actually changed. Unselected source records, incoming groups, path history, and pending suppressions are retained. A clean non-link fix skips link tracking entirely and does not initialize absent link state. Explicit link selection still performs complete reconciliation.
 
@@ -176,13 +176,14 @@ ddocs watch -r
 
 Supplying selectors runs only those systems. Without selectors, `fix` runs configured documentation indexes and link tracking, plus reverse indexes when reverse roots are configured or supplied; it skips frontmatter and document-body format. `check` and `watch` retain the full configured default selection. `-a`/`--all` explicitly selects every configured system.
 
-`check` reports pending rewrites, broken links, ambiguous links, undefined reference labels, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events and prints each reconciliation diagnostic rather than only a message count.
+`check` reports pending rewrites, broken links, missing Markdown heading fragments, ambiguous links, undefined reference labels, and missing baseline state without modifying files. `fix` applies repository-contained source rewrites and saves the resulting state. `watch` uses the same reconciliation path automatically after relevant filesystem events and prints each reconciliation diagnostic rather than only a message count.
 
 When links are enabled, watch mode observes the repository root because moves of non-Markdown targets can require Markdown updates. It also watches the nearest existing parent directories of explicitly linked external targets, so an external rename or removal can trigger the same bounded reconciliation attempt. Documentation-only watch mode remains scoped to the configured docs root. Reverse-only watch mode remains scoped to configured or supplied reverse roots.
 
 ## Code map
 
-- `internal/links/` — parsing, target resolution, identity state, diagnostics, generated rewrites, scoped tracking, document-identity alias recovery, and bounded workers.
+- `internal/links/` — parsing, target resolution, file identity state, fragment validation, diagnostics, generated rewrites, scoped tracking, document-identity alias recovery, and bounded workers.
+- `internal/markdown/` — shared Goldmark-backed Markdown heading parsing and GitHub-style section-anchor normalization.
 - `internal/links/internal_move_rewrites.go` — deterministic job selection, bounded per-source known-move rewrite preparation, and ordered result merge.
 - `internal/links/wiki_links.go` — path-based wiki links, aliases, embeds, and extensionless Markdown resolution.
 - `internal/links/html_links.go` — supported local HTML `href`, `src`, and `poster` targets.
@@ -218,4 +219,4 @@ go test ./internal/links -count=1
 
 ## Notes
 
-Heading fragments are preserved during path repair, but heading-anchor existence is not yet part of the implemented validation contract.
+Heading fragments remain suffix data on ordinary file-target link records. Validation derives section anchors transiently from parsed heading text; it does not introduce persistent heading identities.

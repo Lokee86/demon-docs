@@ -27,9 +27,13 @@ type heading struct {
 
 type sourceRange struct{ Start, End int }
 
+func parseAST(data []byte) ast.Node {
+	return goldmark.DefaultParser().Parse(text.NewReader(data))
+}
+
 func fencedCodeRanges(source string) []sourceRange {
 	data := []byte(source)
-	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
+	doc := parseAST(data)
 	var result []sourceRange
 	if end := frontmatter.LeadingBlockEnd(source); end > 0 {
 		result = append(result, sourceRange{Start: 0, End: end})
@@ -75,7 +79,7 @@ func structuralIndex(source, value string, from int, ranges []sourceRange) int {
 
 func headings(source string) []heading {
 	data := []byte(source)
-	doc := goldmark.DefaultParser().Parse(text.NewReader(data))
+	doc := parseAST(data)
 	frontmatterEnd := frontmatter.LeadingBlockEnd(source)
 	var result []heading
 	_ = ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -103,11 +107,30 @@ func headings(source string) []heading {
 			end++
 		}
 		line := string(data[start:end])
-		title := strings.TrimSpace(string(h.Text(data)))
-		result = append(result, heading{start, end, h.Level, line, title})
+		title := headingVisibleText(h, data)
+		result = append(result, heading{Start: start, End: end, Level: h.Level, Line: line, Title: title})
 		return ast.WalkContinue, nil
 	})
 	return result
+}
+
+func headingVisibleText(h *ast.Heading, source []byte) string {
+	var result strings.Builder
+	_ = ast.Walk(h, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		switch node := n.(type) {
+		case *ast.RawHTML:
+			return ast.WalkSkipChildren, nil
+		case *ast.Text:
+			result.Write(node.Value(source))
+		case *ast.String:
+			result.Write(node.Value)
+		}
+		return ast.WalkContinue, nil
+	})
+	return strings.TrimSpace(result.String())
 }
 
 func FirstHeadingTitle(source string) string {
@@ -116,6 +139,45 @@ func FirstHeadingTitle(source string) string {
 		return ""
 	}
 	return hs[0].Title
+}
+
+// HeadingAnchors returns GitHub-style section anchors for parsed Markdown
+// headings in document order. Goldmark supplies rendered heading text so markup
+// does not leak into the anchor; duplicate anchors receive -1, -2, and so on.
+func HeadingAnchors(source string) []string {
+	hs := headings(source)
+	result := make([]string, 0, len(hs))
+	occurrences := map[string]int{}
+	for _, h := range hs {
+		base := headingAnchor(h.Title)
+		anchor := base
+		for {
+			if _, exists := occurrences[anchor]; !exists {
+				break
+			}
+			occurrences[base]++
+			anchor = fmt.Sprintf("%s-%d", base, occurrences[base])
+		}
+		occurrences[anchor] = 0
+		result = append(result, anchor)
+	}
+	return result
+}
+
+func headingAnchor(title string) string {
+	var result strings.Builder
+	for _, r := range strings.TrimSpace(title) {
+		r = unicode.ToLower(r)
+		switch {
+		case r == ' ':
+			result.WriteByte('-')
+		case r == '-' || r == '_':
+			result.WriteRune(r)
+		case unicode.IsLetter(r) || unicode.IsNumber(r) || unicode.IsMark(r):
+			result.WriteRune(r)
+		}
+	}
+	return result.String()
 }
 func TitleFromName(path string) string {
 	base := filepath.Base(path)

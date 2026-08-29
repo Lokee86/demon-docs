@@ -45,7 +45,7 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 	for sourceID, previousRecords := range previousBySource {
 		previousSource := previousByID[sourceID]
 		currentSource := currentByID[sourceID]
-		if !sourceUnchanged(previousSource, currentSource) || !recordsReusable(previousRecords) {
+		if !sourceUnchanged(previousSource, currentSource) || !recordsReusable(previousRecords) || fragmentTargetsChanged(previousRecords, previousByID, currentByID) {
 			continue
 		}
 		hasMovedTarget := false
@@ -91,6 +91,15 @@ func buildInternalMoveRewrites(root string, previousBySource map[string][]LinkRe
 		}
 	}
 	return result, nil
+}
+
+func fragmentTargetsChanged(records []LinkRecord, previousByID, currentByID map[string]*FileRecord) bool {
+	for _, record := range records {
+		if fragmentTargetContentChanged(record, previousByID[record.TargetFileID], currentByID[record.TargetFileID]) {
+			return true
+		}
+	}
+	return false
 }
 
 func buildInternalMoveRewrite(root string, job internalRewriteJob, movedTargets map[string]*FileRecord, policy review.Policy) (internalRewritePlan, bool, error) {

@@ -11,7 +11,7 @@ func TestRepairObservedRenameRewritesInboundLinksFromState(t *testing.T) {
 	root := t.TempDir()
 	oldPath := filepath.Join(root, "target.md")
 	newPath := filepath.Join(root, "renamed.md")
-	writeTestFile(t, oldPath, "# Target\n")
+	writeTestFile(t, oldPath, "# Target\n\n## Section\n")
 	writeTestFile(t, filepath.Join(root, "one.md"), "[Target](target.md)\n")
 	writeTestFile(t, filepath.Join(root, "two.md"), "[Target](target.md#section)\n")
 	writeTestFile(t, filepath.Join(root, "!INDEX.md"), "# Index\n\n<!-- doc-ledger:files:start -->\n- [target.md](target.md) - Target documentation.\n<!-- doc-ledger:files:end -->\n")

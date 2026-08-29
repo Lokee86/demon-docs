@@ -28,9 +28,9 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Broader Demon Docs diagnostics remain incomplete.
-- Link and index watcher reconciliation still has broader-than-ideal scope.
-- Markdown heading-fragment validation remains unimplemented. Stable schema-1 machine-readable diagnostics are implemented for every reconciliation subsystem—links, documentation indexes, frontmatter, document-body format, and reverse indexes—including combined reports. The runtime/configuration audit is complete: pre-report failures remain exit-2 stderr errors because no complete reconciliation result exists. Machine-readable diagnostics have no remaining planned migration work unless a separate command-error protocol is later justified.
+- Reverse-index hardening still needs focused move-aware authored-reference and nested-root coverage.
+- Watcher reconciliation retains broad authoritative evidence costs, and lifecycle/stress verification remains active hardening work.
+- Review-ledger and codemap quality claims still require broader pinned-corpus validation.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 

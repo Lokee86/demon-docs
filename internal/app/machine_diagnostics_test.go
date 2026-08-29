@@ -131,6 +131,53 @@ func TestCheckLinksJSONDiagnosticContract(t *testing.T) {
 	})
 }
 
+func TestCheckLinksJSONReportsMissingHeadingFragment(t *testing.T) {
+	repo := t.TempDir()
+	docs := filepath.Join(repo, "docs")
+	if err := os.MkdirAll(docs, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, filepath.Join(docs, "INDEX.md"), "[Target](target.md#section)\n")
+	target := filepath.Join(docs, "target.md")
+	writeTestFile(t, target, "# Target\n\n## Section\n")
+
+	withWorkingDirectory(t, repo, func(string) {
+		var out, errOut bytes.Buffer
+		if code := Run(context.Background(), []string{"init", "--root", "docs"}, &out, &errOut); code != 0 {
+			t.Fatalf("init code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"fix", "--links"}, &out, &errOut); code != 0 {
+			t.Fatalf("baseline code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		writeTestFile(t, target, "# Target\n\nSection removed.\n")
+
+		out.Reset()
+		errOut.Reset()
+		if code := Run(context.Background(), []string{"check", "--links", "--output-format", "json"}, &out, &errOut); code != 1 {
+			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
+		}
+		if errOut.Len() != 0 {
+			t.Fatalf("machine diagnostics wrote stderr: %q", errOut.String())
+		}
+		var report machineReportV1
+		if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+			t.Fatal(err)
+		}
+		if len(report.Diagnostics) != 1 {
+			t.Fatalf("diagnostics=%#v", report.Diagnostics)
+		}
+		diagnostic := report.Diagnostics[0]
+		if diagnostic.Code != "links.fragment_missing" || diagnostic.Severity != "error" || diagnostic.Subsystem != "links" || diagnostic.Message != "Markdown heading fragment does not exist" {
+			t.Fatalf("unexpected fragment diagnostic identity: %#v", diagnostic)
+		}
+		if diagnostic.Path != "docs/INDEX.md" || diagnostic.Line != 1 || diagnostic.Column != 10 || diagnostic.Target != "target.md#section" {
+			t.Fatalf("unexpected fragment diagnostic evidence: %#v", diagnostic)
+		}
+	})
+}
+
 func TestCheckLinksJSONIncludesOrphanHealthDiagnostic(t *testing.T) {
 	repo := t.TempDir()
 	docs := filepath.Join(repo, "docs")

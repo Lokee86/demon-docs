@@ -145,6 +145,7 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 	if err != nil {
 		return Plan{}, err
 	}
+	fragments := newHeadingFragmentValidator()
 
 	for index, source := range sources {
 		if rewrite, ok := internal[source.record.ID]; ok {
@@ -168,7 +169,7 @@ func reconcile(repositoryRoot string, repair bool, timings *ReconcileTimings) (P
 			}
 			continue
 		}
-		if err := reconcilePreparedMarkdownSource(&plan, inventory, source, preparedSources[index], previousRecords, initialized, repair, policy); err != nil {
+		if err := reconcilePreparedMarkdownSource(&plan, inventory, source, preparedSources[index], previousRecords, initialized, repair, policy, fragments); err != nil {
 			return Plan{}, err
 		}
 	}
@@ -183,10 +184,10 @@ func reconcileMarkdownSource(plan *Plan, inventory *inventory, source markdownSo
 	if err != nil {
 		return err
 	}
-	return reconcilePreparedMarkdownSource(plan, inventory, source, prepared, previousRecords, initialized, repair, policy)
+	return reconcilePreparedMarkdownSource(plan, inventory, source, prepared, previousRecords, initialized, repair, policy, newHeadingFragmentValidator())
 }
 
-func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, prepared preparedMarkdownSource, previousRecords []LinkRecord, initialized, repair bool, policy review.Policy) error {
+func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source markdownSource, prepared preparedMarkdownSource, previousRecords []LinkRecord, initialized, repair bool, policy review.Policy, fragments *headingFragmentValidator) error {
 	document := prepared.document
 	parsed := prepared.parsed
 	source.record.LinkParserVersion = linkParserVersion
@@ -279,6 +280,18 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 					}
 				}
 			}
+			if targetRecord.Kind == "file" && record.Status != "blocked" && record.Status != "stale_block" {
+				exists, checked, fragmentErr := fragments.validate(actualPath, source.path, document.Text, found.Suffix)
+				if fragmentErr != nil {
+					return fmt.Errorf("validate heading fragment for %s: %w", originalTarget, fragmentErr)
+				}
+				if checked && !exists {
+					record.Status = "fragment_missing"
+					plan.Unresolved++
+					human := fmt.Sprintf("Missing heading fragment in %s:%d:%d: %s", source.record.Path, found.Line, found.Column, originalTarget)
+					addDiagnostic(plan, human, linkDiagnostic(diagnosticFragmentMissing, diagnostics.SeverityError, "Markdown heading fragment does not exist", source.record.Path, found.Line, found.Column, originalTarget))
+				}
+			}
 			plan.Links.Links = append(plan.Links.Links, record)
 			continue
 		}
@@ -343,6 +356,18 @@ func reconcilePreparedMarkdownSource(plan *Plan, inventory *inventory, source ma
 						diagnostic.Replacement = newPath
 						addDiagnostic(plan, human, diagnostic)
 					}
+				}
+			}
+			if targetRecord.Kind == "file" && record.Status != "blocked" && record.Status != "stale_block" {
+				exists, checked, fragmentErr := fragments.validate(actualPath, source.path, document.Text, found.Suffix)
+				if fragmentErr != nil {
+					return fmt.Errorf("validate heading fragment for %s: %w", originalTarget, fragmentErr)
+				}
+				if checked && !exists {
+					record.Status = "fragment_missing"
+					plan.Unresolved++
+					human := fmt.Sprintf("Missing heading fragment in %s:%d:%d: %s", source.record.Path, found.Line, found.Column, originalTarget)
+					addDiagnostic(plan, human, linkDiagnostic(diagnosticFragmentMissing, diagnostics.SeverityError, "Markdown heading fragment does not exist", source.record.Path, found.Line, found.Column, originalTarget))
 				}
 			}
 		default:
@@ -440,8 +465,21 @@ func recordsReferenceChangedTarget(records []LinkRecord, previousByID, currentBy
 		if previous == nil || current == nil || previous.Present != current.Present || previous.Scope != current.Scope || previous.Path != current.Path {
 			return true
 		}
+		if fragmentTargetContentChanged(record, previous, current) {
+			return true
+		}
 	}
 	return false
+}
+
+func fragmentTargetContentChanged(record LinkRecord, previous, current *FileRecord) bool {
+	if previous == nil || current == nil || !isMarkdown(current.Path) {
+		return false
+	}
+	if _, present := fragmentFromSuffix(record.Suffix); !present {
+		return false
+	}
+	return previous.Fingerprint != current.Fingerprint
 }
 
 func recordsReusable(records []LinkRecord) bool {

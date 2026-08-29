@@ -24,7 +24,7 @@ Repository graph intelligence belongs to ArcanaGraph. Context discovery and deli
 
 The current main branch provides:
 
-- recursive indexes, parent navigation, orphan health, and local-link repair;
+- recursive indexes, parent navigation, orphan health, local-link repair, and Markdown heading-fragment validation;
 - explicit link-aware moves and observed filesystem-move recovery;
 - frontmatter and document-format policy with independent caches;
 - authored codemap management and file/folder/exact-symbol reverse projections;
@@ -46,25 +46,14 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Stable machine-readable diagnostics
+### 1. Reverse-index correctness
 
-The schema-1 native JSON envelope and stable link/index/frontmatter/document-format/reverse-index diagnostic vocabularies are implemented for `ddocs check --output-format json` without changing human-readable output. Every reconciliation subsystem may be selected individually or in combination.
-
-The runtime/configuration audit is also complete. Remaining exit-2 paths are CLI misuse, invalid or unloadable configuration, missing scope/preconditions, planning/I/O failures, or private-state publication failures. These prevent a completed reconciliation result and therefore remain on the normal stderr error surface rather than being disguised as schema-1 diagnostics.
-
-No further machine-readable diagnostic migration is currently required. A separate machine-readable command-error envelope should be introduced only if consumers demonstrate a need for one.
-
-Keep stable code, severity, subsystem, repository-relative path, source position, and documented exit semantics as each subsystem migrates. Consider SARIF only after the native contract covers the core check surface.
-
-### 2. Link and reverse-index correctness
-
-- validate heading fragments against one documented deterministic anchor model;
-- improve reverse-index coverage, unresolved-target, and scope diagnostics; and
-- add focused move-aware authored-reference and nested-root coverage.
+- add focused move-aware authored-reference and nested-root coverage; and
+- harden remaining reverse-index scope and coverage edge cases where tests expose them.
 
 External network reachability remains a separate opt-in candidate, not part of local path reconciliation.
 
-### 3. Watcher and demon resilience
+### 2. Watcher and demon resilience
 
 - stress large moves and watcher-event bursts;
 - retain race-focused single-owner lease coverage;
@@ -74,7 +63,7 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain authoritative recovery surfaces.
 
-### 4. Review and codemap evidence hardening
+### 3. Review and codemap evidence hardening
 
 - validate recommendations on broader labeled repositories;
 - compare scoring changes against pinned precision and holdout samples;
@@ -86,11 +75,10 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 Priority order:
 
-1. Stable machine-readable diagnostics.
-2. Heading-fragment and reverse-index diagnostics.
-3. Watcher, lease, and large-move stress coverage.
-4. Review-ledger and codemap corpus hardening.
-5. Broader release-platform and installation verification.
+1. Move-aware authored-reference and nested-root reverse-index coverage.
+2. Watcher, lease, and large-move stress coverage.
+3. Review-ledger and codemap corpus hardening.
+4. Broader release-platform and installation verification.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 

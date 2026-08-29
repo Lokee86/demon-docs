@@ -118,6 +118,7 @@ Command success is defined by the envelope `status` and `exit_code`, not by coun
 |---|---|---|
 | `links.state_uninitialized` | error | Link verification lacks the persisted baseline required to verify move history safely. |
 | `links.broken` | error | A recognized local link has no current target. |
+| `links.fragment_missing` | error | The target Markdown file exists, but its GitHub-style section anchors derived from parsed heading text do not contain the authored fragment. |
 | `links.ambiguous` | error | More than one candidate can satisfy the missing target. |
 | `links.undefined_reference` | error | An explicit or collapsed Markdown reference label has no definition. |
 | `links.repair` | warning | A deterministic moved-target repair is available. `replacement` contains the proposed destination. |

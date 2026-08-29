@@ -7,7 +7,7 @@ import (
 	"github.com/Lokee86/demon-docs/internal/frontmatter"
 )
 
-const linkParserVersion = 2
+const linkParserVersion = 3
 
 type undefinedReference struct {
 	Start, End   int

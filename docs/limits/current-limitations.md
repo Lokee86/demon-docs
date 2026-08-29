@@ -18,29 +18,6 @@ This document records current Demon Docs limitations that materially affect adop
 
 These entries describe incomplete or deliberately narrow current surfaces. They are not permission to weaken deterministic safety rules. Permanent boundaries such as refusing ambiguous rewrites remain architecture invariants even when future interfaces improve how users resolve them.
 
-## Markdown anchors are not validated
-
-Demon Docs preserves query strings and fragments while repairing paths, but it does not currently verify that a Markdown heading fragment exists or matches a renderer-specific anchor algorithm.
-
-Impact:
-
-- a file path may resolve while `#fragment` is stale;
-- `check --links` does not prove heading-level validity; and
-- different Markdown renderer slug rules remain outside the current contract.
-
-Workaround:
-
-Review fragment-bearing links manually or with a renderer-specific checker.
-
-Owning docs:
-
-- [Supported Link Syntax](../reference/supported-link-syntax.md)
-- [Markdown Link Reconciliation](../architecture/markdown-link-reconciliation.md)
-
-Removal condition:
-
-A deterministic supported anchor model, diagnostics, tests, and reference contract are implemented.
-
 ## Initial link state has no historical move evidence
 
 The first link-enabled mutating pass records the current repository baseline. It cannot infer where a currently broken target lived before Demon Docs began tracking identity.

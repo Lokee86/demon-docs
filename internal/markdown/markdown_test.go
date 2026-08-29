@@ -28,6 +28,20 @@ func TestFrontmatterIsInvisibleToMarkdownStructure(t *testing.T) {
 	}
 }
 
+func TestHeadingAnchorsUseParsedRenderedText(t *testing.T) {
+	source := "---\nsummary: Hidden metadata\n---\n# Guide\n\n## Getting Started\n\nGetting Started\n---------------\n\n## Getting Started\n\n#### <img src=\"windows.png\" alt=\"Windows\"/> Windows Installation\n\n## 3. Token path (alternative): obtaining `access_token` and `device_id`\n\n```md\n## Hidden Heading\n```\n"
+	got := HeadingAnchors(source)
+	want := []string{"guide", "getting-started", "getting-started-1", "getting-started-2", "windows-installation", "3-token-path-alternative-obtaining-access_token-and-device_id"}
+	if len(got) != len(want) {
+		t.Fatalf("anchors=%#v want %#v", got, want)
+	}
+	for index := range want {
+		if got[index] != want[index] {
+			t.Fatalf("anchors=%#v want %#v", got, want)
+		}
+	}
+}
+
 func TestGoldmarkIgnoresHeadingsInsideCodeFences(t *testing.T) {
 	source := "# Real\n\n```md\n## Related Docs\n```\n\nTail\n"
 	got := EnsureManaged(source, config.Default())

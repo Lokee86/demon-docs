@@ -47,6 +47,127 @@ func TestFirstScanRecordsOnlyThenRepairsMovedNonMarkdownTarget(t *testing.T) {
 	}
 }
 
+func TestMarkdownHeadingFragmentsAreValidated(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[Install](docs/guide.md#installation)\n[Missing](docs/guide.md#missing)\n[Encoded](docs/guide.md#getting%2Dstarted)\n")
+	writeTestFile(t, filepath.Join(root, "docs", "guide.md"), "# Guide\n\n## Installation\n\n## Getting Started\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Links.Links) != 3 {
+		t.Fatalf("links=%#v", plan.Links.Links)
+	}
+	if plan.Links.Links[0].Status != "valid" || plan.Links.Links[2].Status != "valid" {
+		t.Fatalf("valid fragments rejected: %#v", plan.Links.Links)
+	}
+	if plan.Links.Links[1].Status != "fragment_missing" {
+		t.Fatalf("missing fragment status=%q", plan.Links.Links[1].Status)
+	}
+	found := false
+	for _, diagnostic := range plan.Diagnostics {
+		if diagnostic.Code == "links.fragment_missing" && diagnostic.Path == "README.md" && diagnostic.Line == 2 && diagnostic.Target == "docs/guide.md#missing" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("missing structured fragment diagnostic: %#v", plan.Diagnostics)
+	}
+}
+
+func TestFragmentValidationRechecksChangedTargetContent(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "README.md")
+	target := filepath.Join(root, "guide.md")
+	writeTestFile(t, source, "[Install](guide.md#installation)\n")
+	writeTestFile(t, target, "# Guide\n\n## Installation\n")
+
+	baseline, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(baseline.Links.Links) != 1 || baseline.Links.Links[0].Status != "valid" {
+		t.Fatalf("baseline=%#v", baseline.Links.Links)
+	}
+	if err := Save(baseline); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, target, "# Guide\n\nInstallation was removed.\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Links.Links) != 1 || plan.Links.Links[0].Status != "fragment_missing" || plan.Unresolved != 1 {
+		t.Fatalf("changed target was not revalidated: unresolved=%d links=%#v", plan.Unresolved, plan.Links.Links)
+	}
+}
+
+func TestFragmentValidationBypassesMoveFastPathWhenTargetContentChanges(t *testing.T) {
+	root := t.TempDir()
+	documentID := "019fb76f-fd2d-7618-a5fb-d3a89cdd98a2"
+	writeTestFile(t, filepath.Join(root, "README.md"), "[Install](guide.md#installation)\n")
+	oldTarget := filepath.Join(root, "guide.md")
+	newTarget := filepath.Join(root, "renamed.md")
+	writeTestFile(t, oldTarget, "---\ndocument_id: "+documentID+"\n---\n# Guide\n\n## Installation\n")
+
+	baseline, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Save(baseline); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(oldTarget, newTarget); err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, newTarget, "---\ndocument_id: "+documentID+"\n---\n# Guide\n\nInstallation was removed.\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Links.Links) != 1 || plan.Links.Links[0].Status != "fragment_missing" || plan.Unresolved != 1 {
+		t.Fatalf("moved changed target was not revalidated: unresolved=%d links=%#v messages=%v", plan.Unresolved, plan.Links.Links, plan.Messages)
+	}
+	if len(plan.Updates) != 1 || !strings.Contains(plan.Updates[0].NewText, "renamed.md#installation") {
+		t.Fatalf("safe path repair was not preserved: updates=%#v", plan.Updates)
+	}
+}
+
+func TestSameDocumentHeadingFragmentUsesSourceFileIdentity(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "# Guide\n\n[Install](#installation)\n\n## Installation\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Links.Links) != 1 {
+		t.Fatalf("links=%#v", plan.Links.Links)
+	}
+	record := plan.Links.Links[0]
+	if record.Status != "valid" || record.TargetFileID == "" || record.TargetFileID != record.SourceFileID || record.RawPath != "" || record.Suffix != "#installation" {
+		t.Fatalf("same-document fragment did not retain normal file identity: %#v", record)
+	}
+}
+
+func TestDuplicateHeadingFragmentsUseParserDisambiguation(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, filepath.Join(root, "README.md"), "[Second](guide.md#repeat-1)\n")
+	writeTestFile(t, filepath.Join(root, "guide.md"), "# Repeat\n\n# Repeat\n")
+
+	plan, err := Reconcile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Links.Links) != 1 || plan.Links.Links[0].Status != "valid" {
+		t.Fatalf("duplicate heading fragment was not resolved: %#v", plan.Links.Links)
+	}
+}
+
 func TestNestedWorktreeDirectoriesAreExcludedFromRepositoryInventory(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, filepath.Join(root, "README.md"), "[nested](.worktrees/branch-a/nested.md)\n")
@@ -352,7 +473,7 @@ func TestAbsoluteExternalTargetCanMoveIntoRepository(t *testing.T) {
 func TestHTMLAndWikiLinksRepairMovedTargets(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, filepath.Join(root, "README.md"), "<a href=\"docs/guide.md#part\">Guide</a>\n[[docs/guide|Guide]]\n")
-	writeTestFile(t, filepath.Join(root, "docs", "guide.md"), "# Guide\n")
+	writeTestFile(t, filepath.Join(root, "docs", "guide.md"), "# Guide\n\n## Part\n")
 
 	first, err := Reconcile(root)
 	if err != nil {

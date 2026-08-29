@@ -131,7 +131,7 @@ The query and fragment are not used to locate the filesystem target. They remain
 
 Percent-encoded path characters are decoded for local resolution. Encode a literal `?`, `#`, or space that belongs to a filename rather than a suffix, for example `file%23name.md`. Malformed percent escapes fall back to the raw path rather than producing a separate validation diagnostic.
 
-Demon Docs does not validate whether a fragment names an existing heading or anchor. Fragment text is preserved as opaque suffix data; `#missing-heading` is not evidence that the file target is broken.
+When the resolved target is Markdown and the suffix contains a non-empty fragment, Demon Docs percent-decodes the fragment and compares it with GitHub-style section anchors derived from heading text parsed by Goldmark. Parsed heading text removes Markdown/HTML formatting before anchor normalization; duplicate anchors receive `-1`, `-2`, and so on. This includes same-document links such as `(#intro)`. The file remains identified by its normal `TargetFileID`; no separate heading identity is persisted. Query-only suffixes and fragments on non-Markdown targets remain opaque preservation data.
 
 ### Local targets and external targets
 
@@ -239,14 +239,15 @@ Recognized local destinations produce link records with statuses including:
 | `case_mismatch` | A target exists with a case difference from the requested path. |
 | `moved` | A deterministic repair was planned or applied for a moved target. |
 | `broken` | No current target was found. |
+| `fragment_missing` | The Markdown file target exists, but the authored heading fragment is absent. |
 | `ambiguous` | Multiple candidates could satisfy the destination. |
 | `blocked` | A deterministic repair is held by review policy. |
 | `stale_block` | A previous repair block no longer matches current evidence. |
 | `undefined_reference` | An explicit or collapsed reference use has no matching definition. |
 
-Broken, ambiguous, undefined, and blocked conditions increment the unresolved count and are reported with source path, line, column where available, and the relevant destination or label. Candidate paths are included for ambiguity. The source remains unchanged unless a safe rewrite is planned and its expected source hash still matches at apply time.
+Broken, missing-fragment, ambiguous, undefined, and blocked conditions increment the unresolved count and are reported with source path, line, column where available, and the relevant destination or label. Candidate paths are included for ambiguity. The source remains unchanged unless a safe rewrite is planned and its expected source hash still matches at apply time.
 
-External URI targets, unsupported syntax, ignored targets, and unvalidated heading fragments do not produce broken-link diagnostics from this parser. They are outside this contract rather than confirmed valid.
+External URI targets, unsupported syntax, and ignored targets do not produce broken-link diagnostics from this parser. A resolved Markdown target with a non-empty fragment produces `links.fragment_missing` when no parsed heading generates the matching section anchor.
 
 ## Examples
 
@@ -282,4 +283,4 @@ Forms intentionally outside the reconciliation surface:
 
 ## Notes
 
-This page describes the current implementation in `internal/links/`. It does not define the full grammar of CommonMark, GitHub-Flavored Markdown, wiki engines, or HTML, and it does not imply heading-fragment validation.
+This page describes the current implementation in `internal/links/` and the shared Goldmark-backed heading parser in `internal/markdown/`. Heading-fragment validation follows GitHub-style section-link normalization over parsed rendered heading text; renderer-specific custom-anchor extensions remain outside this contract.

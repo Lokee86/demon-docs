@@ -5,6 +5,7 @@ import "github.com/Lokee86/demon-docs/internal/diagnostics"
 const (
 	diagnosticStateUninitialized = "links.state_uninitialized"
 	diagnosticBroken             = "links.broken"
+	diagnosticFragmentMissing    = "links.fragment_missing"
 	diagnosticAmbiguous          = "links.ambiguous"
 	diagnosticUndefinedReference = "links.undefined_reference"
 	diagnosticRepair             = "links.repair"
