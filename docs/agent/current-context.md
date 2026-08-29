@@ -27,7 +27,7 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Review-ledger and codemap quality claims still require broader pinned-corpus validation.
+- Broader release-platform and installation verification remains.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 

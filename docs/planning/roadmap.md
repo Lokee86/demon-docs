@@ -46,20 +46,16 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Review and codemap evidence hardening
+### 1. Broader release-platform and installation verification
 
-- validate recommendations on broader labeled repositories;
-- compare scoring changes against pinned precision and holdout samples;
-- preserve no-pruning defaults and remembered declines;
-- stress review-ledger append, undo-depth, and stale-evidence behavior; and
-- keep quality claims tied to named datasets.
+- verify packaged and installed binaries through the supported release paths; and
+- keep platform-specific installation claims tied to reproducible release checks.
 
 ## Near-Term Hardening
 
 Priority order:
 
-1. Review-ledger and codemap corpus hardening.
-2. Broader release-platform and installation verification.
+1. Broader release-platform and installation verification.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 

@@ -71,7 +71,7 @@ detected issue
     └── declined issue
 ```
 
-Link repair remains automatic when one deterministic target exists. Multiple plausible targets become `link_repair` suggestions. Codemap missing-link candidates become `codemap_link` suggestions and are never inserted automatically.
+Link repair remains automatic when one deterministic target exists. Multiple plausible targets become `link_repair` suggestions. Codemap missing-link candidates become `codemap_link` suggestions. Explicit codemap execution may add only non-declined `hard_link` recommendations; `context` remains non-mutating review and analysis output.
 
 Selection immediately converts a candidate into the normal repair path. There is no durable accepted-suggestion state.
 
@@ -133,6 +133,7 @@ An unchanged blocked repair is not applied. Materially changed evidence makes th
 - Concurrent appends use compare-and-swap reference advancement.
 - Private review events do not modify the user's normal Git branch history.
 - Expired undo eligibility does not erase audit records.
+- Policy replay is a fresh projection: applying current policy does not mutate reusable suggestion evidence or retain stale candidate flags from an earlier replay.
 
 Automatic private-object compaction is disabled for normal review writes. The
 daemon and CLI can read the same bare object store from separate processes,
@@ -157,7 +158,7 @@ single-process compaction retains review commits and undo blobs.
 
 ## Tests
 
-Focused coverage includes single-commit batch append/replay, legacy per-event history compatibility, nil/empty snapshot preservation, constant object growth, compaction retention, undo eligibility, suggestion CLI, link integration, codemap insertion, blocks, and concurrent history behavior.
+Focused coverage includes single-commit batch append/replay, legacy per-event history compatibility, nil/empty snapshot preservation, constant object growth, compaction retention, undo eligibility, suggestion CLI, link integration, codemap insertion, blocks, and concurrent history behavior. Stress coverage retains a 512-event history across 64 review commits, exact undo-depth boundaries, and long policy replay with 64 candidate declines plus 256 unrelated decisions through decline, stale evidence, reconsideration, and fresh decline.
 
 ```bash
 go test ./internal/review ./internal/links ./internal/app ./internal/codemap -count=1

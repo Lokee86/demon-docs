@@ -3,6 +3,7 @@ package review
 import (
 	"errors"
 	"sort"
+	"time"
 
 	git "github.com/go-git/go-git/v5"
 )
@@ -66,6 +67,17 @@ func LoadPolicy(repositoryRoot string) (Policy, error) {
 }
 
 func (p Policy) ApplySuggestion(suggestion Suggestion) Suggestion {
+	// Policy projection must not mutate reusable suggestion evidence or retain
+	// status from an earlier replay. Callers may apply freshly loaded policy to
+	// the same suggestion after reconsideration or evidence changes.
+	suggestion.Candidates = append([]Candidate(nil), suggestion.Candidates...)
+	suggestion.Status = ""
+	suggestion.Reason = ""
+	suggestion.DecisionTime = time.Time{}
+	for index := range suggestion.Candidates {
+		suggestion.Candidates[index].Declined = false
+		suggestion.Candidates[index].Stale = false
+	}
 	if decision, ok := p.issues[suggestion.RelationKey]; ok {
 		suggestion.Reason = decision.Reason
 		suggestion.DecisionTime = decision.DecidedAt

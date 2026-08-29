@@ -171,7 +171,7 @@ Focused coverage lives in `internal/frontmatter/`, `internal/documentpolicy/`, `
 
 ## Review-Ledger Coverage
 
-Review tests cover persisted decline decisions, stale evidence fingerprints, ambiguous link suggestions, codemap selection, applied-change events, Git-object append behavior, undo depth and age, whole-run preflight, repair-level undo, blocks, unblocks, and refusal to overwrite later edits.
+Review tests cover persisted decline decisions, stale evidence fingerprints, ambiguous link suggestions, codemap selection, applied-change events, Git-object append behavior, undo depth and age, whole-run preflight, repair-level undo, blocks, unblocks, and refusal to overwrite later edits. Stress coverage verifies a 512-event history across 64 review commits, exact deep undo-depth boundaries, and policy replay through 64 candidate declines plus 256 unrelated decisions without leaking stale policy flags into reusable suggestions.
 
 Focused coverage lives in `internal/review/`, `internal/links/review_integration_test.go`, `internal/app/review_cli_test.go`, and `internal/codemap/insert_test.go`.
 
@@ -229,7 +229,7 @@ The committed Space Rocks precision sample contains 150 labels. The current reta
 - `context` recommendations: **82**; and
 - canonical hidden-link holdout: **10/10 recovered**.
 
-The ordinary cross-repository holdout recovers **11/18** links (**61.11%**). The frozen cross-repository precision review retains **83** valid missing links and **34** plausible context links while suppressing all **4** demonstrated incorrect candidates, producing **70.94%** strict precision and **100%** relevance for that fixed reviewed sample only.
+The ordinary cross-repository holdout recovers **11/18** links (**61.11%**). The frozen cross-repository precision review retains **83** valid missing links and **34** plausible context links while suppressing all **4** demonstrated incorrect candidates, producing **70.94%** strict precision and **100%** relevance for that fixed reviewed sample only. That review split was frozen before labeling: agent-orchestrator, beads-rust, Genesis, and render-claude-context formed the tuning set, while Bifrost was reserved for repository-level validation. Expanded Arcana holdouts are retained separately under `research/cross-repo-codemap-benchmark/expanded/` rather than rewriting the historical benchmark.
 
 Run repository holdouts with:
 
