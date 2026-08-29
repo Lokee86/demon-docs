@@ -46,14 +46,7 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Watcher and demon resilience
-
-- stress large moves and watcher-event bursts; and
-- improve diagnostics for slow or failed reconciliation.
-
-`ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain authoritative recovery surfaces.
-
-### 2. Review and codemap evidence hardening
+### 1. Review and codemap evidence hardening
 
 - validate recommendations on broader labeled repositories;
 - compare scoring changes against pinned precision and holdout samples;
@@ -65,9 +58,8 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 Priority order:
 
-1. Watcher, lease, and large-move stress coverage.
-2. Review-ledger and codemap corpus hardening.
-3. Broader release-platform and installation verification.
+1. Review-ledger and codemap corpus hardening.
+2. Broader release-platform and installation verification.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 

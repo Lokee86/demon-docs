@@ -27,7 +27,6 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Watcher large-move/event-burst stress and slow/failed reconciliation observability remain active hardening work.
 - Review-ledger and codemap quality claims still require broader pinned-corpus validation.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.

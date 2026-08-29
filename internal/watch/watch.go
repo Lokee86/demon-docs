@@ -74,6 +74,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 	externalWatched := map[string]bool{}
 	var externalDirectories []string
 	run := func(changedPaths []string, fullValidation bool) error {
+		observation := observeReconciliation(changedPaths, fullValidation)
 		if runLock != nil {
 			runLock.Lock()
 			defer runLock.Unlock()
@@ -124,12 +125,12 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				}
 			}
 			if err != nil {
-				return err
+				return observation.failure("links", err)
 			}
 			if features.Links {
 				count, err := links.ApplyAndSave(&plan)
 				if err != nil {
-					return err
+					return observation.failure("links apply", err)
 				}
 				changed += count
 				for _, rewrite := range plan.Rewrites {
@@ -141,7 +142,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				diagnostics = append(diagnostics, plan.Messages...)
 				unresolved = plan.Unresolved
 			} else if err := links.Save(plan); err != nil {
-				return err
+				return observation.failure("link state", err)
 			}
 			externalDirectories = externalWatchDirectories(plan.Files)
 			if watcher != nil {
@@ -159,10 +160,10 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				result, err = reconcile.TreeScopedWithIgnoreRoot(docsRoot, repositoryRoot, c, changedPaths)
 			}
 			if err != nil {
-				return err
+				return observation.failure("indexes plan", err)
 			}
 			if err := reconcile.PrepareMissingWithin(result, docsRoot); err != nil {
-				return err
+				return observation.failure("indexes prepare", err)
 			}
 			for _, update := range result.Updates {
 				addValidationPath(update.Path)
@@ -182,11 +183,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 					}
 				}
 				if err != nil {
-					return err
+					return observation.failure("frontmatter plan", err)
 				}
 				count, err := frontmatter.Apply(repositoryRoot, docsRoot, plan)
 				if err != nil {
-					return err
+					return observation.failure("frontmatter apply", err)
 				}
 				changed += count
 				for _, update := range plan.Updates {
@@ -214,11 +215,11 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 					}
 				}
 				if err != nil {
-					return err
+					return observation.failure("document format plan", err)
 				}
 				count, err := documentpolicy.Apply(plan, docsRoot)
 				if err != nil {
-					return err
+					return observation.failure("document format apply", err)
 				}
 				changed += count
 				for _, diagnostic := range plan.Diagnostics {
@@ -239,7 +240,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				result, count, err = reconcile.ConvergeScopedWithin(docsRoot, repositoryRoot, c, changedPaths)
 			}
 			if err != nil {
-				return err
+				return observation.failure("indexes converge", err)
 			}
 			changed += count
 			diagnostics = append(diagnostics, result.Messages...)
@@ -257,12 +258,12 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				refreshPlan = links.Plan{RepositoryRoot: repositoryRoot}
 			}
 			if err != nil {
-				return err
+				return observation.failure("link state refresh", err)
 			}
 			if features.TrackLinks || refreshPlan.Initialized {
 				if refreshPlan.RepositoryRoot != "" {
 					if err := links.Save(refreshPlan); err != nil {
-						return err
+						return observation.failure("link state save", err)
 					}
 					externalDirectories = externalWatchDirectories(refreshPlan.Files)
 					if watcher != nil {
@@ -273,7 +274,7 @@ func RootSelectedWithRunLock(ctx context.Context, docsRoot, repositoryRoot strin
 				}
 			}
 		}
-		fmt.Fprintf(out, "%s ddocs watch updated %d file(s)\n", timestamp(), changed)
+		observation.complete(out, changed)
 		for _, message := range diagnostics {
 			fmt.Fprintf(out, "%s ddocs watch: %s\n", timestamp(), message)
 		}

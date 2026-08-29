@@ -67,6 +67,8 @@ The watcher reruns the same selected operations used by `fix` when relevant repo
 - It adds watches for newly created nested directories and removes deleted or renamed watched directories.
 - Observer errors are surfaced. Event-buffer overflow is handled specially because it means event detail was lost: the watcher logs it, schedules a complete reconciliation, and keeps observing instead of terminating.
 - Each reconciliation diagnostic is printed as its own watcher message instead of being collapsed into an opaque count.
+- Completion lines report reconciliation duration, full/scoped scope, and changed-path count. Runs taking at least two seconds also emit an explicit slow-reconciliation line.
+- Reconciliation failures identify the failing subsystem and include elapsed duration, scope, and changed-path count before the underlying error.
 
 Generated Markdown rewrites record their expected content hash and affected link IDs before watcher feedback is processed. Existing unconsumed suppressions are loaded and merged with suppressions from the new batch, so a successful unrelated write cannot discard pending self-write evidence. A matching event is consumed as the expected self-write. A mismatched hash invalidates that suppression and the file is processed normally, preserving concurrent user edits.
 
@@ -74,7 +76,7 @@ Generated Markdown rewrites record their expected content hash and affected link
 
 `debounce_seconds` is a quiet-period setting, not a maximum time-to-repair guarantee. Each relevant event restarts it, and a directory move may produce many events before the repository becomes quiet. Bulk recognized renames also wait for at least 500 milliseconds without another rename before the normal reconciliation pass proceeds.
 
-After scheduling, the selected reconciliation callback still runs to completion. Ordinary Markdown create and write events scope frontmatter and document-format validation to affected paths while untouched documents reuse clean cache entries. Link and folder-index work remains broader, and schema, directory, removal, rename, overflow, startup, or uncertain events may request a full validation pass. Detached logs show the completion timestamp, so execution time can be mistaken for an unusually large debounce.
+After scheduling, the selected reconciliation callback still runs to completion. Ordinary Markdown create and write events scope frontmatter and document-format validation to affected paths while untouched documents reuse clean cache entries. Link and folder-index work remains broader, and schema, directory, removal, rename, overflow, startup, or uncertain events may request a full validation pass. Completion logs include explicit `duration`, `scope`, and `paths` fields, so reconciliation time is distinguishable from debounce time.
 
 The current watcher is serviceable convenience automation for modest repositories and a correctness-first hackathon prototype. It is not yet a fully incremental low-latency daemon for large or continuously changing repositories. Lowering debounce alone does not address remaining link and index scope or follow-up work.
 
@@ -94,7 +96,7 @@ Foreground watcher output includes timestamped status lines and the current proc
 
 ```text
 2026-06-18T23:59:59 ddocs watch watching docs pid=12345
-2026-06-18T23:59:59 ddocs watch updated 3 file(s)
+2026-06-18T23:59:59 ddocs watch updated 3 file(s) duration=142ms scope=scoped paths=2
 ```
 
 Detached watcher output is written to the bounded log set under `.ddocs/runtime/logs/` and is available through:
@@ -115,7 +117,7 @@ ddocs demon --logs
 
 ## Test Coverage
 
-Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, transient initial-plan retries, event-buffer overflow recovery, ordinary observer-error propagation, clean cancellation, and self-write convergence.
+Watcher unit and temporary-filesystem integration tests cover source and destination rename events, nested directory creation, watched-directory deletion, configured filtering, operation selection, events queued during reconciliation, explicit debounce overrides, transient initial-plan retries, event-buffer overflow recovery, ordinary observer-error propagation, clean cancellation, self-write convergence, a deterministic 128-file adversarial rename-event burst, and a real 96-file Windows rename burst.
 
 Repository-demon tests separately cover ownership exclusion and stale recovery, feeder expiry and counting, read-only status snapshots, shell-feeder reuse, bounded logs, shutdown grace, linked-worktree discovery, persistent enablement, generated shell-hook contracts, and real Windows PowerShell parsing of the emitted bootstrap.
 
@@ -124,6 +126,7 @@ Repository-demon tests separately cover ownership exclusion and stale recovery, 
 - `internal/watch/watch.go` — observer setup, watched scopes, event filtering, and reconciliation execution.
 - `internal/watch/scheduler.go` — debounce, single-run ownership, and queued follow-up scheduling.
 - `internal/watch/features.go` — selected reconciliation feature contract.
+- `internal/watch/diagnostics.go` — reconciliation duration/scope telemetry and subsystem-aware failure wrapping.
 - `internal/demon/runtime.go` — detached owner and feeder lifecycle around the same watcher.
 - `internal/demon/log.go` — bounded detached watcher logs.
 - `internal/app/demon.go` — daemon CLI and generated shell hooks.

@@ -94,8 +94,7 @@ The smoke harness intentionally uses a small repository and a small number of fi
 It is not a performance, soak, or stress harness. It does not currently test:
 
 - thousands of documents or links;
-- large rename or move batches;
-- rapid watcher-event bursts;
+- very large repository-scale move batches beyond the retained 128-file deterministic and 96-file real-Windows watcher burst cases;
 - concurrent mutating CLI operations;
 - repeated unclean daemon crashes or sustained cross-process lease contention;
 - sustained memory, handle, CPU, or storage growth; or
@@ -190,6 +189,8 @@ The current recorded mass-rename median is 1.928 seconds for the first `ddocs fi
 See [Markdown Link Performance](../research/link-performance.md) for the complete phase breakdown, throughput, methodology, historical comparison, and retained raw artifacts.
 
 ## Repository-Demon Coverage
+
+Watcher hardening additionally retains a 128-file adversarial queued rename-event convergence test and a 96-file real Windows watcher rename-burst test. Watch output tests verify duration/scope/path telemetry, explicit slow-run reporting, and subsystem-preserving failure wrapping.
 
 Daemon tests cover:
 

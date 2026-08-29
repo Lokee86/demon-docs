@@ -379,6 +379,11 @@ func TestWatchPrintsActualReconciliationMessages(t *testing.T) {
 	if strings.Contains(text, "reconciliation messages:") {
 		t.Fatalf("watch output still used the opaque count: %q", text)
 	}
+	for _, expected := range []string{"duration=", "scope=full", "paths=0"} {
+		if !strings.Contains(text, expected) {
+			t.Fatalf("watch output missing reconciliation telemetry %q: %q", expected, text)
+		}
+	}
 }
 
 func waitFor(t *testing.T, timeout time.Duration, ready func() bool) {
