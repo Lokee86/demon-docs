@@ -46,14 +46,7 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Reverse-index correctness
-
-- add focused move-aware authored-reference and nested-root coverage; and
-- harden remaining reverse-index scope and coverage edge cases where tests expose them.
-
-External network reachability remains a separate opt-in candidate, not part of local path reconciliation.
-
-### 2. Watcher and demon resilience
+### 1. Watcher and demon resilience
 
 - stress large moves and watcher-event bursts;
 - retain race-focused single-owner lease coverage;
@@ -63,7 +56,7 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 `ddocs check`, `ddocs fix`, and explicit `ddocs mv` remain authoritative recovery surfaces.
 
-### 3. Review and codemap evidence hardening
+### 2. Review and codemap evidence hardening
 
 - validate recommendations on broader labeled repositories;
 - compare scoring changes against pinned precision and holdout samples;
@@ -75,10 +68,9 @@ External network reachability remains a separate opt-in candidate, not part of l
 
 Priority order:
 
-1. Move-aware authored-reference and nested-root reverse-index coverage.
-2. Watcher, lease, and large-move stress coverage.
-3. Review-ledger and codemap corpus hardening.
-4. Broader release-platform and installation verification.
+1. Watcher, lease, and large-move stress coverage.
+2. Review-ledger and codemap corpus hardening.
+3. Broader release-platform and installation verification.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 
