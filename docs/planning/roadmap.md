@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7366-a679-359c693253d2
 document_type: general
 policy_exempt: false
-summary: Active Demon Docs priorities for correctness, diagnostics, incremental reconciliation, and operational hardening.
+summary: Demon Docs maintenance status and the earmarked Archivist Rust successor direction.
 ---
 # Demon Docs Roadmap
 
@@ -46,7 +46,20 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-No release-blocking Demon Docs hardening item is currently scheduled. New work should be driven by reproduced defects, measured bottlenecks, or a deliberately expanded supported platform surface.
+No release-blocking Demon Docs hardening item is currently scheduled. New work on the Go implementation should be driven by reproduced defects, measured bottlenecks, or a deliberately expanded supported platform surface.
+
+## Earmarked Successor Direction
+
+The next major product iteration is earmarked as a translation rather than continued expansion of the Go codebase:
+
+- **Product name:** `Archivist` replaces `Demon Docs` when the successor migration begins.
+- **Implementation language:** Rust.
+- **Public executable:** `scribe` replaces both current executables, `ddocs` and `demon`.
+- **CLI ownership:** daemon/watcher lifecycle remains part of the same product, but is exposed beneath the single `scribe` command surface rather than through a second executable.
+- **Migration posture:** the current Go implementation remains the maintained reference implementation until the Rust successor reaches behavioral parity.
+- **Parity rule:** preserve existing deterministic behavior, ownership boundaries, diagnostics, fixtures, review semantics, corpus evidence, and release contracts before using the rewrite to change architecture or behavior.
+
+The exact Rust crate layout, repository transition, compatibility aliases, state-format migration, and command-tree spelling are deliberately deferred until migration planning begins. Current shipped documentation should continue to describe `Demon Docs`, `ddocs`, and `demon` until that transition is implemented.
 
 ## Near-Term Hardening
 

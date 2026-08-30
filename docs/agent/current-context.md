@@ -27,7 +27,14 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- No release-blocking correctness gap is currently tracked. Treat new work as issue-driven unless the roadmap is deliberately reopened.
+- No release-blocking correctness gap is currently tracked. Treat new work on the Go implementation as issue-driven unless the roadmap is deliberately reopened.
+
+## Earmarked successor
+
+- Future product name: **Archivist**.
+- Future implementation: **Rust** translation of the current Go reference implementation.
+- Future public command: **`scribe`**, replacing both `ddocs` and `demon` with one executable surface.
+- Do not rename current shipped commands or rewrite implementation opportunistically; preserve the Go product as the behavioral reference until an explicit migration begins.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 
