@@ -106,7 +106,7 @@ ddocs --help
 demon --help
 ```
 
-The release workflow runs the complete Go test suite on Windows and Linux, executes the Windows and Linux command-line artifacts, runs the vet gate, builds both archives with `CGO_ENABLED=0`, and publishes SHA-256 checksums. macOS does not currently have a prebuilt release asset.
+The release workflow runs the complete Go test suite on Windows and Linux, verifies checkout-based `go install`, builds both archives with `CGO_ENABLED=0`, validates checksums and archive contents, and runs the black-box smoke harness against extracted release binaries before publication. macOS does not currently have a prebuilt release asset.
 
 ### Build from source
 

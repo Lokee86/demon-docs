@@ -27,9 +27,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Test and smoke-test Windows binaries
+      - name: Test source install and packaged Windows binaries
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
             $version = "${{ inputs.version }}"
           } else {
@@ -40,16 +42,32 @@ jobs:
           }
 
           go test ./... -count=1
-          $ldflags = "-s -w -X github.com/Lokee86/demon-docs/internal/app.Version=$version"
-          go build -trimpath -ldflags $ldflags -o ddocs.exe ./cmd/ddocs
-          go build -trimpath -ldflags $ldflags -o demon.exe ./cmd/demon
 
-          if ((.\ddocs.exe --version) -ne "ddocs $version") {
-            throw "Unexpected ddocs version output"
+          $installRoot = Join-Path $env:RUNNER_TEMP "ddocs-go-install"
+          New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
+          $env:GOBIN = $installRoot
+          go install ./cmd/ddocs ./cmd/demon
+          & (Join-Path $installRoot "ddocs.exe") --version
+          & (Join-Path $installRoot "ddocs.exe") --help | Out-Null
+          & (Join-Path $installRoot "demon.exe") --help | Out-Null
+
+          $packageRoot = "package/demon-docs_windows_amd64"
+          Remove-Item package, verify, demon-docs_windows_amd64.zip -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $packageRoot | Out-Null
+          $ldflags = "-s -w -X github.com/Lokee86/demon-docs/internal/app.Version=$version"
+          go build -trimpath -ldflags $ldflags -o "$packageRoot/ddocs.exe" ./cmd/ddocs
+          go build -trimpath -ldflags $ldflags -o "$packageRoot/demon.exe" ./cmd/demon
+          Copy-Item LICENSE.md, LICENSING.md, README.md $packageRoot
+
+          Compress-Archive -Path $packageRoot -DestinationPath demon-docs_windows_amd64.zip
+          Expand-Archive demon-docs_windows_amd64.zip verify
+          $unpacked = "verify/demon-docs_windows_amd64"
+          if ((& "$unpacked/ddocs.exe" --version) -ne "ddocs $version") {
+            throw "Unexpected packaged ddocs version output"
           }
-          .\ddocs.exe --help | Out-Null
-          .\demon.exe --help | Out-Null
-          go run ./tools/smoke --ddocs .\ddocs.exe --demon .\demon.exe
+          & "$unpacked/ddocs.exe" --help | Out-Null
+          & "$unpacked/demon.exe" --help | Out-Null
+          go run ./tools/smoke --ddocs "$unpacked/ddocs.exe" --demon "$unpacked/demon.exe"
 
   release:
     name: Build and publish release
@@ -82,10 +100,16 @@ jobs:
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
           echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
 
-      - name: Verify source
+      - name: Verify source and source installation
         run: |
+          set -euo pipefail
           go test ./... -count=1
           go vet ./...
+          install_root="$(mktemp -d)"
+          GOBIN="${install_root}" go install ./cmd/ddocs ./cmd/demon
+          "${install_root}/ddocs" --version
+          "${install_root}/ddocs" --help >/dev/null
+          "${install_root}/demon" --help >/dev/null
 
       - name: Build release binaries
         shell: bash
@@ -106,11 +130,6 @@ jobs:
           cp LICENSE.md LICENSING.md README.md package/demon-docs_windows_amd64/
 
           ./package/demon-docs_linux_amd64/ddocs --version | grep -Fx "ddocs ${VERSION}"
-          ./package/demon-docs_linux_amd64/ddocs --help >/dev/null
-          ./package/demon-docs_linux_amd64/demon --help >/dev/null
-          go run ./tools/smoke \
-            --ddocs ./package/demon-docs_linux_amd64/ddocs \
-            --demon ./package/demon-docs_linux_amd64/demon
           go version -m package/demon-docs_windows_amd64/ddocs.exe
           go version -m package/demon-docs_windows_amd64/demon.exe
 
@@ -131,6 +150,45 @@ jobs:
           PY
           cd dist
           sha256sum demon-docs_linux_amd64.tar.gz demon-docs_windows_amd64.zip > checksums.txt
+
+      - name: Verify packaged release assets
+        shell: bash
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          (cd dist && sha256sum -c checksums.txt)
+          rm -rf verify
+          mkdir -p verify/linux verify/windows
+          tar -C verify/linux -xzf dist/demon-docs_linux_amd64.tar.gz
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          with ZipFile("dist/demon-docs_windows_amd64.zip") as archive:
+              archive.extractall("verify/windows")
+
+          expected_windows = {"LICENSE.md", "LICENSING.md", "README.md", "ddocs.exe", "demon.exe"}
+          windows_root = Path("verify/windows/demon-docs_windows_amd64")
+          windows_files = {path.name for path in windows_root.iterdir() if path.is_file()}
+          if windows_files != expected_windows:
+              raise SystemExit(f"unexpected Windows release contents: {sorted(windows_files)}")
+
+          expected_linux = {"LICENSE.md", "LICENSING.md", "README.md", "ddocs", "demon"}
+          linux_root = Path("verify/linux/demon-docs_linux_amd64")
+          linux_files = {path.name for path in linux_root.iterdir() if path.is_file()}
+          if linux_files != expected_linux:
+              raise SystemExit(f"unexpected Linux release contents: {sorted(linux_files)}")
+          PY
+
+          linux_root="verify/linux/demon-docs_linux_amd64"
+          "${linux_root}/ddocs" --version | grep -Fx "ddocs ${VERSION}"
+          "${linux_root}/ddocs" --help >/dev/null
+          "${linux_root}/demon" --help >/dev/null
+          go run ./tools/smoke --ddocs "${linux_root}/ddocs" --demon "${linux_root}/demon"
+
+          go version -m verify/windows/demon-docs_windows_amd64/ddocs.exe
+          go version -m verify/windows/demon-docs_windows_amd64/demon.exe
 
       - name: Publish GitHub release
         shell: bash

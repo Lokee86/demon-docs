@@ -33,6 +33,8 @@ demon --help
 demon --version
 ```
 
+The release workflow verifies this checkout-based install path on both Windows and Linux. Release archives are then extracted and verified separately so packaging, layout, version injection, and executable behavior are tested as delivered rather than only before archiving.
+
 Run the complete local release gate from the repository root:
 
 ```bash
@@ -297,8 +299,9 @@ Structural review should also confirm that normal documents contain one parent i
 A release is eligible only when all CI jobs pass. In particular:
 
 - Linux and Windows Go tests are green;
+- checkout-based `go install` succeeds and the installed commands start correctly on both release platforms;
 - the CLI fixture matrix is green;
-- `go vet`, both executable builds, and CLI smoke checks pass;
+- `go vet`, both executable builds, archive checksum/content validation, and extracted-binary smoke checks pass;
 - repeated reconciliation is byte-identical;
 - `check` remains non-mutating;
 - link and codemap reports remain deterministic for pinned fixtures; and

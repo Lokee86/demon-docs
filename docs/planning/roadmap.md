@@ -46,16 +46,11 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-### 1. Broader release-platform and installation verification
-
-- verify packaged and installed binaries through the supported release paths; and
-- keep platform-specific installation claims tied to reproducible release checks.
+No release-blocking Demon Docs hardening item is currently scheduled. New work should be driven by reproduced defects, measured bottlenecks, or a deliberately expanded supported platform surface.
 
 ## Near-Term Hardening
 
-Priority order:
-
-1. Broader release-platform and installation verification.
+No queued hardening item currently outranks normal release verification and issue-driven maintenance.
 
 Shared immutable source snapshots should be introduced only where measurements show duplicated reads or parsing. Incremental changed-region Markdown parsing remains deferred until whole-document parsing is a material bottleneck after path scoping.
 

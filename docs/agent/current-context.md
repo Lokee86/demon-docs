@@ -27,7 +27,7 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 
 ## Current active gaps
 
-- Broader release-platform and installation verification remains.
+- No release-blocking correctness gap is currently tracked. Treat new work as issue-driven unless the roadmap is deliberately reopened.
 
 Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
 
