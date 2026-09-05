@@ -61,6 +61,16 @@ The next major product iteration is earmarked as a translation rather than conti
 
 The exact Rust crate layout, repository transition, compatibility aliases, state-format migration, and command-tree spelling are deliberately deferred until migration planning begins. Current shipped documentation should continue to describe `Demon Docs`, `ddocs`, and `demon` until that transition is implemented.
 
+A required Archivist capability is **repository-local documentation policy enforcement** so product repositories do not need bespoke validation scripts such as Warlock's `scripts/check_docs.py`. Archivist should own deterministic Markdown parsing and diagnostics while a repository-owned policy/config declares constraints such as:
+
+- required sections by document type or path pattern;
+- required ADR metadata and allowed status representation;
+- index membership and parent/index relationships;
+- generated, historical, or otherwise excluded documentation surfaces; and
+- stable machine-readable failures suitable for CI.
+
+The target integration is an `Archivist check`/`scribe check`-style gate driven by repository configuration. Repository-specific Python wrappers should either disappear or become trivial compatibility launchers with no independent document-parsing or policy engine.
+
 ## Near-Term Hardening
 
 No queued hardening item currently outranks normal release verification and issue-driven maintenance.
