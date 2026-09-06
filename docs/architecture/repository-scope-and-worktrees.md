@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7fd7-9f86-3ef6e942ed96
 document_type: general
 policy_exempt: false
-summary: 'This document describes the implemented repository boundary in internal/repository/: how Demon Docs discovers initialized repositories, resolves documentation scope, protects docs-root containment, and handles linked Git worktrees for...'
+summary: 'This document describes the implemented repository boundary in internal/repository/: how Archivist discovers initialized repositories, resolves documentation scope, protects docs-root containment, and handles linked Git worktrees for...'
 ---
 # Repository Scope and Worktrees
 
@@ -12,13 +12,13 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document describes the implemented repository boundary in `internal/repository/`: how Demon Docs discovers initialized repositories, resolves documentation scope, protects docs-root containment, and handles linked Git worktrees for the repository demon.
+This document describes the implemented repository boundary in `internal/repository/`: how Archivist discovers initialized repositories, resolves documentation scope, protects docs-root containment, and handles linked Git worktrees for the repository demon.
 
 ## Overview
 
-Demon Docs treats the ordinary filesystem as the repository-discovery authority. An initialized repository is identified by a non-directory `.ddocs/config.toml` path found while walking from the requested path toward its ancestors. Scope resolution then turns the selected configuration and root setting into a repository root, docs root, configuration path, and `.docignore` path.
+Archivist treats the ordinary filesystem as the repository-discovery authority. An initialized repository is identified by a non-directory `.ddocs/config.toml` path found while walking from the requested path toward its ancestors. Scope resolution then turns the selected configuration and root setting into a repository root, docs root, configuration path, and `.docignore` path.
 
-Linked Git worktrees are the one narrow exception to the Git-independent discovery model. The worktree adapter can read Git's linked-worktree metadata to identify a primary initialized worktree and, only on a mutating demon entry, create independent local `.ddocs/` state for the linked worktree. It does not make Git the general source of Demon Docs repository truth.
+Linked Git worktrees are the one narrow exception to the Git-independent discovery model. The worktree adapter can read Git's linked-worktree metadata to identify a primary initialized worktree and, only on a mutating demon entry, create independent local `.ddocs/` state for the linked worktree. It does not make Git the general source of Archivist repository truth.
 
 ## Code root
 
@@ -43,7 +43,7 @@ The repository boundary owns:
 - read-only linked-worktree detection; and
 - first-mutating-entry bootstrap of local linked-worktree configuration and object storage.
 
-The returned `Scope` is the boundary consumed by application orchestration and reconciliation. It identifies where documentation files, repository-local ignore rules, and private Demon Docs state are selected for the current operation.
+The returned `Scope` is the boundary consumed by application orchestration and reconciliation. It identifies where documentation files, repository-local ignore rules, and private Archivist state are selected for the current operation.
 
 ## Does not own
 
@@ -63,7 +63,7 @@ Git awareness is intentionally limited to `worktree.go`. Normal `Discover`, `Fin
 
 `Discover(start)` normalizes the starting path with `filepath.Abs`. If the path names an existing non-directory, discovery begins at its parent. It then walks upward until it finds a non-directory `.ddocs/config.toml`, returning its containing repository root and config path. A `.ddocs` directory by itself is not enough for initialized discovery.
 
-`FindMarker(start)` performs the same ancestor walk but checks only whether `.ddocs` can be found with `os.Stat`. The application uses this broader marker check to reject initialization inside an already marked repository. The configuration package also uses it as the boundary when looking for legacy local configuration, so a legacy config cannot be selected by walking above an initialized Demon Docs repository.
+`FindMarker(start)` performs the same ancestor walk but checks only whether `.ddocs` can be found with `os.Stat`. The application uses this broader marker check to reject initialization inside an already marked repository. The configuration package also uses it as the boundary when looking for legacy local configuration, so a legacy config cannot be selected by walking above an initialized Archivist repository.
 
 `RootForConfig(configPath)` accepts only the path shape whose final component is `config.toml` and whose parent directory is `.ddocs`. It returns the directory above `.ddocs`; arbitrary config files do not acquire an initialized repository root through this helper.
 
@@ -131,7 +131,7 @@ primary worktree: .ddocs/config.toml + objects + runtime
 linked worktree:  .ddocs/config.toml + fresh objects + runtime
 ```
 
-The configs initially match, but each worktree subsequently reads and mutates its own local config, object store, and demon runtime. `demon.New(location.Root)` therefore addresses the current worktree's `.ddocs/runtime/` rather than the primary worktree's runtime. The worktrees share Git history through Git itself; they do not share mutable Demon Docs state.
+The configs initially match, but each worktree subsequently reads and mutates its own local config, object store, and demon runtime. `demon.New(location.Root)` therefore addresses the current worktree's `.ddocs/runtime/` rather than the primary worktree's runtime. The worktrees share Git history through Git itself; they do not share mutable Archivist state.
 
 The application boundary makes the mutation distinction explicit. `demonLocation` calls ordinary `Discover` first. `ddocs demon run` and the internal `__enter` path allow `BootstrapLinkedWorktree`, because they can create local state. Read-only status and logs use detection without bootstrap. The detached `__serve` and feeder paths use the already selected location and do not independently bootstrap a worktree.
 
@@ -169,7 +169,7 @@ The demon reuses the normal watcher/reconciliation core. Repository scope select
 - An initialized repository is identified by `.ddocs/config.toml`, not by Git metadata.
 - Relative roots in initialized scopes cannot escape the repository lexically or through resolvable symlinks.
 - A standalone scope owns its resolved docs root and does not infer an enclosing initialized repository.
-- Read-only linked-worktree detection does not create or copy Demon Docs state.
+- Read-only linked-worktree detection does not create or copy Archivist state.
 - Only mutating demon entry points may bootstrap a linked worktree.
 - Each worktree owns its own `.ddocs` config, object storage, and demon runtime state.
 - Linked-worktree bootstrap copies config text but never primary runtime state or primary object contents.

@@ -175,11 +175,11 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 }
 func topHelp(w io.Writer) {
-	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, manages codemap sections, and projects codemap references onto code folders. Document schemas also enforce body structure and drive schema-based document creation.\n\npositional arguments:\n  {init,status,mv,new,format,schema,fix,check,watch,codemaps,suggestions,changes,config,index,links,demon}\n    init                initialize a Demon Docs repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    new                 create a document from its document-type schema\n    format              resolve document-body format conflicts\n    schema              install provided starter schemas\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemaps            generate, check, inspect, export, and benchmark codemaps\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -a, --all             all configured reconciliation systems\n  -d, --docs            indexes, frontmatter, and document-body format\n  --frontmatter         configured frontmatter only\n  --format              document-body format only\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         documentation indexes only\n\nUse selectors with check, fix, or watch.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs schema init\n  ddocs new service docs/services/new-service.md\n  ddocs check --frontmatter\n  ddocs fix --format\n  ddocs fix --all\n  ddocs format ignore --heading Appendix docs/guide.md\n  ddocs codemaps fix --root docs/architecture --dry-run\n  ddocs codemaps export\n  ddocs fix\n  ddocs check -r\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs check --help\n  ddocs demon --help\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
+	fmt.Fprintf(w, "%s\n\nddocs maintains documentation indexes and frontmatter, validates and repairs repository-local links, reports orphan documents, supports link-aware moves, manages codemap sections, and projects codemap references onto code folders. Document schemas also enforce body structure and drive schema-based document creation.\n\npositional arguments:\n  {init,status,mv,new,format,schema,fix,check,watch,codemaps,suggestions,changes,config,index,links,demon}\n    init                initialize an Archivist repository\n    status              show the detected repository and docs root\n    mv                  move a file or directory and rewrite affected links\n    new                 create a document from its document-type schema\n    format              resolve document-body format conflicts\n    schema              install provided starter schemas\n    fix                 reconcile selected systems and write updates\n    check               verify selected systems without writing\n    watch               reconcile selected systems and watch for changes\n    codemaps            generate, check, inspect, export, and benchmark codemaps\n    suggestions         inspect and decide unresolved repair suggestions\n    changes             inspect, undo, and block applied repairs\n    config              inspect config path selection and resolved config\n    index               enable or disable repository index management\n    links               enable or disable automatic link maintenance\n    demon               manage the repository-local self-managing watcher\n\nreconciliation selectors:\n  -a, --all             all configured reconciliation systems\n  -d, --docs            indexes, frontmatter, and document-body format\n  --frontmatter         configured frontmatter only\n  --format              document-body format only\n  -l, --links           repository-local Markdown links and orphan health\n  -r, --reverse         code-folder reverse indexes\n  -i, --indexes         documentation indexes only\n\nUse selectors with check, fix, or watch.\n\noptions:\n  -h, --help            show this help message and exit\n  -v, --version         show program's version number and exit\n\nExamples:\n  ddocs init --root docs\n  ddocs schema init\n  ddocs new service docs/services/new-service.md\n  ddocs check --frontmatter\n  ddocs fix --format\n  ddocs fix --all\n  ddocs format ignore --heading Appendix docs/guide.md\n  ddocs codemaps fix --root docs/architecture --dry-run\n  ddocs codemaps export\n  ddocs fix\n  ddocs check -r\n  ddocs mv --dry-run docs/old.md docs/new.md\n  ddocs check --help\n  ddocs demon --help\n  ddocs config paths\n  ddocs --version\n", topUsageLine)
 }
 
 func initHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs init [-h] --root PATH\n\nInitialize a Demon Docs repository in the current directory.\n\noptions:\n  -h, --help   show this help message and exit\n  --root PATH  docs root, relative to the repository root\n\nThe command creates .ddocs/config.toml. The current directory becomes the repository root, and the docs root must already exist inside it. New repository configs enable the self-managing watcher by default with [demon].run = true.")
+	fmt.Fprintln(w, "usage: ddocs init [-h] --root PATH\n\nInitialize an Archivist repository in the current directory.\n\noptions:\n  -h, --help   show this help message and exit\n  --root PATH  docs root, relative to the repository root\n\nThe command creates .ddocs/config.toml. The current directory becomes the repository root, and the docs root must already exist inside it. New repository configs enable the self-managing watcher by default with [demon].run = true.")
 }
 
 func runInit(args []string, out, errOut io.Writer) int {
@@ -238,7 +238,7 @@ func runInit(args []string, out, errOut io.Writer) int {
 }
 
 func statusHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: ddocs status [-h]\n\nShow the Demon Docs repository detected from the current directory. The report includes repository root, docs root, selected repository config, .docignore path, and whether the docs root and ignore file currently exist.\n\noptions:\n  -h, --help  show this help message and exit")
+	fmt.Fprintln(w, "usage: ddocs status [-h]\n\nShow the Archivist repository detected from the current directory. The report includes repository root, docs root, selected repository config, .docignore path, and whether the docs root and ignore file currently exist.\n\noptions:\n  -h, --help  show this help message and exit")
 }
 
 func runStatus(args []string, out, errOut io.Writer) int {
@@ -256,7 +256,7 @@ func runStatus(args []string, out, errOut io.Writer) int {
 	}
 	location, ok := repository.Discover(cwd)
 	if !ok {
-		fmt.Fprintln(errOut, "ddocs error: no Demon Docs repository found")
+		fmt.Fprintln(errOut, "ddocs error: no Archivist repository found")
 		return 2
 	}
 	resolved, err := config.Load(location.ConfigPath)
@@ -855,7 +855,7 @@ func runFeatureToggle(feature string, args []string, out, errOut io.Writer) int 
 	}
 	location, ok := repository.Discover(cwd)
 	if !ok {
-		fmt.Fprintln(errOut, "ddocs error: no Demon Docs repository found")
+		fmt.Fprintln(errOut, "ddocs error: no Archivist repository found")
 		return 2
 	}
 	resolved, err := config.Load(location.ConfigPath)

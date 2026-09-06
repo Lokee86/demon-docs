@@ -1,6 +1,6 @@
 # Astra Relay Documentation
 
-Astra Relay is a fictional space-operations platform used to demonstrate adopting Demon Docs in an existing documentation repository.
+Astra Relay is a fictional space-operations platform used to demonstrate adopting Archivist in an existing documentation repository.
 
 The authored material is useful, but its metadata, structure, navigation, and organization have drifted. This page lists the complete intentional starting condition so every tutorial result can be inspected manually.
 
@@ -10,7 +10,7 @@ The authored material is useful, but its metadata, structure, navigation, and or
 - The service documentation still lives under the legacy `docs/old-system` name, with generic filenames such as `api-notes.md` and `worker-notes.md`. The tutorial reorganizes this area without breaking its references.
 - The managed corpus contains 175 authored local link occurrences across Markdown links, wiki links, aliases, heading fragments, one reference-style link, an image link, and a wiki image embed. This is intentionally dense enough for the move and rename demonstrations to affect a real document graph.
 - Twenty-three of the twenty-eight managed Markdown documents already contain YAML frontmatter. Some are valid, while others contain missing or empty values, an invalid date, weak or duplicated IDs, and unknown fields. Five documents have no frontmatter at all.
-- `docs/private-notes/unstructured-notes.md` is intentionally excluded through `.docignore` and is not a Demon Docs problem.
+- `docs/private-notes/unstructured-notes.md` is intentionally excluded through `.docignore` and is not an Archivist problem.
 
 ## Link and relationship problems
 
@@ -55,4 +55,4 @@ The initialized tutorial policy requires YAML fields `document_id`, `author`, `d
 | `docs/notes/launch-retrospective.md` | Valid UUID; `author` and `summary` missing. | Sections out of order. |
 | `docs/stubs/future-integrations.md` | No frontmatter; all required fields missing. | `Purpose`, `Overview`, and `Notes` missing. |
 
-Demon Docs should report this starting condition, repair deterministic issues, and stop for the two authored structural decisions: preserving `Rollout Checklist` and merging the duplicate `Responsibilities` sections.
+Archivist should report this starting condition, repair deterministic issues, and stop for the two authored structural decisions: preserving `Rollout Checklist` and merging the duplicate `Responsibilities` sections.

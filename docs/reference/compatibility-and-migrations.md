@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-75d2-93b1-1542c56d90bf
 document_type: general
 policy_exempt: false
-summary: This document defines the current compatibility inputs, automatic migrations, and refusal behavior used when Demon Docs reads older configuration, managed indexes, codemap syntax, or link state.
+summary: This document defines the current compatibility inputs, automatic migrations, and refusal behavior used when Archivist reads older configuration, managed indexes, codemap syntax, or link state.
 ---
 # Compatibility and Migrations
 
@@ -12,11 +12,11 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines the current compatibility inputs, automatic migrations, and refusal behavior used when Demon Docs reads older configuration, managed indexes, codemap syntax, or link state.
+This document defines the current compatibility inputs, automatic migrations, and refusal behavior used when Archivist reads older configuration, managed indexes, codemap syntax, or link state.
 
 ## Overview
 
-Demon Docs accepts a bounded set of previous names and formats so repositories can upgrade without an all-at-once rewrite. Compatibility inputs are read into the current model. New files and examples should use current names.
+Archivist accepts a bounded set of previous names and formats so repositories can upgrade without an all-at-once rewrite. Compatibility inputs are read into the current model. New files and examples should use current names.
 
 Automatic migration is permitted only when the old format can be translated deterministically. Unsupported private-state schemas fail explicitly rather than being guessed.
 
@@ -98,7 +98,7 @@ Older link state may exist as:
 .ddocs/links.json
 ```
 
-When current object state is absent, Demon Docs can load both legacy manifests as one initialized link baseline. The next successful link-state publication writes current records into the private `.ddocs` object repository and removes the two legacy JSON files.
+When current object state is absent, Archivist can load both legacy manifests as one initialized link baseline. The next successful link-state publication writes current records into the private `.ddocs` object repository and removes the two legacy JSON files.
 
 Migration occurs through a normal successful state save, such as a link-enabled `fix` or watcher pass. A read-only `check` does not publish migrated state.
 
@@ -143,7 +143,7 @@ Deprecated names may remain supported without being preferred in new documentati
 
 ## Upgrade and downgrade behavior
 
-Demon Docs supports deterministic forward migrations described on this page. It does not promise that an older binary can read state written by a newer schema.
+Archivist supports deterministic forward migrations described on this page. It does not promise that an older binary can read state written by a newer schema.
 
 Before changing binary versions:
 
@@ -169,7 +169,7 @@ The correct response is to preserve evidence and diagnose the specific format. D
 
 ## Related docs
 
-- [Upgrading Demon Docs](../guides/upgrading.md)
+- [Upgrading Archivist](../guides/upgrading.md)
 - [Configuration Reference](configuration.md)
 - [Managed Files and State](managed-files-and-state.md)
 - [Repository State and Transactions](../architecture/repository-state-and-transactions.md)

@@ -22,7 +22,7 @@ Use `check --reverse` to preview required generated changes, `fix --reverse` to 
 
 ## Prerequisites
 
-- Demon Docs is initialized because this guide places reverse-index outputs in code roots outside the docs root; initialization establishes the wider repository boundary.
+- Archivist is initialized because this guide places reverse-index outputs in code roots outside the docs root; initialization establishes the wider repository boundary.
 - The configured documentation root exists.
 - At least one documentation page contains a configured codemap section with file, folder, or exact symbol targets.
 - The intended code roots are inside the repository and outside the documentation root.
@@ -84,7 +84,7 @@ ddocs fix --reverse
 ddocs check --reverse
 ```
 
-Review every created or changed code-folder index. Demon Docs owns only the `reverse-index` marker block. Existing prose outside that block should remain unchanged.
+Review every created or changed code-folder index. Archivist owns only the `reverse-index` marker block. Existing prose outside that block should remain unchanged.
 
 A generated block lists direct files and nests documentation backlinks below exact file targets. Folder-level documentation appears separately as folder documentation. When a uniquely resolved authored symbol target is backed by current matching Arcana/Lexicon state, its backlink is nested one level deeper beneath the backing file, for example:
 
@@ -164,7 +164,7 @@ Keep roots inside the repository, outside the docs root, outside permanently ign
 
 ### An index has incomplete markers
 
-Repair the marker pair manually after reviewing the file. Demon Docs will not guess which authored content belongs inside a damaged generated region.
+Repair the marker pair manually after reviewing the file. Archivist will not guess which authored content belongs inside a damaged generated region.
 
 ## Related docs
 

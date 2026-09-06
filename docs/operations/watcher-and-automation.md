@@ -16,7 +16,7 @@ This document describes foreground watch behavior, event scope, debounce and ser
 
 ## Overview
 
-Demon Docs exposes the same watcher through two operational surfaces:
+Archivist exposes the same watcher through two operational surfaces:
 
 - `ddocs watch` runs explicitly in the foreground;
 - the [Repository Demon](./repository-demon.md) manages a detached watcher while shells or agents are actively feeding it.
@@ -78,7 +78,7 @@ Generated Markdown rewrites record their expected content hash and affected link
 
 After scheduling, the selected reconciliation callback still runs to completion. Ordinary Markdown create and write events scope frontmatter and document-format validation to affected paths while untouched documents reuse clean cache entries. Link and folder-index work remains broader, and schema, directory, removal, rename, overflow, startup, or uncertain events may request a full validation pass. Completion logs include explicit `duration`, `scope`, and `paths` fields, so reconciliation time is distinguishable from debounce time.
 
-The current watcher is serviceable convenience automation for modest repositories and a correctness-first hackathon prototype. It is not yet a fully incremental low-latency daemon for large or continuously changing repositories. Lowering debounce alone does not address remaining link and index scope or follow-up work.
+The current watcher is serviceable convenience automation for modest repositories and remains correctness-first rather than fully optimized for low-latency operation. It is not yet a fully incremental low-latency daemon for large or continuously changing repositories. Lowering debounce alone does not address remaining link and index scope or follow-up work.
 
 Use explicit `ddocs mv` for planned refactors and retain `ddocs check` or `ddocs fix` as the authoritative verification and recovery step.
 

@@ -12,7 +12,7 @@ func TestEvaluateRepairsMissingSourcedFieldsButLeavesUnsourcedRequiredField(t *t
 	if !outcome.Changed {
 		t.Fatal("expected repair changes")
 	}
-	if outcome.Values["author"] != "Demon Docs" || outcome.Values["document_type"] != "general" || outcome.Values["created"] != "2026-07-20" {
+	if outcome.Values["author"] != "Archivist" || outcome.Values["document_type"] != "general" || outcome.Values["created"] != "2026-07-20" {
 		t.Fatalf("defaults not repaired: %#v", outcome.Values)
 	}
 	id, ok := outcome.Values["document_id"].(string)

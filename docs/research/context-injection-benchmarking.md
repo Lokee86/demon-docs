@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7e4a-a048-7d24a81a2014
 document_type: general
 policy_exempt: false
-summary: Historical context-injection benchmark design transferred from Demon Docs to the planned Grimoire Context tool.
+summary: Historical context-injection benchmark design transferred from Archivist to the planned Grimoire Context tool.
 ---
 # Context-Injection Benchmarking
 
@@ -16,11 +16,11 @@ This document preserves the historical-task research design for evaluating deter
 
 ## Overview
 
-Grimoire Context will need evidence that deterministic context bundles improve real agent work. Context delivery is outside Demon Docs, but historical corpus preparation artifacts, three pinned task fixtures, validation manifests, and fixture-preparation tools remain here as transferred research provenance. Paid or large-scale paired model trials remain deferred.
+Grimoire Context will need evidence that deterministic context bundles improve real agent work. Context delivery is outside Archivist, but historical corpus preparation artifacts, three pinned task fixtures, validation manifests, and fixture-preparation tools remain here as transferred research provenance. Paid or large-scale paired model trials remain deferred.
 
 ## Research status
 
-Transferred research design with retained discovery artifacts and validated historical-task fixtures. It does not describe shipped or planned Demon Docs behavior.
+Transferred research design with retained discovery artifacts and validated historical-task fixtures. It does not describe shipped or planned Archivist behavior.
 
 ## Benchmark framing
 

@@ -1,6 +1,6 @@
 # Contributors
 
-Demon Docs is designed and maintained by Brian Fernstrom.
+Archivist is designed and maintained by Brian Fernstrom.
 
 ## Project leadership
 

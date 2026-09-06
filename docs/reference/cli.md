@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-713c-b3c5-e35edf5c86f6
 document_type: general
 policy_exempt: false
-summary: This document summarizes the public Demon Docs command surface, subsystem selectors, mutation behavior, and command ownership.
+summary: This document summarizes the public Archivist command surface, subsystem selectors, mutation behavior, and command ownership.
 ---
 # CLI Reference
 
@@ -12,7 +12,7 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document summarizes the public Demon Docs command surface, subsystem selectors, mutation behavior, and command ownership.
+This document summarizes the public Archivist command surface, subsystem selectors, mutation behavior, and command ownership.
 
 ## Overview
 
@@ -46,7 +46,7 @@ Initialize when a stable repository-wide boundary, repository-local configuratio
 
 Optionally establishes an initialized repository boundary and writes repository-local configuration. The documentation root must already exist inside the repository. Core `check`, `fix`, `watch`, and `mv` behavior does not require this command.
 
-Mutation scope: repository-local Demon Docs configuration and state initialization.
+Mutation scope: repository-local Archivist configuration and state initialization.
 
 ### `ddocs status`
 
@@ -249,7 +249,7 @@ The evaluation commands and production CLI consume the same `internal/codemaprec
 
 ## Repository demon commands
 
-The same lifecycle is available through `demon ...` and `ddocs demon ...`. Running `demon` with no arguments or `demon --help` opens the repository-demon help page; `demon --version` reports the shared Demon Docs version.
+The same lifecycle is available through `demon ...` and `ddocs demon ...`. Running `demon` with no arguments or `demon --help` opens the repository-demon help page; `demon --version` reports the shared Archivist version.
 
 Primary operations include:
 

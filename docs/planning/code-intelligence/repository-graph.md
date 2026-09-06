@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7e16-a1e9-eb98628a66bf
 document_type: general
 policy_exempt: false
-summary: Historical normalized repository-graph design transferred from Demon Docs to ArcanaGraph.
+summary: Historical normalized repository-graph design transferred from Archivist to ArcanaGraph.
 ---
 # Transferred Polyglot Repository-Graph Design
 
@@ -12,7 +12,7 @@ Parent index: [Transferred Code-Intelligence Design](./INDEX.md)
 
 ## Purpose
 
-This document preserves the normalized repository-graph design that was transferred from Demon Docs to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
+This document preserves the normalized repository-graph design that was transferred from Archivist to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Overview
 
@@ -20,15 +20,15 @@ The design normalizes deterministic facts from existing parsers, compiler toolin
 
 ## Current status
 
-Transferred historical design. No general polyglot code graph is part of Demon Docs, and none is planned for its baseline reconciliation.
+Transferred historical design. No general polyglot code graph is part of Archivist, and none is planned for its baseline reconciliation.
 
 ## Expected ownership
 
 ArcanaGraph owns the language-neutral relationship model, provider contracts, node and edge semantics, provenance, resolution, invalidation, and graph projections. Language adapters remain outside the normalized graph model.
 
-This document is retained as design provenance. References below to a future Demon Docs graph or graph core are superseded by the ArcanaGraph product boundary. Demon Docs retains its focused Markdown/link model and authored documentation projections; exact symbol projections consume verified Arcana node facts without importing graph ownership.
+This document is retained as design provenance. References below to a future Archivist graph or graph core are superseded by the ArcanaGraph product boundary. Archivist retains its focused Markdown/link model and authored documentation projections; exact symbol projections consume verified Arcana node facts without importing graph ownership.
 
-Demon Docs already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
+Archivist already has a focused repository-local Markdown link graph. The future code graph must add definitions, references, calls, imports, implementations, containment, and other reproducible code relationships without replacing that working link model or rebuilding a general code-intelligence platform from scratch.
 
 ## Observed Layers
 
@@ -40,17 +40,17 @@ The graph keeps three observed layers distinct:
 
 A fact from one layer may be connected to a fact in another layer by an explicit or parser-observable relationship. The graph does not fill gaps between layers with semantic guesses. In particular, authored prose is not converted into a concept or code relationship merely because it sounds similar to a path, symbol, or heading.
 
-The documentation/link layer remains owned by existing Demon Docs scanners and state. Code facts arrive through a separate provider seam and are normalized before codemap inference or context projection consumes them.
+The documentation/link layer remains owned by existing Archivist scanners and state. Code facts arrive through a separate provider seam and are normalized before codemap inference or context projection consumes them.
 
 ## Polyglot Provider Boundary
 
-The provider adapter seam is the first required implementation step when this track resumes. A provider may wrap Tree-sitter analysis, compiler tooling, SCIP-style indexes, language servers, or an external code-intelligence product. The Demon Docs core must not depend on one provider's storage format or language-specific identities.
+The provider adapter seam is the first required implementation step when this track resumes. A provider may wrap Tree-sitter analysis, compiler tooling, SCIP-style indexes, language servers, or an external code-intelligence product. The Archivist core must not depend on one provider's storage format or language-specific identities.
 
 Each provider reports a capability manifest and a deterministic snapshot containing normalized nodes, edges, diagnostics, provenance, language identity, tool version, repository-relative paths, and source locations. Unsupported or unresolved relationship families remain explicit rather than being treated as negative facts.
 
 The seam must exist before the first language implementation. A Go-only graph wired directly into core packages would make later Ruby, GDScript, Python, TypeScript, or other support unnecessarily expensive and would not satisfy the intended product scope.
 
-Demon Docs should reuse existing deterministic analyzers where practical. It should not implement another parser platform, compiler front end, general call-graph service, or graph database merely to obtain provider facts.
+Archivist should reuse existing deterministic analyzers where practical. It should not implement another parser platform, compiler front end, general call-graph service, or graph database merely to obtain provider facts.
 
 ## Node Types
 

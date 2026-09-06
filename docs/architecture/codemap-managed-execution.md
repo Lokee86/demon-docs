@@ -32,7 +32,7 @@ configured repository and docs root
 -> codemap semantic-baseline publication when available
 ```
 
-The codemap is one artifact. Demon Docs does not maintain separate authored and generated lists after adoption. Existing links, newly discovered links, explanatory prose inside the section, and the codemap-specific markers belong to one managed section lifecycle.
+The codemap is one artifact. Archivist does not maintain separate authored and generated lists after adoption. Existing links, newly discovered links, explanatory prose inside the section, and the codemap-specific markers belong to one managed section lifecycle.
 
 The default policy is additive and conservative. Existing valid links remain even when the current algorithm does not rediscover them or ranks them below the permanent-link threshold. Removal based on confidence requires explicit repository configuration.
 
@@ -158,7 +158,7 @@ Heading recognition is Markdown-aware:
 - the matching section ends at the next heading of the same or higher level; and
 - exactly one matching section is allowed in a document.
 
-Multiple configured codemap sections are an error. Demon Docs does not guess which one should become canonical.
+Multiple configured codemap sections are an error. Archivist does not guess which one should become canonical.
 
 An existing matching section is processed regardless of whether a future file-type schema would require a codemap for that file.
 
@@ -279,7 +279,7 @@ The managed marker pair is derived from `[markers].prefix`:
 
 The exact prefix is configurable.
 
-On the first successful reconciliation of an existing section, Demon Docs:
+On the first successful reconciliation of an existing section, Archivist:
 
 1. locates the complete section body;
 2. validates any existing codemap marker pair;
@@ -290,11 +290,11 @@ On the first successful reconciliation of an existing section, Demon Docs:
 7. wraps the entire resulting body in one codemap marker pair; and
 8. leaves the section heading outside the marker pair.
 
-A prior partial layout where human-authored links sat outside a smaller generated block is unified into one managed body. Demon Docs does not retain provenance classes inside the section.
+A prior partial layout where human-authored links sat outside a smaller generated block is unified into one managed body. Archivist does not retain provenance classes inside the section.
 
 Existing prose inside the codemap section is also retained inside the managed region. This is intentional complete-section ownership, not ownership of link lines only.
 
-Malformed or duplicated codemap markers fail the operation. Demon Docs does not repair an ambiguous ownership boundary by guessing.
+Malformed or duplicated codemap markers fail the operation. Archivist does not repair an ambiguous ownership boundary by guessing.
 
 ## Rendering and source preservation
 
@@ -380,7 +380,7 @@ The transaction layer:
 - rereads and verifies the expected new digest; and
 - attempts guarded rollback if a later file fails.
 
-A file changed after planning causes failure rather than overwrite. Rollback is also hash-guarded so it does not erase content created after Demon Docs' attempted write.
+A file changed after planning causes failure rather than overwrite. Rollback is also hash-guarded so it does not erase content created after Archivist's attempted write.
 
 After the authored-file transaction succeeds, `codemaprun.Apply` publishes planned codemap semantic baselines through the existing `.ddocs` object repository under `refs/ddocs/state`. Persisted decline policy remains read-only during `fix`.
 

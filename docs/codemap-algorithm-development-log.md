@@ -8,7 +8,7 @@ summary: This document is the durable chronological record of the codemap missin
 ---
 # Codemap Algorithm Development Log
 
-Parent index: [Demon Docs Documentation](./INDEX.md)
+Parent index: [Archivist Documentation](./INDEX.md)
 
 ## Purpose
 
@@ -249,7 +249,7 @@ Space Rocks remained unchanged at:
 
 ### Phase 11: Production policy and authored-provenance repair
 
-August 27 dogfooding against Demon Docs exposed that the retained research tiers had been connected to a broader mutation policy than their labels justified. `context` recommendations were being written as permanent links, and resolved glob members were flattened into ordinary existing-file seeds. An authored pattern such as `internal/app/codemap_*.go` could therefore fan out through siblings, dependencies, related documents, and Git history.
+August 27 dogfooding against Archivist exposed that the retained research tiers had been connected to a broader mutation policy than their labels justified. `context` recommendations were being written as permanent links, and resolved glob members were flattened into ordinary existing-file seeds. An authored pattern such as `internal/app/codemap_*.go` could therefore fan out through siblings, dependencies, related documents, and Git history.
 
 The production repair separated these concerns:
 
@@ -261,21 +261,21 @@ The production repair separated these concerns:
 - only explicitly authored resolved files seed sibling, dependency, test-counterpart, and target-history expansion; and
 - basename-only patterns constrain inferred non-matching siblings in their literal parent directory unless the current document supplies direct path, basename, or symbol evidence.
 
-The immediate Demon Docs self-test on `docs/architecture/codemap-pipeline.md` moved from 30 would-be additions before the repair, to five hard-link additions after the mutation-policy split, to zero permanent additions after provenance and scope-boundary preservation. Context candidates remain visible for later ranking work.
+The immediate Archivist self-test on `docs/architecture/codemap-pipeline.md` moved from 30 would-be additions before the repair, to five hard-link additions after the mutation-policy split, to zero permanent additions after provenance and scope-boundary preservation. Context candidates remain visible for later ranking work.
 
 The older precision and recovery numbers above are retained as historical baselines. They have not yet been regenerated against the repaired production algorithm and must not be presented as post-repair measurements.
 
 ### Phase 12: Code-intelligence provider boundary
 
-The next step separated repository semantics from Demon Docs' local language parsers without changing ranking policy. `internal/codemapcorpus` now exposes a narrow `CodeIntelligenceProvider` contract that returns repository-local dependency and declared-symbol facts. The existing shallow parsers are wrapped as the default local provider rather than being hard-wired into corpus construction.
+The next step separated repository semantics from Archivist's local language parsers without changing ranking policy. `internal/codemapcorpus` now exposes a narrow `CodeIntelligenceProvider` contract that returns repository-local dependency and declared-symbol facts. The existing shallow parsers are wrapped as the default local provider rather than being hard-wired into corpus construction.
 
 The corpus retains ownership of trust and determinism at the boundary: provider paths are validated against the current repository-file inventory, malformed or out-of-scope paths fail construction, facts are normalized/deduplicated/sorted before publication, and provider failures are not silently mixed with fallback results. `BuildContext` propagates caller cancellation through production, benchmark, and precision paths; the older `Build` entry point remains as a background-context compatibility wrapper.
 
-No Arcana or Lexicon transport was added in this phase. The purpose of the seam is to make that integration replace the semantic fact source later without moving evidence scoring, review policy, codemap coverage, or mutation authority out of Demon Docs.
+No Arcana or Lexicon transport was added in this phase. The purpose of the seam is to make that integration replace the semantic fact source later without moving evidence scoring, review policy, codemap coverage, or mutation authority out of Archivist.
 
 ### Phase 13: Pinned Arcana file and symbol resolution
 
-The next phase wired authored target resolution to Arcana without yet consuming Arcana relationship edges. Demon Docs now speaks the `arcana.query.v1` JSONL protocol through `resolve_file` and `resolve_symbol`, retaining Arcana's durable external node identity and source span when a target resolves uniquely.
+The next phase wired authored target resolution to Arcana without yet consuming Arcana relationship edges. Archivist now speaks the `arcana.query.v1` JSONL protocol through `resolve_file` and `resolve_symbol`, retaining Arcana's durable external node identity and source span when a target resolves uniquely.
 
 Trust is deliberately narrower than snapshot existence. `.arcana/CURRENT` must equal `.lexicon/CURRENT`; the Arcana snapshot must name that Lexicon snapshot; and the content-addressed Lexicon manifest must verify against its published ID. Path-qualified queries additionally require the current source SHA-256 to equal the Lexicon manifest content ID. Standalone/global symbol resolution requires a clean repository at the Git head recorded when Lexicon state was prepared. Stale or unavailable semantic state therefore degrades to the pre-existing `symbol_unverified` or `unsupported` outcomes instead of being treated as current truth.
 
@@ -291,7 +291,7 @@ Only currently visible exact file targets and Step 4-verified symbol targets see
 
 Expansion is deliberately bounded: at most 128 relation-capable nodes per seed and 128 neighbors per node/direction. A truncated seed neighborhood is discarded rather than partially trusted. Returned relationships become a distinct `semantic_relationship` evidence kind with weight 3. They can surface and rank context recommendations, but they do not qualify a `hard_link` and their score is excluded from numeric hard-link thresholds.
 
-Live dogfooding used a freshly prepared matching Lexicon/Arcana snapshot for Demon Docs. `codemap-pipeline.md` still produced zero additions/removals. On `codemap-extraction-and-dataset.md`, Arcana emitted real call/implements relationship evidence and changed context scores/order, while the automatic hard-link set remained exactly the same five files as the fallback run. This is a mutation-isolation check, not a precision claim.
+Live dogfooding used a freshly prepared matching Lexicon/Arcana snapshot for Archivist. `codemap-pipeline.md` still produced zero additions/removals. On `codemap-extraction-and-dataset.md`, Arcana emitted real call/implements relationship evidence and changed context scores/order, while the automatic hard-link set remained exactly the same five files as the fallback run. This is a mutation-isolation check, not a precision claim.
 
 ### Phase 15: Deterministic candidate roles
 
@@ -319,7 +319,7 @@ Hard-link qualification predicates and numeric thresholds were retained, but all
 
 Focused synthetic coverage pins both sides of the policy: same-band role/directory candidates can survive a crowded cutoff, while lower score bands cannot displace stronger-band candidates.
 
-Live Demon Docs dogfooding against a freshly rebuilt matching Lexicon/Arcana snapshot showed the intended hard-link redistribution on `docs/architecture/codemap-extraction-and-dataset.md`. Before the selection rewrite, its five hard links were four `verification_test` candidates plus one `primary_implementation`. After the rewrite, the five slots were two verification candidates, one primary implementation, and two supporting implementations. `docs/architecture/codemap-pipeline.md` still produced zero additions and zero removals. This is a behavioral/convergence check, not a precision claim. Fresh cross-corpus precision and recall measurement remains deferred to the final benchmark/tuning phase.
+Live Archivist dogfooding against a freshly rebuilt matching Lexicon/Arcana snapshot showed the intended hard-link redistribution on `docs/architecture/codemap-extraction-and-dataset.md`. Before the selection rewrite, its five hard links were four `verification_test` candidates plus one `primary_implementation`. After the rewrite, the five slots were two verification candidates, one primary implementation, and two supporting implementations. `docs/architecture/codemap-pipeline.md` still produced zero additions and zero removals. This is a behavioral/convergence check, not a precision claim. Fresh cross-corpus precision and recall measurement remains deferred to the final benchmark/tuning phase.
 
 ### Phase 17: Semantic staleness from Arcana snapshot diffs
 

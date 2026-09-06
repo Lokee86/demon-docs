@@ -4,13 +4,13 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7ce6-aed3-79734c26ecc7
 document_type: general
 policy_exempt: false
-summary: Historical repository-graph, dependency, and symbol-intelligence design transferred from Demon Docs to ArcanaGraph.
+summary: Historical repository-graph, dependency, and symbol-intelligence design transferred from Archivist to ArcanaGraph.
 ---
 # Transferred Code-Intelligence Design
 
 Parent index: [Planning](../INDEX.md)
 
-Historical repository-graph, dependency, and symbol-intelligence design transferred from Demon Docs to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
+Historical repository-graph, dependency, and symbol-intelligence design transferred from Archivist to [ArcanaGraph](https://github.com/Lokee86/arcana-graph).
 
 ## Direct Files
 
@@ -33,4 +33,4 @@ Historical repository-graph, dependency, and symbol-intelligence design transfer
 
 ## Notes
 
-These pages preserve design provenance from before ArcanaGraph became a separate tool. They do not describe planned Demon Docs behavior. Current graph implementation and sequencing belong in the ArcanaGraph repository.
+These pages preserve design provenance from before ArcanaGraph became a separate tool. They do not describe planned Archivist behavior. Current graph implementation and sequencing belong in the ArcanaGraph repository.

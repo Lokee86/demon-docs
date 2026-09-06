@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-71c0-9170-576569cd158c
 document_type: general
 policy_exempt: false
-summary: This document explains which filesystem locations Demon Docs observes, how watch scope changes while a process is running, how ignore-policy and external-target updates affect observation, and how to recover from watch-scope failures.
+summary: This document explains which filesystem locations Archivist observes, how watch scope changes while a process is running, how ignore-policy and external-target updates affect observation, and how to recover from watch-scope failures.
 ---
 # Dynamic Watch Scope
 
@@ -12,11 +12,11 @@ Parent index: [Operations](./INDEX.md)
 
 ## Purpose
 
-This document explains which filesystem locations Demon Docs observes, how watch scope changes while a process is running, how ignore-policy and external-target updates affect observation, and how to recover from watch-scope failures.
+This document explains which filesystem locations Archivist observes, how watch scope changes while a process is running, how ignore-policy and external-target updates affect observation, and how to recover from watch-scope failures.
 
 ## Overview
 
-Demon Docs computes watch scope from the selected features rather than watching every reachable filesystem path.
+Archivist computes watch scope from the selected features rather than watching every reachable filesystem path.
 
 Documentation-index, frontmatter, and document-format watch modes are bounded to the documentation root. Document-format selection also observes the configured shared and document-specific schema directories. Link-enabled watch observes the repository root because changes to non-Markdown local targets can require Markdown link repair. Reverse-index watch observes configured code roots and the ancestor directories needed to discover new scope folders. Explicit external link targets may add bounded watches outside the repository at their nearest existing parent directories.
 
@@ -74,7 +74,7 @@ Reverse-index relevance is bounded to:
 
 ### Mixed base and reverse watch
 
-When reverse indexes are selected together with forward indexes or links, Demon Docs runs the base watcher and reverse-index watcher concurrently.
+When reverse indexes are selected together with forward indexes or links, Archivist runs the base watcher and reverse-index watcher concurrently.
 
 Their observer scopes remain separate. Their mutation-capable reconciliation callbacks share one run lock so they do not apply repository changes concurrently.
 
@@ -95,7 +95,7 @@ After the initial run succeeds, it:
 
 The separate repository-root watch lets a docs-root watcher observe repository-owned control files such as `.docignore` even when the docs root is a subdirectory.
 
-If any required directory cannot be added, startup fails. Demon Docs does not silently continue with incomplete observation.
+If any required directory cannot be added, startup fails. Archivist does not silently continue with incomplete observation.
 
 ## Recursive directory admission
 
@@ -169,7 +169,7 @@ They are configuration-driven process state. Changing the configuration file doe
 
 Link reconciliation can track explicit targets outside the repository boundary.
 
-After each successful link reconciliation, Demon Docs derives the current set of external records from the link files manifest. For each external path, it finds the nearest existing directory at or above the target's parent.
+After each successful link reconciliation, Archivist derives the current set of external records from the link files manifest. For each external path, it finds the nearest existing directory at or above the target's parent.
 
 The resulting directory list is:
 
@@ -235,7 +235,7 @@ Ignore policy and configured watch filters are applied after suppression handlin
 
 ## Observer errors
 
-Demon Docs treats observer errors as operational failures.
+Archivist treats observer errors as operational failures.
 
 Examples include:
 

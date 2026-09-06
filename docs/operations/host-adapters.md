@@ -22,7 +22,7 @@ External hosts integrate through three public CLI commands:
 acquire -> heartbeat -> release
 ```
 
-The host owns process lifecycle and token handling. Demon Docs owns repository discovery, feeder files, single-owner coordination, watcher startup or recovery, expiry, shutdown grace, and repository-local logs.
+The host owns process lifecycle and token handling. Archivist owns repository discovery, feeder files, single-owner coordination, watcher startup or recovery, expiry, shutdown grace, and repository-local logs.
 
 This interface keeps host-specific code outside the static reconciliation core. It does not deliver agent context, inspect prompts, or make the repository demon part of `check` and `fix` correctness.
 
@@ -139,7 +139,7 @@ demon run --true PATH
 
 ### Repository not found
 
-The command fails when the path is outside an initialized repository and is not a linked worktree whose primary worktree has an initialized Demon Docs repository.
+The command fails when the path is outside an initialized repository and is not a linked worktree whose primary worktree has an initialized Archivist repository.
 
 ### Invalid or expired token
 
@@ -200,4 +200,4 @@ go test ./internal/demon ./internal/app -count=1
 
 ## Notes
 
-The feeder protocol is lifecycle plumbing only. Deterministic task-context delivery belongs to the planned Grimoire Context sibling tool and must not be inferred from a running Demon Docs agent feeder.
+The feeder protocol is lifecycle plumbing only. Deterministic task-context delivery belongs to the planned Grimoire Context sibling tool and must not be inferred from a running Archivist agent feeder.

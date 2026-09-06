@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7b52-aa6e-731e59030442
 document_type: general
 policy_exempt: false
-summary: This document records current Demon Docs limitations that materially affect adoption, diagnostics, or feature expectations.
+summary: This document records current Archivist limitations that materially affect adoption, diagnostics, or feature expectations.
 ---
 # Current Product Limitations
 
@@ -12,7 +12,7 @@ Parent index: [Limits](./INDEX.md)
 
 ## Purpose
 
-This document records current Demon Docs limitations that materially affect adoption, diagnostics, or feature expectations.
+This document records current Archivist limitations that materially affect adoption, diagnostics, or feature expectations.
 
 ## Overview
 
@@ -20,7 +20,7 @@ These entries describe incomplete or deliberately narrow current surfaces. They 
 
 ## Initial link state has no historical move evidence
 
-The first link-enabled mutating pass records the current repository baseline. It cannot infer where a currently broken target lived before Demon Docs began tracking identity.
+The first link-enabled mutating pass records the current repository baseline. It cannot infer where a currently broken target lived before Archivist began tracking identity.
 
 Impact:
 
@@ -66,7 +66,7 @@ The reachability contract may gain explicit reviewed exemptions or richer diagno
 
 ## Link checking is local, not network reachability validation
 
-Demon Docs recognizes repository-local and supported filesystem targets. It does not fetch HTTP, HTTPS, mail, or other external destinations to test availability.
+Archivist recognizes repository-local and supported filesystem targets. It does not fetch HTTP, HTTPS, mail, or other external destinations to test availability.
 
 Impact:
 
@@ -89,7 +89,7 @@ A separately scoped, opt-in network checker is implemented without entering dete
 
 ## Reverse indexes project authored targets, not graph relationships
 
-Reverse indexes now project authored file and folder targets plus uniquely verified exact symbol targets. Arcana owns declaration identity, parsing, and repository graph relationships; Demon Docs consumes only the verified semantic node attached to an authored codemap target.
+Reverse indexes now project authored file and folder targets plus uniquely verified exact symbol targets. Arcana owns declaration identity, parsing, and repository graph relationships; Archivist consumes only the verified semantic node attached to an authored codemap target.
 
 Impact:
 
@@ -111,7 +111,7 @@ Owning docs:
 
 Boundary:
 
-[ArcanaGraph](https://github.com/Lokee86/arcana-graph) continues to own language-independent repository relationships and symbol identity. Demon Docs owns only the authored-document projection: raw Arcana relationships never create reverse backlinks.
+[ArcanaGraph](https://github.com/Lokee86/arcana-graph) continues to own language-independent repository relationships and symbol identity. Archivist owns only the authored-document projection: raw Arcana relationships never create reverse backlinks.
 
 ## Codemap generation quality is corpus-dependent
 
@@ -123,7 +123,7 @@ Impact:
 - Arcana-backed file/symbol target resolution, bounded one-hop semantic relationship evidence, and mapped-node semantic staleness are wired when current matching Arcana/Lexicon state is available; semantic staleness also requires a previously accepted baseline and retained prior Arcana snapshot, while repository-wide dependency/symbol facts still default to the built-in shallow local provider and the new role/directory coverage policy has not yet been rebenchmarked across the frozen corpora;
 - a repository may receive plausible but unnecessary `context` links;
 - new repository populations need independent labels;
-- self-authored Demon Docs codemaps are not an independent benchmark; and
+- self-authored Archivist codemaps are not an independent benchmark; and
 - low-quality or sparse code maps reduce useful supervision.
 
 Workaround:
@@ -141,20 +141,20 @@ Removal condition:
 
 This limitation cannot be fully removed; it can be narrowed by broader validated corpora, calibrated tiers, repository-specific evaluation, and improved evidence providers.
 
-## Agent context delivery is outside Demon Docs
+## Agent context delivery is outside Archivist
 
 The repository demon exposes lifecycle feeders for agents, but it does not build or deliver task-context bundles. Context discovery, selection, packaging, and delivery are owned by the planned **Grimoire Context** sibling tool.
 
 Impact:
 
-- an active `agent` feeder only keeps Demon Docs watcher automation alive;
+- an active `agent` feeder only keeps Archivist watcher automation alive;
 - host adapters receive no context payload from the demon;
-- Demon Docs has no context request or delivery command contract; and
+- Archivist has no context request or delivery command contract; and
 - codemap `hard_link` suggestions remain permanent documentation-link candidates; `context` suggestions are non-mutating analysis/review output, not temporary task-context delivery.
 
 Operational guidance:
 
-Use the feeder protocol only for lifecycle integration. Context-producing hosts or sibling tools should use an explicit integration contract rather than extending the Demon Docs daemon into a context service.
+Use the feeder protocol only for lifecycle integration. Context-producing hosts or sibling tools should use an explicit integration contract rather than extending the Archivist daemon into a context service.
 
 Owning docs:
 
@@ -164,7 +164,7 @@ Owning docs:
 
 Boundary:
 
-This is not a missing Demon Docs feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
+This is not a missing Archivist feature. Grimoire Context owns the context product boundary, while Warlock owns cross-tool integration direction.
 
 ## Machine-readable diagnostics cover reconciliation, not precondition failures
 
@@ -192,7 +192,7 @@ A future contract explicitly defines machine-readable command/precondition failu
 
 ## Symlink entries are not owned traversal trees
 
-Demon Docs does not traverse symbolic-link entries as repository-owned documentation or code trees and rejects symbolic-link move sources.
+Archivist does not traverse symbolic-link entries as repository-owned documentation or code trees and rejects symbolic-link move sources.
 
 Impact:
 

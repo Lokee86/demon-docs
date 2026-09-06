@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-2e95-734f-a812-8f4c708fb696
 document_type: general
 policy_exempt: false
-summary: This document defines how Demon Docs publishes one planned batch of generated Markdown rewrites across authored source files, the append-only review ledger, refreshed link metadata, and private link state.
+summary: This document defines how Archivist publishes one planned batch of generated Markdown rewrites across authored source files, the append-only review ledger, refreshed link metadata, and private link state.
 ---
 # Generated Rewrite Publication
 
@@ -12,11 +12,11 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document defines how Demon Docs publishes one planned batch of generated Markdown rewrites across authored source files, the append-only review ledger, refreshed link metadata, and private link state.
+This document defines how Archivist publishes one planned batch of generated Markdown rewrites across authored source files, the append-only review ledger, refreshed link metadata, and private link state.
 
 ## Overview
 
-A generated rewrite is a complete before-and-after byte transition for one Markdown source. It carries expected hashes and exact transformations so Demon Docs can reject stale plans rather than reinterpreting current content during application.
+A generated rewrite is a complete before-and-after byte transition for one Markdown source. It carries expected hashes and exact transformations so Archivist can reject stale plans rather than reinterpreting current content during application.
 
 Publication spans three physically separate surfaces:
 
@@ -171,7 +171,7 @@ Worker completion order does not affect result order. Preflight results remain i
 
 After the complete batch passes, sources are processed in plan order.
 
-Immediately before each replacement, Demon Docs repeats that source's stat, regular-file, read, and expected-old-hash checks. This closes the interval between the parallel batch preflight and the actual write.
+Immediately before each replacement, Archivist repeats that source's stat, regular-file, read, and expected-old-hash checks. This closes the interval between the parallel batch preflight and the actual write.
 
 The source mode is retained. Replacement then uses:
 
@@ -189,7 +189,7 @@ A watcher suppression is constructed only after the new hash verifies. Suppressi
 
 ## Filesystem failure and rollback
 
-If the second preflight, replacement, read-back, or new-hash verification fails, Demon Docs attempts to roll back every attempted source in reverse order.
+If the second preflight, replacement, read-back, or new-hash verification fails, Archivist attempts to roll back every attempted source in reverse order.
 
 For each attempted source, current bytes are classified as:
 
@@ -224,7 +224,7 @@ When another process changes the review reference concurrently, the store rebuil
 
 ### Review publication failure
 
-If append fails, Demon Docs immediately calls `RollbackGenerated` for the authored source batch.
+If append fails, Archivist immediately calls `RollbackGenerated` for the authored source batch.
 
 - Successful rollback leaves authored files in their recorded old state and the review reference unchanged.
 - Failed or refused rollback returns both errors. Some source files may remain in generated state, and no new review events are visible.
@@ -241,7 +241,7 @@ This ordering means a failed review append cannot leave durable suppressions for
 
 ## Generated-source refresh
 
-Demon Docs re-reads every generated source and parses its current link occurrences. Refresh verifies that each stored outgoing link can be found in ordinal order with its expected current target text.
+Archivist re-reads every generated source and parses its current link occurrences. Refresh verifies that each stored outgoing link can be found in ordinal order with its expected current target text.
 
 Detached worker results contain:
 

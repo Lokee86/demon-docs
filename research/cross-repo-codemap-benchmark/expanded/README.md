@@ -42,7 +42,7 @@ Lemonade hides four links per seed. Seepient hides five. The smaller repositorie
 
 Every recovered relationship remained `context` tier. Arcana therefore increased discovery without increasing automatic `hard_link` insertion in this expanded sample.
 
-The Demon Docs self-map was also used as the convergence fixture. Its first dry-run proposed `added=0 removed=0` and only needed managed-section ownership adoption. After applying that ownership-only change, the second dry-run reported `0 file(s)` to update. This pins the expected mature-map behavior: no semantic expansion and full idempotence after adoption.
+The Archivist self-map was also used as the convergence fixture. Its first dry-run proposed `added=0 removed=0` and only needed managed-section ownership adoption. After applying that ownership-only change, the second dry-run reported `0 file(s)` to update. This pins the expected mature-map behavior: no semantic expansion and full idempotence after adoption.
 
 ## Interpretation limits
 
@@ -55,7 +55,7 @@ The retained Space Rocks and frozen cross-repository manual-review corpora remai
 - `candidates.json` — repository definitions and extraction conventions.
 - `discovery.json` — pinned discovery metadata and unresolved examples.
 - `corpus/` — normalized authored document-to-code pairs.
-- `datasets/` — Demon Docs benchmark datasets.
+- `datasets/` — Archivist benchmark datasets.
 - `evaluation.json` — exact multi-seed aggregates, Arcana snapshot IDs, and diagnostic results.
 
 Ignored `checkouts/` and temporary per-seed reports are not retained. The pinned revisions and datasets are sufficient to recreate the benchmark inputs.

@@ -434,7 +434,7 @@ validate and encode every request
 -> advance reference once with compare-and-swap
 ```
 
-Each commit is authored locally as `Demon Docs <ddocs@local>`. The batch preserves request order, individual event IDs, per-file change IDs, exact before/after snapshots, and run grouping. `History` returns those entries newest-first as individual `StoredEvent` values, so existing CLI and undo behavior remains event-addressable.
+Each commit is authored locally as `Archivist <ddocs@local>`. The batch preserves request order, individual event IDs, per-file change IDs, exact before/after snapshots, and run grouping. `History` returns those entries newest-first as individual `StoredEvent` values, so existing CLI and undo behavior remains event-addressable.
 
 A failed preflight publishes no visible event. A compare-and-swap conflict leaves one unreachable batch commit, retries from the current head, and does not expose a partial batch.
 

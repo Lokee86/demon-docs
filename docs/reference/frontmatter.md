@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7aa1-a158-b3f4ab6b4003
 document_type: general
 policy_exempt: false
-summary: Demon Docs can validate and repair a configurable front matter schema for every non-ignored Markdown document under the configured documentation root. Generated folder indexes are included; generated files are not silently exempted from...
+summary: Archivist can validate and repair a configurable front matter schema for every non-ignored Markdown document under the configured documentation root. Generated folder indexes are included; generated files are not silently exempted from...
 ---
 # Front Matter Schemas
 
@@ -12,7 +12,7 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines the configurable frontmatter formats, field schema, repair sources, immutable-value behavior, and diagnostics used by Demon Docs.
+This document defines the configurable frontmatter formats, field schema, repair sources, immutable-value behavior, and diagnostics used by Archivist.
 
 ## Overview
 
@@ -44,7 +44,7 @@ policy_exempt = false
 +++
 ```
 
-YAML is the default generated format. Existing TOML or YAML blocks retain their current format during repair. Demon Docs never converts a document between formats automatically.
+YAML is the default generated format. Existing TOML or YAML blocks retain their current format during repair. Archivist never converts a document between formats automatically.
 
 Front matter must be the first block in the file. Malformed blocks, duplicate keys, unsupported formats, and multiple leading blocks are errors.
 
@@ -105,11 +105,11 @@ equals = true
 require = "policy_exempt_reason"
 ```
 
-Projects may replace this schema. No document type, status system, team model, or project-specific policy is hard-coded into Demon Docs.
+Projects may replace this schema. No document type, status system, team model, or project-specific policy is hard-coded into Archivist.
 
 When document-body format enforcement is enabled and `document_type` is missing, frontmatter repair resolves the configured format path rules and then `default_schema`, and writes that selected schema name. Existing non-empty `document_type` metadata remains authoritative. This keeps generated indexes and path-classified planning or service documents from being stamped with the generic frontmatter default before body-format enforcement runs.
 
-Generated folder indexes are Demon Docs-owned files. When such an index lacks required `author` or `summary` values and those fields have no configured source, repair uses `TODO` for the author and `Generated documentation folder index.` for the summary. A configured literal default or non-empty `default_author` takes precedence. These generated-index defaults apply whenever frontmatter enforcement is selected; they do not depend on document-body format enforcement being enabled.
+Generated folder indexes are Archivist-owned files. When such an index lacks required `author` or `summary` values and those fields have no configured source, repair uses `TODO` for the author and `Generated documentation folder index.` for the summary. A configured literal default or non-empty `default_author` takes precedence. These generated-index defaults apply whenever frontmatter enforcement is selected; they do not depend on document-body format enforcement being enabled.
 
 ## Field definitions
 
@@ -173,7 +173,7 @@ ddocs watch --docs
 - adds missing configured defaults and generated values;
 - removes unknown fields only when configured for `remove`;
 - preserves existing valid mutable values;
-- restores immutable values from recorded Demon Docs state when possible;
+- restores immutable values from recorded Archivist state when possible;
 - replaces an invalid immutable value only when a recorded or generated replacement exists;
 - resolves duplicate generated `document_id` values by preserving the recorded owner, or the lexicographically first path when no owner is recorded, and assigning new UUIDs to the other documents; and
 - leaves invalid mutable values unresolved for the author to correct.
@@ -188,7 +188,7 @@ Document IDs provide a stable identity seam used by link inventory and reconcili
 
 ## Rendering guarantees and limits
 
-Demon Docs preserves the Markdown body and original line-ending style. When a front matter block must be rewritten, fields are rendered deterministically. Comments and original key ordering inside the block are not preserved.
+Archivist preserves the Markdown body and original line-ending style. When a front matter block must be rewritten, fields are rendered deterministically. Comments and original key ordering inside the block are not preserved.
 
 Type-specific document policy selected through `document_type` belongs to the separate document-body format operation in the shared document-policy system. See [Document Schemas And Format Enforcement](document-schemas.md).
 

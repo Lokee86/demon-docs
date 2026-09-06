@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Until Demon Docs reaches a stable `1.0` release, security fixes are applied to the latest published release and the current `main` branch. Older releases may not receive backported fixes.
+Until Archivist reaches a stable `1.0` release, security fixes are applied to the latest published release and the current `main` branch. Older releases may not receive backported fixes.
 
 | Version | Supported |
 | --- | --- |
@@ -18,7 +18,7 @@ Use GitHub's private vulnerability reporting feature from the repository's **Sec
 
 A useful report includes:
 
-- the affected Demon Docs version or commit;
+- the affected Archivist version or commit;
 - the operating system and relevant filesystem details;
 - the smallest reproducible repository or fixture;
 - exact reproduction steps;
@@ -30,7 +30,7 @@ Reports will be reviewed as soon as practical. Confirmed vulnerabilities will be
 
 ## Relevant security areas
 
-Demon Docs reads, moves, and rewrites repository files and maintains private state under `.ddocs/`. Reports are particularly relevant when they involve:
+Archivist reads, moves, and rewrites repository files and maintains private state under `.ddocs/`. Reports are particularly relevant when they involve:
 
 - repository-boundary or path-traversal escapes;
 - unintended file modification or deletion;

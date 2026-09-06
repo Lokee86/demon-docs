@@ -2,7 +2,7 @@
 
 ## Current source license
 
-Beginning with the commit after `pre-shield-2026-08-28`, original Demon Docs source code and documentation are offered under the [PolyForm Shield License 1.0.0](LICENSE.md).
+Beginning with the commit after `pre-shield-2026-08-28`, original Archivist source code and documentation are offered under the [PolyForm Shield License 1.0.0](LICENSE.md).
 
 Required Notice: Copyright 2026 Brian Fernstrom (https://github.com/Lokee86)
 

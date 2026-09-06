@@ -16,7 +16,7 @@ This guide exports authored codemap data, runs deterministic missing-link holdou
 
 ## Overview
 
-Demon Docs has three related codemap workflows:
+Archivist has three related codemap workflows:
 
 ```text
 production generation

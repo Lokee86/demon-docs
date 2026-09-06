@@ -191,8 +191,8 @@ func (s *Store) writeReviewBatchCommit(prepared []preparedAppend, payload []byte
 	}
 	when := prepared[len(prepared)-1].event.Time
 	commit := object.Commit{
-		Author:    object.Signature{Name: "Demon Docs", Email: "ddocs@local", When: when},
-		Committer: object.Signature{Name: "Demon Docs", Email: "ddocs@local", When: when},
+		Author:    object.Signature{Name: "Archivist", Email: "ddocs@local", When: when},
+		Committer: object.Signature{Name: "Archivist", Email: "ddocs@local", When: when},
 		Message:   reviewBatchMessage(prepared),
 		TreeHash:  treeHash,
 	}

@@ -59,11 +59,11 @@ Check:
 - `.docignore`; and
 - whether authored text was placed inside managed markers.
 
-Demon Docs reconciles managed blocks back to the configured filesystem model. Put hand-authored guidance outside markers.
+Archivist reconciles managed blocks back to the configured filesystem model. Put hand-authored guidance outside markers.
 
 ## Unexpected link rewrites
 
-Review the exact source diff. Demon Docs should change only the target path portion of a recognized link.
+Review the exact source diff. Archivist should change only the target path portion of a recognized link.
 
 Check persistent identity/history and whether the destination was uniquely determined. If the label, title, alias, fragment, query, prose, or unrelated content changed, preserve the failing input and treat it as a bug rather than accepting the write.
 
@@ -86,7 +86,7 @@ When stale private records and one live file share the same `document_id`, curre
 
 ## First-pass link limitations
 
-Without prior identity state, Demon Docs cannot know where a target used to live. The first link-enabled mutating pass establishes a baseline.
+Without prior identity state, Archivist cannot know where a target used to live. The first link-enabled mutating pass establishes a baseline.
 
 Repair current broken links manually before relying on later move reconciliation.
 
@@ -134,11 +134,11 @@ Likely differences include:
 
 ## Validation cache and private-object maintenance
 
-Validation-cache records are optimization state. A content, policy, schema, immutable-state, duplicate-identity, or validation-engine change invalidates reuse automatically. Deleting only the cache records after all Demon Docs processes stop is safe, but normally unnecessary; the next pass simply reparses the affected documents.
+Validation-cache records are optimization state. A content, policy, schema, immutable-state, duplicate-identity, or validation-engine change invalidates reuse automatically. Deleting only the cache records after all Archivist processes stop is safe, but normally unnecessary; the next pass simply reparses the affected documents.
 
 Automatic private-object compaction is disabled. Builds that enabled it could corrupt `.ddocs` when the daemon repacked while another CLI process read the same object store. Errors such as `packfile not found`, `object not found`, or a state/reference hash whose object cannot be loaded require stopping the daemon and preserving the damaged `.ddocs` directory before rebuilding private state. Do not delete `config.toml` or authored schemas when only the private Git metadata is damaged.
 
-An error from the project's normal `.git` maintenance is separate from Demon Docs' private `.ddocs` maintenance. Diagnose the path named in the message before deleting or repairing either repository.
+An error from the project's normal `.git` maintenance is separate from Archivist's private `.ddocs` maintenance. Diagnose the path named in the message before deleting or repairing either repository.
 
 ## Repository demon stops during a move burst
 

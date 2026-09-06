@@ -203,6 +203,6 @@ jobs:
           else
             gh release create "${TAG}" dist/* \
               --target "${GITHUB_SHA}" \
-              --title "Demon Docs ${VERSION}" \
+              --title "Archivist ${VERSION}" \
               --generate-notes
           fi

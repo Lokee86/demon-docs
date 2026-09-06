@@ -16,7 +16,7 @@ This document describes the implemented documentation-tree scan and forward-inde
 
 ## Overview
 
-Demon Docs keeps folder indexes in a predictable shape by scanning the managed tree, matching current files and folders to existing generated entries, and planning the smallest repository-contained update set.
+Archivist keeps folder indexes in a predictable shape by scanning the managed tree, matching current files and folders to existing generated entries, and planning the smallest repository-contained update set.
 
 The byte-level transformation and newline-preservation boundary is owned separately by [Managed Markdown Transformation](managed-markdown-transformation.md). Repository-local link reconciliation is owned by [Markdown Link Reconciliation](markdown-link-reconciliation.md).
 
@@ -69,7 +69,7 @@ Application is unchanged: selected updates are applied serially with expected-ol
 
 The scanner starts from the configured managed root and builds a tree of folders.
 
-- The managed root is the folder Demon Docs owns, such as `docs/` by default.
+- The managed root is the folder Archivist owns, such as `docs/` by default.
 - Normal folders are folders that can have their own index file.
 - Draft folders, also called stub folders in the implementation, are the configured draft folder name such as `stubs/` by default.
 - Direct files are indexed files that live directly inside a normal folder.
@@ -77,11 +77,11 @@ The scanner starts from the configured managed root and builds a tree of folders
 - Direct folders are child folders of a normal folder, excluding the draft folder itself.
 - Draft folders do not get their own index file.
 
-The scan model is descriptive only. It records what exists on disk and where Demon Docs should look for managed content.
+The scan model is descriptive only. It records what exists on disk and where Archivist should look for managed content.
 
 ## Folder Index Behavior
 
-Demon Docs treats configured folder index files as structured documents with managed sections. The exact structural recognition, migration, bounded replacement, parent-line editing, and byte-preservation rules are documented in [Managed Markdown Transformation](managed-markdown-transformation.md).
+Archivist treats configured folder index files as structured documents with managed sections. The exact structural recognition, migration, bounded replacement, parent-line editing, and byte-preservation rules are documented in [Managed Markdown Transformation](managed-markdown-transformation.md).
 
 - Managed blocks are wrapped in HTML comment markers.
 - The managed sections are Direct Files, Stub Files, and Direct Folders.
@@ -91,13 +91,13 @@ Demon Docs treats configured folder index files as structured documents with man
 - Folder index files get `Parent index` links by default.
 - Indexed files do not get `Parent index` links unless `indexed_files = true` is set.
 
-If a README already has the expected managed sections, Demon Docs updates only the content inside those managed blocks.
+If a README already has the expected managed sections, Archivist updates only the content inside those managed blocks.
 
 Goldmark determines which headings and HTML comments are Markdown structure. Heading- and marker-like text inside fenced code blocks is code content and is never treated as a managed section. Parent-link-shaped lines inside fenced code are likewise examples rather than editable parent links. This is an intentional compatibility correction: fenced examples are not treated as real headings or managed sections.
 
 ## Missing README Creation
 
-During reconciliation, Demon Docs creates missing index files where they belong.
+During reconciliation, Archivist creates missing index files where they belong.
 
 - Normal folders get an index file if one is missing.
 - The root folder gets an index file if one is missing.
@@ -107,7 +107,7 @@ The generated folder-index template includes the managed sections so reconciliat
 
 ## Parent Index Behavior
 
-Demon Docs maintains parent index lines according to the configured parent-link toggles.
+Archivist maintains parent index lines according to the configured parent-link toggles.
 
 - The root index file has no parent index line.
 - Child folder index files point to the parent folder using `../<index file>`.
@@ -130,7 +130,7 @@ Reconciliation prefers to preserve stable, existing index content when the targe
 - Unambiguous cross-folder file and folder moves preserve descriptions.
 - Stale entries are removed from managed blocks and reported as reconciliation messages.
 
-This preservation is intentionally narrow. Demon Docs matches by the current filesystem model and existing managed entries; it does not try to guess every historical rename pattern.
+This preservation is intentionally narrow. Archivist matches by the current filesystem model and existing managed entries; it does not try to guess every historical rename pattern.
 
 ## Preparation performance
 
@@ -174,7 +174,7 @@ Documentation policy, documentation indexes, Markdown links, and code-folder rev
 
 ## Safety Boundaries
 
-Demon Docs is a reconciliation tool, not a semantic documentation author.
+Archivist is a reconciliation tool, not a semantic documentation author.
 
 - It does not decide which folder should own a topic.
 - It rewrites only the resolved filesystem path portion of recognized local links.

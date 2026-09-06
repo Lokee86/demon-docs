@@ -28,7 +28,7 @@ ongoing body policy
 
 Frontmatter enforcement and body-format enforcement remain separate operations. `--docs` runs folder indexes, frontmatter, and body format together. `--frontmatter` and `--format` run the two policy operations independently.
 
-Demon Docs does not rewrite prose to force a schema match. Deterministic structure changes are applied automatically; unknown or duplicate human-authored sections require an explicit decision when the schema policy is `manual`.
+Archivist does not rewrite prose to force a schema match. Deterministic structure changes are applied automatically; unknown or duplicate human-authored sections require an explicit decision when the schema policy is `manual`.
 
 ## Prerequisites
 
@@ -98,7 +98,7 @@ heading = "Responsibilities"
 placeholder = "- TODO"
 ```
 
-Treat section `id` as stable. Rename a heading by changing `heading` while retaining the same `id`; this lets Demon Docs migrate the heading without inferring intent from prose.
+Treat section `id` as stable. Rename a heading by changing `heading` while retaining the same `id`; this lets Archivist migrate the heading without inferring intent from prose.
 
 Before broad use, validate the schema against one representative document:
 
@@ -171,7 +171,7 @@ When a useful human-authored section is not part of the shared schema, preserve 
 ddocs format ignore --heading "Appendix" docs/guide.md
 ```
 
-Demon Docs creates or updates:
+Archivist creates or updates:
 
 ```text
 .ddocs/document-schemas/<document-id>.toml
@@ -194,7 +194,7 @@ Merge duplicate sibling sections when both bodies should remain:
 ddocs format merge --heading "Notes" docs/guide.md
 ```
 
-Merge preserves discovery order. Exact list-item deduplication occurs only when both complete sections are compatible lists of the same category; Demon Docs does not perform fuzzy prose merging.
+Merge preserves discovery order. Exact list-item deduplication occurs only when both complete sections are compatible lists of the same category; Archivist does not perform fuzzy prose merging.
 
 Delete one explicit occurrence when it should not remain:
 
@@ -226,7 +226,7 @@ When the repository demon or foreground watcher is enabled, the same selected po
 
 ## Schema changes and existing exceptions
 
-Demon Docs stores canonical shared-schema snapshots for migration. Stable one-to-one heading renames preserve section bodies.
+Archivist stores canonical shared-schema snapshots for migration. Stable one-to-one heading renames preserve section bodies.
 
 Document-specific exceptions remember the shared-schema fingerprint under which they were accepted. Similarity is measured cumulatively against that accepted snapshot. When it falls below `[format].invalidation_similarity`, the exception is invalidated so stale local decisions are not silently applied to a materially different shared schema.
 
@@ -244,7 +244,7 @@ Review invalidation diagnostics and recreate only the exceptions that remain app
 
 A shared or document-specific schema can declare a required codemap section. Explicit `ddocs codemaps` execution may create that missing section at the schema-defined location.
 
-Heading configuration recognizes existing codemap sections; it does not authorize Demon Docs to invent a missing section. A schema with no required codemap section leaves the document unchanged.
+Heading configuration recognizes existing codemap sections; it does not authorize Archivist to invent a missing section. A schema with no required codemap section leaves the document unchanged.
 
 Use [Managing Codemaps](managing-codemaps.md) for the separate inspect, dry-run, fix, and check workflow.
 
@@ -252,7 +252,7 @@ Use [Managing Codemaps](managing-codemaps.md) for the separate inspect, dry-run,
 
 ### The named schema does not exist
 
-Confirm the `document_type`, configured schema directory, and available `.toml` files. Demon Docs does not fall back from an explicit missing metadata schema.
+Confirm the `document_type`, configured schema directory, and available `.toml` files. Archivist does not fall back from an explicit missing metadata schema.
 
 ### Fix reports an unknown section
 
@@ -269,7 +269,7 @@ Use `format merge`, `format delete`, or a deliberate duplicate allowance. Do not
 
 ### Frontmatter remains unresolved after fix
 
-The field may be mutable but invalid, required without a configured source, or blocked by schema policy. Correct the authored value or add an explicit safe source; Demon Docs preserves existing valid mutable values and does not guess replacements.
+The field may be mutable but invalid, required without a configured source, or blocked by schema policy. Correct the authored value or add an explicit safe source; Archivist preserves existing valid mutable values and does not guess replacements.
 
 ### A document-specific exception was invalidated
 
@@ -277,7 +277,7 @@ Review the changed shared schema and the generated exception file. Reapply only 
 
 ### A file changes during publication
 
-Demon Docs refuses the stale plan. Review the concurrent edit, then rerun check and fix. Guarded rollback will not overwrite content created after Demon Docs' own write.
+Archivist refuses the stale plan. Review the concurrent edit, then rerun check and fix. Guarded rollback will not overwrite content created after Archivist's own write.
 
 ## Related docs
 

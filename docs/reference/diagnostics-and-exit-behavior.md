@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-798b-bde2-333a82ea7a83
 document_type: general
 policy_exempt: false
-summary: This document describes the behavioral contract for Demon Docs diagnostics, unresolved conditions, mutation refusal, and command success or failure.
+summary: This document describes the behavioral contract for Archivist diagnostics, unresolved conditions, mutation refusal, and command success or failure.
 ---
 # Diagnostics and Exit Behavior
 
@@ -12,11 +12,11 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document describes the behavioral contract for Demon Docs diagnostics, unresolved conditions, mutation refusal, and command success or failure.
+This document describes the behavioral contract for Archivist diagnostics, unresolved conditions, mutation refusal, and command success or failure.
 
 ## Overview
 
-Demon Docs prefers explicit unresolved states over guesses. Diagnostics identify pending deterministic work, invalid configuration, broken or ambiguous references, missing baselines, coverage gaps, and runtime ownership problems. Output wording may evolve, but the safety behavior must remain stable.
+Archivist prefers explicit unresolved states over guesses. Diagnostics identify pending deterministic work, invalid configuration, broken or ambiguous references, missing baselines, coverage gaps, and runtime ownership problems. Output wording may evolve, but the safety behavior must remain stable.
 
 ## Diagnostic classes
 
@@ -54,7 +54,7 @@ The source remains unchanged. User selection is required.
 
 ### Missing baseline
 
-A stateful subsystem lacks the persisted baseline needed to infer history safely. This is not equivalent to an uninitialized Demon Docs repository.
+A stateful subsystem lacks the persisted baseline needed to infer history safely. This is not equivalent to an uninitialized Archivist repository.
 
 The first link-enabled mutating pass records current state rather than pretending to know earlier moves. It can do so in standalone or initialized mode.
 
@@ -62,7 +62,7 @@ The first link-enabled mutating pass records current state rather than pretendin
 
 A normal managed Markdown document has no meaningful inbound link. Index files, draft documents, self-links, and inbound links originating from indexes or drafts do not satisfy the health check.
 
-`check` reports `message: Orphan document: PATH` and returns non-zero. No automatic fix is attempted because Demon Docs does not decide which canonical document should own the relationship.
+`check` reports `message: Orphan document: PATH` and returns non-zero. No automatic fix is attempted because Archivist does not decide which canonical document should own the relationship.
 
 ### Stale review decision or repair block
 
@@ -90,7 +90,7 @@ The codemap commands consult the selected effective document schema. If it requi
 
 A document contains more than one heading matching the active configured codemap heading set.
 
-Planning fails. Demon Docs does not choose one section or merge them automatically.
+Planning fails. Archivist does not choose one section or merge them automatically.
 
 ### Malformed codemap ownership markers
 
@@ -169,7 +169,7 @@ Machine-readable output is not implied unless a command explicitly documents suc
 
 ## Failure safety
 
-Demon Docs should fail without broad mutation when:
+Archivist should fail without broad mutation when:
 
 - configuration, the selected frontmatter schema, or the effective document schema cannot be validated safely;
 - a root escapes repository scope;

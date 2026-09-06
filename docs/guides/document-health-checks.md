@@ -74,7 +74,7 @@ merge its useful content into an owning document and delete it
 remove an obsolete document
 ```
 
-Demon Docs does not select the owning document automatically.
+Archivist does not select the owning document automatically.
 
 After the authored change:
 

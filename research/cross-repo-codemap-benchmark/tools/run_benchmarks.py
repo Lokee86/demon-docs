@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the frozen Demon Docs algorithm against prepared cross-repo datasets."""
+"""Run the frozen Archivist algorithm against prepared cross-repo datasets."""
 
 from __future__ import annotations
 

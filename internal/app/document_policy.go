@@ -204,7 +204,7 @@ func runSchema(args []string, out, errOut io.Writer) int {
 	}
 	location, ok := repository.Discover(cwd)
 	if !ok {
-		fmt.Fprintln(errOut, "ddocs error: no Demon Docs repository found")
+		fmt.Fprintln(errOut, "ddocs error: no Archivist repository found")
 		return 2
 	}
 	cfg, err := configForLocation(location.ConfigPath)

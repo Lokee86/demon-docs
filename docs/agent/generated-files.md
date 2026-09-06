@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 8f7b7799-630e-4538-a33b-973fe8a4b4fe
 document_type: general
 policy_exempt: false
-summary: This document tells agents how to handle Demon Docs managed regions, generated artifacts, and private state safely.
+summary: This document tells agents how to handle Archivist managed regions, generated artifacts, and private state safely.
 ---
 # Generated Files and Managed State
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document tells agents how to handle Demon Docs managed regions, generated artifacts, and private state safely.
+This document tells agents how to handle Archivist managed regions, generated artifacts, and private state safely.
 
 ## Overview
 

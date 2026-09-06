@@ -16,7 +16,7 @@ This document defines the implemented `.ddocs` object repository, record namespa
 
 ## Overview
 
-Demon Docs stores durable reconciliation state in a private bare Git object database rooted at `.ddocs/`.
+Archivist stores durable reconciliation state in a private bare Git object database rooted at `.ddocs/`.
 
 The object repository is a small transactional key/value layer built on Git blobs, trees, and one state reference:
 
@@ -70,7 +70,7 @@ Callers must decode their own record formats and decide whether missing, incompa
 
 ## Physical layout
 
-An initialized Demon Docs repository contains a bare Git repository at `.ddocs/`.
+An initialized Archivist repository contains a bare Git repository at `.ddocs/`.
 
 The durable state reference is:
 
@@ -148,7 +148,7 @@ single-process callers. It uses go-git `RepackObjects`, walks every private
 reference, prunes only unreachable loose objects, and reindexes the active
 storer after pack replacement.
 
-Normal Demon Docs constructors disable compaction by using zero thresholds.
+Normal Archivist constructors disable compaction by using zero thresholds.
 The repository demon and CLI are separate processes, while the current write
 gate is process-local. Without a cross-process lock covering both readers and
 writers, one process can remove or replace a packfile while another process is
@@ -430,7 +430,7 @@ The repository mutex serializes operations performed through one `Repository` ha
 It does not prevent:
 
 - another `Repository` handle in the same process;
-- another Demon Docs process; or
+- another Archivist process; or
 - a direct writer to the same Git storage
 
 from attempting state publication.
@@ -621,4 +621,4 @@ Separate private-state owners:
 
 ## Notes
 
-The use of Git objects is an internal storage mechanism. Demon Docs does not expose the root tree or shard blobs as a public editing interface, and users should not repair records by modifying object data manually.
+The use of Git objects is an internal storage mechanism. Archivist does not expose the root tree or shard blobs as a public editing interface, and users should not repair records by modifying object data manually.

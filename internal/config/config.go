@@ -565,7 +565,7 @@ func Discover(start string) string {
 }
 
 // DiscoverWithin searches legacy local configs upward without crossing an
-// initialized Demon Docs repository boundary.
+// initialized Archivist repository boundary.
 func DiscoverWithin(start, boundary string) string {
 	p, err := filepath.Abs(start)
 	if err != nil {

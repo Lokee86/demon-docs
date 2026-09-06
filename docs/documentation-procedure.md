@@ -4,15 +4,15 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7a47-8394-a30cf61f95f4
 document_type: general
 policy_exempt: false
-summary: This document defines the standard process for creating, updating, moving, graduating, and removing Demon Docs documentation.
+summary: This document defines the standard process for creating, updating, moving, graduating, and removing Archivist documentation.
 ---
 # Documentation Procedure
 
-Parent index: [Demon Docs Documentation](./INDEX.md)
+Parent index: [Archivist Documentation](./INDEX.md)
 
 ## Purpose
 
-This document defines the standard process for creating, updating, moving, graduating, and removing Demon Docs documentation.
+This document defines the standard process for creating, updating, moving, graduating, and removing Archivist documentation.
 
 ## Overview
 
@@ -262,7 +262,7 @@ Run the project documentation checks and normal test gate after structural chang
 ## Related docs
 
 - [Documentation Policy](documentation-policy.md)
-- [Demon Docs Documentation](INDEX.md)
+- [Archivist Documentation](INDEX.md)
 - [Testing and Fixtures](development/testing-and-fixtures.md)
 - [Behavioral Contract Matrix](development/behavioral-contract-matrix.md)
 - [Safe Extension Procedures](development/safe-extension-procedures.md)

@@ -16,7 +16,7 @@ This document defines the implemented watcher scheduling, debounce, single-run o
 
 ## Overview
 
-Demon Docs watchers separate filesystem observation from reconciliation execution.
+Archivist watchers separate filesystem observation from reconciliation execution.
 
 Filesystem events do not run reconciliation directly. They mark work as pending. A scheduler waits for the debounce window, grants one run at a time, clears the current pending batch, and invokes the selected reconciliation function. Events that arrive while a reconciliation is running accumulate as new pending work and cause a later follow-up run.
 
@@ -285,7 +285,7 @@ This protects output integrity only. It does not establish run ordering; the sha
 
 ## Self-write convergence
 
-Link application can generate filesystem events for Markdown files that Demon Docs just rewrote.
+Link application can generate filesystem events for Markdown files that Archivist just rewrote.
 
 Before normal event relevance processing, the link-enabled watcher asks the link subsystem to consume a pending suppression for the event path.
 

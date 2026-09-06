@@ -1,6 +1,6 @@
-# Demon Docs Self-Corpus Development Benchmark
+# Archivist Self-Corpus Development Benchmark
 
-This note records a development-only codemap holdout run against Demon Docs' own refreshed documentation. It is not an independent precision benchmark: the project authors control both the documentation links and the algorithm under evaluation.
+This note records a development-only codemap holdout run against Archivist's own refreshed documentation. It is not an independent precision benchmark: the project authors control both the documentation links and the algorithm under evaluation.
 
 ## Corpus
 
@@ -44,7 +44,7 @@ That is a negative directional result for this development corpus. Before mergin
 
 ## Reproduction
 
-From an initialized Demon Docs worktree containing the refreshed documentation:
+From an initialized Archivist worktree containing the refreshed documentation:
 
 ```bash
 ddocs codemap export --output .cache/docs-refresh-codemap.json

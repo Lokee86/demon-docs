@@ -11,7 +11,7 @@ target_dir="$target_parent/$(basename -- "$requested_target")"
 
 case "$target_dir" in
   "$repo_root"|"$repo_root"/*)
-    printf 'ERROR: refusing to create the disposable demo inside the Demon Docs checkout.\n' >&2
+    printf 'ERROR: refusing to create the disposable demo inside the Archivist checkout.\n' >&2
     printf 'Tracked source fixture: %s\n' "$source_dir" >&2
     printf 'Requested target:       %s\n' "$target_dir" >&2
     printf 'Use the default sibling target or another directory outside %s.\n' "$repo_root" >&2
@@ -33,5 +33,5 @@ cp -a -- "$source_dir/." "$target_dir/"
 
 printf '\nDemo workspace ready.\n'
 printf 'Open this directory as the Obsidian vault: %s\n' "$target_dir"
-printf 'Do NOT open the tracked fixture under the Demon Docs checkout.\n'
+printf 'Do NOT open the tracked fixture under the Archivist checkout.\n'
 printf 'Next: cd "%s" && ddocs init --root docs\n' "$target_dir"

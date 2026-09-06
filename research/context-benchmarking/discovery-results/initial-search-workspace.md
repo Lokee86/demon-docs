@@ -1,4 +1,4 @@
-# Demon Docs Benchmark Search
+# Archivist Benchmark Search
 
 This workspace discovers open-source repositories suitable for evaluating deterministic context injection.
 

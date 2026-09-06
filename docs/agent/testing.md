@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 3b4f8d66-b4d2-4c86-b478-dd844c1fe101
 document_type: general
 policy_exempt: false
-summary: This document owns concise testing and verification guidance for agents working on Demon Docs.
+summary: This document owns concise testing and verification guidance for agents working on Archivist.
 ---
 # Agent Testing Rules
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document owns concise testing and verification guidance for agents working on Demon Docs.
+This document owns concise testing and verification guidance for agents working on Archivist.
 
 ## Overview
 

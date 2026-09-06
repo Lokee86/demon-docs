@@ -4,21 +4,21 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7366-a679-359c693253d2
 document_type: general
 policy_exempt: false
-summary: Demon Docs maintenance status and the earmarked Archivist Rust successor direction.
+summary: Archivist maintenance status and the earmarked Archivist Rust successor direction.
 ---
-# Demon Docs Roadmap
+# Archivist Roadmap
 
 Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
-Record the small set of active Demon Docs priorities. Shipped behavior belongs in architecture, reference, operations, guides, and limitations documents rather than being duplicated here.
+Record the small set of active Archivist priorities. Shipped behavior belongs in architecture, reference, operations, guides, and limitations documents rather than being duplicated here.
 
 ## Overview
 
-Demon Docs is a deterministic documentation-maintenance engine. This roadmap is limited to work that strengthens links, indexes, schemas, authored codemaps, reverse indexes, review history, and watcher automation.
+Archivist is a deterministic documentation-maintenance engine. This roadmap is limited to work that strengthens links, indexes, schemas, authored codemaps, reverse indexes, review history, and watcher automation.
 
-Repository graph intelligence belongs to ArcanaGraph. Context discovery and delivery belong to Grimoire Context. Neither is unfinished Demon Docs work.
+Repository graph intelligence belongs to ArcanaGraph. Context discovery and delivery belong to Grimoire Context. Neither is unfinished Archivist work.
 
 ## Current status
 
@@ -36,7 +36,7 @@ The latest tagged release is `v0.3.5`. Exact behavior is documented outside this
 
 ## Ownership boundary
 
-Demon Docs owns deterministic maintenance of repository-owned Markdown and explicit managed surfaces. It may exchange versioned facts with sibling Warlock tools without absorbing their implementation responsibilities.
+Archivist owns deterministic maintenance of repository-owned Markdown and explicit managed surfaces. It may exchange versioned facts with sibling Warlock tools without absorbing their implementation responsibilities.
 
 It does not own polyglot repository graphs, declaration discovery/identity generation, dependencies, impact analysis, agent context delivery, or autonomous prose generation. It may consume verified symbol facts from Arcana for explicit authored targets without absorbing that ownership.
 
@@ -46,20 +46,22 @@ Canonical product details live in [Architecture](../architecture/INDEX.md), [Ref
 
 ## Active Work
 
-No release-blocking Demon Docs hardening item is currently scheduled. New work on the Go implementation should be driven by reproduced defects, measured bottlenecks, or a deliberately expanded supported platform surface.
+No release-blocking Archivist hardening item is currently scheduled. New work on the Go implementation should be driven by reproduced defects, measured bottlenecks, or a deliberately expanded supported platform surface.
 
 ## Earmarked Successor Direction
 
-The next major product iteration is earmarked as a translation rather than continued expansion of the Go codebase:
+The public product name is now **Archivist**. The current implementation remains the maintained Go reference implementation, and the existing `ddocs` and `demon` commands remain the shipped CLI surfaces until the planned successor migration reaches parity.
 
-- **Product name:** `Archivist` replaces `Demon Docs` when the successor migration begins.
+The next major implementation iteration is earmarked as a translation rather than continued expansion of the Go codebase:
+
+- **Product name:** `Archivist` is already the public brand and remains unchanged through the migration.
 - **Implementation language:** Rust.
-- **Public executable:** `scribe` replaces both current executables, `ddocs` and `demon`.
-- **CLI ownership:** daemon/watcher lifecycle remains part of the same product, but is exposed beneath the single `scribe` command surface rather than through a second executable.
+- **Public executable:** `scribe` will replace both current executables, `ddocs` and `demon`, once the Rust successor reaches behavioral parity.
+- **CLI ownership:** daemon/watcher lifecycle remains part of the same product, but will be exposed beneath the single `scribe` command surface rather than through a second executable.
 - **Migration posture:** the current Go implementation remains the maintained reference implementation until the Rust successor reaches behavioral parity.
 - **Parity rule:** preserve existing deterministic behavior, ownership boundaries, diagnostics, fixtures, review semantics, corpus evidence, and release contracts before using the rewrite to change architecture or behavior.
 
-The exact Rust crate layout, repository transition, compatibility aliases, state-format migration, and command-tree spelling are deliberately deferred until migration planning begins. Current shipped documentation should continue to describe `Demon Docs`, `ddocs`, and `demon` until that transition is implemented.
+The exact Rust crate layout, repository transition, compatibility aliases, state-format migration, and command-tree spelling are deliberately deferred until migration planning begins. Current shipped documentation should describe the product as Archivist while accurately documenting the still-current `ddocs` and `demon` commands.
 
 A required Archivist capability is **repository-local documentation policy enforcement** so product repositories do not need bespoke validation scripts such as Warlock's `scripts/check_docs.py`. Archivist should own deterministic Markdown parsing and diagnostics while a repository-owned policy/config declares constraints such as:
 
@@ -83,7 +85,7 @@ Shared immutable source snapshots should be introduced only where measurements s
 - **Grimoire Context** owns bounded context discovery, selection, packaging, provenance, truncation, and delivery.
 - The [Warlock Toolchain](https://github.com/Lokee86/warlock-toolchain) owns shared terminology, cross-tool contracts, and integration direction.
 
-The retained [code-intelligence](./code-intelligence/INDEX.md), [agent-context](./agent-context-and-integrations.md), and [context-benchmark](../research/context-injection-benchmarking.md) pages are historical design provenance, not active Demon Docs commitments.
+The retained [code-intelligence](./code-intelligence/INDEX.md), [agent-context](./agent-context-and-integrations.md), and [context-benchmark](../research/context-injection-benchmarking.md) pages are historical design provenance, not active Archivist commitments.
 
 ## Optional LLM Assistance
 
@@ -102,7 +104,7 @@ Optional LLM assistance may propose changes from deterministic evidence, but it 
 
 ## Explicit Non-Goals
 
-- General repository graph or symbol intelligence inside Demon Docs.
+- General repository graph or symbol intelligence inside Archivist.
 - Agent context assembly or delivery through the repository demon.
 - Required network, LLM, language-server, or external-indexer dependencies.
 - Automatic semantic prose rewriting.

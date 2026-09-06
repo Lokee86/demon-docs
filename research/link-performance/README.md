@@ -6,7 +6,7 @@ This directory records the historical Markdown-link performance results referenc
 
 - Date: July 19, 2026
 - Host: Windows development machine
-- Repository: Demon Docs
+- Repository: Archivist
 - Parallel rewrite implementation: commit `12856e3a65a96528c2da2e2304aa30cc420c1824`
 - Pre-parallel phase-timing implementation: commit `38228b5e25446f4e7cd112e9e0acee0c848f559a`
 - Rewrite worker count: 16

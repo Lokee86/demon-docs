@@ -4,19 +4,19 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7a71-8fff-be364ee93444
 document_type: general
 policy_exempt: false
-summary: This document defines Demon Docs configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
+summary: This document defines Archivist configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
 ---
-# Demon Docs Configuration
+# Archivist Configuration
 
 Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines Demon Docs configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
+This document defines Archivist configuration selection, defaults, supported keys, repository scope behavior, ignore rules, and complete configuration examples.
 
 ## Overview
 
-Demon Docs is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Go CLI fixture regression matrix.
+Archivist is configured with TOML. The primary config model lives in `internal/config/config.go` and is exercised by Go package tests and the Go CLI fixture regression matrix.
 
 CLI help is available with `ddocs --help`, and each subcommand also supports `--help`.
 Top-level version output is available with `ddocs -v` or `ddocs --version`.
@@ -128,7 +128,7 @@ ddocs links status
 
 Disabling `[index].enabled` suspends folder-index creation, insertion, repair, and index-specific tracking. Existing index files are not ignored or given special treatment. They remain ordinary document files and can still participate in link scanning, codemap extraction, and other document behavior.
 
-Disabling `[links].enabled` suspends automatic link rewrites and user-visible link diagnostics. Demon Docs continues updating its private file identities, path history, and link graph in `.ddocs/`. Re-enabling link maintenance therefore resumes from retained state instead of rebuilding tracking from scratch.
+Disabling `[links].enabled` suspends automatic link rewrites and user-visible link diagnostics. Archivist continues updating its private file identities, path history, and link graph in `.ddocs/`. Re-enabling link maintenance therefore resumes from retained state instead of rebuilding tracking from scratch.
 
 Selectors do not override a disabled repository feature. For example, `ddocs fix -d` does not create indexes while indexing is disabled, and `ddocs fix -l` refreshes internal link state without rewriting documents while link maintenance is disabled. Configured frontmatter remains a separate docs-selected subsystem, so `-d` may still validate or repair frontmatter when indexing is disabled.
 
@@ -179,7 +179,7 @@ required = true
 default = "general"
 ```
 
-`default`, `default_from`, and `generated` are mutually exclusive. The only current `default_from` source is `frontmatter.default_author`. Generated values are supported for `uuid` and `date`: UUIDs are created once and then preserved; generated dates use the current local calendar date. Immutable values are recorded in Demon Docs private state and restored by `fix` when later edits disagree with that known value. Existing valid mutable values are never overwritten. Existing invalid mutable values remain authored content and are reported for manual correction.
+`default`, `default_from`, and `generated` are mutually exclusive. The only current `default_from` source is `frontmatter.default_author`. Generated values are supported for `uuid` and `date`: UUIDs are created once and then preserved; generated dates use the current local calendar date. Immutable values are recorded in Archivist private state and restored by `fix` when later edits disagree with that known value. Existing valid mutable values are never overwritten. Existing invalid mutable values remain authored content and are reported for manual correction.
 
 Unknown-field handling is configured with `unknown_fields`:
 
@@ -196,7 +196,7 @@ equals = true
 require = "policy_exempt_reason"
 ```
 
-`check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so ordinary authored documents must configure those values, relax the schema, or author them explicitly. Demon Docs-owned generated folder indexes receive deterministic fallback author and summary values when no configured source exists, allowing a fresh initialized repository to converge without weakening policy for ordinary documents.
+`check` never writes frontmatter or immutable state. `fix` applies deterministic repairs, then returns non-zero when required or invalid values still need authored input. The starter schema intentionally leaves `default_author` blank and `summary` without a default, so ordinary authored documents must configure those values, relax the schema, or author them explicitly. Archivist-owned generated folder indexes receive deterministic fallback author and summary values when no configured source exists, allowing a fresh initialized repository to converge without weakening policy for ordinary documents.
 
 ## Document Schemas And Body Format
 
@@ -249,7 +249,7 @@ The demon is an operational convenience around the existing watcher, not a
 correctness dependency. `check`, `fix`, and foreground `watch` remain available
 when it is disabled. Shell hooks use `shell` feeders; MCP and native host
 adapters can use the host-neutral `agent` feeder lifecycle without moving host
-logic into Demon Docs core. See [Repository Demon](../operations/repository-demon.md).
+logic into Archivist core. See [Repository Demon](../operations/repository-demon.md).
 
 ## Review and Undo
 
@@ -261,7 +261,7 @@ undo_max_age_days = 30
 
 `undo_depth` limits how many recent non-undo applied changes remain eligible for reversal. `0` disables undo and `-1` removes the depth limit. `undo_max_age_days` limits eligibility by age; `0` removes the age limit. These settings do not delete audit history.
 
-Demon Docs supports undo by reconciliation run, one file change, or one repair within a file change. Every undo remains hash-guarded and refuses to overwrite later edits. See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md).
+Archivist supports undo by reconciliation run, one file change, or one repair within a file change. Every undo remains hash-guarded and refuses to overwrite later edits. See [Review Ledger](../architecture/review-ledger.md) and [Reviewing Suggestions and Changes](../guides/reviewing-suggestions-and-changes.md).
 
 ## Codemap Configuration
 
@@ -282,7 +282,7 @@ The research-oriented `codemap export` command additionally supports `--target-b
 
 ## Selection
 
-Demon Docs selects one base config before applying command-specific CLI overrides.
+Archivist selects one base config before applying command-specific CLI overrides.
 
 Selection order:
 
@@ -511,7 +511,7 @@ Legacy standalone config files may continue using `root`; both keys load into th
 
 ## `[index].enabled` and `[links].enabled`
 
-`[index].enabled` controls automatic folder-index management. It defaults to `true`. When disabled, Demon Docs does not create, insert, repair, or specially track folder indexes. A file whose name matches `index_file` remains visible as an ordinary document.
+`[index].enabled` controls automatic folder-index management. It defaults to `true`. When disabled, Archivist does not create, insert, repair, or specially track folder indexes. A file whose name matches `index_file` remains visible as an ordinary document.
 
 `[links].enabled` controls automatic link maintenance. It defaults to `true`. When disabled, document contents are not rewritten, but persistent internal link tracking continues and is published to `.ddocs/`.
 
@@ -586,12 +586,12 @@ Removal based on algorithm confidence is opt-in through the two boolean settings
 `[parent_link].folder_indexes` controls parent links in folder index files.
 
 - Default: `true`
-- When `false`, Demon Docs does not insert or update parent links in child folder index files
+- When `false`, Archivist does not insert or update parent links in child folder index files
 
 `[parent_link].indexed_files` controls parent links in indexed files such as `page.md` and `topic.md`.
 
 - Default: `false`
-- When `true`, Demon Docs inserts or updates parent links in editable indexed files
+- When `true`, Archivist inserts or updates parent links in editable indexed files
 
 `[parent_link].enabled` is a compatibility alias for older configs.
 
@@ -677,7 +677,7 @@ exclude_patterns = ["**/*.tmp"]
 
 An initialized repository uses `.docignore` at its repository root, beside `.ddocs/`, as the base ignore policy. A standalone scope instead uses `.docignore` at its resolved docs root. It excludes paths from index traversal, frontmatter enforcement, document-body format enforcement, repository Markdown link scanning, link-target inventory, and watch events. Reverse-index traversal additionally recognizes nested `.docignore` files beneath configured roots; each nested file applies Git-ignore rules relative to its containing directory.
 
-Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Demon Docs, and a Git-ignored file may still be indexed.
+Rules use Git ignore syntax, including comments, anchored paths, `*`, `**`, directory patterns, and `!` negation. Patterns are relative to the repository root. Legacy standalone configurations continue using the docs root as the ignore root. `.docignore` is independent from `.gitignore`: a Git-tracked file may be excluded from Archivist, and a Git-ignored file may still be indexed.
 
 Example:
 
@@ -858,7 +858,7 @@ In that setup:
 
 ## Link State
 
-Markdown link reconciliation is controlled by `[links].enabled`. Its persistent, schema-versioned state is stored in the active scope's private `.ddocs/` object repository: beneath the docs root in standalone mode or beneath the repository root in initialized mode. Demon Docs uses internal go-git object and reference plumbing. Link state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither ref creates commits in the user's normal Git history or exposes a user-facing Git workflow for private state.
+Markdown link reconciliation is controlled by `[links].enabled`. Its persistent, schema-versioned state is stored in the active scope's private `.ddocs/` object repository: beneath the docs root in standalone mode or beneath the repository root in initialized mode. Archivist uses internal go-git object and reference plumbing. Link state uses `refs/ddocs/state`; suggestion decisions and applied-change history use `refs/ddocs/review`. Neither ref creates commits in the user's normal Git history or exposes a user-facing Git workflow for private state.
 
 The first link-enabled `fix` or `watch` pass establishes this baseline without repairing links. With link maintenance enabled, `check -l` is read-only and reports a missing link-state baseline rather than creating it. With link maintenance disabled, selected and default reconciliation passes may publish tracking-only state while leaving every document unchanged. Legacy `.ddocs/files.json` and `.ddocs/links.json` state is migrated on the next successful link-state publication.
 

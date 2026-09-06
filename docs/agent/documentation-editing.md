@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 1ff3410e-249d-423c-a8a2-7a4f0d8494cd
 document_type: general
 policy_exempt: false
-summary: This document guides agents editing Demon Docs documentation under the repository documentation taxonomy.
+summary: This document guides agents editing Archivist documentation under the repository documentation taxonomy.
 ---
 # Documentation Editing
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document guides agents editing Demon Docs documentation under the repository documentation taxonomy.
+This document guides agents editing Archivist documentation under the repository documentation taxonomy.
 
 ## Overview
 

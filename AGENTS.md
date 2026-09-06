@@ -6,7 +6,7 @@ This file is the short, always-read operating manual. Keep it practical and stab
 
 ## Project Snapshot
 
-Demon Docs is a deterministic documentation maintenance engine and Go CLI.
+Archivist is a deterministic documentation maintenance engine and Go CLI.
 
 - Canonical CLI entry point: `cmd/ddocs/`
 - Alias CLI entry point: `cmd/demon/`
@@ -17,7 +17,7 @@ Demon Docs is a deterministic documentation maintenance engine and Go CLI.
 - Retained benchmark and research artifacts: `research/`
 - Task-specific agent workflows: `skills/`
 
-Demon Docs maintains explicit managed documentation surfaces while preserving authored Markdown outside those boundaries. It owns deterministic index blocks, supported path-only link rewrites, explicit repository-contained moves, configured reverse-index regions, adopted codemap sections, and private state under `.ddocs/`.
+Archivist maintains explicit managed documentation surfaces while preserving authored Markdown outside those boundaries. It owns deterministic index blocks, supported path-only link rewrites, explicit repository-contained moves, configured reverse-index regions, adopted codemap sections, and private state under `.ddocs/`.
 
 ## Read First
 
@@ -70,7 +70,7 @@ Normal authored repository files remain the primary product surface. Private ide
 
 Do not hand-edit tool-owned regions or internal private state as a convenience.
 
-Demon Docs manages:
+Archivist manages:
 
 ```text
 content inside configured index marker pairs

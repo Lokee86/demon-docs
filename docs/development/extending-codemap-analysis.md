@@ -72,7 +72,7 @@ A change to any of these is a product-quality change:
 7. Record the result and limitations in research documentation.
 8. Update [Codemap Evidence and Ranking](../architecture/codemap-evidence-and-ranking.md) when implemented constants or admission rules change.
 
-Do not tune only against Demon Docs' own authored codemaps. They are useful for deterministic and portability checks but are not independent quality evidence.
+Do not tune only against Archivist's own authored codemaps. They are useful for deterministic and portability checks but are not independent quality evidence.
 
 ## Adding or replacing code intelligence
 

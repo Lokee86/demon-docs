@@ -64,7 +64,7 @@ func (h *harness) prepareGitWorktreeFixture() error {
 	if _, err := h.command(h.repo, "git", "init"); err != nil {
 		return err
 	}
-	if _, err := h.command(h.repo, "git", "config", "user.name", "Demon Docs Smoke"); err != nil {
+	if _, err := h.command(h.repo, "git", "config", "user.name", "Archivist Smoke"); err != nil {
 		return err
 	}
 	if _, err := h.command(h.repo, "git", "config", "user.email", "smoke@example.invalid"); err != nil {

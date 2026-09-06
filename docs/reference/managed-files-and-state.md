@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-76de-a665-333edc85e448
 document_type: general
 policy_exempt: false
-summary: This document defines which repository files Demon Docs may manage, which portions remain authored, what private state is stored under .ddocs/, and which source-preservation guarantees apply.
+summary: This document defines which repository files Archivist may manage, which portions remain authored, what private state is stored under .ddocs/, and which source-preservation guarantees apply.
 ---
 # Managed Files and State
 
@@ -12,11 +12,11 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines which repository files Demon Docs may manage, which portions remain authored, what private state is stored under `.ddocs/`, and which source-preservation guarantees apply.
+This document defines which repository files Archivist may manage, which portions remain authored, what private state is stored under `.ddocs/`, and which source-preservation guarantees apply.
 
 ## Overview
 
-Demon Docs does not replace Markdown or Git with a proprietary authoring store. Authored files remain ordinary repository files. Generated ownership is narrow and marked, while private state records deterministic identities, history, reverse indexes, transactions, and runtime coordination needed to reconcile repository changes.
+Archivist does not replace Markdown or Git with a proprietary authoring store. Authored files remain ordinary repository files. Generated ownership is narrow and marked, while private state records deterministic identities, history, reverse indexes, transactions, and runtime coordination needed to reconcile repository changes.
 
 ## Managed index blocks
 
@@ -37,7 +37,7 @@ Documentation folder indexes use HTML marker pairs. By default:
 <!-- doc-ledger:folders:end -->
 ```
 
-Demon Docs owns content between matching markers. Prose outside managed blocks remains authored.
+Archivist owns content between matching markers. Prose outside managed blocks remains authored.
 
 Heading- and marker-like text inside fenced code blocks is treated as code content, not document structure.
 
@@ -45,11 +45,11 @@ Heading- and marker-like text inside fenced code blocks is treated as code conte
 
 Parent navigation can be enabled independently for folder indexes and indexed files. The default label is `Parent index`.
 
-Demon Docs edits only configured Markdown-like file types for parent links. The root index has no parent link.
+Archivist edits only configured Markdown-like file types for parent links. The root index has no parent link.
 
 ## Frontmatter
 
-When `[frontmatter].enabled` is true, Demon Docs validates every non-ignored `.md` file beneath the configured docs root, including generated folder indexes. Existing YAML (`---`) and TOML (`+++`) blocks keep their format. Missing blocks use the configured default format.
+When `[frontmatter].enabled` is true, Archivist validates every non-ignored `.md` file beneath the configured docs root, including generated folder indexes. Existing YAML (`---`) and TOML (`+++`) blocks keep their format. Missing blocks use the configured default format.
 
 `fix` may insert configured defaults or generated UUID/date values, restore immutable fields from private state, and remove unknown fields when configured. It does not replace an existing valid mutable value. Malformed blocks, invalid mutable values, and required fields without a repair source remain authored problems and are not guessed.
 
@@ -74,7 +74,7 @@ Explicit codemap execution adopts the complete configured codemap section under 
 <!-- doc-ledger:codemap:end -->
 ```
 
-The heading remains outside the marker pair. Everything in the section body, including existing links and explanatory prose, becomes part of the unified managed region. Demon Docs does not preserve separate authored and generated provenance groups inside the section.
+The heading remains outside the marker pair. Everything in the section body, including existing links and explanatory prose, becomes part of the unified managed region. Archivist does not preserve separate authored and generated provenance groups inside the section.
 
 On first adoption, a prior partial generated block is expanded to cover the whole section. Existing marker lines are removed and one canonical pair is rendered. Malformed or duplicated codemap markers are an error rather than an automatically guessed repair.
 
@@ -129,7 +129,7 @@ Repository-specific exclusions belong in `.docignore`.
 
 ## `.ddocs/` private state
 
-Demon Docs stores private state under the active scope's `.ddocs/` directory. In standalone reconciliation, the docs root is also the scope root, so link-enabled mutating passes may create `<docs-root>/.ddocs/` without creating a repository config. In initialized mode, repository-root `.ddocs/` also contains `config.toml`, schemas, feature settings, review state, transactions, and demon runtime ownership.
+Archivist stores private state under the active scope's `.ddocs/` directory. In standalone reconciliation, the docs root is also the scope root, so link-enabled mutating passes may create `<docs-root>/.ddocs/` without creating a repository config. In initialized mode, repository-root `.ddocs/` also contains `config.toml`, schemas, feature settings, review state, transactions, and demon runtime ownership.
 
 State families include:
 
@@ -172,7 +172,7 @@ Delete or reset `.ddocs/` only as a deliberate recovery action after stopping ac
 
 ## Mutation boundaries
 
-Demon Docs does not:
+Archivist does not:
 
 - rewrite arbitrary prose;
 - change link labels, titles, or aliases to improve style;

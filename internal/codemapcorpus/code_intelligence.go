@@ -10,7 +10,7 @@ import (
 )
 
 // CodeIntelligenceProvider supplies deterministic repository-local semantic
-// facts. Demon Docs owns candidate policy; providers only report facts.
+// facts. Archivist owns candidate policy; providers only report facts.
 type CodeIntelligenceProvider interface {
 	Collect(context.Context, CodeIntelligenceRequest) (CodeIntelligenceFacts, error)
 }

@@ -107,7 +107,7 @@ func TestBuildUsesFormatRulesAndGeneratedIndexDefaults(t *testing.T) {
 	for path, body := range map[string]string{
 		filepath.Join(docs, "README.md"): "# Docs\n",
 		filepath.Join(docs, "guide.md"): `---
-author: Demon Docs
+author: Archivist
 created: "2026-07-20"
 document_id: 11111111-2222-4333-8444-555555555555
 document_type: ""
@@ -139,12 +139,12 @@ summary: Existing summary
 		updates[filepath.Base(update.Path)] = update.NewText
 	}
 	if !strings.Contains(updates["README.md"], "document_type: index") ||
-		!strings.Contains(updates["README.md"], "author: Demon Docs") ||
+		!strings.Contains(updates["README.md"], "author: Archivist") ||
 		!strings.Contains(updates["README.md"], "summary: Generated documentation folder index.") {
 		t.Fatalf("index defaults did not follow the path-selected schema: %q", updates["README.md"])
 	}
 	if !strings.Contains(updates["guide.md"], "document_type: general") ||
-		!strings.Contains(updates["guide.md"], "author: Demon Docs") ||
+		!strings.Contains(updates["guide.md"], "author: Archivist") ||
 		!strings.Contains(updates["guide.md"], "summary: Existing summary") {
 		t.Fatalf("ordinary defaults changed unexpectedly: %q", updates["guide.md"])
 	}
@@ -174,7 +174,7 @@ func TestBuildUsesGeneratedIndexDefaultsWithoutFormat(t *testing.T) {
 		t.Fatalf("unexpected repair plan: %+v", plan)
 	}
 	updated := plan.Updates[0].NewText
-	if !strings.Contains(updated, "author: Demon Docs") ||
+	if !strings.Contains(updated, "author: Archivist") ||
 		!strings.Contains(updated, "summary: Generated documentation folder index.") {
 		t.Fatalf("index defaults depended on document-format enforcement: %q", updated)
 	}

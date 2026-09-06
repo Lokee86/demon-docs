@@ -1,6 +1,6 @@
 # Scratch Notes
 
-This ignored file intentionally remains outside Demon Docs management.
+This ignored file intentionally remains outside Archivist management.
 
 ## Whatever
 

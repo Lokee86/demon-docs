@@ -147,7 +147,7 @@ Thresholds are useful in pinned regression jobs only when repository, answers, s
 
 ## Corpus guidance
 
-Use multiple repositories when evaluating general portability. Demon Docs' own code maps are useful for extraction, deterministic ordering, and holdout mechanics, but are not independent evidence because the same project shaped both docs and algorithm.
+Use multiple repositories when evaluating general portability. Archivist's own code maps are useful for extraction, deterministic ordering, and holdout mechanics, but are not independent evidence because the same project shaped both docs and algorithm.
 
 Large or repetitive repositories can expose fan-out and adapter behavior. Small curated sets can expose exact failure modes. Neither alone is representative.
 

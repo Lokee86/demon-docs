@@ -16,7 +16,7 @@ This guide reviews unresolved repair suggestions, records accept or decline deci
 
 ## Overview
 
-Demon Docs separates unresolved choices, persisted decisions, and concrete repairs. Ambiguous link targets appear through `ddocs suggestions`. Selecting a candidate converts it into the compatibility hash-guarded repair path and records the applied repair in the private review ledger.
+Archivist separates unresolved choices, persisted decisions, and concrete repairs. Ambiguous link targets appear through `ddocs suggestions`. Selecting a candidate converts it into the compatibility hash-guarded repair path and records the applied repair in the private review ledger.
 
 Codemap recommendations are generated only by the explicit `ddocs codemaps` command family. They are reviewed through codemap command output and Git rather than being mixed into ordinary link suggestions or published as `ddocs changes` events.
 
@@ -126,7 +126,7 @@ Check configured depth and age limits. Audit history remains inspectable even wh
 
 ### Undo reports an after-hash mismatch
 
-The file changed after the recorded repair. Use normal Git history or manually integrate the intended reversal; Demon Docs does not perform arbitrary historical selective reverts through later edits.
+The file changed after the recorded repair. Use normal Git history or manually integrate the intended reversal; Archivist does not perform arbitrary historical selective reverts through later edits.
 
 ### A repair returns after undo
 

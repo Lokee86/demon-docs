@@ -4,12 +4,12 @@ created: "2026-07-19"
 document_id: 019f7e4d-9000-7243-ba61-27a3b45d912b
 document_type: general
 policy_exempt: false
-summary: Adopt Demon Docs in a small existing repository, distinguishing standalone operation from optional initialization before indexes, link health, safe moves, reverse indexes, codemap suggestions, and schema-backed creation.
+summary: Adopt Archivist in a small existing repository, distinguishing standalone operation from optional initialization before indexes, link health, safe moves, reverse indexes, codemap suggestions, and schema-backed creation.
 ---
 # Product Walkthrough
 Parent index: [Guides](./INDEX.md)
 ## Purpose
-This walkthrough shows the main Demon Docs workflow in a small existing repository. It introduces each managed surface separately so the resulting changes remain reviewable.
+This walkthrough shows the main Archivist workflow in a small existing repository. It introduces each managed surface separately so the resulting changes remain reviewable.
 ## Overview
 The sequence distinguishes standalone operation from initialized-repository operation, then covers staged adoption, generated indexes, link-state baselining, orphan health, link-aware moves, reverse indexes, codemap execution, suggestion review, and schema-backed document creation. The command outputs were reproduced against the current CLI; paths and generated identifiers vary.
 ### Starting fixture
@@ -33,7 +33,7 @@ The runtime package owns service startup and shutdown.
 ## Code map
 - `internal/runtime/service.go`
 ```
-Demon Docs treats that target as authored evidence. It does not infer ownership from arbitrary prose.
+Archivist treats that target as authored evidence. It does not infer ownership from arbitrary prose.
 ### 1. Choose the scope
 Core docs-scoped behavior does not require initialization. A narrow standalone adoption could begin with:
 ```bash
@@ -69,7 +69,7 @@ With frontmatter and format disabled, the fixture reports:
 ```text
 ddocs fix updated 3 file(s)
 ```
-Demon Docs adds managed index regions to `docs/INDEX.md` and creates indexes for `docs/architecture/` and `docs/guides/`. The guide index contains:
+Archivist adds managed index regions to `docs/INDEX.md` and creates indexes for `docs/architecture/` and `docs/guides/`. The guide index contains:
 ```markdown
 ## Direct Files
 <!-- doc-ledger:files:start -->
@@ -128,7 +128,7 @@ The runtime document already targets `internal/runtime/service.go` under a confi
 ddocs fix --reverse --reverse-root internal
 ddocs check --reverse --reverse-root internal
 ```
-Demon Docs creates `internal/runtime/README.md`:
+Archivist creates `internal/runtime/README.md`:
 ```markdown
 # Runtime
 This index maps code files to their documentation.
@@ -235,7 +235,7 @@ The documentation and reverse checks report `ddocs check passed`. The explicit c
 
 Repository-visible changes are limited to managed index regions, rewritten link destinations from the explicit move, one schema-created Markdown file, one managed codemap, and one managed reverse-index file. Because this walkthrough chose initialized mode, private link, review, identity, and transaction state remains under the repository-root `.ddocs/`; standalone link reconciliation would place that state beneath the standalone docs root.
 
-Demon Docs does not replace Markdown, silently choose ambiguous targets, infer semantic ownership from arbitrary prose, or run codemap generation in the background.
+Archivist does not replace Markdown, silently choose ambiguous targets, infer semantic ownership from arbitrary prose, or run codemap generation in the background.
 ## Related docs
 - [Getting Started](getting-started.md)
 - [Using Document Schemas](document-schemas.md)

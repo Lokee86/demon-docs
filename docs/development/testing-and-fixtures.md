@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7dff-9331-c53ab2c88526
 document_type: general
 policy_exempt: false
-summary: This document describes the Demon Docs test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
+summary: This document describes the Archivist test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
 ---
 # Testing and Fixtures
 
@@ -12,13 +12,13 @@ Parent index: [Development](./INDEX.md)
 
 ## Purpose
 
-This document describes the Demon Docs test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
+This document describes the Archivist test commands, regression fixture matrix, package coverage, performance benchmarks, research validation, CI, and release gates.
 
 ## Overview
 
 Testing is organized around deterministic behavior and source preservation. Focused package tests protect ownership boundaries, repository-level fixtures protect complete command behavior, and retained benchmarks expose performance or ranking regressions without turning research samples into universal claims.
 
-Demon Docs is covered by focused Go package tests, filesystem integration tests, CLI fixture regressions, codemap benchmark artifacts, and cross-platform CI. Go is the sole implementation and supported runtime.
+Archivist is covered by focused Go package tests, filesystem integration tests, CLI fixture regressions, codemap benchmark artifacts, and cross-platform CI. Go is the sole implementation and supported runtime.
 
 ## Test Commands
 
@@ -252,7 +252,7 @@ ddocs codemaps check --root docs/architecture/example.md
 
 The second `fix` must be a no-op. Inspect, check, and dry-run must not write. A normal `ddocs check` does not include codemap-generation convergence.
 
-Demon Docs' own code maps are a second development corpus. They are appropriate for extraction, portability, deterministic holdouts, and production execution tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
+Archivist's own code maps are a second development corpus. They are appropriate for extraction, portability, deterministic holdouts, and production execution tests, but they are not an independent precision benchmark because the same development process authored the docs and tunes the algorithm.
 
 ## Behavioral Contract Verification
 

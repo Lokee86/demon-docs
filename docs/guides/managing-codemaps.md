@@ -26,7 +26,7 @@ inspect one file
 -> verify convergence
 ```
 
-Demon Docs adopts the complete configured codemap section as one managed artifact. It retains current links by default, adds deterministic missing links, and reuses shared decline policy so rejected additions remain suppressed while their evidence is unchanged.
+Archivist adopts the complete configured codemap section as one managed artifact. It retains current links by default, adds deterministic missing links, and reuses shared decline policy so rejected additions remain suppressed while their evidence is unchanged.
 
 The command does not run from normal `ddocs fix`, `ddocs check`, `ddocs watch`, or the repository demon.
 
@@ -44,7 +44,7 @@ After a successful workflow:
 
 ## Prerequisites
 
-- Demon Docs resolves the intended repository and documentation root.
+- Archivist resolves the intended repository and documentation root.
 - Target documents are existing `.md` files beneath that docs root.
 - Existing codemap sections use one of the configured headings.
 - The repository has no unresolved concurrent edit in the selected documents.
@@ -133,7 +133,7 @@ Apply the same target without `--dry-run`:
 ddocs codemaps fix --root docs/architecture/runtime.md
 ```
 
-On first adoption, Demon Docs inserts a marker pair around the whole existing body:
+On first adoption, Archivist inserts a marker pair around the whole existing body:
 
 ```markdown
 ## Implementation Map
@@ -284,7 +284,7 @@ remove_undiscovered_links = false
 remove_low_score_links = false
 ```
 
-With those settings, Demon Docs does not remove a valid existing link merely because:
+With those settings, Archivist does not remove a valid existing link merely because:
 
 - the current algorithm cannot rediscover it;
 - it ranks below the permanent-link tier;
@@ -351,7 +351,7 @@ The next successful codemap fix adopts the complete section:
 <!-- doc-ledger:codemap:end -->
 ```
 
-This migration removes the provenance split. Both links remain members of one Demon Docs-owned codemap.
+This migration removes the provenance split. Both links remain members of one Archivist-owned codemap.
 
 ## Confirm daemon exclusion
 
@@ -388,11 +388,11 @@ Select the Markdown document that owns the codemap. Directory traversal may cont
 
 ### Section is reported missing
 
-Confirm that the heading is configured or supply `--heading`. If the section is still reported as `missing`, inspect the selected `document_type`, matching `format.path_rules`, and document-specific schema. Add a required codemap section to the effective schema when automatic placement is intended; heading recognition alone does not authorize Demon Docs to invent a section.
+Confirm that the heading is configured or supply `--heading`. If the section is still reported as `missing`, inspect the selected `document_type`, matching `format.path_rules`, and document-specific schema. Add a required codemap section to the effective schema when automatic placement is intended; heading recognition alone does not authorize Archivist to invent a section.
 
 ### More than one configured section exists
 
-Consolidate the document to one canonical codemap section. Demon Docs will not choose among multiple matching headings.
+Consolidate the document to one canonical codemap section. Archivist will not choose among multiple matching headings.
 
 ### Markers are malformed or duplicated
 
@@ -412,7 +412,7 @@ Use the evidence output and the codemap algorithm docs before changing threshold
 
 ### Fix reports that a source changed
 
-Another process or user edited a selected file after planning. Review the edit and rerun `inspect`, dry-run, and fix. Demon Docs will not overwrite the changed source with the stale plan.
+Another process or user edited a selected file after planning. Review the edit and rerun `inspect`, dry-run, and fix. Archivist will not overwrite the changed source with the stale plan.
 
 ### Multi-file fix fails partway
 

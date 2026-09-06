@@ -139,7 +139,7 @@ A source can bypass full reparsing when all of these are true:
 
 The reconciler reads the unchanged source, calculates replacements directly from stored incoming-link records, applies review-block policy, and creates updated link records and an optional generated rewrite.
 
-This path preserves known occurrence identities and avoids interpreting a Demon Docs repair as an unrelated user edit. If stored byte offsets no longer match the current source text even though file metadata reported the source as unchanged, rewrite construction treats that mismatch as a transient filesystem race, abandons the fast path for that source, and lets normal current-source parsing rebuild the repair from fresh offsets.
+This path preserves known occurrence identities and avoids interpreting an Archivist repair as an unrelated user edit. If stored byte offsets no longer match the current source text even though file metadata reported the source as unchanged, rewrite construction treats that mismatch as a transient filesystem race, abandons the fast path for that source, and lets normal current-source parsing rebuild the repair from fresh offsets.
 
 ### Unchanged-source reuse path
 

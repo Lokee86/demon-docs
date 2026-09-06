@@ -151,7 +151,7 @@ New stateful behavior must be added here when its ownership cannot be explained 
 | Repository demon | [CI and Automation](../guides/ci-and-automation.md) | [Repository Demon](../operations/repository-demon.md), [Repository Demon Lease Protocol](../architecture/repository-demon-lease-protocol.md) |
 | External feeder adapters | Host-specific integration | [Host Adapter Feeder Integration](../operations/host-adapters.md) |
 | Linked worktrees | [Using Linked Git Worktrees](../guides/linked-worktrees.md) | [Repository Scope and Worktrees](../architecture/repository-scope-and-worktrees.md) |
-| Upgrade and migration | [Upgrading Demon Docs](../guides/upgrading.md) | [Compatibility and Migrations](../reference/compatibility-and-migrations.md) |
+| Upgrade and migration | [Upgrading Archivist](../guides/upgrading.md) | [Compatibility and Migrations](../reference/compatibility-and-migrations.md) |
 | Current incomplete surfaces | Not applicable | [Current Product Limitations](../limits/current-limitations.md) |
 
 ## Research and planning separation

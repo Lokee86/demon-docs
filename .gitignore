@@ -18,8 +18,6 @@ dist/
 /.grimoire/
 /.worktrees/
 /.codex/
-# Existing committed hackathon evidence remains tracked; ignore new local captures.
-/.codex-hackathon/
 *.log
 *.pid
 __pycache__/

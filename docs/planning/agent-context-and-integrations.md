@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7c56-a0ce-a8a3c84239ee
 document_type: general
 policy_exempt: false
-summary: Historical bounded-context and host-integration design transferred from Demon Docs to the planned Grimoire Context tool.
+summary: Historical bounded-context and host-integration design transferred from Archivist to the planned Grimoire Context tool.
 ---
 # Transferred Agent-Context Design
 
@@ -12,21 +12,21 @@ Parent index: [Planning](./INDEX.md)
 
 ## Purpose
 
-This document preserves bounded deterministic context and host-integration design transferred from Demon Docs to the planned **Grimoire Context** sibling tool.
+This document preserves bounded deterministic context and host-integration design transferred from Archivist to the planned **Grimoire Context** sibling tool.
 
 ## Overview
 
-The transferred context design projects existing repository facts for a temporary task. It remains distinct from Demon Docs codemap inference, which asks whether a permanent authored relationship may be missing.
+The transferred context design projects existing repository facts for a temporary task. It remains distinct from Archivist codemap inference, which asks whether a permanent authored relationship may be missing.
 
 ## Current status
 
-Transferred historical design. Graph-based context discovery and delivery are outside the Demon Docs product boundary and belong to Grimoire Context. The existing host-neutral demon feeder remains lifecycle plumbing only.
+Transferred historical design. Graph-based context discovery and delivery are outside the Archivist product boundary and belong to Grimoire Context. The existing host-neutral demon feeder remains lifecycle plumbing only.
 
 ## Expected ownership
 
-Grimoire Context owns context requests, deterministic resolution, ordering, bounds, provenance, truncation reporting, and delivery. ArcanaGraph owns the general repository relationship model it may consume. Demon Docs owns only its feeder lifecycle and exportable documentation facts.
+Grimoire Context owns context requests, deterministic resolution, ordering, bounds, provenance, truncation reporting, and delivery. ArcanaGraph owns the general repository relationship model it may consume. Archivist owns only its feeder lifecycle and exportable documentation facts.
 
-This document is retained as design provenance. References below to `ddocs context`, `ddocs graph`, a Demon Docs context core, or context delivery through the Demon Docs daemon are superseded and must not be treated as implementation commitments.
+This document is retained as design provenance. References below to `ddocs context`, `ddocs graph`, an Archivist context core, or context delivery through the Archivist daemon are superseded and must not be treated as implementation commitments.
 
 ## One Core, Thin Adapters
 
@@ -199,7 +199,7 @@ The design is ready for implementation planning when focused fixtures and adapte
 
 ## Transferred implementation sequence
 
-This sequence now belongs to ArcanaGraph and Grimoire Context rather than the Demon Docs roadmap:
+This sequence now belongs to ArcanaGraph and Grimoire Context rather than the Archivist roadmap:
 
 ```text
 stabilize repository relationship contracts in ArcanaGraph

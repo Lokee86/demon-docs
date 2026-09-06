@@ -19,7 +19,7 @@ import (
 const demonStartupTimeout = 2 * time.Minute
 
 func demonHelp(w io.Writer) {
-	fmt.Fprintln(w, "usage: demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n       ddocs demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n\nManage the repository-local self-managing Demon Docs watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  acquire --client NAME [PATH] register an external agent feeder\n  heartbeat --token TOKEN [PATH]\n                               refresh an external agent feeder\n  release --token TOKEN [PATH] release an external agent feeder\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\noptions:\n  -h, --help                   show this help message and exit\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership. Run `demon <command> --help` or `ddocs demon <command> --help` for exact feeder and lifecycle behavior.")
+	fmt.Fprintln(w, "usage: demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n       ddocs demon [-h] {run,acquire,heartbeat,release,--status,--logs} ...\n\nManage the repository-local self-managing Archivist watcher. One fresh owner serves each local .ddocs repository while shell or agent feeders remain active. Foreground ddocs watch remains available and uses the same reconciliation core.\n\ncommands:\n  run [--true|--false] [PATH]  check/enable/disable, start, and feed the demon\n  acquire --client NAME [PATH] register an external agent feeder\n  heartbeat --token TOKEN [PATH]\n                               refresh an external agent feeder\n  release --token TOKEN [PATH] release an external agent feeder\n  --status [PATH]              show read-only ownership and feeder status\n  --logs [PATH]                print retained repository-specific logs\n\noptions:\n  -h, --help                   show this help message and exit\n\nshell integration:\n  ddocs demon __shell-hook bash\n  ddocs demon __shell-hook powershell\n\nPATH may point anywhere inside an initialized repository. The first mutating entry into an initialized linked Git worktree creates independent local .ddocs configuration, object storage, runtime state, and watcher ownership. Run `demon <command> --help` or `ddocs demon <command> --help` for exact feeder and lifecycle behavior.")
 }
 
 func demonRunHelp(w io.Writer) {
@@ -96,7 +96,7 @@ func demonLocation(argument string, allowBootstrap bool) (repository.Location, e
 			}
 			return detected, nil
 		}
-		return repository.Location{}, fmt.Errorf("no initialized Demon Docs repository found from %s", argument)
+		return repository.Location{}, fmt.Errorf("no initialized Archivist repository found from %s", argument)
 	}
 	return location, nil
 }
@@ -522,7 +522,7 @@ func demonLeave(args []string, out, errOut io.Writer) int {
 
 func demonShellHook(args []string, out, errOut io.Writer) int {
 	if helpRequested(args) {
-		fmt.Fprintln(out, "usage: ddocs demon __shell-hook {bash|powershell}\n\nPrint shell integration code that registers a shell feeder when entering a Demon Docs repository and removes only that feeder when leaving.\n\nInstall Bash integration with:\n  eval \"$(ddocs demon __shell-hook bash)\"\n\nInstall PowerShell integration with:\n  Invoke-Expression (& ddocs demon __shell-hook powershell)")
+		fmt.Fprintln(out, "usage: ddocs demon __shell-hook {bash|powershell}\n\nPrint shell integration code that registers a shell feeder when entering an Archivist repository and removes only that feeder when leaving.\n\nInstall Bash integration with:\n  eval \"$(ddocs demon __shell-hook bash)\"\n\nInstall PowerShell integration with:\n  Invoke-Expression (& ddocs demon __shell-hook powershell)")
 		return 0
 	}
 	if len(args) != 1 || (args[0] != "bash" && args[0] != "powershell") {
@@ -530,7 +530,7 @@ func demonShellHook(args []string, out, errOut io.Writer) int {
 		return 2
 	}
 	if args[0] == "bash" {
-		_, _ = io.WriteString(out, `# Demon Docs shell integration. Add: eval "$(ddocs demon __shell-hook bash)"
+		_, _ = io.WriteString(out, `# Archivist shell integration. Add: eval "$(ddocs demon __shell-hook bash)"
 __ddocs_demon_repo=""
 __ddocs_demon_token=""
 __ddocs_demon_leave() {

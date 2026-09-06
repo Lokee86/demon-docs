@@ -4,11 +4,11 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-720d-b9ba-bfa926a5d8e5
 document_type: general
 policy_exempt: false
-summary: This is the top-level documentation index and rulebook entry point for Demon Docs.
+summary: This is the top-level documentation index and rulebook entry point for Archivist.
 ---
-# Demon Docs Documentation
+# Archivist Documentation
 
-This is the top-level documentation index and rulebook entry point for Demon Docs.
+This is the top-level documentation index and rulebook entry point for Archivist.
 
 The repository root [README](../README.md) is the product introduction and quick start. This documentation tree owns detailed user workflows, exact reference material, implemented architecture, operational behavior, research evidence, future planning, and contributor guidance.
 
@@ -42,7 +42,7 @@ The repository root [README](../README.md) is the product introduction and quick
 - [agent](agent/INDEX.md) - Agent documentation.
 - [Architecture](architecture/INDEX.md) - Implemented ownership boundaries, state models, reconciliation pipelines, and internal system behavior.
 - [Development](development/INDEX.md) - Contributor workflow, testing, repository layout, fixtures, and release verification.
-- [Guides](guides/INDEX.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Demon Docs.
+- [Guides](guides/INDEX.md) - Task-oriented workflows for installing, adopting, refactoring, reviewing, and operating Archivist.
 - [Limits](limits/INDEX.md) - Current user-visible limitations, incomplete surfaces, workarounds, ownership, and removal conditions.
 - [Operations](operations/INDEX.md) - Watcher, repository demon, recovery, troubleshooting, and runtime behavior.
 - [Planning](planning/INDEX.md) - Future, unresolved, proposed, or back-burnered work.

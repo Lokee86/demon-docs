@@ -34,14 +34,14 @@ Generated, human-editable document-specific schemas live in:
 
 ## Schema Selection
 
-For each Markdown document, Demon Docs selects the body schema in this order:
+For each Markdown document, Archivist selects the body schema in this order:
 
 1. The `document_type` frontmatter value.
 2. The first matching `[[format.path_rules]]` entry.
 3. `[format].default_schema`.
 4. No format enforcement when all three are absent.
 
-An explicit metadata value is authoritative. Demon Docs does not fall back to a path rule when `document_type` names a missing schema; it reports that missing schema.
+An explicit metadata value is authoritative. Archivist does not fall back to a path rule when `document_type` names a missing schema; it reports that missing schema.
 
 A document-specific schema is keyed by immutable `document_id`, so repository moves do not detach accepted exceptions.
 
@@ -175,15 +175,15 @@ Merge retains one heading and combines bodies in discovery order. Exact duplicat
 - ordered list with ordered list; or
 - task list with task list.
 
-Mixed content, non-list content, or different list categories are concatenated without deduplication. Demon Docs performs no fuzzy or semantic content matching.
+Mixed content, non-list content, or different list categories are concatenated without deduplication. Archivist performs no fuzzy or semantic content matching.
 
 Choosing `ignore` for a recognized duplicate records `allow_duplicates = true` in the document-specific schema.
 
 ## Schema Renames And Change Invalidation
 
-Heading renames are schema changes only. A section retains its stable `id` while its `heading` changes. Demon Docs stores canonical shared-schema snapshots by fingerprint in its private Git-backed object state, plus the latest successfully reconciled version for migration. A deterministic one-to-one rename changes only the Markdown heading text and preserves the complete section body.
+Heading renames are schema changes only. A section retains its stable `id` while its `heading` changes. Archivist stores canonical shared-schema snapshots by fingerprint in its private Git-backed object state, plus the latest successfully reconciled version for migration. A deterministic one-to-one rename changes only the Markdown heading text and preserves the complete section body.
 
-Demon Docs does not infer renames from document wording. Ambiguous structural changes remain unresolved.
+Archivist does not infer renames from document wording. Ambiguous structural changes remain unresolved.
 
 Document-specific exceptions record the exact shared-schema fingerprint under which they were accepted. `[format].invalidation_similarity` defaults to `0.5`. Similarity is always measured cumulatively against that accepted snapshot: it is the proportion of stable section IDs whose canonical definitions remain unchanged, divided by the larger schema's section count. When similarity falls below the configured value, `check` reports invalidation and `fix` deletes the document-specific schema before requiring new decisions. Set the threshold to `0` to disable automatic invalidation.
 
@@ -231,7 +231,7 @@ Document-specific sections extend matching shared section IDs or add local IDs. 
 
 - [Using Document Schemas](../guides/document-schemas.md)
 - [CLI Reference](cli.md)
-- [Demon Docs Configuration](configuration.md)
+- [Archivist Configuration](configuration.md)
 - [Frontmatter](frontmatter.md)
 - [Managed Files and State](managed-files-and-state.md)
 - [Application Orchestration](../architecture/application-orchestration.md)

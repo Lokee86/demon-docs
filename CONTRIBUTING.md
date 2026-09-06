@@ -1,4 +1,4 @@
-# Contributing to Demon Docs
+# Contributing to Archivist
 
 Issue reports and design proposals are welcome.
 

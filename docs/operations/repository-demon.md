@@ -30,7 +30,7 @@ host enters repository work
 -> demon exits after grace when no feeders remain
 ```
 
-The repository demon is the self-managing background lifecycle around the existing Demon Docs watcher. It runs the same deterministic reconciliation operations as `ddocs watch`; it does not introduce a second indexing, link-repair, or repository-truth system.
+The repository demon is the self-managing background lifecycle around the existing Archivist watcher. It runs the same deterministic reconciliation operations as `ddocs watch`; it does not introduce a second indexing, link-repair, or repository-truth system.
 
 The static commands remain authoritative:
 
@@ -68,9 +68,9 @@ Two feeder kinds are supported:
 
 Each feeder has an opaque token and its own heartbeat record. Leaving one shell or finishing one agent job removes only that feeder. It does not shut down a demon still needed by another feeder.
 
-The generic agent feeder boundary is deliberately host-neutral. Demon Docs does not need to know whether an agent feeder came from Codex, Hermes, an MCP server, Claude Code, or another plugin. Each adapter supplies a client name, registers before work begins, refreshes its opaque token while work continues, and releases the token on every terminal path, including success, failure, cancellation, timeout, and spawn failure.
+The generic agent feeder boundary is deliberately host-neutral. Archivist does not need to know whether an agent feeder came from Codex, Hermes, an MCP server, Claude Code, or another plugin. Each adapter supplies a client name, registers before work begins, refreshes its opaque token while work continues, and releases the token on every terminal path, including success, failure, cancellation, timeout, and spawn failure.
 
-The generic feeder protocol exists in Demon Docs core. Thin MCP, Codex, Hermes, and other host adapters remain integration work; the daemon does not invoke those hosts itself.
+The generic feeder protocol exists in Archivist core. Thin MCP, Codex, Hermes, and other host adapters remain integration work; the daemon does not invoke those hosts itself.
 
 Agent registration is operational only. It keeps the watcher alive while an adapter is active; it does not make the demon an MCP server, context service, or host integration. A missed release is bounded by feeder expiry, and a later heartbeat can recover a missing or stale demon owner.
 
@@ -136,17 +136,17 @@ Invoke-Expression (& ddocs demon __shell-hook powershell)
 
 The PowerShell command emits one physical bootstrap line, even though the decoded hook is multiline. This keeps Windows PowerShell 5.1 from converting native-command output into an `Object[]` that `Invoke-Expression` cannot execute. Repository and active-shell values are parsed by removing their named prefixes rather than fixed character offsets, preserving Windows drive letters and single-digit counts.
 
-The hook tracks its repository root and feeder token. Entering a Demon Docs repository registers one shell feeder. Moving to another repository or leaving the repository removes the old feeder rather than issuing a repository-wide shutdown request.
+The hook tracks its repository root and feeder token. Entering an Archivist repository registers one shell feeder. Moving to another repository or leaving the repository removes the old feeder rather than issuing a repository-wide shutdown request.
 
 The hook announces when it actually claims and starts a demon, then reports the current active-shell count. The ownership result comes from the enter operation itself rather than a separate status guess.
 
 ## Linked Worktrees
 
-A linked Git worktree receives independent Demon Docs runtime and object state under that worktree's own `.ddocs/` directory.
+A linked Git worktree receives independent Archivist runtime and object state under that worktree's own `.ddocs/` directory.
 
-Read-only discovery can identify a linked worktree from nested directories without creating runtime state. The first mutating demon entry bootstraps the worktree by copying the primary worktree's Demon Docs configuration and initializing fresh local `.ddocs/` object storage. The primary and linked worktrees therefore do not share a running demon or mutable Demon Docs state.
+Read-only discovery can identify a linked worktree from nested directories without creating runtime state. The first mutating demon entry bootstraps the worktree by copying the primary worktree's Archivist configuration and initializing fresh local `.ddocs/` object storage. The primary and linked worktrees therefore do not share a running demon or mutable Archivist state.
 
-Git awareness is limited to this worktree adapter. Ordinary Demon Docs repository discovery remains based on `.ddocs/config.toml`.
+Git awareness is limited to this worktree adapter. Ordinary Archivist repository discovery remains based on `.ddocs/config.toml`.
 
 ## Runtime State
 

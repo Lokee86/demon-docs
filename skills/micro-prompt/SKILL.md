@@ -1,6 +1,6 @@
 # Agent Micro Refactor Skill
 
-Use this skill for the default Demon Docs implementation workflow: one small, bounded agent task that makes a reviewable edit.
+Use this skill for the default Archivist implementation workflow: one small, bounded agent task that makes a reviewable edit.
 
 ## When to use
 

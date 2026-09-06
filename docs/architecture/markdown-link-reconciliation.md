@@ -16,7 +16,7 @@ This document describes the implemented repository-local link graph, supported s
 
 ## Overview
 
-Demon Docs maintains a repository-scoped graph of local Markdown links. This is a focused link graph for validation and path repair; it is not the later repository, code, symbol, or agent-context graph.
+Archivist maintains a repository-scoped graph of local Markdown links. This is a focused link graph for validation and path repair; it is not the later repository, code, symbol, or agent-context graph.
 
 This page owns the subsystem overview and supported behavior. The detailed record transitions are owned by [Link Reconciliation State Machine](link-reconciliation-state-machine.md), while filesystem writes and multi-store publication are owned by [Generated Rewrite Publication](generated-rewrite-publication.md).
 
@@ -44,7 +44,7 @@ It does not own authored link labels or prose, external target contents, semanti
 
 ## Scope
 
-Markdown source files and repository-local targets are scanned throughout the Demon Docs repository root, subject to `.docignore` and the permanent traversal exclusions. Nested `.worktrees/` and `.workingtrees/` directories are pruned so attached checkout copies do not enter the repository link graph. A link to an ignored repository path is left outside the link graph. Explicit targets outside the repository are not governed by the repository's `.docignore`.
+Markdown source files and repository-local targets are scanned throughout the Archivist repository root, subject to `.docignore` and the permanent traversal exclusions. Nested `.worktrees/` and `.workingtrees/` directories are pruned so attached checkout copies do not enter the repository link graph. A link to an ignored repository path is left outside the link graph. Explicit targets outside the repository are not governed by the repository's `.docignore`.
 
 Local targets may be:
 
@@ -57,7 +57,7 @@ Local targets may be:
 
 Web URLs and other non-filesystem schemes are not part of the local link graph.
 
-Demon Docs only rewrites Markdown source files inside the repository. A target outside the repository can be checked and used as reconciliation evidence, but the external target itself is never modified.
+Archivist only rewrites Markdown source files inside the repository. A target outside the repository can be checked and used as reconciliation evidence, but the external target itself is never modified.
 
 ## Supported Markdown Forms
 
@@ -80,13 +80,13 @@ Link-like text inside fenced code blocks and inline code spans is ignored. Query
 
 ## Persistent State
 
-`.ddocs/` is a private Demon Docs repository, independent of the project's `.git/`. It uses go-git object, tree, reference, and filesystem-storage plumbing internally, but exposes no staging, branch, merge, commit-history, or manual repository workflow.
+`.ddocs/` is a private Archivist repository, independent of the project's `.git/`. It uses go-git object, tree, reference, and filesystem-storage plumbing internally, but exposes no staging, branch, merge, commit-history, or manual repository workflow.
 
 State is stored as deterministic records for file identities, current paths, Markdown sources and outgoing links, incoming-link groups, fingerprints, and pending generated writes. Record names are distributed across 16 content-addressed shards. A state reference atomically publishes the new root tree after all affected shard objects exist.
 
 A single-file change rewrites only its affected shard or shards; unchanged objects and root entries are reused. The old `.ddocs/files.json` and `.ddocs/links.json` manifests are read only for migration and are removed after the first successful repository-backed publication.
 
-The state is implementation-owned and schema-versioned. Source files are not modified to embed Demon Docs file IDs. When exactly one present file carries a `document_id` that also appears on absent duplicate private records, reconciliation collapses those stale aliases into the live file identity, remaps stored source and target references, and merges historical paths before ordinary candidate discovery.
+The state is implementation-owned and schema-versioned. Source files are not modified to embed Archivist file IDs. When exactly one present file carries a `document_id` that also appears on absent duplicate private records, reconciliation collapses those stale aliases into the live file identity, remaps stored source and target references, and merges historical paths before ordinary candidate discovery.
 
 ## First Scan
 
@@ -98,7 +98,7 @@ After the baseline exists, later passes can repair links using recorded identity
 
 ## Reconciliation Evidence
 
-Demon Docs prefers deterministic evidence in this order:
+Archivist prefers deterministic evidence in this order:
 
 1. the previous target file ID still resolves to a present file, including a canonical live identity recovered from an unambiguous `document_id` alias;
 2. the target remains at the recorded current path, including a case-only correction;
@@ -113,15 +113,15 @@ Relative links remain relative. Absolute filesystem links remain absolute. Link 
 
 ## External Edits and Generated Rewrites
 
-User-authored Markdown changes and Demon Docs-generated repairs follow separate paths.
+User-authored Markdown changes and Archivist-generated repairs follow separate paths.
 
 Repository traversal remains serial and deterministic. Files whose path, size, and modification time still match reuse stored fingerprints and `document_id` values. Changed and new regular files are read through a bounded 16-worker pool; Markdown content is read once for both fingerprinting and document-identity extraction, and results merge in traversal order.
 
-For external edits, Demon Docs first identifies every source that cannot reuse stored link records. Those changed sources are read and parsed through a bounded 16-worker pool. Each worker writes only to its assigned source-result slot; results then merge in deterministic source-path order before target resolution, file-identity mutation, diagnostics, review-policy decisions, and repair planning. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
+For external edits, Archivist first identifies every source that cannot reuse stored link records. Those changed sources are read and parsed through a bounded 16-worker pool. Each worker writes only to its assigned source-result slot; results then merge in deterministic source-path order before target resolution, file-identity mutation, diagnostics, review-policy decisions, and repair planning. A content change currently causes a complete source parse; line- or chunk-level incremental parsing is not implemented.
 
-For a known target move, Demon Docs queries stored incoming links by target identity and identifies unchanged affected sources. Each source independently reads its document, calculates exact destination replacements from existing link records, consults the read-only review policy, and constructs a detached generated-rewrite plan through the bounded 16-worker pool. Results remain indexed by deterministic source-path order and merge serially before graph records, diagnostics, updates, and rewrites enter the shared plan. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
+For a known target move, Archivist queries stored incoming links by target identity and identifies unchanged affected sources. Each source independently reads its document, calculates exact destination replacements from existing link records, consults the read-only review policy, and constructs a detached generated-rewrite plan through the bounded 16-worker pool. Results remain indexed by deterministic source-path order and merge serially before graph records, diagnostics, updates, and rewrites enter the shared plan. Each generated rewrite records the source file ID, expected old and new content hashes, affected link IDs, and old and new destinations. Successful generated repairs also append an applied-change event to the review ledger.
 
-If stored occurrence offsets no longer match current source text despite unchanged file metadata, Demon Docs abandons that internal fast path and reparses the current source before rebuilding the repair. It does not fail the entire reconciliation or write using stale offsets.
+If stored occurrence offsets no longer match current source text despite unchanged file metadata, Archivist abandons that internal fast path and reparses the current source before rebuilding the repair. It does not fail the entire reconciliation or write using stale offsets.
 
 Before writing, every source must still match its expected old hash. Writes use a same-directory temporary file and atomic replacement. The known graph mutation is then published directly. Reparsing the rewritten source is limited to verifying the expected links and refreshing byte offsets, line numbers, and fingerprints.
 

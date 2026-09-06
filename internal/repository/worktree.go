@@ -32,7 +32,7 @@ func DetectLinkedWorktree(start string) (Location, bool, error) {
 
 // BootstrapLinkedWorktree is the sole Git-aware repository adapter. It only
 // handles a linked worktree whose primary worktree is already initialized; all
-// ordinary Demon Docs discovery remains independent of Git.
+// ordinary Archivist discovery remains independent of Git.
 func BootstrapLinkedWorktree(start string) (Location, bool, error) {
 	location, detected, err := DetectLinkedWorktree(start)
 	if err != nil || !detected {

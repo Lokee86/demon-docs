@@ -1,6 +1,6 @@
 # Context Benchmarking Tools
 
-These scripts support future corpus preparation. They are research utilities, not Demon Docs product commands or release gates.
+These scripts support future corpus preparation. They are research utilities, not Archivist product commands or release gates.
 
 ## Current Helpers
 

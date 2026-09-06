@@ -49,7 +49,7 @@ The focused canonical owners are:
 
 ## Permanent safety rule
 
-Demon Docs owns the complete configured codemap section as one unified managed artifact. Existing and newly generated links are not split into separate authored and generated lists.
+Archivist owns the complete configured codemap section as one unified managed artifact. Existing and newly generated links are not split into separate authored and generated lists.
 
 By default it never removes an existing valid semantic link merely because the algorithm does not rediscover it or ranks it below the hard-link tier. Projects may explicitly enable undiscovered-link or low-score removal. Declined proposed additions are persisted through the shared review ledger and remain suppressed until their evidence materially changes.
 
@@ -122,7 +122,7 @@ See [Codemap Evidence and Ranking](codemap-evidence-and-ranking.md).
 
 ### 4. Semantic staleness
 
-When current Arcana state is available, Demon Docs compares each document against the Arcana snapshot recorded by its last accepted semantic baseline in `.ddocs`. Arcana's deterministic snapshot `diff` identifies mapped nodes whose definition metadata, ownership-like identity, or relationships changed, and detects mapped targets that disappeared or moved. Directory and glob targets are not treated as semantic nodes.
+When current Arcana state is available, Archivist compares each document against the Arcana snapshot recorded by its last accepted semantic baseline in `.ddocs`. Arcana's deterministic snapshot `diff` identifies mapped nodes whose definition metadata, ownership-like identity, or relationships changed, and detects mapped targets that disappeared or moved. Directory and glob targets are not treated as semantic nodes.
 
 Semantic staleness is analysis only. It does not remove authored links, alter recommendation score, or authorize pruning. `inspect` reports the individual mapped targets and change kinds; `check` fails when a document has semantic-staleness findings even if its managed codemap text would not change.
 
@@ -190,7 +190,7 @@ Exact flags, schemas, and exit behavior are owned by the CLI and report-format r
 - per-document semantic validation baselines are stored in `.ddocs` and record document digest plus the accepted Arcana snapshot;
 - source reports and labels may be retained as research evidence;
 - decline and reconsideration state belongs to `internal/review` under `refs/ddocs/review`;
-- Demon Docs owns the complete recognized codemap section while preserving existing valid links by default.
+- Archivist owns the complete recognized codemap section while preserving existing valid links by default.
 
 ## Invariants and safety boundaries
 

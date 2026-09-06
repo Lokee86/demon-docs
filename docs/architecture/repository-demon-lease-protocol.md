@@ -16,7 +16,7 @@ This document defines the implemented repository-demon ownership claim, feeder d
 
 ## Overview
 
-The repository demon is a single-owner lifecycle around the normal Demon Docs watcher.
+The repository demon is a single-owner lifecycle around the normal Archivist watcher.
 
 One fresh owner record identifies the process responsible for the repository-local watcher. Independent feeder records represent shells or external agent sessions that currently need that watcher. The owner remains alive while configuration permits it and fresh feeders continue to exist, then exits after the no-feeder grace period or another shutdown condition.
 
@@ -468,7 +468,7 @@ Feeder counts come from `SnapshotFeeders`, so expired records are excluded from 
 
 ## Linked-worktree isolation
 
-Mutating demon entry can bootstrap a linked Git worktree that has not yet initialized local Demon Docs state.
+Mutating demon entry can bootstrap a linked Git worktree that has not yet initialized local Archivist state.
 
 The worktree receives independent:
 

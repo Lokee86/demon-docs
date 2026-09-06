@@ -4,21 +4,21 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7310-8006-496ce3421c27
 document_type: general
 policy_exempt: false
-summary: This document defines the documentation policy for Demon Docs.
+summary: This document defines the documentation policy for Archivist.
 ---
 # Documentation Policy
 
-Parent index: [Demon Docs Documentation](./INDEX.md)
+Parent index: [Archivist Documentation](./INDEX.md)
 
 ## Purpose
 
-This document defines the documentation policy for Demon Docs.
+This document defines the documentation policy for Archivist.
 
 It governs where documentation belongs, how current facts are separated from plans and research, how folder indexes are maintained, what shape each document type requires, when code maps are expected, and how stale or duplicated documentation is removed.
 
 ## Overview
 
-Demon Docs documentation is organized by **documentation type and ownership**, not merely by feature name.
+Archivist documentation is organized by **documentation type and ownership**, not merely by feature name.
 
 A single feature may have several valid documents because different documents answer different questions:
 
@@ -49,7 +49,7 @@ Documents must make those distinctions explicit. Planning and research material 
 
 ## Documentation types
 
-Demon Docs uses these documentation types:
+Archivist uses these documentation types:
 
 ```text
 Guide
@@ -74,7 +74,7 @@ Guides are task-oriented user documentation.
 Guides explain how to accomplish a concrete goal, such as:
 
 ```text
-installing Demon Docs
+installing Archivist
 initializing an existing repository
 adding checks to CI
 running foreground automation
@@ -311,7 +311,7 @@ Indexes should stay navigational. They may summarize ownership and authority, bu
 
 ## Managed index sections
 
-Demon Docs' own indexes should use the default managed sections:
+Archivist's own indexes should use the default managed sections:
 
 ```markdown
 
@@ -361,7 +361,7 @@ Notes
 
 The title and parent-index link appear before `Purpose`.
 
-`Purpose` explains why the document exists. `Overview` explains what is being documented, how it behaves, and how it fits into Demon Docs.
+`Purpose` explains why the document exists. `Overview` explains what is being documented, how it behaves, and how it fits into Archivist.
 
 ## Type-specific shapes
 
@@ -551,7 +551,7 @@ Package-level coverage is also not sufficient when one package owns several inde
 ## Related docs
 
 - [Documentation Procedure](documentation-procedure.md)
-- [Demon Docs Documentation](INDEX.md)
+- [Archivist Documentation](INDEX.md)
 - [Repository Layout](development/repository-layout.md)
 - [Roadmap](planning/roadmap.md)
 

@@ -162,7 +162,7 @@ func TestInitCreatesRepositoryAndCommandsDiscoverItFromChild(t *testing.T) {
 func TestStatusFailsOutsideRepository(t *testing.T) {
 	withWorkingDirectory(t, t.TempDir(), func(string) {
 		var out, errOut bytes.Buffer
-		if code := Run(context.Background(), []string{"status"}, &out, &errOut); code != 2 || !strings.Contains(errOut.String(), "no Demon Docs repository found") {
+		if code := Run(context.Background(), []string{"status"}, &out, &errOut); code != 2 || !strings.Contains(errOut.String(), "no Archivist repository found") {
 			t.Fatalf("code=%d out=%q err=%q", code, out.String(), errOut.String())
 		}
 	})

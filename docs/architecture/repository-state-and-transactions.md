@@ -16,7 +16,7 @@ This document describes the private `.ddocs/` object repository, durable identit
 
 ## Overview
 
-Demon Docs keeps authored files in the ordinary repository filesystem. Private `.ddocs/` state supplements those files with stable identities, path history, fingerprints, incoming-link groups, reverse-index state, generated-write metadata, review decisions, applied-change history, and repository-demon runtime data.
+Archivist keeps authored files in the ordinary repository filesystem. Private `.ddocs/` state supplements those files with stable identities, path history, fingerprints, incoming-link groups, reverse-index state, generated-write metadata, review decisions, applied-change history, and repository-demon runtime data.
 
 The private repository exists to make later reconciliation deterministic. It is not an alternate authoring model and does not replace Git.
 

@@ -2,7 +2,7 @@ package app
 
 import "encoding/base64"
 
-const powershellHookScript = `# Demon Docs shell integration. Add: Invoke-Expression (& ddocs demon __shell-hook powershell)
+const powershellHookScript = `# Archivist shell integration. Add: Invoke-Expression (& ddocs demon __shell-hook powershell)
 $global:__DdocsDemonRepo = ""
 $global:__DdocsDemonToken = ""
 function global:Leave-DdocsDemon {

@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-2e95-7b3e-b0d4-2dfff823b601
 document_type: general
 policy_exempt: false
-summary: This document describes how Demon Docs recognizes authored Markdown code maps, normalizes their targets, resolves those targets against repository scope, and exports the deterministic schema-1 dataset consumed by later analysis stages.
+summary: This document describes how Archivist recognizes authored Markdown code maps, normalizes their targets, resolves those targets against repository scope, and exports the deterministic schema-1 dataset consumed by later analysis stages.
 ---
 # Codemap Extraction and Dataset
 
@@ -12,7 +12,7 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document describes how Demon Docs recognizes authored Markdown code maps, normalizes their targets, resolves those targets against repository scope, and exports the deterministic schema-1 dataset consumed by later analysis stages.
+This document describes how Archivist recognizes authored Markdown code maps, normalizes their targets, resolves those targets against repository scope, and exports the deterministic schema-1 dataset consumed by later analysis stages.
 
 ## Overview
 
@@ -117,7 +117,7 @@ raw authored line
 
 Source columns are UTF-8 byte positions rather than grapheme indexes. Consumers that display source positions must preserve that interpretation.
 
-The syntax kind is descriptive. Demon Docs does not rewrite all authored code maps into one syntax.
+The syntax kind is descriptive. Archivist does not rewrite all authored code maps into one syntax.
 
 ## Target normalization
 
@@ -155,13 +155,13 @@ symbol not verified because semantic resolution is unavailable/stale
 unsupported target
 ```
 
-Demon Docs does not choose among ambiguous roots or coerce a directory into a file target. Pattern families are not later treated as one exact benchmark answer.
+Archivist does not choose among ambiguous roots or coerce a directory into a file target. Pattern families are not later treated as one exact benchmark answer.
 
 ## Arcana file and symbol resolution
 
 `BuildDatasetContext` accepts a narrow `TargetResolver`. The current production, export, benchmark, and precision paths attempt to open the current Arcana snapshot through `internal/codemaparcana`; `BuildDataset` remains the compatibility path with no semantic resolver.
 
-The Arcana integration uses the versioned `arcana.query.v1` JSONL process protocol. Target resolution itself uses `resolve_file` and `resolve_symbol`; the shared production session also requires `list_nodes`/`neighbors` for bounded relationship evidence and `diff` for semantic-staleness comparison. Demon Docs never reads Arcana's packed graph storage directly.
+The Arcana integration uses the versioned `arcana.query.v1` JSONL process protocol. Target resolution itself uses `resolve_file` and `resolve_symbol`; the shared production session also requires `list_nodes`/`neighbors` for bounded relationship evidence and `diff` for semantic-staleness comparison. Archivist never reads Arcana's packed graph storage directly.
 
 Before a resolver is trusted, `.arcana/CURRENT` must equal `.lexicon/CURRENT`, the Arcana snapshot must be bound to that same Lexicon snapshot, and the content-addressed Lexicon snapshot manifest must verify against its published ID. Path-qualified symbol/file queries are used only when the current file SHA-256 still matches the Lexicon manifest content ID. Standalone/global symbols are more conservative: they require the Lexicon preparation Git head to equal the current clean repository head. If those checks cannot establish freshness, semantic resolution is not attempted.
 
@@ -183,7 +183,7 @@ symbol:Name / standalone symbol
 
 Resolved semantic records retain Arcana's stable node key, durable external node identity, node kind, repository path, qualified name, and exact source span when present. The stable node key is used to pair logical declarations across snapshots even when path/identity metadata changes. Plain file existence remains filesystem truth; Arcana file resolution adds semantic identity but does not turn an existing unsupported-language file into a missing file.
 
-An Arcana executable is discovered next to the running Demon Docs binary or on `PATH`; `DDOCS_ARCANA_COMMAND` is available as a development/host override. Missing or structurally stale Arcana state degrades to the explicit fallback states above. Once a current Arcana protocol session has been opened, query/protocol failures abort the operation rather than silently mixing partial semantic truth with fallback results.
+An Arcana executable is discovered next to the running Archivist binary or on `PATH`; `DDOCS_ARCANA_COMMAND` is available as a development/host override. Missing or structurally stale Arcana state degrades to the explicit fallback states above. Once a current Arcana protocol session has been opened, query/protocol failures abort the operation rather than silently mixing partial semantic truth with fallback results.
 
 Relationship expansion is not part of dataset construction. Step 5 consumes the same verified Arcana session through the separate corpus `RelationshipProvider`, so target resolution remains an authored-target concern while graph-neighborhood evidence remains per-document and benchmark-safe.
 

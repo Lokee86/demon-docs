@@ -14,7 +14,7 @@ $RepoPrefix = $RepoRoot.TrimEnd('\') + '\'
 
 if ($Target -eq $RepoRoot -or $Target.StartsWith($RepoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw @"
-Refusing to create the disposable demo inside the Demon Docs checkout.
+Refusing to create the disposable demo inside the Archivist checkout.
 Tracked source fixture: $Source
 Requested target:       $Target
 Use the default sibling target or another directory outside $RepoRoot.
@@ -39,5 +39,5 @@ Copy-Item -Path (Join-Path $Source ".docignore") -Destination $Target -Force
 Write-Host ""
 Write-Host "Demo workspace ready."
 Write-Host "Open this directory as the Obsidian vault: $Target"
-Write-Host "Do NOT open the tracked fixture under the Demon Docs checkout."
+Write-Host "Do NOT open the tracked fixture under the Archivist checkout."
 Write-Host "Next: Set-Location '$Target'; ddocs init --root docs"

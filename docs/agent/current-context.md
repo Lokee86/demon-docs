@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 5e940090-17d9-430b-968f-0f3e18c6a059
 document_type: general
 policy_exempt: false
-summary: This file is volatile project memory for agents working on Demon Docs.
+summary: This file is volatile project memory for agents working on Archivist.
 ---
 # Agent Current Context
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This file is volatile project memory for agents working on Demon Docs.
+This file is volatile project memory for agents working on Archivist.
 
 ## Overview
 
@@ -36,7 +36,7 @@ Keep this file short and prune it aggressively. Stable facts belong in canonical
 - Future public command: **`scribe`**, replacing both `ddocs` and `demon` with one executable surface.
 - Do not rename current shipped commands or rewrite implementation opportunistically; preserve the Go product as the behavioral reference until an explicit migration begins.
 
-Polyglot repository intelligence and deterministic task-context delivery are not Demon Docs gaps. They belong to ArcanaGraph and Grimoire Context.
+Polyglot repository intelligence and deterministic task-context delivery are not Archivist gaps. They belong to ArcanaGraph and Grimoire Context.
 
 Use [Current Limitations](../limits/current-limitations.md) and [Roadmap](../planning/roadmap.md) for canonical status.
 

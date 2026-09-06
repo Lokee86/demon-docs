@@ -112,7 +112,7 @@ These measurements include repository traversal, document reads, parsing, valida
 
 Recorded benchmark evidence. New performance changes should preserve the original artifacts and add comparable runs rather than overwriting historical results.
 
-Demon Docs records link-reconciliation benchmarks separately from correctness tests. These results are host-specific engineering measurements, not guaranteed performance limits. Unless noted otherwise, the measurements below were taken on the Windows development host on July 19, 2026.
+Archivist records link-reconciliation benchmarks separately from correctness tests. These results are host-specific engineering measurements, not guaranteed performance limits. Unless noted otherwise, the measurements below were taken on the Windows development host on July 19, 2026.
 
 ## High-Fanout Target Move
 

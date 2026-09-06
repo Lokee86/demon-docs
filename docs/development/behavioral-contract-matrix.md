@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7b71-a12d-60a0efab1898
 document_type: general
 policy_exempt: false
-summary: This document maps Demon Docs' critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
+summary: This document maps Archivist's critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
 ---
 # Behavioral Contract Matrix
 
@@ -12,7 +12,7 @@ Parent index: [Development](./INDEX.md)
 
 ## Purpose
 
-This document maps Demon Docs' critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
+This document maps Archivist's critical behavioral contracts to their canonical documentation owners, focused tests, integration coverage, and release gates.
 
 ## Overview
 
@@ -85,7 +85,7 @@ A test passing does not authorize undocumented contract changes. A document clai
 | Watch startup retries recognized stale move plans, and event-buffer overflow requests a complete reconciliation without terminating observation | [Watch Scheduler and Reconciliation Serialization](../architecture/watch-scheduler.md), [Repository Demon](../operations/repository-demon.md) | `TestInitialReconciliationRetriesTransientFilesystemRaces`, `TestWatcherRecoversFromEventOverflowWithFullReconciliation` | `go test ./internal/watch -count=1` |
 | New generated rewrites and scoped tracking preserve unrelated pending watcher suppressions | [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md), [Watcher and Automation](../operations/watcher-and-automation.md) | suppression merge tests, `TestTrackSourcesRefreshesOnlySelectedSourceRecords` | `go test ./internal/links -count=1` |
 | Policy and index fixes skip clean-run link tracking and refresh only changed source paths | [Reconciliation Command Lifecycle](../architecture/reconciliation-command-lifecycle.md) | `TestFrontmatterOnlyCleanFixDoesNotRefreshLinkState`, `TestTrackSourcesRefreshesOnlySelectedSourceRecords` | `go test ./internal/app ./internal/links -count=1` |
-| Rollback never overwrites content created after Demon Docs' write | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRollbackGeneratedRefusesToOverwriteNewerContent` | full Go suite |
+| Rollback never overwrites content created after Archivist's write | [Repository State and Transactions](../architecture/repository-state-and-transactions.md) | `TestRollbackGeneratedRefusesToOverwriteNewerContent` | full Go suite |
 | Review-publication failure restores generated source content | [Review Ledger](../architecture/review-ledger.md) | `TestApplyAndSaveRestoresSourcesWhenReviewBatchFails`, `TestRollbackAfterReviewFailureRestoresUndoSource` | review CLI integration suite |
 | Stateless move preflights hashes and repository containment | [Stateless Document Refactoring](../guides/document-refactoring.md) | `internal/links/move_test.go`, `internal/app/move_test.go` | `go test ./internal/links ./internal/app -count=1` |
 | Shared rewrite batches reject duplicate or inconsistent inputs, preflight every source before writes, verify new hashes, and refuse rollback over newer content | [Generated Rewrite Publication](../architecture/generated-rewrite-publication.md) | `TestApplyAndRollbackBatch`, `TestPreflightFailurePreventsEveryWrite`, `TestRollbackRefusesNewerContent` | `go test ./internal/filetxn -count=1` |

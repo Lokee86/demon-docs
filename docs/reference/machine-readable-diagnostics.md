@@ -4,7 +4,7 @@ created: "2026-08-28"
 document_id: 019fb711-9205-7fe0-bdd5-9ef5244bcb3e
 document_type: general
 policy_exempt: false
-summary: Versioned JSON diagnostic contract for all Demon Docs reconciliation checks, including stable envelope fields, subsystem diagnostic codes, severity values, and compatibility rules.
+summary: Versioned JSON diagnostic contract for all Archivist reconciliation checks, including stable envelope fields, subsystem diagnostic codes, severity values, and compatibility rules.
 ---
 # Machine-Readable Diagnostics
 
@@ -12,7 +12,7 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines the first stable machine-readable diagnostic contract exposed by Demon Docs.
+This document defines the first stable machine-readable diagnostic contract exposed by Archivist.
 
 ## Current scope
 

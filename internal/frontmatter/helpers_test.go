@@ -7,7 +7,7 @@ func schema() config.Frontmatter {
 		Enabled:        true,
 		DefaultFormat:  FormatYAML,
 		AllowedFormats: []string{FormatYAML, FormatTOML},
-		DefaultAuthor:  "Demon Docs",
+		DefaultAuthor:  "Archivist",
 		UnknownFields:  "remove",
 		Fields: map[string]config.FrontmatterField{
 			"author":        {Type: "string", Required: true, DefaultFrom: "frontmatter.default_author"},

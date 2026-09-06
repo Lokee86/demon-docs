@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-2e95-7a47-b5c2-b8cd161a8a8b
 document_type: general
 policy_exempt: false
-summary: This document describes how Demon Docs builds normalized repository facts for codemap evidence, including repository files, dependency edges, symbols, related documents, and bounded Git history.
+summary: This document describes how Archivist builds normalized repository facts for codemap evidence, including repository files, dependency edges, symbols, related documents, and bounded Git history.
 ---
 # Codemap Corpus and Adapters
 
@@ -12,7 +12,7 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document describes how Demon Docs builds normalized repository facts for codemap evidence, including repository files, dependency edges, symbols, related documents, and bounded Git history.
+This document describes how Archivist builds normalized repository facts for codemap evidence, including repository files, dependency edges, symbols, related documents, and bounded Git history.
 
 ## Overview
 
@@ -35,7 +35,7 @@ repository + codemap dataset
    -> bounded semantic relationship facts
 ```
 
-The providers report facts only. They do not rank candidates, decide documentation coverage, or mutate authored maps. The repository-wide `CodeIntelligenceProvider` defaults to Demon Docs' shallow language adapters. The per-document `RelationshipProvider` is optional and is currently backed by Arcana when a current verified snapshot is available.
+The providers report facts only. They do not rank candidates, decide documentation coverage, or mutate authored maps. The repository-wide `CodeIntelligenceProvider` defaults to Archivist's shallow language adapters. The per-document `RelationshipProvider` is optional and is currently backed by Arcana when a current verified snapshot is available.
 
 ## Code root
 
@@ -131,7 +131,7 @@ DependencyEdge[]
 SymbolDeclaration[]
 ```
 
-Demon Docs validates every returned path against the current repository-file inventory, rejects provider facts that point outside that inventory, trims relation/symbol identifiers, removes self-edges and empty facts, deduplicates equivalent facts, and publishes deterministic ordering. Provider order is therefore not observable by evidence or ranking.
+Archivist validates every returned path against the current repository-file inventory, rejects provider facts that point outside that inventory, trims relation/symbol identifiers, removes self-edges and empty facts, deduplicates equivalent facts, and publishes deterministic ordering. Provider order is therefore not observable by evidence or ranking.
 
 The provider does **not** receive document text, existing codemap targets, evidence weights, review state, or mutation authority. This keeps future Lexicon/Arcana integration on the fact side of the boundary rather than allowing an external graph to decide what belongs in documentation.
 

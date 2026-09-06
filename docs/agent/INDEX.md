@@ -4,15 +4,15 @@ created: "2026-07-19"
 document_id: d5b9a8db-3047-4a7b-953e-2da0258586ec
 document_type: general
 policy_exempt: false
-summary: This index summarizes the agent workflow and repository-orientation guidance for Demon Docs.
+summary: This index summarizes the agent workflow and repository-orientation guidance for Archivist.
 ---
 # Agent
 
-Parent index: [Demon Docs Documentation](../INDEX.md)
+Parent index: [Archivist Documentation](../INDEX.md)
 
 ## Purpose
 
-This index summarizes the agent workflow and repository-orientation guidance for Demon Docs.
+This index summarizes the agent workflow and repository-orientation guidance for Archivist.
 
 ## Overview
 

@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 8ebd03b5-09be-4ace-bbc5-b1c27c6ebf73
 document_type: general
 policy_exempt: false
-summary: This document owns agent-facing repository safety and hygiene rules for Demon Docs.
+summary: This document owns agent-facing repository safety and hygiene rules for Archivist.
 ---
 # Repo Hygiene
 
@@ -12,11 +12,11 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document owns agent-facing repository safety and hygiene rules for Demon Docs.
+This document owns agent-facing repository safety and hygiene rules for Archivist.
 
 ## Overview
 
-Demon Docs worktrees may contain unrelated user changes, generated artifacts, private state, or benchmark outputs. Agents must handle repository state carefully while keeping scoped work focused.
+Archivist worktrees may contain unrelated user changes, generated artifacts, private state, or benchmark outputs. Agents must handle repository state carefully while keeping scoped work focused.
 
 ## Rules
 

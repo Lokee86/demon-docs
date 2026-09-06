@@ -261,8 +261,8 @@ func TestStoreHistoryReadsLegacyPerEventCommit(t *testing.T) {
 		t.Fatal(err)
 	}
 	commit := object.Commit{
-		Author:    object.Signature{Name: "Demon Docs", Email: "ddocs@local", When: now},
-		Committer: object.Signature{Name: "Demon Docs", Email: "ddocs@local", When: now},
+		Author:    object.Signature{Name: "Archivist", Email: "ddocs@local", When: now},
+		Committer: object.Signature{Name: "Archivist", Email: "ddocs@local", When: now},
 		Message:   eventMessage(event),
 		TreeHash:  treeHash,
 	}

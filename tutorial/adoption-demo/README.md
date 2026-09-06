@@ -1,13 +1,13 @@
-# Demon Docs adoption walkthrough
+# Archivist adoption walkthrough
 
 > [!IMPORTANT]
 > **Do not open `tutorial/`, `tutorial/adoption-demo/`, or `tutorial/adoption-demo/fixture/` as the Obsidian vault.**
 >
-> `tutorial/adoption-demo/fixture/` is a tracked, read-only source template containing synthetic Astra Relay documentation. It is not the working tutorial repository, it is not Demon Docs product documentation, and it is not Space Rocks documentation.
+> `tutorial/adoption-demo/fixture/` is a tracked, read-only source template containing synthetic Astra Relay documentation. It is not the working tutorial repository, it is not Archivist product documentation, and it is not Space Rocks documentation.
 >
 > Run the reset script first. It creates a separate disposable sibling directory named `demon-docs-adoption-demo`. **Open and edit only that sibling directory.** Running the reset script again deletes and recreates that sibling workspace from the tracked fixture.
 
-This walkthrough adopts Demon Docs into a deliberately inconsistent documentation repository, repairs what can be decided safely, preserves authored decisions, reorganizes a service area without breaking references, and finishes by enabling automatic maintenance.
+This walkthrough adopts Archivist into a deliberately inconsistent documentation repository, repairs what can be decided safely, preserves authored decisions, reorganizes a service area without breaking references, and finishes by enabling automatic maintenance.
 
 The fixture is deterministic and contains no nested Git repository or initialized `.ddocs` state. Its top-level `README.md` discloses every intentional starting problem and navigability shortcoming. The demonstration uses YAML frontmatter; TOML frontmatter is also supported but is outside this walkthrough.
 
@@ -16,18 +16,18 @@ Codemap generation, reverse code indexes, and source-code integration are intent
 ## Source template versus working repository
 
 ```text
-Demon Docs checkout/
+Archivist checkout/
 └── tutorial/adoption-demo/fixture/   tracked source template; do not use as the vault
 
-Sibling of the Demon Docs checkout/
+Sibling of the Archivist checkout/
 └── demon-docs-adoption-demo/         generated disposable repository; use this as the vault
 ```
 
-The reset scripts never repair or regenerate files in place under `tutorial/`. They copy the tracked source template into the sibling working repository. The scripts refuse targets located inside the Demon Docs checkout.
+The reset scripts never repair or regenerate files in place under `tutorial/`. They copy the tracked source template into the sibling working repository. The scripts refuse targets located inside the Archivist checkout.
 
-## 1. Install Demon Docs
+## 1. Install Archivist
 
-From the Demon Docs checkout:
+From the Archivist checkout:
 
 ```bash
 go install ./cmd/ddocs
@@ -37,7 +37,7 @@ ddocs --version
 
 ## 2. Generate or reset the disposable demonstration repository
 
-Run the script **from the Demon Docs checkout**:
+Run the script **from the Archivist checkout**:
 
 ```bash
 bash tutorial/adoption-demo/reset-demo.sh
@@ -63,7 +63,7 @@ into this separate sibling directory:
 ../demon-docs-adoption-demo/
 ```
 
-The sibling directory is the actual tutorial repository. The script deletes and recreates it on every run, so edits made there are intentionally disposable. It does **not** modify the tracked source fixture inside the Demon Docs checkout.
+The sibling directory is the actual tutorial repository. The script deletes and recreates it on every run, so edits made there are intentionally disposable. It does **not** modify the tracked source fixture inside the Archivist checkout.
 
 Before continuing, confirm that the current directory ends with:
 
@@ -71,7 +71,7 @@ Before continuing, confirm that the current directory ends with:
 demon-docs-adoption-demo
 ```
 
-Open that exact directory as the Obsidian vault. Do not open the Demon Docs checkout, its `tutorial/` directory, or the tracked `fixture/` directory as the vault.
+Open that exact directory as the Obsidian vault. Do not open the Archivist checkout, its `tutorial/` directory, or the tracked `fixture/` directory as the vault.
 
 ## 3. Review the disclosed starting condition
 
@@ -86,9 +86,9 @@ It provides a complete inventory of the fixture's intentional state:
 - an older service area that needs to be moved and renamed;
 - eleven folders without local indexes, reducing navigability without constituting broken Markdown;
 - 175 authored local link occurrences across Markdown links, wiki links, aliases, fragments, a reference-style link, an image link, and a wiki image embed;
-- one ignored private-notes file that is intentionally outside Demon Docs management.
+- one ignored private-notes file that is intentionally outside Archivist management.
 
-The individual files remain available for manual inspection, but the walkthrough now lets Demon Docs diagnose the repository itself.
+The individual files remain available for manual inspection, but the walkthrough now lets Archivist diagnose the repository itself.
 
 ## 4. Initialize without starting automatic maintenance
 
@@ -225,7 +225,7 @@ Select the intended target by path:
 ddocs suggestions select <suggestion-id> docs/concepts/overview.md
 ```
 
-Demon Docs can resolve the ambiguous target after that explicit decision. It should not invent a semantic relationship for the orphaned retrospective.
+Archivist can resolve the ambiguous target after that explicit decision. It should not invent a semantic relationship for the orphaned retrospective.
 
 Add this authored entry under `Related docs` in `docs/home.md`:
 
@@ -253,7 +253,7 @@ The authored references still point to `local-setup.md`. Confirm the failure wit
 ddocs check --links
 ```
 
-Because the clean baseline recorded the document's prior identity and location, Demon Docs can now repair the static filesystem change deterministically:
+Because the clean baseline recorded the document's prior identity and location, Archivist can now repair the static filesystem change deterministically:
 
 ```bash
 ddocs fix --links
@@ -343,7 +343,7 @@ The ledger records ordinary generated repairs and provides inspectable before-an
 ddocs changes show <change-id>
 ```
 
-Demon Docs also supports bounded hash-guarded undo, but performing an undo is unnecessary for the main walkthrough.
+Archivist also supports bounded hash-guarded undo, but performing an undo is unnecessary for the main walkthrough.
 
 ## 14. Enable automatic maintenance
 

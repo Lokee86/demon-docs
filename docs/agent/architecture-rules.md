@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 2e484814-3e3d-4a96-90a4-1ff820160580
 document_type: general
 policy_exempt: false
-summary: This document defines mandatory architecture and seam-editing guardrails for agents changing Demon Docs code, structure, or ownership boundaries.
+summary: This document defines mandatory architecture and seam-editing guardrails for agents changing Archivist code, structure, or ownership boundaries.
 ---
 # Architecture and Seam Editing Rules
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document defines mandatory architecture and seam-editing guardrails for agents changing Demon Docs code, structure, or ownership boundaries.
+This document defines mandatory architecture and seam-editing guardrails for agents changing Archivist code, structure, or ownership boundaries.
 
 ## Overview
 

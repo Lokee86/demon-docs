@@ -27,7 +27,7 @@ Use it when the intended source and destination are already known. Use normal li
 - The destination does not overwrite an existing non-directory path.
 - The working tree is clean or its current changes are intentionally understood.
 
-The boundary is the nearest initialized Demon Docs repository root when one exists. Otherwise it is the current directory. `--root PATH` selects an explicit boundary.
+The boundary is the nearest initialized Archivist repository root when one exists. Otherwise it is the current directory. `--root PATH` selects an explicit boundary.
 
 ## Preview the move
 

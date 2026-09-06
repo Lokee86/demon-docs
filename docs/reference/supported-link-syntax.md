@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7852-ae71-3a30d63b7dfa
 document_type: general
 policy_exempt: false
-summary: This document defines the current link forms that Demon Docs recognizes while reconciling repository Markdown. It is a parser and rewrite contract, not a statement that every link format supported by a Markdown renderer is validated.
+summary: This document defines the current link forms that Archivist recognizes while reconciling repository Markdown. It is a parser and rewrite contract, not a statement that every link format supported by a Markdown renderer is validated.
 ---
 # Supported Link Syntax
 
@@ -12,7 +12,7 @@ Parent index: [Reference](./INDEX.md)
 
 ## Purpose
 
-This document defines the current link forms that Demon Docs recognizes while reconciling repository Markdown. It is a parser and rewrite contract, not a statement that every link format supported by a Markdown renderer is validated.
+This document defines the current link forms that Archivist recognizes while reconciling repository Markdown. It is a parser and rewrite contract, not a statement that every link format supported by a Markdown renderer is validated.
 
 ## Overview
 
@@ -62,7 +62,7 @@ Reference labels are normalized for undefined-use checks by lowercasing and coll
 [Read this][ guide ]
 ```
 
-A definition does not cause every use to become an individual destination record. Demon Docs records the definition's destination and checks explicit or collapsed uses for an undefined label.
+A definition does not cause every use to become an individual destination record. Archivist records the definition's destination and checks explicit or collapsed uses for an undefined label.
 
 ### Reference uses
 
@@ -131,7 +131,7 @@ The query and fragment are not used to locate the filesystem target. They remain
 
 Percent-encoded path characters are decoded for local resolution. Encode a literal `?`, `#`, or space that belongs to a filename rather than a suffix, for example `file%23name.md`. Malformed percent escapes fall back to the raw path rather than producing a separate validation diagnostic.
 
-When the resolved target is Markdown and the suffix contains a non-empty fragment, Demon Docs percent-decodes the fragment and compares it with GitHub-style section anchors derived from heading text parsed by Goldmark. Parsed heading text removes Markdown/HTML formatting before anchor normalization; duplicate anchors receive `-1`, `-2`, and so on. This includes same-document links such as `(#intro)`. The file remains identified by its normal `TargetFileID`; no separate heading identity is persisted. Query-only suffixes and fragments on non-Markdown targets remain opaque preservation data.
+When the resolved target is Markdown and the suffix contains a non-empty fragment, Archivist percent-decodes the fragment and compares it with GitHub-style section anchors derived from heading text parsed by Goldmark. Parsed heading text removes Markdown/HTML formatting before anchor normalization; duplicate anchors receive `-1`, `-2`, and so on. This includes same-document links such as `(#intro)`. The file remains identified by its normal `TargetFileID`; no separate heading identity is persisted. Query-only suffixes and fragments on non-Markdown targets remain opaque preservation data.
 
 ### Local targets and external targets
 

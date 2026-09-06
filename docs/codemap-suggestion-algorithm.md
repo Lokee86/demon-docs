@@ -8,7 +8,7 @@ summary: This document defines the current deterministic codemap missing-link al
 ---
 # Codemap Missing-Link Algorithm
 
-Parent index: [Demon Docs Documentation](./INDEX.md)
+Parent index: [Archivist Documentation](./INDEX.md)
 
 ## Purpose
 
@@ -329,7 +329,7 @@ The current baseline supports:
 
 - explicit foreground codemap generation;
 - review-ledger suppression of unwanted additions;
-- dogfooding against Demon Docs and Space Rocks;
+- dogfooding against Archivist and Space Rocks;
 - controlled hidden-link recovery evaluation;
 - deterministic precision sampling; and
 - collection of new accepted and declined outcomes.

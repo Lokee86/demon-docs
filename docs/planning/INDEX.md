@@ -4,20 +4,20 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-71be-844f-43c55077f6ee
 document_type: general
 policy_exempt: false
-summary: Active Demon Docs planning plus retained design records whose implementation ownership has moved to sibling Warlock tools.
+summary: Active Archivist planning plus retained design records whose implementation ownership has moved to sibling Warlock tools.
 ---
 # Planning
 
-Parent index: [Demon Docs Documentation](../INDEX.md)
+Parent index: [Archivist Documentation](../INDEX.md)
 
-Active Demon Docs planning plus retained design records whose implementation ownership has moved to sibling Warlock tools. Planning pages are not canonical references for shipped behavior.
+Active Archivist planning plus retained design records whose implementation ownership has moved to sibling Warlock tools. Planning pages are not canonical references for shipped behavior.
 
 ## Direct Files
 
 <!-- doc-ledger:files:start -->
 
 - [agent-context-and-integrations.md](agent-context-and-integrations.md) - Historical context-delivery design transferred to Grimoire Context.
-- [roadmap.md](roadmap.md) - Narrow active priorities for Demon Docs correctness, diagnostics, incremental reconciliation, and operational hardening.
+- [roadmap.md](roadmap.md) - Narrow active priorities for Archivist correctness, diagnostics, incremental reconciliation, and operational hardening.
 <!-- doc-ledger:files:end -->
 
 ## Direct Folders
@@ -34,4 +34,4 @@ Active Demon Docs planning plus retained design records whose implementation own
 
 ## Notes
 
-When Demon Docs work ships, current facts move into guides, reference, architecture, operations, or development docs. Transferred design records remain only to preserve provenance and must not be interpreted as Demon Docs implementation commitments.
+When Archivist work ships, current facts move into guides, reference, architecture, operations, or development docs. Transferred design records remain only to preserve provenance and must not be interpreted as Archivist implementation commitments.

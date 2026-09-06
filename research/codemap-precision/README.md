@@ -1,6 +1,6 @@
 # Space Rocks authored-links codemap precision benchmark
 
-This benchmark measures the usefulness of Demon Docs' current missing-link suggestions when every authored codemap link remains visible. It is a user-facing precision benchmark for genuinely new suggestions, not a hidden-link recovery test.
+This benchmark measures the usefulness of Archivist's current missing-link suggestions when every authored codemap link remains visible. It is a user-facing precision benchmark for genuinely new suggestions, not a hidden-link recovery test.
 
 ## Corpus and source pool
 
@@ -202,7 +202,7 @@ A proposed generic test-counterpart demotion was rejected during validation: it 
 
 ## Reproduction
 
-From the Demon Docs repository, with the pinned Space Rocks checkout available:
+From the Archivist repository, with the pinned Space Rocks checkout available:
 
 ```text
 $env:GOCACHE = Join-Path (Get-Location) '.go-cache'
@@ -260,5 +260,3 @@ The older holdout benchmark deliberately hides known-good authored links and mea
 - Sampling is balanced for coverage rather than a natural production traffic distribution.
 - Candidate membership, ranking, and metrics can change when evidence extraction or authored links change.
 - This benchmark measures precision of current suggestions; it does not establish recall for links not suggested and does not replace the positive-only recall benchmark.
-
-Codex work used `danger-full-access` with hackathon session logging under `.codex-hackathon/sessions/`; the committed submission logs are intentionally preserved, while new local captures are ignored unless deliberately reviewed and added.

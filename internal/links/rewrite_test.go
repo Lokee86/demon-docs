@@ -145,7 +145,7 @@ func TestInternalMoveRewriteRejectsConcurrentUserEdit(t *testing.T) {
 	if len(plan.Rewrites) != 1 {
 		t.Fatalf("generated rewrites = %d, want 1", len(plan.Rewrites))
 	}
-	userEdit := "User changed this before Demon Docs wrote it.\n"
+	userEdit := "User changed this before Archivist wrote it.\n"
 	if err := os.WriteFile(sourcePath, []byte(userEdit), 0o644); err != nil {
 		t.Fatal(err)
 	}

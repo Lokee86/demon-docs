@@ -1,6 +1,6 @@
 # Context Benchmarking Research
 
-This directory preserves exploratory context-injection benchmark work transferred from Demon Docs to the planned **Grimoire Context** sibling tool. The design record is described in [Context-Injection Benchmarking](../../docs/research/context-injection-benchmarking.md).
+This directory preserves exploratory context-injection benchmark work transferred from Archivist to the planned **Grimoire Context** sibling tool. The design record is described in [Context-Injection Benchmarking](../../docs/research/context-injection-benchmarking.md).
 
 This is research material, not a current product subsystem, release requirement, or commitment to fund model trials now. The immediate purpose is to develop a credible experimental design, retain reproducible discovery evidence, and avoid losing useful historical-task work.
 

@@ -16,7 +16,7 @@ This document records retained codemap evidence findings, measured baselines, co
 
 ## Overview
 
-Demon Docs has implemented a deterministic missing-link analysis pipeline and an explicit foreground managed-section writer. This page owns research evidence and interpretation, not the exact production command or implementation contract.
+Archivist has implemented a deterministic missing-link analysis pipeline and an explicit foreground managed-section writer. This page owns research evidence and interpretation, not the exact production command or implementation contract.
 
 The missing-link ranker returns targets absent from the current codemap. Production execution automatically adds only selected non-declined `hard_link` candidates; `context` remains non-mutating analysis/review output. Existing links remain by default; optional confidence-based pruning belongs to a separate execution policy and is disabled by default.
 
@@ -190,7 +190,7 @@ Step 10 adds a separate expanded validation at implementation baseline `94d3b463
 
 Three smaller fallback-only diagnostics recovered 1/1 for cclint, 1/2 for text-to-speech, and 0/1 for emisso-sii. All recovered relationships in the expanded run remained `context` tier, so the Arcana lift improved discovery without broadening automatic insertion.
 
-The Demon Docs pipeline map also serves as a convergence fixture. It required one ownership-only managed-section adoption with `added=0 removed=0`; the immediately following dry-run reported zero files to update. Mature authored coverage therefore converges without semantic expansion.
+The Archivist pipeline map also serves as a convergence fixture. It required one ownership-only managed-section adoption with `added=0 removed=0`; the immediately following dry-run reported zero files to update. Mature authored coverage therefore converges without semantic expansion.
 
 ### Frozen cross-repository precision review
 
@@ -234,7 +234,7 @@ The measurements do not support:
 - universal precision claims;
 - daemon-triggered unattended generation;
 - default removal of links the algorithm cannot reconstruct;
-- treating self-authored Demon Docs links as an unbiased benchmark; or
+- treating self-authored Archivist links as an unbiased benchmark; or
 - assuming context-tier additions are always necessary permanent links.
 
 ## Decision persistence

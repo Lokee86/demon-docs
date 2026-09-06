@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: d3a026ea-a99c-4e5e-9497-cf2a81dff02a
 document_type: general
 policy_exempt: false
-summary: This document provides a short, stable orientation layer for new agent sessions working on Demon Docs.
+summary: This document provides a short, stable orientation layer for new agent sessions working on Archivist.
 ---
 # Session Primer
 
@@ -12,7 +12,7 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document provides a short, stable orientation layer for new agent sessions working on Demon Docs.
+This document provides a short, stable orientation layer for new agent sessions working on Archivist.
 
 ## Overview
 
@@ -20,7 +20,7 @@ Use this primer to get oriented quickly, then move to canonical documentation fo
 
 ## Rules
 
-- Demon Docs is a deterministic documentation maintenance engine and Go CLI.
+- Archivist is a deterministic documentation maintenance engine and Go CLI.
 - Authored repository files remain the primary product surface.
 - Managed ownership is narrow and explicit.
 - Read-only commands and dry-run paths must remain non-mutating.

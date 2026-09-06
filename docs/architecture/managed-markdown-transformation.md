@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-2e95-72b2-a536-7659111e2ff5
 document_type: general
 policy_exempt: false
-summary: This document describes the implemented transformation boundary that preserves authored Markdown while Demon Docs creates and updates managed folder indexes, parent-index lines, descriptions, and generated entries.
+summary: This document describes the implemented transformation boundary that preserves authored Markdown while Archivist creates and updates managed folder indexes, parent-index lines, descriptions, and generated entries.
 ---
 # Managed Markdown Transformation
 
@@ -12,11 +12,11 @@ Parent index: [Architecture](./INDEX.md)
 
 ## Purpose
 
-This document describes the implemented transformation boundary that preserves authored Markdown while Demon Docs creates and updates managed folder indexes, parent-index lines, descriptions, and generated entries.
+This document describes the implemented transformation boundary that preserves authored Markdown while Archivist creates and updates managed folder indexes, parent-index lines, descriptions, and generated entries.
 
 ## Overview
 
-Managed Markdown is not rewritten as a normalized document. Demon Docs builds a structural view of the source, identifies narrowly owned spans, plans replacement text for those spans, and preserves everything outside them.
+Managed Markdown is not rewritten as a normalized document. Archivist builds a structural view of the source, identifies narrowly owned spans, plans replacement text for those spans, and preserves everything outside them.
 
 The complete forward-index path crosses three distinct ownership boundaries:
 
@@ -78,7 +78,7 @@ This boundary does not own:
 This distinction is critical:
 
 - Goldmark determines whether a heading or marker-like line is real Markdown structure.
-- Original byte offsets determine what Demon Docs may replace.
+- Original byte offsets determine what Archivist may replace.
 - Text inside fenced code remains authored example content even when it resembles a heading, parent link, or managed marker.
 - Inline code is not treated as a managed section boundary.
 
@@ -116,7 +116,7 @@ The legacy body extends to the next parsed heading. Fence-contained heading text
 
 ### Mixed legacy and canonical source
 
-When managed markers already exist but a recognized legacy heading remains, Demon Docs normalizes the heading text without rebuilding the rest of the document.
+When managed markers already exist but a recognized legacy heading remains, Archivist normalizes the heading text without rebuilding the rest of the document.
 
 ### Missing section
 
@@ -221,7 +221,7 @@ The same uniqueness rule applies to child folders, using the child folder basena
 
 ### Ambiguous transition
 
-When more than one stale entry or destination shares the basename, Demon Docs does not guess. The destination receives the configured generated description and the stale entries are removed and reported.
+When more than one stale entry or destination shares the basename, Archivist does not guess. The destination receives the configured generated description and the stale entries are removed and reported.
 
 ## Newline and byte preservation
 
@@ -331,4 +331,4 @@ go test ./internal/markdown ./internal/reconcile ./internal/textio ./internal/sc
 
 ## Notes
 
-The term “source-preserving” means Demon Docs limits its ownership and preserves unchanged source bytes where implemented. It does not mean generated spans retain arbitrary formatting that conflicts with the canonical managed format.
+The term “source-preserving” means Archivist limits its ownership and preserves unchanged source bytes where implemented. It does not mean generated spans retain arbitrary formatting that conflicts with the canonical managed format.

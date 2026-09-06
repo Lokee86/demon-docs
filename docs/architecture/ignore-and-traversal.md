@@ -59,7 +59,7 @@ Those consumers combine ignore results with their own scope and file-type rules.
 
 An initialized repository uses the repository root as the base ignore root. Its `.docignore` sits beside `.ddocs/`. Calls such as `scan.TreeWithIgnoreRoot(docsRoot, repositoryRoot, c)` therefore scan the configured documentation root while evaluating paths against the repository-root policy. Legacy standalone configurations use the managed root as the ignore root.
 
-The base `Policy` has one Git-ignore domain: every pattern is parsed relative to the policy root. A missing `.docignore` produces an empty matcher and does not exclude ordinary paths. The policy is independent of Git's own ignore files: a Git-tracked path can be excluded by `.docignore`, and a Git-ignored path can remain visible to Demon Docs.
+The base `Policy` has one Git-ignore domain: every pattern is parsed relative to the policy root. A missing `.docignore` produces an empty matcher and does not exclude ordinary paths. The policy is independent of Git's own ignore files: a Git-tracked path can be excluded by `.docignore`, and a Git-ignored path can remain visible to Archivist.
 
 `Hierarchy` begins with the repository-root domain. As a reverse-index walk accepts a directory, it loads that directory's `.docignore`, if present, with the directory as the pattern domain. A pattern in `services/api/.docignore` therefore describes paths below `services/api`, not paths relative to the repository root. Ancestor files are loaded from the repository root through the relevant directory before a reverse root is evaluated.
 
@@ -78,7 +78,7 @@ The following directory names are ignored at every depth:
 logseq/
 ```
 
-The check is performed before the Git-ignore matcher. A `!` rule cannot re-include these directories or anything below them. This also means that a policy cannot expose `.ddocs/` private Demon Docs state, a Git worktree/control directory, Obsidian metadata, or Logseq metadata by negation.
+The check is performed before the Git-ignore matcher. A `!` rule cannot re-include these directories or anything below them. This also means that a policy cannot expose `.ddocs/` private Archivist state, a Git worktree/control directory, Obsidian metadata, or Logseq metadata by negation.
 
 On Windows, these four permanent directory names are compared with `strings.EqualFold`, so case variants such as `.GIT` and `LogSeq` remain permanently excluded. This case folding is limited to the permanent-directory check. The implementation does not normalize all `.docignore` patterns or all control-file names to case-insensitive form.
 

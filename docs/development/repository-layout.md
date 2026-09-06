@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7874-9b0a-5ab2f1373ce8
 document_type: general
 policy_exempt: false
-summary: This document maps the Demon Docs repository into command entry points, implementation packages, tests, research artifacts, and generated or runtime boundaries.
+summary: This document maps the Archivist repository into command entry points, implementation packages, tests, research artifacts, and generated or runtime boundaries.
 ---
 # Repository Layout
 
@@ -12,11 +12,11 @@ Parent index: [Development](./INDEX.md)
 
 ## Purpose
 
-This document maps the Demon Docs repository into command entry points, implementation packages, tests, research artifacts, and generated or runtime boundaries.
+This document maps the Archivist repository into command entry points, implementation packages, tests, research artifacts, and generated or runtime boundaries.
 
 ## Overview
 
-Demon Docs is a Go CLI application with focused internal packages. The repository keeps production code under `cmd/` and `internal/`, black-box and fixture regression tests under `tests/`, durable documentation under `docs/`, and evaluation artifacts under `research/`.
+Archivist is a Go CLI application with focused internal packages. The repository keeps production code under `cmd/` and `internal/`, black-box and fixture regression tests under `tests/`, durable documentation under `docs/`, and evaluation artifacts under `research/`.
 
 Package boundaries should preserve direct ownership. New mechanics belong in the narrowest durable package rather than accumulating in `internal/app` or being hidden behind unnecessary wrappers.
 

@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-74a7-917f-aa3b6e202737
 document_type: general
 policy_exempt: false
-summary: Historical dependency, impact, and entanglement design transferred from Demon Docs to ArcanaGraph.
+summary: Historical dependency, impact, and entanglement design transferred from Archivist to ArcanaGraph.
 ---
 # Deterministic Code, Dependency, and Entanglement Facts
 
@@ -20,13 +20,13 @@ The transferred design exposes observed dependency and relationship facts withou
 
 ## Current status
 
-Transferred historical design. Existing Demon Docs codemap corpus adapters collect bounded evidence for codemap ranking, but general dependency graphs and impact projections are ArcanaGraph responsibilities.
+Transferred historical design. Existing Archivist codemap corpus adapters collect bounded evidence for codemap ranking, but general dependency graphs and impact projections are ArcanaGraph responsibilities.
 
 ## Expected ownership
 
 ArcanaGraph owns normalized observed facts, capability metadata, deterministic graph projections, bounds, unresolved states, and report composition.
 
-This document is retained as design provenance. References below to a future Demon Docs code graph are superseded. Demon Docs does not require general dependency/entanglement graph capabilities for documentation-folder reconciliation, link repair, codemap extraction, or authored reverse projections; exact symbol reverse backlinks consume only the verified Arcana node attached to an authored target.
+This document is retained as design provenance. References below to a future Archivist code graph are superseded. Archivist does not require general dependency/entanglement graph capabilities for documentation-folder reconciliation, link repair, codemap extraction, or authored reverse projections; exact symbol reverse backlinks consume only the verified Arcana node attached to an authored target.
 
 ## Scope and Deterministic Basis
 

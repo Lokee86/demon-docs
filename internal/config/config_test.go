@@ -318,7 +318,7 @@ func TestFrontmatterConfigurationLoads(t *testing.T) {
 enabled = true
 default_format = "toml"
 allowed_formats = ["toml"]
-default_author = "Demon Docs"
+default_author = "Archivist"
 unknown_fields = "warn"
 
 [frontmatter.fields.document_id]
@@ -348,7 +348,7 @@ require = "policy_exempt_reason"
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !loaded.Frontmatter.Enabled || loaded.Frontmatter.DefaultFormat != "toml" || !reflect.DeepEqual(loaded.Frontmatter.AllowedFormats, []string{"toml"}) || loaded.Frontmatter.DefaultAuthor != "Demon Docs" || loaded.Frontmatter.UnknownFields != "warn" {
+	if !loaded.Frontmatter.Enabled || loaded.Frontmatter.DefaultFormat != "toml" || !reflect.DeepEqual(loaded.Frontmatter.AllowedFormats, []string{"toml"}) || loaded.Frontmatter.DefaultAuthor != "Archivist" || loaded.Frontmatter.UnknownFields != "warn" {
 		t.Fatalf("frontmatter settings not loaded: %+v", loaded.Frontmatter)
 	}
 	id := loaded.Frontmatter.Fields["document_id"]

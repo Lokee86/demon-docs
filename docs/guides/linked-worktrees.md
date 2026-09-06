@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7dc6-8055-c44e60f2f0f5
 document_type: general
 policy_exempt: false
-summary: This guide explains how Demon Docs state is isolated in linked Git worktrees and how to bootstrap repository-demon operation without copying runtime or historical state from the primary worktree.
+summary: This guide explains how Archivist state is isolated in linked Git worktrees and how to bootstrap repository-demon operation without copying runtime or historical state from the primary worktree.
 ---
 # Using Linked Git Worktrees
 
@@ -12,11 +12,11 @@ Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 
-This guide explains how Demon Docs state is isolated in linked Git worktrees and how to bootstrap repository-demon operation without copying runtime or historical state from the primary worktree.
+This guide explains how Archivist state is isolated in linked Git worktrees and how to bootstrap repository-demon operation without copying runtime or historical state from the primary worktree.
 
 ## Overview
 
-A linked Git worktree shares Git history with its primary worktree but has a separate filesystem snapshot. Demon Docs therefore gives each worktree its own `.ddocs/` object repository and runtime directory.
+A linked Git worktree shares Git history with its primary worktree but has a separate filesystem snapshot. Archivist therefore gives each worktree its own `.ddocs/` object repository and runtime directory.
 
 The current Git-aware bootstrap exists at the repository-demon boundary. Read-only linked-worktree detection can locate the primary worktree configuration without writing. A demon command that requires local mutable state can copy that configuration into the linked worktree and initialize fresh local object storage.
 
@@ -43,7 +43,7 @@ Agent adapters may instead acquire a feeder:
 demon acquire --client mcp
 ```
 
-During linked-worktree detection, Demon Docs follows the `.git` pointer and `commondir` metadata to find the primary worktree. When the primary worktree is initialized and the linked worktree is not, bootstrap:
+During linked-worktree detection, Archivist follows the `.git` pointer and `commondir` metadata to find the primary worktree. When the primary worktree is initialized and the linked worktree is not, bootstrap:
 
 ```text
 copies primary .ddocs/config.toml
@@ -51,7 +51,7 @@ creates linked-worktree .ddocs/ object storage
 creates no copied owner, feeder, heartbeat, log, or link-history state
 ```
 
-After bootstrap, the linked worktree is discovered as its own Demon Docs repository.
+After bootstrap, the linked worktree is discovered as its own Archivist repository.
 
 ## Verify local isolation
 
@@ -63,7 +63,7 @@ demon --status
 
 The reported repository root, config path, `.docignore`, object storage, and runtime state should all belong to the linked worktree.
 
-The configuration contents initially match the primary worktree, but later edits are ordinary local file edits. Demon Docs does not continuously synchronize configuration between worktrees.
+The configuration contents initially match the primary worktree, but later edits are ordinary local file edits. Archivist does not continuously synchronize configuration between worktrees.
 
 ## Run reconciliation
 
@@ -131,4 +131,4 @@ Stop active automation, inspect `ddocs status`, and verify that commands are run
 
 ## Notes
 
-Git history is shared; Demon Docs working state is not. Branches may contain different docs, targets, and generated output, so sharing one live `.ddocs/` state across worktrees would be unsafe.
+Git history is shared; Archivist working state is not. Branches may contain different docs, targets, and generated output, so sharing one live `.ddocs/` state across worktrees would be unsafe.

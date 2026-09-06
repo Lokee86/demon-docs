@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-72b1-a1b3-39ffc6b36427
 document_type: general
 policy_exempt: false
-summary: This document routes common Demon Docs extensions to the correct ownership boundary, required documentation, and minimum verification.
+summary: This document routes common Archivist extensions to the correct ownership boundary, required documentation, and minimum verification.
 ---
 # Safe Extension Procedures
 
@@ -12,11 +12,11 @@ Parent index: [Development](./INDEX.md)
 
 ## Purpose
 
-This document routes common Demon Docs extensions to the correct ownership boundary, required documentation, and minimum verification.
+This document routes common Archivist extensions to the correct ownership boundary, required documentation, and minimum verification.
 
 ## Overview
 
-Many Demon Docs changes cross more than one file because public behavior, persistent state, source preservation, and deterministic reports are separate seams. Safe extension starts by identifying the owning seam instead of adding behavior to the first convenient package.
+Many Archivist changes cross more than one file because public behavior, persistent state, source preservation, and deterministic reports are separate seams. Safe extension starts by identifying the owning seam instead of adding behavior to the first convenient package.
 
 Use the focused procedures for implementation details:
 

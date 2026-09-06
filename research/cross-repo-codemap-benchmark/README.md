@@ -25,7 +25,7 @@ python research/cross-repo-codemap-benchmark/tools/run_benchmarks.py
 
 The first command shallow-clones repositories into the ignored `checkouts/` directory, pins revisions, validates explicit paths, writes the compact `discovery.json`, and writes normalized resolved pairs under `corpus/`. The complete discovery trace stays under the ignored `runs/` directory.
 
-The second command converts eligible normalized corpora into Demon Docs dataset schema without changing the source repositories. `benchmark-plan.json` pins the algorithm baseline, repository revisions, corpus sizes, and holdout counts.
+The second command converts eligible normalized corpora into Archivist dataset schema without changing the source repositories. `benchmark-plan.json` pins the algorithm baseline, repository revisions, corpus sizes, and holdout counts.
 
 The third command runs the frozen algorithm named by `benchmark-plan.json`. Per-repository reports are stored under `reports/`; `evaluation.json` and `results.md` summarize the run. `--checkout-root` can reuse an existing ignored checkout corpus from another worktree.
 
@@ -105,7 +105,7 @@ The smaller diagnostic single splits recovered 1/1 for cclint, 1/2 for text-to-s
 
 The expanded evaluation remains a recall test, not a precision study. Unmatched suggestions are not labeled false positives. The retained Space Rocks and frozen cross-repository manual reviews remain the precision evidence.
 
-Expanded artifacts live under `expanded/` so the historical `benchmark-plan.json`, `evaluation.json`, `results.md`, corpus, and reports remain reproducible unchanged. The Demon Docs `docs/architecture/codemap-pipeline.md` self-map is also pinned as the convergence fixture: zero link additions/removals on adoption, followed by a zero-update second dry-run.
+Expanded artifacts live under `expanded/` so the historical `benchmark-plan.json`, `evaluation.json`, `results.md`, corpus, and reports remain reproducible unchanged. The Archivist `docs/architecture/codemap-pipeline.md` self-map is also pinned as the convergence fixture: zero link additions/removals on adoption, followed by a zero-update second dry-run.
 
 ## Acceptance requirements
 

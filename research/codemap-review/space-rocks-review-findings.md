@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This review creates a small, defensible positive-link corpus for evaluating Demon Docs missing-link suggestions.
+This review creates a small, defensible positive-link corpus for evaluating Archivist missing-link suggestions.
 
 It does not judge existing links as irrelevant and does not create negative examples. Entries that cannot safely be treated as ground truth are excluded from scoring.
 
@@ -74,7 +74,7 @@ The corpus includes:
 - large cross-service protocol inventories;
 - explicit non-ownership boundary sections.
 
-Demon Docs should normalize these styles internally instead of requiring one Markdown shape.
+Archivist should normalize these styles internally instead of requiring one Markdown shape.
 
 ### Group labels are valuable evidence
 

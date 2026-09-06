@@ -16,7 +16,7 @@ This document describes the implemented architecture of `ddocs mv`: its stateles
 
 ## Overview
 
-`ddocs mv` performs one explicit file or directory move and rewrites recognized repository-local links that would otherwise change meaning. It plans against the pre-move filesystem, applies the filesystem rename, and then applies generated Markdown rewrites. The command does not require an initialized Demon Docs repository and does not create or update `.ddocs/` state.
+`ddocs mv` performs one explicit file or directory move and rewrites recognized repository-local links that would otherwise change meaning. It plans against the pre-move filesystem, applies the filesystem rename, and then applies generated Markdown rewrites. The command does not require an initialized Archivist repository and does not create or update `.ddocs/` state.
 
 The move boundary is intentionally separate from persistent link reconciliation. It does not infer an already-completed move from historical identity state. It receives the intended source and destination, resolves affected links before mutation, and applies only the path changes required by that explicit move.
 
@@ -62,7 +62,7 @@ The common generated-rewrite boundary owns source-preserving atomic replacement.
 
 ## Repository boundary resolution
 
-`runMove` starts with the current working directory. If repository discovery finds an initialized Demon Docs repository, its root becomes the default boundary. Otherwise the current directory is the boundary. `--root PATH` overrides discovery; a relative override is resolved from the current directory.
+`runMove` starts with the current working directory. If repository discovery finds an initialized Archivist repository, its root becomes the default boundary. Otherwise the current directory is the boundary. `--root PATH` overrides discovery; a relative override is resolved from the current directory.
 
 The CLI resolves relative `SOURCE` and `DESTINATION` arguments from the current directory. `PlanMove` normalizes the repository root and both paths to absolute, clean paths. Direct callers may also provide relative paths, which are resolved from the supplied repository root.
 
@@ -194,7 +194,7 @@ Rollback is best effort, not a filesystem transaction. It can fail because a rew
 
 The move planner uses a fresh filesystem inventory and `FilesManifest{}` rather than persistent link identity state. Neither dry-run nor apply creates `.ddocs/`; the move command does not publish identities, incoming-link groups, fingerprints, review events, or applied-change history.
 
-Statelessness does not mean read-only: a non-dry-run changes the requested filesystem location and affected Markdown sources. It means the command has no durable Demon Docs transaction to commit or recover. A later standalone or initialized watcher or link-enabled reconciliation pass can refresh persistent state after the explicit move.
+Statelessness does not mean read-only: a non-dry-run changes the requested filesystem location and affected Markdown sources. It means the command has no durable Archivist transaction to commit or recover. A later standalone or initialized watcher or link-enabled reconciliation pass can refresh persistent state after the explicit move.
 
 ## Invariants and safety boundaries
 
@@ -295,4 +295,4 @@ Related tests:
 
 ## Notes
 
-This document describes the explicit move transaction, not historical move detection. The command’s rollback is bounded best effort around a filesystem rename and per-source generated writes; it does not replace Git recovery or publish persistent Demon Docs state.
+This document describes the explicit move transaction, not historical move detection. The command’s rollback is bounded best effort around a filesystem rename and per-source generated writes; it does not replace Git recovery or publish persistent Archivist state.

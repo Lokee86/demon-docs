@@ -1,6 +1,6 @@
 # Space Rocks Codemap Format Inventory
 
-This inventory records the codemap shapes currently present in the Space Rocks documentation corpus. It exists to guide Demon Docs' first codemap adapter and extractor fixtures. It does not define one mandatory Markdown format and does not require Space Rocks documents to be rewritten.
+This inventory records the codemap shapes currently present in the Space Rocks documentation corpus. It exists to guide Archivist's first codemap adapter and extractor fixtures. It does not define one mandatory Markdown format and does not require Space Rocks documents to be rewritten.
 
 ## Corpus
 

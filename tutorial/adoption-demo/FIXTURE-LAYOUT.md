@@ -12,12 +12,12 @@ Do not:
 
 - open this directory as the Obsidian vault;
 - run the tutorial inside it;
-- treat it as Demon Docs or Space Rocks documentation;
+- treat it as Archivist or Space Rocks documentation;
 - expect edits made elsewhere to update it automatically.
 
 ## Disposable working repository
 
-Run one reset script from the Demon Docs checkout:
+Run one reset script from the Archivist checkout:
 
 ```bash
 bash tutorial/adoption-demo/reset-demo.sh
@@ -33,6 +33,6 @@ Both scripts create this sibling directory by default:
 ../demon-docs-adoption-demo/
 ```
 
-That sibling directory is the only intended tutorial workspace and Obsidian vault. It has its own repository boundary for Demon Docs initialization. Re-running the reset script deletes and recreates the sibling directory from the tracked source template.
+That sibling directory is the only intended tutorial workspace and Obsidian vault. It has its own repository boundary for Archivist initialization. Re-running the reset script deletes and recreates the sibling directory from the tracked source template.
 
-The scripts refuse to create a target anywhere inside the Demon Docs checkout.
+The scripts refuse to create a target anywhere inside the Archivist checkout.

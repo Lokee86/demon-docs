@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 9aaf9bd3-bfe8-4d5a-8812-897e89d2de30
 document_type: general
 policy_exempt: false
-summary: This document owns prompt and report expectations for implementation agents working on Demon Docs.
+summary: This document owns prompt and report expectations for implementation agents working on Archivist.
 ---
 # Prompting and Reporting
 
@@ -12,11 +12,11 @@ Parent index: [Agent](./INDEX.md)
 
 ## Purpose
 
-This document owns prompt and report expectations for implementation agents working on Demon Docs.
+This document owns prompt and report expectations for implementation agents working on Archivist.
 
 ## Overview
 
-Demon Docs agent work should stay small, bounded, and easy to review.
+Archivist agent work should stay small, bounded, and easy to review.
 
 ## Rules
 

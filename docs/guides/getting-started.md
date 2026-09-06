@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-73e8-b9e0-df6ed92de6e5
 document_type: general
 policy_exempt: false
-summary: This guide installs Demon Docs, explains standalone and initialized operation, establishes deterministic index and link state, and reaches a clean ddocs check result.
+summary: This guide installs Archivist, explains standalone and initialized operation, establishes deterministic index and link state, and reaches a clean ddocs check result.
 ---
 # Getting Started
 
@@ -12,11 +12,11 @@ Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 
-This guide installs Demon Docs, explains when repository initialization is optional or required, establishes deterministic index and link state, and reaches a clean `ddocs check` result.
+This guide installs Archivist, explains when repository initialization is optional or required, establishes deterministic index and link state, and reaches a clean `ddocs check` result.
 
 ## Overview
 
-Demon Docs has a static reconciliation core. `fix` applies deterministic scope-contained updates, while `check` verifies the same plan without writing. Core reconciliation and foreground `watch` work without `ddocs init`; the detached repository demon is an optional initialized-repository convenience.
+Archivist has a static reconciliation core. `fix` applies deterministic scope-contained updates, while `check` verifies the same plan without writing. Core reconciliation and foreground `watch` work without `ddocs init`; the detached repository demon is an optional initialized-repository convenience.
 
 ## Prerequisites
 
@@ -88,7 +88,7 @@ ddocs config show
 
 Create or update `.docignore` at the active scope root when generated, private, vendor, or scratch paths should be excluded. That is the docs root in standalone mode and the repository root in initialized mode.
 
-Demon Docs always prunes `.git/`, `.ddocs/`, `.obsidian/`, and `logseq/`. Additional repository-specific exclusions belong in `.docignore`, not in global assumptions.
+Archivist always prunes `.git/`, `.ddocs/`, `.obsidian/`, and `logseq/`. Additional repository-specific exclusions belong in `.docignore`, not in global assumptions.
 
 See [Configuration Reference](../reference/configuration.md) for syntax and precedence.
 
@@ -154,7 +154,7 @@ A successful adoption leaves:
 
 ### The documentation root does not exist
 
-Create or select the intended docs root before running reconciliation or `init`. Demon Docs does not invent the product's documentation taxonomy.
+Create or select the intended docs root before running reconciliation or `init`. Archivist does not invent the product's documentation taxonomy.
 
 ### The first link pass reports issues but does not repair moves
 
@@ -162,7 +162,7 @@ This is expected when no prior identity baseline exists. Resolve current broken 
 
 ### A link has multiple plausible targets
 
-Demon Docs leaves the source unchanged. Choose the intended target manually, then rerun `fix` and `check`.
+Archivist leaves the source unchanged. Choose the intended target manually, then rerun `fix` and `check`.
 
 ### Generated changes are broader than expected
 

@@ -4,19 +4,19 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-7ad0-aaf4-6046c8448538
 document_type: general
 policy_exempt: false
-summary: This guide upgrades the Demon Docs binaries and repository state while preserving authored files, configuration, link identity evidence, review history, and a recoverable pre-upgrade snapshot.
+summary: This guide upgrades the Archivist binaries and repository state while preserving authored files, configuration, link identity evidence, review history, and a recoverable pre-upgrade snapshot.
 ---
-# Upgrading Demon Docs
+# Upgrading Archivist
 
 Parent index: [Guides](./INDEX.md)
 
 ## Purpose
 
-This guide upgrades the Demon Docs binaries and repository state while preserving authored files, configuration, link identity evidence, review history, and a recoverable pre-upgrade snapshot.
+This guide upgrades the Archivist binaries and repository state while preserving authored files, configuration, link identity evidence, review history, and a recoverable pre-upgrade snapshot.
 
 ## Overview
 
-Demon Docs keeps authored documentation in normal repository files and private state under `.ddocs/`. Most upgrades require replacing the binaries and running normal verification. Some versions may deterministically migrate compatibility configuration, managed index headings, codemap syntax, or legacy link-state files during the next successful mutating pass.
+Archivist keeps authored documentation in normal repository files and private state under `.ddocs/`. Most upgrades require replacing the binaries and running normal verification. Some versions may deterministically migrate compatibility configuration, managed index headings, codemap syntax, or legacy link-state files during the next successful mutating pass.
 
 Use a clean branch or worktree for the first upgrade pass. Do not upgrade while a watcher or repository demon is actively writing.
 
@@ -24,7 +24,7 @@ Use a clean branch or worktree for the first upgrade pass. Do not upgrade while 
 
 The `v0.3.5` release and earlier release artifacts remain under the MIT License distributed with those versions. The repository subsequently moved to Apache License 2.0. The tag `pre-shield-2026-08-28` preserves the final Apache-licensed repository state at commit `45f5b000c8d520fcf9b73b3e4959240c61b7d1c8`.
 
-Beginning with the commit after that tag, current Demon Docs source code and documentation are offered under the PolyForm Shield License 1.0.0. Previously granted MIT and Apache rights are not revoked. New source distributions and release archives include `LICENSE.md` and `LICENSING.md`.
+Beginning with the commit after that tag, current Archivist source code and documentation are offered under the PolyForm Shield License 1.0.0. Previously granted MIT and Apache rights are not revoked. New source distributions and release archives include `LICENSE.md` and `LICENSING.md`.
 
 No code, configuration, authored-document, or private-state migration is required.
 
@@ -72,7 +72,7 @@ In version 0.3.2, cold frontmatter and format validation remained serial, and ch
 ## Prerequisites
 
 - The repository's current Git status is understood.
-- The currently installed Demon Docs version still runs.
+- The currently installed Archivist version still runs.
 - Active external feeder tokens can be released.
 - The Go toolchain required by the target revision is installed when building from source.
 
@@ -208,7 +208,7 @@ ddocs check
 
 The second full fix should report zero changed files. A clean check confirms the selected subsystems are reconciled under the target version.
 
-Run the repository's normal test or release gate when upgrading Demon Docs inside its own checkout or when generated fixtures depend on exact output.
+Run the repository's normal test or release gate when upgrading Archivist inside its own checkout or when generated fixtures depend on exact output.
 
 ## Re-enable automation
 

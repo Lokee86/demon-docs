@@ -18,7 +18,7 @@ This document describes the implemented reverse-index projection from authored d
 
 Reverse indexing is the third reconciliation subsystem alongside documentation indexes and local links. It reads explicit targets from configured codemap sections, resolves those targets against the current repository filesystem and optional current Arcana/Lexicon semantic state, inventories selected code roots, and writes deterministic managed blocks into code-folder index files.
 
-Reverse-index relationships still come only from authored codemap targets. File and folder targets are projected directly. Exact symbol targets may additionally be projected at declaration level when Arcana deterministically resolves the authored target against a current matching snapshot. Arcana owns declaration identity and code relationships; Demon Docs consumes only the verified node attached to the authored target and never turns raw graph neighbours, calls, dependencies, or other Arcana edges into documentation backlinks.
+Reverse-index relationships still come only from authored codemap targets. File and folder targets are projected directly. Exact symbol targets may additionally be projected at declaration level when Arcana deterministically resolves the authored target against a current matching snapshot. Arcana owns declaration identity and code relationships; Archivist consumes only the verified node attached to the authored target and never turns raw graph neighbours, calls, dependencies, or other Arcana edges into documentation backlinks.
 
 ## Code root
 
@@ -65,7 +65,7 @@ A build receives:
 repository root
 configured documentation root
 one or more reverse roots
-Demon Docs configuration
+Archivist configuration
 configured codemap headings
 current repository files
 current .docignore hierarchy
@@ -112,7 +112,7 @@ verified symbol target -> documentation references attached to that exact declar
 
 A file target does not imply documentation for its containing folder. A folder target is rendered as folder documentation and does not automatically mark every descendant file as documented. A verified symbol target marks its backing file as covered for reverse-index orphan health, but it does not masquerade as a generic file-level documentation reference: the generated backlink remains attached to the exact symbol identity and current source span.
 
-A path-qualified symbol whose semantic resolver is unavailable or stale retains the existing explicit file-path fallback because the authored path itself is deterministic. A standalone `symbol:...` target requires a unique verified semantic resolution before it can project a backlink. Missing or ambiguous symbol targets remain diagnostics; Demon Docs never selects a candidate.
+A path-qualified symbol whose semantic resolver is unavailable or stale retains the existing explicit file-path fallback because the authored path itself is deterministic. A standalone `symbol:...` target requires a unique verified semantic resolution before it can project a backlink. Missing or ambiguous symbol targets remain diagnostics; Archivist never selects a candidate.
 
 Multiple documents may reference the same target. Every distinct source document is retained and rendered in sorted order. Symbol grouping prefers Arcana's stable node key and otherwise uses the durable external identity supplied by the verified resolver.
 
@@ -136,7 +136,7 @@ Folder documentation:
 <!-- doc-ledger:reverse-index:end -->
 ```
 
-When a folder has no index file, Demon Docs creates one with a title, a short generated-purpose sentence, and the managed block. When an index already exists, authored content outside the reverse-index markers is preserved.
+When a folder has no index file, Archivist creates one with a title, a short generated-purpose sentence, and the managed block. When an index already exists, authored content outside the reverse-index markers is preserved.
 
 An incomplete marker pair is an error. Reverse indexing does not take ownership of ordinary documentation-index marker blocks in the same file.
 
@@ -237,4 +237,4 @@ go test ./internal/reverseindex ./internal/app -count=1
 
 ## Notes
 
-Dependency-aware reverse projection, graph-neighbour backlinks, and richer coverage exports remain outside the current reverse-index contract. Exact authored symbol targets are now supported only through verified Arcana node metadata; this does not transfer general symbol discovery or graph ownership into Demon Docs.
+Dependency-aware reverse projection, graph-neighbour backlinks, and richer coverage exports remain outside the current reverse-index contract. Exact authored symbol targets are now supported only through verified Arcana node metadata; this does not transfer general symbol discovery or graph ownership into Archivist.

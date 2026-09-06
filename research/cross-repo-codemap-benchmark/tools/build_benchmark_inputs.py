@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Demon Docs benchmark datasets from the normalized cross-repo corpus."""
+"""Build Archivist benchmark datasets from the normalized cross-repo corpus."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # Changelog
 
-This file records notable user-facing changes to Demon Docs. Exact command contracts and current behavior remain documented in the README and the canonical documentation tree.
+This file records notable user-facing changes to Archivist. Exact command contracts and current behavior remain documented in the README and the canonical documentation tree.
 
 ## Unreleased
 
@@ -14,7 +14,7 @@ This file records notable user-facing changes to Demon Docs. Exact command contr
 
 ### Initial public release
 
-Demon Docs `v0.3.5` is the initial public release of the Go implementation: a deterministic documentation-maintenance engine for repository-owned Markdown.
+Archivist `v0.3.5` is the initial public release of the Go implementation: a deterministic documentation-maintenance engine for repository-owned Markdown.
 
 ### Core capabilities
 

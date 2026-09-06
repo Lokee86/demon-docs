@@ -4,7 +4,7 @@ created: "2026-07-19"
 document_id: 019f7d55-31e4-71b2-a949-b6557ef7de3c
 document_type: general
 policy_exempt: false
-summary: Historical declaration-reference and symbol-resolution design transferred from Demon Docs to ArcanaGraph.
+summary: Historical declaration-reference and symbol-resolution design transferred from Archivist to ArcanaGraph.
 ---
 # Code-Symbol References
 
@@ -20,13 +20,13 @@ The transferred design allows documentation systems to identify code declaration
 
 ## Current status
 
-Transferred historical design. General symbol identity, declaration discovery, and declaration-reference contracts belong to ArcanaGraph. Demon Docs now consumes uniquely verified Arcana nodes for explicit authored symbol targets, including target resolution, semantic-staleness analysis, and symbol-level reverse-index backlinks, without owning the underlying language or graph machinery.
+Transferred historical design. General symbol identity, declaration discovery, and declaration-reference contracts belong to ArcanaGraph. Archivist now consumes uniquely verified Arcana nodes for explicit authored symbol targets, including target resolution, semantic-staleness analysis, and symbol-level reverse-index backlinks, without owning the underlying language or graph machinery.
 
 ## Expected ownership
 
 ArcanaGraph owns declaration identities, provider resolution, and symbol-level relationship facts. Documentation tools may consume explicit versioned facts without becoming language-specific parsers.
 
-This document is retained as design provenance. References below to implementing symbol identities or declaration-level graph construction inside Demon Docs are superseded. Demon Docs continues to own explicit Markdown, authored codemap behavior, and generated documentation projections from externally verified facts.
+This document is retained as design provenance. References below to implementing symbol identities or declaration-level graph construction inside Archivist are superseded. Archivist continues to own explicit Markdown, authored codemap behavior, and generated documentation projections from externally verified facts.
 
 ## Goals
 
